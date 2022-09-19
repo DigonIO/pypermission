@@ -1,3 +1,6 @@
+from pathlib import Path
+import json
+
 from pypermission.core import Authority as _Authority
 from pypermission.core import EntityID, Permission, PermissionMap
 from pypermission.error import (
@@ -49,7 +52,7 @@ class Subject(PermissionableEntity):
 
     _group_ids: set[EntityID]
 
-    def __init__(self, *, id: EntityID):
+    def __init__(self, *, id: EntityID) -> None:
         super().__init__(self, id=id)
         self._group_ids = set()
 
@@ -62,7 +65,7 @@ class Group(PermissionableEntity):
 
     _subject_ids: set[EntityID]
 
-    def __init__(self, *, id: EntityID):
+    def __init__(self, *, id: EntityID) -> None:
         super().__init__(self, id=id)
         self._subject_ids = set()
 
@@ -75,12 +78,38 @@ class Authority(_Authority):
 
     _subjects: dict[EntityID, Subject]
     _groups: dict[EntityID, Group]
+    _data_file: Path | str
 
-    def __init__(self):
+    def __init__(self, *, data_file: Path | str | None = None) -> None:
         super().__init__(self)
 
         self._subjects = {}
         self._groups = {}
+        self._data_file = data_file
+
+    def load_from_file(self, path: Path | str | None) -> None:
+        if not path:
+            path = self._data_file
+
+        with open(path, "r") as handle:
+            serial_data = handle.read()
+
+        self.load_from_file(serial_data=serial_data)
+
+    def load_from_string(self, *, serial_data: str) -> None:
+        ...
+
+    def save_to_file(self, path: Path | str | None):
+        if not path:
+            path = self._data_file
+
+        serial_data = self.save_to_str()
+
+        with open(path, "r") as handle:
+            serial_data = handle.read()
+
+    def save_to_str(self) -> str:
+        ...
 
     def subject_add(self, new_subject_id: EntityID) -> None:
         """Create a new subject for a given ID."""
@@ -231,6 +260,12 @@ class Authority(_Authority):
             return self._groups[group_id]
         except KeyError:
             raise UnknownSubjectIDError
+
+    def _serialize(self) -> str:
+        ...
+
+    def _deserialize(self, *, serial_data: str) -> None:
+        ...
 
 
 def _validate_payload_status(*, permission: Permission, payload: str | None):
