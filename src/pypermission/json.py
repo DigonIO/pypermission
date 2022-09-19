@@ -90,8 +90,8 @@ class Authority(_Authority):
         subject = Subject(id=new_subject_id)
         self._subjects[new_subject_id] = subject
 
-    def subject_del(self, subject_id: EntityID) -> None:
-        """Delete a subject for a given ID."""
+    def subject_rem(self, subject_id: EntityID) -> None:
+        """Remove a subject for a given ID."""
         subject = self._subjects.pop(subject_id, None)
         if subject is None:
             return
@@ -126,14 +126,14 @@ class Authority(_Authority):
             permission_map=permission_map, permission=permission, payload=payload
         )
 
-    def subject_del_permission(
+    def subject_rem_permission(
         self, *, subject_id: EntityID, permission: Permission, payload: str | None = None
     ):
         """Remove a permission from a subject."""
         _validate_payload_status(permission=permission, payload=payload)
         permission_map = self._get_subject(subject_id=subject_id).permission_map
 
-        _del_permission_map_entry(
+        _rem_permission_map_entry(
             permission_map=permission_map, permission=permission, payload=payload
         )
 
@@ -155,8 +155,8 @@ class Authority(_Authority):
         group = Group(id=new_group_id)
         self._groups[new_group_id] = group
 
-    def group_del(self, group_id: EntityID) -> None:
-        """Delete a group for a given ID."""
+    def group_rem(self, group_id: EntityID) -> None:
+        """Remove a group for a given ID."""
         group = self._groups.pop(group_id, None)
         if group is None:
             return
@@ -183,14 +183,14 @@ class Authority(_Authority):
             permission_map=permission_map, permission=permission, payload=payload
         )
 
-    def group_del_permission(
+    def group_rem_permission(
         self, *, group_id: EntityID, permission: Permission, payload: str | None = None
     ):
         """Remove a permission from a group."""
         _validate_payload_status(permission=permission, payload=payload)
         permission_map = self._get_group(group_id=group_id).permission_map
 
-        _del_permission_map_entry(
+        _rem_permission_map_entry(
             permission_map=permission_map, permission=permission, payload=payload
         )
 
@@ -210,7 +210,7 @@ class Authority(_Authority):
         group.subject_ids.add(subject_id)
         subject.group_ids.add(group_id)
 
-    def group_del_subject(self, group_id: EntityID, subject_id: EntityID) -> None:
+    def group_rem_subject(self, group_id: EntityID, subject_id: EntityID) -> None:
         """Remove a subject from a group."""
         group = self._get_group(group_id=group_id)
         subject = self._get_subject(subject_id=subject_id)
@@ -234,6 +234,7 @@ class Authority(_Authority):
 
 
 def _validate_payload_status(*, permission: Permission, payload: str | None):
+    """Check the permission payload combinatorics."""
     if permission.has_payload and payload is None:
         raise MissingPayloadError
 
@@ -254,7 +255,7 @@ def _add_permission_map_entry(
         payload_set.add(payload)
 
 
-def _del_permission_map_entry(
+def _rem_permission_map_entry(
     *, permission_map: PermissionMap, permission: Permission, payload: str | None
 ) -> None:
     """Remove a permission from a permission map."""
