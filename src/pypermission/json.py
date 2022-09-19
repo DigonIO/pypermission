@@ -1,12 +1,10 @@
-from typing import Hashable
-
 from pypermission.core import Authority as _Authority
-from pypermission.core import Permission, PermissionMap, EntityID
+from pypermission.core import EntityID, Permission, PermissionMap
 from pypermission.error import (
+    EntityIDCollisionError,
+    MissingPayloadError,
     UnknownSubjectIDError,
     UnusedPayloadError,
-    MissingPayloadError,
-    EntityIDCollisionError,
 )
 
 

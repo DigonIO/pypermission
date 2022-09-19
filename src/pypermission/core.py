@@ -1,6 +1,7 @@
 from __future__ import annotations
-from typing import TypeVar
+
 from abc import ABC, abstractmethod
+from typing import TypeVar
 
 from pypermission.error import PermissionError
 
