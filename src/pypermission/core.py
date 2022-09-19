@@ -67,11 +67,18 @@ class Authority(ABC):
     _root_permission: Permission
     _id_permission_map: dict[str, Permission]
 
-    def __init__(self):
+    def __init__(self) -> None:
         self._root_permission = Permission()
         self._id_permission_map = {}
 
-    def _deserialize_permission(self, perm_id: str) -> tuple[Permission, str | None]:
+    @staticmethod
+    def _serialize_permission_node(permission: Permission, payload: str | None) -> str:
+        node: str = permission.id
+        if permission.has_payload:
+            node = f"{node[:-2]}{payload}>"
+        return node
+
+    def _deserialize_permission_node(self, perm_id: str) -> tuple[Permission, str | None]:
 
         id_sections: list[str] = perm_id.split(".")
         last_section: str = id_sections[-1]

@@ -1,5 +1,6 @@
 from pathlib import Path
 import json
+from typing import TypedDict
 
 from pypermission.core import Authority as _Authority
 from pypermission.core import EntityID, Permission, PermissionMap
@@ -9,6 +10,16 @@ from pypermission.error import (
     UnknownSubjectIDError,
     UnusedPayloadError,
 )
+
+
+class NonSerialGroup(TypedDict):
+    subjects: set[EntityID]
+    nodes: list[str]
+
+
+class NonSerialData(TypedDict):
+    groups: dict[EntityID, NonSerialGroup]
+    subjects: dict[EntityID, list[str]]
 
 
 class PermissionableEntity:
@@ -28,7 +39,6 @@ class PermissionableEntity:
     def permission_map(self) -> PermissionMap:
         return self._permission_map
 
-    @property
     def set_permission_map(self, *, new_permission_map: dict[Permission, str | None]) -> None:
         self._permission_map = new_permission_map
 
@@ -87,29 +97,70 @@ class Authority(_Authority):
         self._groups = {}
         self._data_file = data_file
 
-    def load_from_file(self, path: Path | str | None) -> None:
-        if not path:
-            path = self._data_file
-
-        with open(path, "r") as handle:
-            serial_data = handle.read()
-
-        self.load_from_file(serial_data=serial_data)
-
-    def load_from_string(self, *, serial_data: str) -> None:
-        ...
-
     def save_to_file(self, path: Path | str | None):
+        """Save the current state to file formatted as JSON."""
         if not path:
             path = self._data_file
 
         serial_data = self.save_to_str()
+        with open(path, "r") as handle:
+            handle.write(serial_data)
+
+    def load_from_file(self, path: Path | str | None) -> None:
+        """Load a previous state from a JSON formatted file."""
+        if not path:
+            path = self._data_file
 
         with open(path, "r") as handle:
             serial_data = handle.read()
+        self.load_from_str(serial_data=serial_data)
 
     def save_to_str(self) -> str:
-        ...
+        """Save the current state to string formatted as JSON."""
+        groups = {}
+        subjects = {}
+        data = NonSerialData(groups=groups, subjects=subjects)
+
+        for group_id, group in self._groups.items():
+            nodes: list[str] = [
+                self._serialize_permission_node(permission=permission, payload=payload)
+                for permission, payload in group.permission_map
+            ]
+            groups[group_id] = NonSerialGroup(subjects=group.subject_ids, nodes=nodes)
+
+        for subject_id, subject in self._subjects.items():
+            subjects[subject_id] = subject.group_ids
+
+        return self._serialize_data(non_serial_data=data)
+
+    def load_from_str(self, *, serial_data: str) -> None:
+        """Load a previous state from a JSON formatted string."""
+        data: NonSerialData = self._deserialize_data(serial_data=serial_data)
+
+        # populate subjects
+        for subject_id, nodes in data["subjects"].items():
+            subject = Subject(id=subject_id)
+            self._subjects[subject_id] = subject
+
+            # add permissions to a subject
+            for node in nodes:
+                permission, payload = self._deserialize_permission_node(perm_id=node)
+                subject.permission_map[permission] = payload
+
+        # populate groups
+        for group_id, group_data in data["groups"].items():
+            group = Group(id=group_id)
+            self._groups[group_id] = group
+
+            # add permissions to a group
+            for node in group_data["nodes"]:
+                permission, payload = self._deserialize_permission_node(perm_id=node)
+                subject.permission_map[permission] = payload
+
+            # add group ids to subjects of a group and vice versa
+            for subject_id in group_data["subjects"]:
+                group.subject_ids.add(subject_id)
+                self._subjects[subject_id].group_ids.add(group_id)
 
     def subject_add(self, new_subject_id: EntityID) -> None:
         """Create a new subject for a given ID."""
@@ -261,11 +312,13 @@ class Authority(_Authority):
         except KeyError:
             raise UnknownSubjectIDError
 
-    def _serialize(self) -> str:
-        ...
+    @staticmethod
+    def _serialize_data(*, non_serial_data: NonSerialData) -> str:
+        return json.dumps(non_serial_data)
 
-    def _deserialize(self, *, serial_data: str) -> None:
-        ...
+    @staticmethod
+    def _deserialize_data(*, serial_data: str) -> NonSerialData:
+        return json.loads(serial_data)
 
 
 def _validate_payload_status(*, permission: Permission, payload: str | None):
