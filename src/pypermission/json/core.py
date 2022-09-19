@@ -1,5 +1,5 @@
-from pathlib import Path
 import json
+from pathlib import Path
 from typing import TypedDict
 
 from pypermission.core import Authority as _Authority
