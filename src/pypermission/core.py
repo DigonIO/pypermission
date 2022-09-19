@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import Hashable
+from typing import TypeVar
 from abc import ABC, abstractmethod
 
 from pypermission.error import PermissionError
@@ -48,10 +48,11 @@ class Permission:
 
 
 PermissionMap = dict[Permission, set[str]]
+EntityID = TypeVar("EntityID", int, str)
 
 
 class CustomPermission(Permission):
-    def __init__(self, *, id: str, parent: Permission, has_payload: bool, is_leave: bool):
+    def __init__(self, *, id: str, parent: Permission, has_payload: bool, is_leave: bool) -> None:
         self._id: str = id
         self._parent: Permission = parent
         self._ancestors: tuple[Permission, ...] = None
@@ -87,7 +88,7 @@ class Authority(ABC):
 
     @abstractmethod
     def subject_has_permission(
-        self, *, subject_id: Hashable, perm: Permission, payload: str | None = None
+        self, *, subject_id: EntityID, perm: Permission, payload: str | None = None
     ) -> set[str]:
         """
         Check if a subject has a given permission and return its potential payload.
@@ -105,7 +106,7 @@ class Authority(ABC):
         # TODO multiple errors
 
     @abstractmethod
-    def subject_get_permissions(self, *, subject_id: Hashable) -> PermissionMap:
+    def subject_get_permissions(self, *, subject_id: EntityID) -> PermissionMap:
         """
         Get all permissions and there potential payload for a subject.
 
