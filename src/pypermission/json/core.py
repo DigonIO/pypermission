@@ -144,7 +144,7 @@ class Authority(_Authority):
 
             # add permissions to a subject
             for node in nodes:
-                permission, payload = self._deserialize_permission_node(perm_id=node)
+                permission, payload = self._deserialize_permission_node(node=node)
                 subject.permission_map[permission] = payload
 
         # populate groups
@@ -154,7 +154,7 @@ class Authority(_Authority):
 
             # add permissions to a group
             for node in group_data["nodes"]:
-                permission, payload = self._deserialize_permission_node(perm_id=node)
+                permission, payload = self._deserialize_permission_node(node=node)
                 subject.permission_map[permission] = payload
 
             # add group ids to subjects of a group and vice versa
