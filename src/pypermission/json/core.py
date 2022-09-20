@@ -1,15 +1,15 @@
 import json
 from pathlib import Path
-from typing import TypedDict, Any, cast
+from typing import Any, TypedDict, cast
 
 from pypermission.core import Authority as _Authority
 from pypermission.core import EntityID, Permission, PermissionMap
 from pypermission.error import (
     EntityIDCollisionError,
+    MissingPathError,
     MissingPayloadError,
     UnknownSubjectIDError,
     UnusedPayloadError,
-    MissingPathError,
 )
 
 
