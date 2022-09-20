@@ -3,7 +3,7 @@ from __future__ import annotations
 from abc import ABC, abstractmethod
 from typing import TypeVar
 
-from pypermission.error import PermissionError
+from pypermission.error import PermissionParsingError
 
 
 class Permission:
@@ -92,7 +92,7 @@ class Authority(ABC):
         try:
             return self._node_permission_map[node], payload
         except KeyError:
-            raise PermissionError("Unknown permission id!", node)
+            raise PermissionParsingError("Unknown permission id!", node)
 
     @abstractmethod
     def subject_has_permission(
@@ -109,7 +109,7 @@ class Authority(ABC):
         Raises
         ------
 
-        PermissionError
+        PermissionParsingError
         """
         # TODO multiple errors
 
@@ -126,7 +126,7 @@ class Authority(ABC):
         Raises
         ------
 
-        PermissionError
+        PermissionParsingError
         """
         # TODO multiple errors
 
@@ -134,7 +134,7 @@ class Authority(ABC):
         "Register permission"
 
         if node in self._node_permission_map:
-            raise PermissionError("Permission has been registered before!")
+            raise PermissionParsingError("Permission has been registered before!")
 
         node_sections: list[str] = node.split(".")
         last_section: str = node_sections[-1]
@@ -157,13 +157,13 @@ class Authority(ABC):
             try:
                 parent: Permission = parent.sub_graph[section]
             except KeyError:
-                raise PermissionError(
+                raise PermissionParsingError(
                     "A nested permission requires a parent permission!",
                     potential_parent_node[1:] + ".*",
                 )
 
         if parent.is_leave:
-            raise PermissionError("The desired parent permission is a leave permission!", parent.node)
+            raise PermissionParsingError("The desired parent permission is a leave permission!", parent.node)
 
         new_perm = CustomPermission(
             id=node, parent=parent, has_payload=has_payload, is_leave=is_leave

@@ -2,6 +2,10 @@ class PyPermissionError(Exception):
     ...
 
 
+class PermissionParsingError(PyPermissionError):
+    ...
+
+
 class EntityIDCollisionError(PyPermissionError):
     ...
 
