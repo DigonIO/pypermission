@@ -49,7 +49,7 @@ class Permission:
 
 
 PermissionMap = dict[Permission, set[str]]
-EntityID = TypeVar("EntityID", int, str)
+EntityID = int | str
 
 
 class CustomPermission(Permission):
@@ -70,6 +70,10 @@ class Authority(ABC):
     def __init__(self) -> None:
         self._root_permission = Permission()
         self._node_permission_map = {}
+
+    @property
+    def root_permission(self) -> Permission:
+        return self._root_permission
 
     @staticmethod
     def _serialize_permission_node(permission: Permission, payload: str | None) -> str:
@@ -94,42 +98,6 @@ class Authority(ABC):
         except KeyError:
             raise PermissionParsingError("Unknown permission id!", node)
 
-    @abstractmethod
-    def subject_has_permission(
-        self, *, subject_id: EntityID, perm: Permission, payload: str | None = None
-    ) -> set[str]:
-        """
-        Check if a subject has a given permission and return its potential payload.
-
-        Returns
-        -------
-
-        set[str] : Payload of a permission. Set can be empty.
-
-        Raises
-        ------
-
-        PermissionParsingError
-        """
-        # TODO multiple errors
-
-    @abstractmethod
-    def subject_get_permissions(self, *, subject_id: EntityID) -> PermissionMap:
-        """
-        Get all permissions and there potential payload for a subject.
-
-        Returns
-        -------
-
-        PermissionMap : Payload of a permission. Set can be empty.
-
-        Raises
-        ------
-
-        PermissionParsingError
-        """
-        # TODO multiple errors
-
     def register_permission(self, *, node: str):
         "Register permission"
 
@@ -139,6 +107,7 @@ class Authority(ABC):
         node_sections: list[str] = node.split(".")
         last_section: str = node_sections[-1]
 
+        has_payload = False
         if last_section == "*":
             parent_node_sections: list[str] = node_sections[0:-2]
             last_section: str = node_sections[-2]
@@ -163,10 +132,12 @@ class Authority(ABC):
                 )
 
         if parent.is_leave:
-            raise PermissionParsingError("The desired parent permission is a leave permission!", parent.node)
+            raise PermissionParsingError(
+                "The desired parent permission is a leave permission!", parent.node
+            )
 
         new_perm = CustomPermission(
-            id=node, parent=parent, has_payload=has_payload, is_leave=is_leave
+            node=node, parent=parent, has_payload=has_payload, is_leave=is_leave
         )
 
         if not parent_node_sections:

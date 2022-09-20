@@ -1,6 +1,6 @@
 import json
 from pathlib import Path
-from typing import TypedDict
+from typing import TypedDict, Any, cast
 
 from pypermission.core import Authority as _Authority
 from pypermission.core import EntityID, Permission, PermissionMap
@@ -63,7 +63,7 @@ class Subject(PermissionableEntity):
     _group_ids: set[EntityID]
 
     def __init__(self, *, id: EntityID) -> None:
-        super().__init__(self, id=id)
+        super().__init__(id=id)
         self._group_ids = set()
 
     @property
@@ -76,7 +76,7 @@ class Group(PermissionableEntity):
     _subject_ids: set[EntityID]
 
     def __init__(self, *, id: EntityID) -> None:
-        super().__init__(self, id=id)
+        super().__init__(id=id)
         self._subject_ids = set()
 
     @property
@@ -91,7 +91,7 @@ class Authority(_Authority):
     _data_file: Path | str
 
     def __init__(self, *, data_file: Path | str | None = None) -> None:
-        super().__init__(self)
+        super().__init__()
 
         self._subjects = {}
         self._groups = {}
@@ -135,7 +135,7 @@ class Authority(_Authority):
 
     def load_from_str(self, *, serial_data: str) -> None:
         """Load a previous state from a JSON formatted string."""
-        data: NonSerialData = self._deserialize_data(serial_data=serial_data)
+        data: Any = self._deserialize_data(serial_data=serial_data)
 
         # populate subjects
         for subject_id, nodes in data["subjects"].items():
@@ -162,13 +162,13 @@ class Authority(_Authority):
                 group.subject_ids.add(subject_id)
                 self._subjects[subject_id].group_ids.add(group_id)
 
-    def subject_add(self, new_subject_id: EntityID) -> None:
+    def subject_add(self, subject_id: EntityID) -> None:
         """Create a new subject for a given ID."""
-        if new_subject_id in self._subjects:
+        if subject_id in self._subjects:
             raise EntityIDCollisionError
 
-        subject = Subject(id=new_subject_id)
-        self._subjects[new_subject_id] = subject
+        subject = Subject(id=subject_id)
+        self._subjects[subject_id] = subject
 
     def subject_rem(self, subject_id: EntityID) -> None:
         """Remove a subject for a given ID."""
@@ -227,13 +227,13 @@ class Authority(_Authority):
             new_permission_map=permissions
         )
 
-    def group_add(self, new_group_id: EntityID) -> None:
+    def group_add(self, group_id: EntityID) -> None:
         """Create a new group for a given ID."""
-        if new_group_id in self._subjects:
+        if group_id in self._subjects:
             raise EntityIDCollisionError
 
-        group = Group(id=new_group_id)
-        self._groups[new_group_id] = group
+        group = Group(id=group_id)
+        self._groups[group_id] = group
 
     def group_rem(self, group_id: EntityID) -> None:
         """Remove a group for a given ID."""
@@ -314,10 +314,11 @@ class Authority(_Authority):
 
     @staticmethod
     def _serialize_data(*, non_serial_data: NonSerialData) -> str:
-        return json.dumps(non_serial_data)
+        # cast only valid with one argument to dumps
+        return cast(str, json.dumps(non_serial_data))
 
     @staticmethod
-    def _deserialize_data(*, serial_data: str) -> NonSerialData:
+    def _deserialize_data(*, serial_data: str) -> Any:
         return json.loads(serial_data)
 
 
@@ -337,7 +338,8 @@ def _add_permission_map_entry(
     try:
         payload_set = permission_map[permission]
     except KeyError:
-        permission_map[permission] = set()
+        payload_set = set()
+        permission_map[permission] = payload_set
 
     if payload:
         payload_set.add(payload)
