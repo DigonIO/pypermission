@@ -7,12 +7,21 @@ from pypermission.error import PermissionParsingError
 
 
 class Permission:
-    def __init__(self):
-        self._node: str = "*"
-        self._parent: Permission | None = None
-        self._ancestors: tuple[Permission, ...] = tuple()
-        self._childs: set[Permission] = set()
-        self._sub_graph: dict[str, Permission] = {}
+
+    _node: str
+    _parent: Permission | None
+    _ancestors: tuple[Permission, ...]
+    _childs: set[Permission]
+    _sub_graph: dict[str, Permission]
+    _has_payload: bool
+    _is_leave: bool
+
+    def __init__(self) -> None:
+        self._node = "*"
+        self._parent = None
+        self._ancestors = tuple()
+        self._childs = set()
+        self._sub_graph = {}
         self._has_payload = False
         self._is_leave = False
 
@@ -25,7 +34,7 @@ class Permission:
         return self._parent
 
     @property
-    def ancestors(self) -> tuple[Permission]:
+    def ancestors(self) -> tuple[Permission, ...]:
         return self._ancestors
 
     @property
@@ -44,9 +53,6 @@ class Permission:
     def is_leave(self) -> bool:
         return self._is_leave
 
-    def _update_ancestors(self):
-        self._ancestors = (*self._parent.ancestors, self._parent)
-
 
 PermissionMap = dict[Permission, set[str]]
 EntityID = int | str
@@ -54,13 +60,16 @@ EntityID = int | str
 
 class CustomPermission(Permission):
     def __init__(self, *, node: str, parent: Permission, has_payload: bool, is_leave: bool) -> None:
-        self._node: str = node
-        self._parent: Permission = parent
-        self._ancestors: tuple[Permission, ...] = None
-        self._childs: set[Permission] = set()
-        self._sub_graph: dict[str, Permission] = {}
+        self._node = node
+        self._parent = parent
+        self._ancestors = tuple()
+        self._childs = set()
+        self._sub_graph = {}
         self._has_payload = has_payload
         self._is_leave = is_leave
+
+    def _update_ancestors(self):
+        self._ancestors = (*self._parent.ancestors, self._parent)
 
 
 class Authority(ABC):
@@ -77,7 +86,7 @@ class Authority(ABC):
 
     @staticmethod
     def _serialize_permission_node(permission: Permission, payload: str | None) -> str:
-        node: str = permission.id
+        node: str = permission.node
         if permission.has_payload:
             node = f"{node[:-2]}{payload}>"
         return node
@@ -110,10 +119,10 @@ class Authority(ABC):
         has_payload = False
         if last_section == "*":
             parent_node_sections: list[str] = node_sections[0:-2]
-            last_section: str = node_sections[-2]
+            last_section = node_sections[-2]
             is_leave = False
         else:
-            parent_node_sections: list[str] = node_sections[0:-1]
+            parent_node_sections = node_sections[0:-1]
             is_leave = True
 
             if last_section == "<x>":
@@ -124,7 +133,7 @@ class Authority(ABC):
         for section in parent_node_sections:
             potential_parent_node = potential_parent_node + "." + section
             try:
-                parent: Permission = parent.sub_graph[section]
+                parent = parent.sub_graph[section]
             except KeyError:
                 raise PermissionParsingError(
                     "A nested permission requires a parent permission!",

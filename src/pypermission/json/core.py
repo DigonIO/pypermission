@@ -9,6 +9,7 @@ from pypermission.error import (
     MissingPayloadError,
     UnknownSubjectIDError,
     UnusedPayloadError,
+    MissingPathError,
 )
 
 
@@ -39,7 +40,7 @@ class PermissionableEntity:
     def permission_map(self) -> PermissionMap:
         return self._permission_map
 
-    def set_permission_map(self, *, new_permission_map: dict[Permission, str | None]) -> None:
+    def set_permission_map(self, *, new_permission_map: PermissionMap) -> None:
         self._permission_map = new_permission_map
 
     def has_permission(self, *, permission: Permission, payload: str | None = None) -> bool:
@@ -88,7 +89,7 @@ class Authority(_Authority):
 
     _subjects: dict[EntityID, Subject]
     _groups: dict[EntityID, Group]
-    _data_file: Path | str
+    _data_file: Path | str | None
 
     def __init__(self, *, data_file: Path | str | None = None) -> None:
         super().__init__()
@@ -101,6 +102,8 @@ class Authority(_Authority):
         """Save the current state to file formatted as JSON."""
         if not path:
             path = self._data_file
+        if not path:
+            raise MissingPathError
 
         serial_data = self.save_to_str()
         with open(path, "r") as handle:
@@ -110,6 +113,8 @@ class Authority(_Authority):
         """Load a previous state from a JSON formatted file."""
         if not path:
             path = self._data_file
+        if not path:
+            raise MissingPathError
 
         with open(path, "r") as handle:
             serial_data = handle.read()
@@ -117,19 +122,25 @@ class Authority(_Authority):
 
     def save_to_str(self) -> str:
         """Save the current state to string formatted as JSON."""
-        groups = {}
-        subjects = {}
+        groups: dict[EntityID, NonSerialGroup] = {}
+        subjects: dict[EntityID, list[str]] = {}
         data = NonSerialData(groups=groups, subjects=subjects)
 
         for group_id, group in self._groups.items():
             nodes: list[str] = [
                 self._serialize_permission_node(permission=permission, payload=payload)
-                for permission, payload in group.permission_map
+                for permission, payload_set in group.permission_map.items()
+                for payload in payload_set
             ]
             groups[group_id] = NonSerialGroup(subjects=group.subject_ids, nodes=nodes)
 
         for subject_id, subject in self._subjects.items():
-            subjects[subject_id] = subject.group_ids
+            nodes = [
+                self._serialize_permission_node(permission=permission, payload=payload)
+                for permission, payload_set in subject.permission_map.items()
+                for payload in payload_set
+            ]
+            subjects[subject_id] = nodes
 
         return self._serialize_data(non_serial_data=data)
 
@@ -145,7 +156,13 @@ class Authority(_Authority):
             # add permissions to a subject
             for node in nodes:
                 permission, payload = self._deserialize_permission_node(node=node)
-                subject.permission_map[permission] = payload
+                permission_map = subject.permission_map
+                if payload:
+                    payload_set = permission_map.get(permission, None)
+                    if not payload_set:
+                        payload_set = set()
+                        permission_map[permission] = payload_set
+                    payload_set.add(payload)
 
         # populate groups
         for group_id, group_data in data["groups"].items():
@@ -155,7 +172,13 @@ class Authority(_Authority):
             # add permissions to a group
             for node in group_data["nodes"]:
                 permission, payload = self._deserialize_permission_node(node=node)
-                subject.permission_map[permission] = payload
+                permission_map = group.permission_map
+                if payload:
+                    payload_set = permission_map.get(permission, None)
+                    if not payload_set:
+                        payload_set = set()
+                        permission_map[permission] = payload_set
+                    payload_set.add(payload)
 
             # add group ids to subjects of a group and vice versa
             for subject_id in group_data["subjects"]:

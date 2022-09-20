@@ -2,6 +2,10 @@ class PyPermissionError(Exception):
     ...
 
 
+class MissingPathError(Exception):
+    ...
+
+
 class PermissionParsingError(PyPermissionError):
     ...
 
