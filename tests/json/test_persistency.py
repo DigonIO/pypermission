@@ -58,3 +58,74 @@ def test_affiliation_persistency():
     assert auth._groups[FOOD]._subject_ids == auth2._groups[FOOD]._subject_ids
     assert auth._groups[ANIMAL_BASED]._subject_ids == auth2._groups[ANIMAL_BASED]._subject_ids
     assert auth._groups[PLANT_BASED]._subject_ids == auth2._groups[PLANT_BASED]._subject_ids
+
+
+def test_permission_persistency():
+    auth = Authority()
+
+    def r(node: str):
+        return auth.register_permission(node=node)
+
+    ROOT_ = auth.root_permission
+    TOWNY_ = r("towny.*")
+    TOWNY_CHAT_ = r("towny.chat.*")
+    TOWNY_CHAT_TOWN = r("towny.chat.town")
+    TOWNY_CHAT_NATION = r("towny.chat.nation")
+    TOWNY_CHAT_GLOBAL = r("towny.chat.global")
+    TOWNY_WILD_ = r("towny.wild.*")
+    TOWNY_WILD_BUILD_ = r("towny.wild.build.*")
+    TOWNY_WILD_BUILD_X = r("towny.wild.build.<x>")
+    TOWNY_WILD_DESTROY_ = r("towny.wild.destroy.*")
+    TOWNY_WILD_DESTROY_X = r("towny.wild.destroy.<x>")
+
+    auth.subject_add(subject_id=EGG)
+    auth.subject_add_permission(subject_id=EGG, permission=TOWNY_CHAT_TOWN)
+    auth.subject_add_permission(subject_id=EGG, permission=TOWNY_WILD_BUILD_X, payload="dirt")
+
+    auth.subject_add(subject_id=SPAM)
+
+    auth.group_add(group_id=FOOD)
+    auth.group_add_permission(group_id=FOOD, permission=TOWNY_CHAT_NATION)
+    auth.group_add_permission(group_id=FOOD, permission=TOWNY_WILD_DESTROY_X, payload="iron")
+
+    serial_data = auth.save_to_str()
+
+    auth2 = Authority()
+    auth2.load_from_str(serial_data=serial_data)
+
+    def r(node: str):
+        return auth2.register_permission(node=node)
+
+    ROOT_ = auth2.root_permission
+    TOWNY_ = r("towny.*")
+    TOWNY_CHAT_ = r("towny.chat.*")
+    TOWNY_CHAT_TOWN = r("towny.chat.town")
+    TOWNY_CHAT_NATION = r("towny.chat.nation")
+    TOWNY_CHAT_GLOBAL = r("towny.chat.global")
+    TOWNY_WILD_ = r("towny.wild.*")
+    TOWNY_WILD_BUILD_ = r("towny.wild.build.*")
+    TOWNY_WILD_BUILD_X = r("towny.wild.build.<x>")
+    TOWNY_WILD_DESTROY_ = r("towny.wild.destroy.*")
+    TOWNY_WILD_DESTROY_X = r("towny.wild.destroy.<x>")
+
+    assert auth2.subject_has_permission(subject_id=EGG, permission=TOWNY_CHAT_TOWN) == True
+    assert auth2.subject_has_permission(subject_id=EGG, permission=TOWNY_CHAT_) == False
+    assert (
+        auth2.subject_add_permission(subject_id=EGG, permission=TOWNY_WILD_BUILD_X, payload="dirt")
+        == True
+    )
+    assert (
+        auth2.subject_add_permission(subject_id=EGG, permission=TOWNY_WILD_BUILD_X, payload="stone")
+        == False
+    )
+
+    assert auth2.group_add_permission(group_id=FOOD, permission=TOWNY_CHAT_NATION) == True
+    assert auth2.group_add_permission(group_id=FOOD, permission=TOWNY_CHAT_TOWN) == False
+    assert (
+        auth2.group_add_permission(group_id=FOOD, permission=TOWNY_WILD_DESTROY_X, payload="iron")
+        == True
+    )
+    assert (
+        auth2.group_add_permission(group_id=FOOD, permission=TOWNY_WILD_DESTROY_X, payload="gold")
+        == False
+    )
