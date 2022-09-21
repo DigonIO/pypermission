@@ -1,8 +1,64 @@
 # PyPermission
 
-Lightweight permission system for your python projects.
+<p>Lightweight permission system for your python projects. Inspired by the permission system used in the `Bukkit` Minecraft server mod project.
+</p>
 
-## Example
+[![repository](https://img.shields.io/badge/src-GitLab-orange)](https://gitlab.com/DigonIO/scheduler)
+[![mirror](https://img.shields.io/badge/mirror-GitHub-orange)](https://github.com/DigonIO/scheduler)
+[![license](https://img.shields.io/badge/license-LGPLv3-orange)](https://gitlab.com/DigonIO/scheduler/-/blob/master/LICENSE)
+[![pipeline status](https://gitlab.com/DigonIO/scheduler/badges/master/pipeline.svg)](https://gitlab.com/DigonIO/scheduler/-/pipelines)
+[![coverage report](https://gitlab.com/DigonIO/scheduler/badges/master/coverage.svg)](https://gitlab.com/DigonIO/scheduler/-/pipelines)
+[![Documentation Status](https://readthedocs.org/projects/python-scheduler/badge/?version=latest)](https://python-scheduler.readthedocs.io/en/latest/?badge=latest)
+[![Code style: black](https://gitlab.com/DigonIO/scheduler/-/raw/master/doc/_assets/code_style_black.svg)](https://github.com/psf/black)
+
+[![pkgversion](https://img.shields.io/pypi/v/scheduler)](https://pypi.org/project/scheduler/)
+[![versionsupport](https://img.shields.io/pypi/pyversions/scheduler)](https://pypi.org/project/scheduler/)
+[![Downloads Week](https://pepy.tech/badge/scheduler/week)](https://pepy.tech/project/scheduler)
+[![Downloads Total](https://pepy.tech/badge/scheduler)](https://pepy.tech/project/scheduler)
+
+## Features
+
++ Permissionable entities
+  + Subjects: e.g. users
+  + Groups: e.g. collection of users
++ Tree based permissions nodes
+  + Parent nodes
+  + Leaf nodes
+  + Leaf nodes w/ a string payload
++ Persistency backend
+  + JSON
+  + YAML
+
+## Installation
+
+### pip
+
+`PyPermission` can be installed directly from the PyPI repositories.
+
+#### JSON backend
+
+```bash
+pip install PyPermission
+```
+
+#### YAML backend
+
+```bash
+pip install PyPermission[yaml]
+```
+
+### Editable installation for developers
+
+Install `PyPermission` from the `git`
+[repository](https://gitlab.com/DigonIO/PyPermission) with:
+
+```bash
+git clone https://gitlab.com/DigonIO/PyPermission.git
+cd PyPermission
+pip install -e .
+```
+
+## Example code
 
 Setup a permission authority and a helper function:
 
@@ -68,3 +124,18 @@ if(auth.subject_has_permission(subject_id=SUBJECT_ID, permission=TOWNY_WILD_DEST
 if(auth.subject_has_permission(subject_id=SUBJECT_ID, permission=TOWNY_WILD_DESTROY_X, payload="diamond"))
   ...  # leaf w/ payload permission provided by the subject itself
 ```
+
+## Testing
+
+Testing is done using [pytest](https://pypi.org/project/pytest/). With
+[pytest-cov](https://pypi.org/project/pytest-cov/) and
+[coverage](https://pypi.org/project/coverage/) a report for the test coverage can be generated:
+
+```bash
+pytest --cov=src/ tests/
+coverage html
+```
+
+## License
+
+This free and open source software (FOSS) is published under the [LGPLv3 license](https://www.gnu.org/licenses/lgpl-3.0.en.html).
