@@ -51,7 +51,6 @@ class PermissionableEntity:
     def has_permission(self, *, permission: Permission, payload: str | None = None) -> bool:
         for ancestor in permission.ancestors:
             if ancestor in self._permission_map:
-                print(ancestor.node)
                 return True
 
         try:
@@ -169,7 +168,6 @@ class Authority(_Authority):
     def load_from_str(self, *, serial_data: str) -> None:
         """Load a previous state from a JSON formatted string."""
         data: Any = self._deserialize_data(serial_data=serial_data)
-        print(data)
 
         # populate subject id types
         subject_id_types: InIDTypeDict = {}
