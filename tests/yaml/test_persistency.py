@@ -17,7 +17,7 @@ ANIMAL_BASED = "animal_based"
 PLANT_BASED = "plant_based"
 
 
-def test_affiliation_persistency():
+def test_affiliation_persistency_yaml():
     auth = Authority()
 
     auth.subject_add(subject_id=EGG)
@@ -94,7 +94,6 @@ def test_permission_persistency():
     serial_data = auth.save_to_str()
 
     auth2 = Authority()
-    auth2.load_from_str(serial_data=serial_data)
 
     def r(node: str):
         return auth2.register_permission(node=node)
@@ -110,6 +109,8 @@ def test_permission_persistency():
     TOWNY_WILD_BUILD_X = r("towny.wild.build.<x>")
     TOWNY_WILD_DESTROY_ = r("towny.wild.destroy.*")
     TOWNY_WILD_DESTROY_X = r("towny.wild.destroy.<x>")
+
+    auth2.load_from_str(serial_data=serial_data)
 
     assert auth2.subject_has_permission(subject_id=EGG, permission=TOWNY_CHAT_TOWN) == True
     assert auth2.subject_has_permission(subject_id=EGG, permission=TOWNY_CHAT_) == False

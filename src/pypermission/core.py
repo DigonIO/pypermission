@@ -101,7 +101,7 @@ class Authority(ABC):
             payload = last_section[1:-1]
             last_section = "<x>"
 
-        node = ".".join(node_sections) + "." + last_section
+        node = ".".join(node_sections[:-1]) + "." + last_section
         try:
             return self._node_permission_map[node], payload
         except KeyError:
