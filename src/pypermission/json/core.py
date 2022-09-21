@@ -1,6 +1,6 @@
 import json
 from pathlib import Path
-from typing import Any, TypedDict, cast
+from typing import Any, TypedDict, cast, Literal
 
 from pypermission.core import Authority as _Authority
 from pypermission.core import EntityID, Permission, PermissionMap
@@ -12,15 +12,20 @@ from pypermission.error import (
     UnusedPayloadError,
 )
 
+OutIDTypeDict = dict[str, Literal["str"] | Literal["int"]]
+InIDTypeDict = dict[str, type[str | int]]
+
 
 class NonSerialGroup(TypedDict):
-    subjects: set[EntityID]
+    subjects: set[str]
     nodes: list[str]
 
 
 class NonSerialData(TypedDict):
-    groups: dict[EntityID, NonSerialGroup]
-    subjects: dict[EntityID, list[str]]
+    groups: dict[str, NonSerialGroup]
+    subjects: dict[str, list[str]]
+    group_id_types: dict[str, str]
+    subject_id_types: dict[str, str]
 
 
 class PermissionableEntity:
@@ -46,6 +51,7 @@ class PermissionableEntity:
     def has_permission(self, *, permission: Permission, payload: str | None = None) -> bool:
         for ancestor in permission.ancestors:
             if ancestor in self._permission_map:
+                print(ancestor.node)
                 return True
 
         try:
@@ -122,34 +128,68 @@ class Authority(_Authority):
 
     def save_to_str(self) -> str:
         """Save the current state to string formatted as JSON."""
-        groups: dict[EntityID, NonSerialGroup] = {}
-        subjects: dict[EntityID, list[str]] = {}
-        data = NonSerialData(groups=groups, subjects=subjects)
+        groups: dict[str, NonSerialGroup] = {}
+        subjects: dict[str, list[str]] = {}
+        subject_id_types: OutIDTypeDict = {}
+        group_id_types: OutIDTypeDict = {}
+        data = NonSerialData(
+            groups=groups,
+            subjects=subjects,
+            subject_id_types=subject_id_types,
+            group_id_types=group_id_types,
+        )
 
         for group_id, group in self._groups.items():
+            if isinstance(group_id, str):
+                group_id_types[str(group_id)] = "str"
+            else:  # isinstance(group_id, int):
+                group_id_types[str(group_id)] = "int"
             nodes: list[str] = [
                 self._serialize_permission_node(permission=permission, payload=payload)
                 for permission, payload_set in group.permission_map.items()
                 for payload in payload_set
             ]
-            groups[group_id] = NonSerialGroup(subjects=group.subject_ids, nodes=nodes)
+            grouped_subjects: list[str] = [str(subject_id) for subject_id in group.subject_ids]
+            groups[str(group_id)] = NonSerialGroup(subjects=grouped_subjects, nodes=nodes)
 
         for subject_id, subject in self._subjects.items():
+            if isinstance(subject_id, str):
+                subject_id_types[str(subject_id)] = "str"
+            else:  # isinstance(group_id, int):
+                subject_id_types[str(subject_id)] = "int"
             nodes = [
                 self._serialize_permission_node(permission=permission, payload=payload)
                 for permission, payload_set in subject.permission_map.items()
                 for payload in payload_set
             ]
-            subjects[subject_id] = nodes
+            subjects[str(subject_id)] = nodes
 
         return self._serialize_data(non_serial_data=data)
 
     def load_from_str(self, *, serial_data: str) -> None:
         """Load a previous state from a JSON formatted string."""
         data: Any = self._deserialize_data(serial_data=serial_data)
+        print(data)
+
+        # populate subject id types
+        subject_id_types: InIDTypeDict = {}
+        for subject_id_str, type_str in data["subject_id_types"].items():
+            if type_str == "str":
+                subject_id_types[subject_id_str] = str
+            else:
+                subject_id_types[subject_id_str] = int
+
+        # populate subject id types
+        group_id_types: InIDTypeDict = {}
+        for group_id_str, type_str in data["group_id_types"].items():
+            if type_str == "str":
+                group_id_types[group_id_str] = str
+            else:
+                group_id_types[group_id_str] = int
 
         # populate subjects
-        for subject_id, nodes in data["subjects"].items():
+        for subject_id_str, nodes in data["subjects"].items():
+            subject_id = subject_id_types[subject_id_str](subject_id_str)
             subject = Subject(id=subject_id)
             self._subjects[subject_id] = subject
 
@@ -165,7 +205,8 @@ class Authority(_Authority):
                     payload_set.add(payload)
 
         # populate groups
-        for group_id, group_data in data["groups"].items():
+        for group_id_str, group_data in data["groups"].items():
+            group_id = group_id_types[group_id_str](group_id_str)
             group = Group(id=group_id)
             self._groups[group_id] = group
 
@@ -181,7 +222,8 @@ class Authority(_Authority):
                     payload_set.add(payload)
 
             # add group ids to subjects of a group and vice versa
-            for subject_id in group_data["subjects"]:
+            for subject_id_str in group_data["subjects"]:
+                subject_id = subject_id_types[subject_id_str](subject_id_str)
                 group.subject_ids.add(subject_id)
                 self._subjects[subject_id].group_ids.add(group_id)
 
