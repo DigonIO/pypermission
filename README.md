@@ -22,14 +22,14 @@ Register permission nodes (example permission nodes from [towny](https://github.
 ROOT_ = auth.root_permission  # root
 TOWNY_ = r("towny.*")  # parent
 TOWNY_CHAT_ = r("towny.chat.*")  # parent
-TOWNY_CHAT_TOWN = r("towny.chat.town")  # leave
-TOWNY_CHAT_NATION = r("towny.chat.nation") # leave
-TOWNY_CHAT_GLOBAL = r("towny.chat.global") # leave
+TOWNY_CHAT_TOWN = r("towny.chat.town")  # leaf
+TOWNY_CHAT_NATION = r("towny.chat.nation") # leaf
+TOWNY_CHAT_GLOBAL = r("towny.chat.global") # leaf
 TOWNY_WILD_ = r("towny.wild.*")  # parent
 TOWNY_WILD_BUILD_ = r("towny.wild.build.*")  # parent
-TOWNY_WILD_BUILD_X = r("towny.wild.build.<x>") # leave w/ payload
+TOWNY_WILD_BUILD_X = r("towny.wild.build.<x>") # leaf w/ payload
 TOWNY_WILD_DESTROY_ = r("towny.wild.destroy.*")  # parent
-TOWNY_WILD_DESTROY_X = r("towny.wild.destroy.<x>") # leave w/ payload
+TOWNY_WILD_DESTROY_X = r("towny.wild.destroy.<x>") # leaf w/ payload
 ```
 
 Create a group and add some permissions:
@@ -40,8 +40,6 @@ GROUP_ID = "group_foo"  # the group ID can be str or int
 auth.group_add(group_id=GROUP_ID)
 
 auth.group_add_permission(group_id=GROUP_ID, permission=TOWNY_CHAT_)
-auth.group_add_permission(group_id=GROUP_ID, permission=TOWNY_WILD_BUILD_X, payload="dirt")
-auth.group_add_permission(group_id=GROUP_ID, permission=TOWNY_WILD_BUILD_X, payload="stone")
 auth.group_add_permission(group_id=GROUP_ID, permission=TOWNY_WILD_DESTROY_X, payload="iron")
 auth.group_add_permission(group_id=GROUP_ID, permission=TOWNY_WILD_DESTROY_X, payload="gold")
 ```
@@ -61,9 +59,12 @@ auth.subject_add_permission(subject_id=SUBJECT_ID, permission=TOWNY_WILD_DESTROY
 Now check if a subject has a desired permission:
 
 ```py
-if(auth.subject_has_permission(subject_id=SUBJECT_ID, permission=TOWNY_CHAT_))
-  ...  # permission provided by the group
+if(auth.subject_has_permission(subject_id=SUBJECT_ID, permission=TOWNY_CHAT_TOWN))
+  ...  # parent permission provided by the group
+
+if(auth.subject_has_permission(subject_id=SUBJECT_ID, permission=TOWNY_WILD_DESTROY_X, payload="iron"))
+  ...  # leaf w/ payload permission provided by the group
 
 if(auth.subject_has_permission(subject_id=SUBJECT_ID, permission=TOWNY_WILD_DESTROY_X, payload="diamond"))
-  ...  # permission provided by the subject itself
+  ...  # leaf w/ payload permission provided by the subject itself
 ```
