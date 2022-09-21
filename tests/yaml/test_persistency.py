@@ -17,7 +17,7 @@ ANIMAL_BASED = "animal_based"
 PLANT_BASED = "plant_based"
 
 
-def test_affiliation_persistency_yaml():
+def test_affiliation_persistency():
     auth = Authority()
 
     auth.subject_add(subject_id=EGG)
@@ -63,7 +63,7 @@ def test_affiliation_persistency_yaml():
     assert auth._groups[PLANT_BASED]._subject_ids == auth2._groups[PLANT_BASED]._subject_ids
 
 
-def test_permission_persistency():
+def test_permission_persistency_json():
     auth = Authority()
 
     def r(node: str):
@@ -115,21 +115,21 @@ def test_permission_persistency():
     assert auth2.subject_has_permission(subject_id=EGG, permission=TOWNY_CHAT_TOWN) == True
     assert auth2.subject_has_permission(subject_id=EGG, permission=TOWNY_CHAT_) == False
     assert (
-        auth2.subject_add_permission(subject_id=EGG, permission=TOWNY_WILD_BUILD_X, payload="dirt")
+        auth2.subject_has_permission(subject_id=EGG, permission=TOWNY_WILD_BUILD_X, payload="dirt")
         == True
     )
     assert (
-        auth2.subject_add_permission(subject_id=EGG, permission=TOWNY_WILD_BUILD_X, payload="stone")
+        auth2.subject_has_permission(subject_id=EGG, permission=TOWNY_WILD_BUILD_X, payload="stone")
         == False
     )
 
-    assert auth2.group_add_permission(group_id=FOOD, permission=TOWNY_CHAT_NATION) == True
-    assert auth2.group_add_permission(group_id=FOOD, permission=TOWNY_CHAT_TOWN) == False
+    assert auth2.group_has_permission(group_id=FOOD, permission=TOWNY_CHAT_NATION) == True
+    assert auth2.group_has_permission(group_id=FOOD, permission=TOWNY_CHAT_TOWN) == False
     assert (
-        auth2.group_add_permission(group_id=FOOD, permission=TOWNY_WILD_DESTROY_X, payload="iron")
+        auth2.group_has_permission(group_id=FOOD, permission=TOWNY_WILD_DESTROY_X, payload="iron")
         == True
     )
     assert (
-        auth2.group_add_permission(group_id=FOOD, permission=TOWNY_WILD_DESTROY_X, payload="gold")
+        auth2.group_has_permission(group_id=FOOD, permission=TOWNY_WILD_DESTROY_X, payload="gold")
         == False
     )

@@ -143,11 +143,17 @@ class Authority(_Authority):
                 group_id_types[str(group_id)] = "str"
             else:  # isinstance(group_id, int):
                 group_id_types[str(group_id)] = "int"
-            nodes: list[str] = [
-                self._serialize_permission_node(permission=permission, payload=payload)
-                for permission, payload_set in group.permission_map.items()
-                for payload in payload_set
-            ]
+            nodes: list[str] = []
+            for permission, payload_set in group.permission_map.items():
+                if payload_set:
+                    for payload in payload_set:
+                        node = self._serialize_permission_node(
+                            permission=permission, payload=payload
+                        )
+                else:
+                    node = self._serialize_permission_node(permission=permission, payload=None)
+                nodes.append(node)
+
             grouped_subjects: list[str] = [str(subject_id) for subject_id in group.subject_ids]
             groups[str(group_id)] = NonSerialGroup(subjects=grouped_subjects, nodes=nodes)
 
@@ -156,11 +162,17 @@ class Authority(_Authority):
                 subject_id_types[str(subject_id)] = "str"
             else:  # isinstance(group_id, int):
                 subject_id_types[str(subject_id)] = "int"
-            nodes = [
-                self._serialize_permission_node(permission=permission, payload=payload)
-                for permission, payload_set in subject.permission_map.items()
-                for payload in payload_set
-            ]
+            nodes = []
+            for permission, payload_set in subject.permission_map.items():
+                if payload_set:
+                    for payload in payload_set:
+                        node = self._serialize_permission_node(
+                            permission=permission, payload=payload
+                        )
+                else:
+                    node = self._serialize_permission_node(permission=permission, payload=None)
+                nodes.append(node)
+
             subjects[str(subject_id)] = nodes
 
         return self._serialize_data(non_serial_data=data)
@@ -201,6 +213,8 @@ class Authority(_Authority):
                         payload_set = set()
                         permission_map[permission] = payload_set
                     payload_set.add(payload)
+                else:
+                    permission_map[permission] = set()
 
         # populate groups
         for group_id_str, group_data in data["groups"].items():
@@ -218,6 +232,8 @@ class Authority(_Authority):
                         payload_set = set()
                         permission_map[permission] = payload_set
                     payload_set.add(payload)
+                else:
+                    permission_map[permission] = set()
 
             # add group ids to subjects of a group and vice versa
             for subject_id_str in group_data["subjects"]:
