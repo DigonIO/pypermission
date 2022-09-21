@@ -14,7 +14,7 @@ class Permission:
     _childs: set[Permission]
     _sub_graph: dict[str, Permission]
     _has_payload: bool
-    _is_leave: bool
+    _is_leaf: bool
 
     def __init__(self) -> None:
         self._node = "*"
@@ -23,7 +23,7 @@ class Permission:
         self._childs = set()
         self._sub_graph = {}
         self._has_payload = False
-        self._is_leave = False
+        self._is_leaf = False
 
     @property
     def node(self) -> str:
@@ -50,8 +50,8 @@ class Permission:
         return self._has_payload
 
     @property
-    def is_leave(self) -> bool:
-        return self._is_leave
+    def is_leaf(self) -> bool:
+        return self._is_leaf
 
 
 PermissionMap = dict[Permission, set[str]]
@@ -59,14 +59,14 @@ EntityID = int | str
 
 
 class CustomPermission(Permission):
-    def __init__(self, *, node: str, parent: Permission, has_payload: bool, is_leave: bool) -> None:
+    def __init__(self, *, node: str, parent: Permission, has_payload: bool, is_leaf: bool) -> None:
         self._node = node
         self._parent = parent
         self._ancestors = tuple()
         self._childs = set()
         self._sub_graph = {}
         self._has_payload = has_payload
-        self._is_leave = is_leave
+        self._is_leaf = is_leaf
 
     def _update_ancestors(self):
         self._ancestors = (*self._parent.ancestors, self._parent)
@@ -120,10 +120,10 @@ class Authority(ABC):
         if last_section == "*":
             parent_node_sections: list[str] = node_sections[0:-2]
             last_section = node_sections[-2]
-            is_leave = False
+            is_leaf = False
         else:
             parent_node_sections = node_sections[0:-1]
-            is_leave = True
+            is_leaf = True
 
             if last_section == "<x>":
                 has_payload = True
@@ -140,13 +140,13 @@ class Authority(ABC):
                     potential_parent_node[1:] + ".*",
                 )
 
-        if parent.is_leave:
+        if parent.is_leaf:
             raise PermissionParsingError(
                 "The desired parent permission is a leave permission!", parent.node
             )
 
         new_perm = CustomPermission(
-            node=node, parent=parent, has_payload=has_payload, is_leave=is_leave
+            node=node, parent=parent, has_payload=has_payload, is_leaf=is_leaf
         )
 
         if not parent_node_sections:

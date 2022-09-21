@@ -7,7 +7,7 @@ from pypermission.typing import Permission
 # https://github.com/TownyAdvanced/Towny/blob/master/src/com/palmergames/bukkit/towny/permissions/PermissionNodes.java
 
 test_data = (
-    # (node, is_leave, has_payload)
+    # (node, is_leaf, has_payload)
     ("towny.*", False, False),
     ("towny.chat.*", False, False),
     ("towny.chat.town", True, False),
@@ -34,5 +34,5 @@ def test_perm_reg():
 
     for permission, entry in zip(permissions, test_data):
         assert permission.node == entry[0]
-        assert permission.is_leave == entry[1]
+        assert permission.is_leaf == entry[1]
         assert permission.has_payload == entry[2]
