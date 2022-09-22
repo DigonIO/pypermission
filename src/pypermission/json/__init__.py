@@ -1,1 +1,1 @@
-from pypermission.json.core import Authority, PermissionNode, EntityID
+from pypermission.json.core import Authority, EntityID, PermissionNode

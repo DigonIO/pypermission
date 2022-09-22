@@ -1,7 +1,7 @@
 import json
-from pathlib import Path
 from enum import Enum
-from typing import Any, TypedDict, cast, Literal
+from pathlib import Path
+from typing import Any, Literal, TypedDict, cast
 
 from pypermission.core import Authority as _Authority
 from pypermission.core import EntityID, Permission, PermissionMap, PermissionNode
@@ -252,6 +252,14 @@ class Authority(_Authority):
         subject = Subject(id=subject_id)
         self._subjects[subject_id] = subject
 
+    def add_group(self, group_id: EntityID) -> None:
+        """Create a new group for a given ID."""
+        if group_id in self._subjects:
+            raise EntityIDCollisionError
+
+        group = Group(id=group_id)
+        self._groups[group_id] = group
+
     def rem_subject(self, subject_id: EntityID) -> None:
         """Remove a subject for a given ID."""
         subject = self._subjects.pop(subject_id, None)
@@ -259,6 +267,14 @@ class Authority(_Authority):
             return
         for group_id in subject.group_ids:
             self._groups[group_id].subject_ids.remove(subject_id)
+
+    def rem_group(self, group_id: EntityID) -> None:
+        """Remove a group for a given ID."""
+        group = self._groups.pop(group_id, None)
+        if group is None:
+            return
+        for subject_id in group.subject_ids:
+            self._subjects[subject_id].group_ids.remove(group_id)
 
     def subject_has_permission(
         self, *, subject_id: EntityID, node: PermissionNode, payload: str | None = None
@@ -305,22 +321,6 @@ class Authority(_Authority):
     def subject_get_permissions(self, *, subject_id: EntityID) -> PermissionMap:
         """Get a copy of all permissions from a subject."""
         return self._get_subject(subject_id=subject_id).permission_map.copy()
-
-    def add_group(self, group_id: EntityID) -> None:
-        """Create a new group for a given ID."""
-        if group_id in self._subjects:
-            raise EntityIDCollisionError
-
-        group = Group(id=group_id)
-        self._groups[group_id] = group
-
-    def rem_group(self, group_id: EntityID) -> None:
-        """Remove a group for a given ID."""
-        group = self._groups.pop(group_id, None)
-        if group is None:
-            return
-        for subject_id in group.subject_ids:
-            self._subjects[subject_id].group_ids.remove(group_id)
 
     def group_has_permission(
         self, *, group_id: EntityID, node: PermissionNode, payload: str | None = None
