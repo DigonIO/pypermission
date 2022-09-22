@@ -60,69 +60,84 @@ pip install -e .
 
 ## Example code
 
-Setup a permission authority and a helper function:
+Import all required objects. Here we will choose the authority with the JSON persistency backend.
 
 ```py
-from pypermission.json import Authority
-
-auth = Authority()
-
-def r(node: str):
-    """Reduces boilerplate code while registering permission nodes."""
-    return auth.register_permission(node=node)
+from pypermission.json import Authority, PermissionNode, EntityID
 ```
 
-Register permission nodes (example permission nodes from [towny](https://github.com/TownyAdvanced/Towny/blob/master/src/com/palmergames/bukkit/towny/permissions/PermissionNodes.java)):
+Define some permission nodes. We distinguish between buildin and plugin permission nodes.
+Buildin permission nodes are registered when the authority is instantiated.
+Plugin permission nodes can be registered via an extra api after the authority has been created.
 
 ```py
-ROOT_ = auth.root_permission  # root
-TOWNY_ = r("towny.*")  # parent
-TOWNY_CHAT_ = r("towny.chat.*")  # parent
-TOWNY_CHAT_TOWN = r("towny.chat.town")  # leaf
-TOWNY_CHAT_NATION = r("towny.chat.nation") # leaf
-TOWNY_CHAT_GLOBAL = r("towny.chat.global") # leaf
-TOWNY_WILD_ = r("towny.wild.*")  # parent
-TOWNY_WILD_BUILD_ = r("towny.wild.build.*")  # parent
-TOWNY_WILD_BUILD_X = r("towny.wild.build.<x>") # leaf w/ payload
-TOWNY_WILD_DESTROY_ = r("towny.wild.destroy.*")  # parent
-TOWNY_WILD_DESTROY_X = r("towny.wild.destroy.<x>") # leaf w/ payload
+class BuildinPN(PermissionNode):
+    ADMIN = "admin"  # leaf
+    COMMAND_ = "command.*"  # parent
+    COMMAND_STATS = "command.stats"  # leaf
+    COMMAND_RESPAWN = "command.respawn"  # leaf
+
+
+class PluginPN(PermissionNode):
+    # Example permission nodes taken from the towny Minecraft server plugin
+    # https://github.com/TownyAdvanced/Towny/blob/master/src/com/palmergames/bukkit/towny/permissions/PermissionNodes.java
+    TOWNY_ = "towny.*"  # parent
+    TOWNY_CHAT_ = "towny.chat.*"  # parent
+    TOWNY_CHAT_TOWN = "towny.chat.town"  # leaf
+    TOWNY_CHAT_NATION = "towny.chat.nation"  # leaf
+    TOWNY_CHAT_GLOBAL = "towny.chat.global"  # leaf
+    TOWNY_WILD_ = "towny.wild.*"  # parent
+    TOWNY_WILD_BUILD_ = "towny.wild.build.*"  # parent
+    TOWNY_WILD_BUILD_X = "towny.wild.build.<x>"  # leaf w/ payload
+    TOWNY_WILD_DESTROY_ = "towny.wild.destroy.*"  # parent
+    TOWNY_WILD_DESTROY_X = "towny.wild.destroy.<x>"  # leaf w/ payload
 ```
 
-Create a group and add some permissions:
+Create an authority and register all permission nodes.
 
 ```py
-GROUP_ID = "group_foo"  # the group ID can be str or int
+auth = Authority(nodes=BuildinPN)  # register buildin nodes
+auth.register_permission_nodes(nodes=PluginPN)  # api for plugin based node registration
+```
 
+Create a group and add some permissions.
+
+```py
+GROUP_ID: EntityID = "group_foo"  # str | int
 auth.add_group(group_id=GROUP_ID)
 
-auth.group_add_permission(group_id=GROUP_ID, permission=TOWNY_CHAT_)
-auth.group_add_permission(group_id=GROUP_ID, permission=TOWNY_WILD_DESTROY_X, payload="iron")
-auth.group_add_permission(group_id=GROUP_ID, permission=TOWNY_WILD_DESTROY_X, payload="gold")
+auth.group_add_permission(group_id=GROUP_ID, node=PluginPN.TOWNY_CHAT_)
+auth.group_add_permission(group_id=GROUP_ID, node=PluginPN.TOWNY_WILD_DESTROY_X, payload="iron")
+auth.group_add_permission(group_id=GROUP_ID, node=PluginPN.TOWNY_WILD_DESTROY_X, payload="gold")
 ```
 
-Create a subject, add it to a group and add a permission:
+Create a subject, add it to a group and add a permission.
 
 ```py
-SUBJECT_ID = "user_bar"  # the subject ID can be str or int
-
+SUBJECT_ID: EntityID = "user_bar"  # str | int
 auth.add_subject(subject_id=SUBJECT_ID)
 auth.group_add_subject(group_id=GROUP_ID, subject_id=SUBJECT_ID)
 
-auth.subject_add_permission(subject_id=SUBJECT_ID, permission=TOWNY_WILD_DESTROY_X, payload="diamond")
-
+auth.subject_add_permission(
+    subject_id=SUBJECT_ID, node=PluginPN.TOWNY_WILD_DESTROY_X, payload="diamond"
+)
 ```
 
 Now check if a subject has a desired permission:
 
 ```py
-if(auth.subject_has_permission(subject_id=SUBJECT_ID, permission=TOWNY_CHAT_TOWN))
-  ...  # parent permission provided by the group
+if auth.subject_has_permission(subject_id=SUBJECT_ID, node=PluginPN.TOWNY_CHAT_TOWN):
+    print("Parent permission provided by the group.")
 
-if(auth.subject_has_permission(subject_id=SUBJECT_ID, permission=TOWNY_WILD_DESTROY_X, payload="iron"))
-  ...  # leaf w/ payload permission provided by the group
+if auth.subject_has_permission(
+    subject_id=SUBJECT_ID, node=PluginPN.TOWNY_WILD_DESTROY_X, payload="iron"
+):
+    print("Leaf w/ payload permission provided by the group")
 
-if(auth.subject_has_permission(subject_id=SUBJECT_ID, permission=TOWNY_WILD_DESTROY_X, payload="diamond"))
-  ...  # leaf w/ payload permission provided by the subject itself
+if auth.subject_has_permission(
+    subject_id=SUBJECT_ID, node=PluginPN.TOWNY_WILD_DESTROY_X, payload="diamond"
+):
+    print("Leaf w/ payload permission provided by the subject itself")
 ```
 
 ## Testing
