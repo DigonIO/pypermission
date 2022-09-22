@@ -4,7 +4,7 @@ from enum import Enum
 from typing import Any, TypedDict, cast, Literal
 
 from pypermission.core import Authority as _Authority
-from pypermission.core import EntityID, Permission, PermissionMap
+from pypermission.core import EntityID, Permission, PermissionMap, PermissionNode
 from pypermission.error import (
     EntityIDCollisionError,
     MissingPathError,
@@ -261,9 +261,10 @@ class Authority(_Authority):
             self._groups[group_id].subject_ids.remove(subject_id)
 
     def subject_has_permission(
-        self, *, subject_id: EntityID, permission: Permission, payload: str | None = None
+        self, *, subject_id: EntityID, node: PermissionNode, payload: str | None = None
     ) -> bool:
         """Check if a subject has a wanted permission."""
+        permission = self._node_permission_map[node]  # TODO raise if unknown node
         _validate_payload_status(permission=permission, payload=payload)
         subject = self._get_subject(subject_id=subject_id)
 
@@ -278,9 +279,10 @@ class Authority(_Authority):
         return False
 
     def subject_add_permission(
-        self, *, subject_id: EntityID, permission: Permission, payload: str | None = None
+        self, *, subject_id: EntityID, node: PermissionNode, payload: str | None = None
     ):
         """Add a permission to a subject."""
+        permission = self._node_permission_map[node]  # TODO raise if unknown node
         _validate_payload_status(permission=permission, payload=payload)
         permission_map = self._get_subject(subject_id=subject_id).permission_map
 
@@ -289,9 +291,10 @@ class Authority(_Authority):
         )
 
     def subject_rem_permission(
-        self, *, subject_id: EntityID, permission: Permission, payload: str | None = None
+        self, *, subject_id: EntityID, node: PermissionNode, payload: str | None = None
     ):
         """Remove a permission from a subject."""
+        permission = self._node_permission_map[node]  # TODO raise if unknown node
         _validate_payload_status(permission=permission, payload=payload)
         permission_map = self._get_subject(subject_id=subject_id).permission_map
 
