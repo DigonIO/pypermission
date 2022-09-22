@@ -1,5 +1,7 @@
 from pypermission.json import Authority
 
+from ..helpers import TownyPermissionNode
+
 EGG = "egg"
 SPAM = "spam"
 HAM = "ham"
@@ -14,7 +16,7 @@ ANIMAL_BASED = "animal_based"
 PLANT_BASED = "plant_based"
 
 
-def test_affiliation_persistency():
+def test_affiliation_persistency_json():
     auth = Authority()
 
     auth.subject_add(subject_id=EGG)
@@ -61,72 +63,63 @@ def test_affiliation_persistency():
 
 
 def test_permission_persistency_json():
-    auth = Authority()
-
-    def r(node: str):
-        return auth.register_permission(node=node)
-
-    ROOT_ = auth.root_permission
-    TOWNY_ = r("towny.*")
-    TOWNY_CHAT_ = r("towny.chat.*")
-    TOWNY_CHAT_TOWN = r("towny.chat.town")
-    TOWNY_CHAT_NATION = r("towny.chat.nation")
-    TOWNY_CHAT_GLOBAL = r("towny.chat.global")
-    TOWNY_WILD_ = r("towny.wild.*")
-    TOWNY_WILD_BUILD_ = r("towny.wild.build.*")
-    TOWNY_WILD_BUILD_X = r("towny.wild.build.<x>")
-    TOWNY_WILD_DESTROY_ = r("towny.wild.destroy.*")
-    TOWNY_WILD_DESTROY_X = r("towny.wild.destroy.<x>")
+    auth = Authority(nodes=TownyPermissionNode)
 
     auth.subject_add(subject_id=EGG)
-    auth.subject_add_permission(subject_id=EGG, permission=TOWNY_CHAT_TOWN)
-    auth.subject_add_permission(subject_id=EGG, permission=TOWNY_WILD_BUILD_X, payload="dirt")
+    auth.subject_add_permission(subject_id=EGG, node=TownyPermissionNode.TOWNY_CHAT_TOWN)
+    auth.subject_add_permission(
+        subject_id=EGG, node=TownyPermissionNode.TOWNY_WILD_BUILD_X, payload="dirt"
+    )
 
     auth.subject_add(subject_id=SPAM)
 
     auth.group_add(group_id=FOOD)
-    auth.group_add_permission(group_id=FOOD, permission=TOWNY_CHAT_NATION)
-    auth.group_add_permission(group_id=FOOD, permission=TOWNY_WILD_DESTROY_X, payload="iron")
+    auth.group_add_permission(group_id=FOOD, node=TownyPermissionNode.TOWNY_CHAT_NATION)
+    auth.group_add_permission(
+        group_id=FOOD, node=TownyPermissionNode.TOWNY_WILD_DESTROY_X, payload="iron"
+    )
 
     serial_data = auth.save_to_str()
 
-    auth2 = Authority()
-
-    def r(node: str):
-        return auth2.register_permission(node=node)
-
-    ROOT_ = auth2.root_permission
-    TOWNY_ = r("towny.*")
-    TOWNY_CHAT_ = r("towny.chat.*")
-    TOWNY_CHAT_TOWN = r("towny.chat.town")
-    TOWNY_CHAT_NATION = r("towny.chat.nation")
-    TOWNY_CHAT_GLOBAL = r("towny.chat.global")
-    TOWNY_WILD_ = r("towny.wild.*")
-    TOWNY_WILD_BUILD_ = r("towny.wild.build.*")
-    TOWNY_WILD_BUILD_X = r("towny.wild.build.<x>")
-    TOWNY_WILD_DESTROY_ = r("towny.wild.destroy.*")
-    TOWNY_WILD_DESTROY_X = r("towny.wild.destroy.<x>")
-
+    auth2 = Authority(nodes=TownyPermissionNode)
     auth2.load_from_str(serial_data=serial_data)
 
-    assert auth2.subject_has_permission(subject_id=EGG, permission=TOWNY_CHAT_TOWN) == True
-    assert auth2.subject_has_permission(subject_id=EGG, permission=TOWNY_CHAT_) == False
     assert (
-        auth2.subject_has_permission(subject_id=EGG, permission=TOWNY_WILD_BUILD_X, payload="dirt")
+        auth2.subject_has_permission(subject_id=EGG, node=TownyPermissionNode.TOWNY_CHAT_TOWN)
         == True
     )
     assert (
-        auth2.subject_has_permission(subject_id=EGG, permission=TOWNY_WILD_BUILD_X, payload="stone")
+        auth2.subject_has_permission(subject_id=EGG, node=TownyPermissionNode.TOWNY_CHAT_) == False
+    )
+    assert (
+        auth2.subject_has_permission(
+            subject_id=EGG, node=TownyPermissionNode.TOWNY_WILD_BUILD_X, payload="dirt"
+        )
+        == True
+    )
+    assert (
+        auth2.subject_has_permission(
+            subject_id=EGG, node=TownyPermissionNode.TOWNY_WILD_BUILD_X, payload="stone"
+        )
         == False
     )
 
-    assert auth2.group_has_permission(group_id=FOOD, permission=TOWNY_CHAT_NATION) == True
-    assert auth2.group_has_permission(group_id=FOOD, permission=TOWNY_CHAT_TOWN) == False
     assert (
-        auth2.group_has_permission(group_id=FOOD, permission=TOWNY_WILD_DESTROY_X, payload="iron")
+        auth2.group_has_permission(group_id=FOOD, node=TownyPermissionNode.TOWNY_CHAT_NATION)
         == True
     )
     assert (
-        auth2.group_has_permission(group_id=FOOD, permission=TOWNY_WILD_DESTROY_X, payload="gold")
+        auth2.group_has_permission(group_id=FOOD, node=TownyPermissionNode.TOWNY_CHAT_TOWN) == False
+    )
+    assert (
+        auth2.group_has_permission(
+            group_id=FOOD, node=TownyPermissionNode.TOWNY_WILD_DESTROY_X, payload="iron"
+        )
+        == True
+    )
+    assert (
+        auth2.group_has_permission(
+            group_id=FOOD, node=TownyPermissionNode.TOWNY_WILD_DESTROY_X, payload="gold"
+        )
         == False
     )

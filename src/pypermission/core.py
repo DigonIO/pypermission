@@ -118,26 +118,26 @@ class Authority(ABC):
 
     @staticmethod
     def _serialize_permission_node(permission: Permission, payload: str | None) -> str:
-        node: str = permission.node
+        node_str: str = permission.node.value
         if permission.has_payload:
-            node = f"{node[:-2]}{payload}>"
-        return node
+            node_str = f"{node_str[:-2]}{payload}>"
+        return node_str
 
-    def _deserialize_permission_node(self, node: str) -> tuple[Permission, str | None]:
+    def _deserialize_permission_node(self, node_str: str) -> tuple[Permission, str | None]:
 
-        node_sections: list[str] = node.split(".")
-        last_section: str = node_sections[-1]
+        node_str_sections: list[str] = node_str.split(".")
+        last_section: str = node_str_sections[-1]
 
         payload = None
         if last_section[0] == "<" and last_section[-1] == ">":
             payload = last_section[1:-1]
             last_section = "<x>"
 
-        node = ".".join(node_sections[:-1]) + "." + last_section
+        node_str = ".".join(node_str_sections[:-1]) + "." + last_section
         try:
-            return self._node_permission_map[node], payload
+            return self._node_str_permission_map[node_str], payload
         except KeyError:
-            raise PermissionParsingError("Unknown permission id!", node)
+            raise PermissionParsingError("Unknown permission node!", node_str)
 
     def _register_permission(self, *, node: PermissionNode):
         "Register permission"

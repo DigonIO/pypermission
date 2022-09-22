@@ -207,8 +207,8 @@ class Authority(_Authority):
             self._subjects[subject_id] = subject
 
             # add permissions to a subject
-            for node in nodes:
-                permission, payload = self._deserialize_permission_node(node=node)
+            for node_str in nodes:
+                permission, payload = self._deserialize_permission_node(node_str=node_str)
                 permission_map = subject.permission_map
                 if payload:
                     payload_set = permission_map.get(permission, None)
@@ -226,8 +226,8 @@ class Authority(_Authority):
             self._groups[group_id] = group
 
             # add permissions to a group
-            for node in group_data["nodes"]:
-                permission, payload = self._deserialize_permission_node(node=node)
+            for node_str in group_data["nodes"]:
+                permission, payload = self._deserialize_permission_node(node_str=node_str)
                 permission_map = group.permission_map
                 if payload:
                     payload_set = permission_map.get(permission, None)
