@@ -252,7 +252,7 @@ class Authority(_Authority):
         subject = Subject(id=subject_id)
         self._subjects[subject_id] = subject
 
-    def subject_rem(self, subject_id: EntityID) -> None:
+    def rem_subject(self, subject_id: EntityID) -> None:
         """Remove a subject for a given ID."""
         subject = self._subjects.pop(subject_id, None)
         if subject is None:
@@ -314,7 +314,7 @@ class Authority(_Authority):
         group = Group(id=group_id)
         self._groups[group_id] = group
 
-    def group_rem(self, group_id: EntityID) -> None:
+    def rem_group(self, group_id: EntityID) -> None:
         """Remove a group for a given ID."""
         group = self._groups.pop(group_id, None)
         if group is None:
