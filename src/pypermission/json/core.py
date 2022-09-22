@@ -1,5 +1,6 @@
 import json
 from pathlib import Path
+from enum import Enum
 from typing import Any, TypedDict, cast, Literal
 
 from pypermission.core import Authority as _Authority
@@ -96,8 +97,10 @@ class Authority(_Authority):
     _groups: dict[EntityID, Group]
     _data_file: Path | str | None
 
-    def __init__(self, *, data_file: Path | str | None = None) -> None:
-        super().__init__()
+    def __init__(
+        self, *, nodes: type[Enum] | None = None, data_file: Path | str | None = None
+    ) -> None:
+        super().__init__(nodes=nodes)
 
         self._subjects = {}
         self._groups = {}

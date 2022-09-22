@@ -1,38 +1,33 @@
 import pytest
 
 from pypermission.json import Authority
-from pypermission.typing import Permission
+from pypermission.typing import PermissionNode
+from pypermission.core import Permission
 
-# Permission nodes for testing inspired be the towny permission nodes
-# https://github.com/TownyAdvanced/Towny/blob/master/src/com/palmergames/bukkit/towny/permissions/PermissionNodes.java
+from ..helpers import TownyPermissionNode
 
-test_data = (
-    # (node, is_leaf, has_payload)
-    ("towny.*", False, False),
-    ("towny.chat.*", False, False),
-    ("towny.chat.town", True, False),
-    ("towny.chat.nation", True, False),
-    ("towny.chat.global", True, False),
-    ("towny.wild.*", False, False),
-    ("towny.wild.build.*", False, False),
-    ("towny.wild.build.<x>", True, True),
-    ("towny.wild.destroy.*", False, False),
-    ("towny.wild.destroy.<x>", True, True),
+
+@pytest.mark.parametrize(
+    "node, is_leaf, has_payload",
+    [
+        # (node, is_leaf, has_payload)
+        (Authority.root_node(), False, False),
+        (TownyPermissionNode.TOWNY_, False, False),
+        (TownyPermissionNode.TOWNY_CHAT_, False, False),
+        (TownyPermissionNode.TOWNY_CHAT_TOWN, True, False),
+        (TownyPermissionNode.TOWNY_CHAT_NATION, True, False),
+        (TownyPermissionNode.TOWNY_CHAT_GLOBAL, True, False),
+        (TownyPermissionNode.TOWNY_WILD_, False, False),
+        (TownyPermissionNode.TOWNY_WILD_BUILD_, False, False),
+        (TownyPermissionNode.TOWNY_WILD_BUILD_X, True, True),
+        (TownyPermissionNode.TOWNY_WILD_DESTROY_, False, False),
+        (TownyPermissionNode.TOWNY_WILD_DESTROY_X, True, True),
+    ],
 )
+def test_perm_reg(node: PermissionNode, is_leaf: bool, has_payload: bool):
+    auth = Authority(nodes=TownyPermissionNode)
 
-
-def test_perm_reg():
-    auth = Authority()
-
-    def r(node: str):
-        return auth.register_permission(node=node)
-
-    permissions: list[Permission] = []
-
-    for entry in test_data:
-        permissions.append(r(entry[0]))
-
-    for permission, entry in zip(permissions, test_data):
-        assert permission.node == entry[0]
-        assert permission.is_leaf == entry[1]
-        assert permission.has_payload == entry[2]
+    permission: Permission = auth._node_permission_map[node]
+    assert permission.node == node
+    assert permission.is_leaf == is_leaf
+    assert permission.has_payload == has_payload
