@@ -1,4 +1,4 @@
-from pypermission.typing import PermissionNode
+from pypermission.core import PermissionNode
 
 
 class TownyPermissionNode(PermissionNode):
