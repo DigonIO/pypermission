@@ -306,12 +306,6 @@ class Authority(_Authority):
         """Get a copy of all permissions from a subject."""
         return self._get_subject(subject_id=subject_id).permission_map.copy()
 
-    def subject_set_permissions(self, *, subject_id: EntityID, permissions: PermissionMap) -> None:
-        """Overwrite all permissions for a subject."""
-        return self._get_subject(subject_id=subject_id).set_permission_map(
-            new_permission_map=permissions
-        )
-
     def group_add(self, group_id: EntityID) -> None:
         """Create a new group for a given ID."""
         if group_id in self._subjects:
@@ -365,10 +359,6 @@ class Authority(_Authority):
     def group_get_permissions(self, *, group_id: EntityID) -> PermissionMap:
         """Get a copy of all permissions from a group."""
         return self._get_group(group_id=group_id).permission_map.copy()
-
-    def group_set_permissions(self, *, group_id: EntityID, permissions: PermissionMap) -> None:
-        """Overwrite all permissions for a group."""
-        return self._get_group(group_id=group_id).set_permission_map(new_permission_map=permissions)
 
     def group_add_subject(self, group_id: EntityID, subject_id: EntityID) -> None:
         """Add a subject to a group."""
