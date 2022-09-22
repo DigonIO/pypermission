@@ -329,18 +329,20 @@ class Authority(_Authority):
             self._subjects[subject_id].group_ids.remove(group_id)
 
     def group_has_permission(
-        self, *, group_id: EntityID, permission: Permission, payload: str | None = None
+        self, *, group_id: EntityID, node: PermissionNode, payload: str | None = None
     ) -> bool:
         """Check if a group has a wanted permission."""
+        permission = self._node_permission_map[node]  # TODO raise if unknown node
         _validate_payload_status(permission=permission, payload=payload)
         group = self._get_group(group_id=group_id)
 
         return group.has_permission(permission=permission, payload=payload)
 
     def group_add_permission(
-        self, *, group_id: EntityID, permission: Permission, payload: str | None = None
+        self, *, group_id: EntityID, node: PermissionNode, payload: str | None = None
     ):
         """Add a permission to a group."""
+        permission = self._node_permission_map[node]  # TODO raise if unknown node
         _validate_payload_status(permission=permission, payload=payload)
         permission_map = self._get_group(group_id=group_id).permission_map
 
@@ -349,9 +351,10 @@ class Authority(_Authority):
         )
 
     def group_rem_permission(
-        self, *, group_id: EntityID, permission: Permission, payload: str | None = None
+        self, *, group_id: EntityID, node: PermissionNode, payload: str | None = None
     ):
         """Remove a permission from a group."""
+        permission = self._node_permission_map[node]  # TODO raise if unknown node
         _validate_payload_status(permission=permission, payload=payload)
         permission_map = self._get_group(group_id=group_id).permission_map
 
