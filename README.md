@@ -93,7 +93,7 @@ Create a group and add some permissions:
 ```py
 GROUP_ID = "group_foo"  # the group ID can be str or int
 
-auth.group_add(group_id=GROUP_ID)
+auth.add_group(group_id=GROUP_ID)
 
 auth.group_add_permission(group_id=GROUP_ID, permission=TOWNY_CHAT_)
 auth.group_add_permission(group_id=GROUP_ID, permission=TOWNY_WILD_DESTROY_X, payload="iron")

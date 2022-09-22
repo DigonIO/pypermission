@@ -306,7 +306,7 @@ class Authority(_Authority):
         """Get a copy of all permissions from a subject."""
         return self._get_subject(subject_id=subject_id).permission_map.copy()
 
-    def group_add(self, group_id: EntityID) -> None:
+    def add_group(self, group_id: EntityID) -> None:
         """Create a new group for a given ID."""
         if group_id in self._subjects:
             raise EntityIDCollisionError

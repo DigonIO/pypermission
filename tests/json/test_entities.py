@@ -142,7 +142,7 @@ def test_subject_perms_without_groups():
 def test_group_perms():
     auth = Authority(nodes=TownyPermissionNode)
 
-    auth.group_add(ANIMAL_BASED)
+    auth.add_group(ANIMAL_BASED)
 
     auth.group_add_permission(group_id=ANIMAL_BASED, node=Authority.root_node())
     assert (
@@ -162,8 +162,8 @@ def test_group_perms():
 def test_subject_perms_with_groups():
     auth = Authority(nodes=TownyPermissionNode)
 
-    auth.group_add(group_id=ANIMAL_BASED)
-    auth.group_add(group_id=PLANT_BASED)
+    auth.add_group(group_id=ANIMAL_BASED)
+    auth.add_group(group_id=PLANT_BASED)
 
     auth.add_subject(subject_id=EGG)
 
@@ -191,9 +191,9 @@ def test_grouped_subjects():
     auth.add_subject(subject_id=PEAR)
     auth.add_subject(subject_id=BANANA)
 
-    auth.group_add(group_id=FOOD)
-    auth.group_add(group_id=ANIMAL_BASED)
-    auth.group_add(group_id=PLANT_BASED)
+    auth.add_group(group_id=FOOD)
+    auth.add_group(group_id=ANIMAL_BASED)
+    auth.add_group(group_id=PLANT_BASED)
 
     auth.group_add_subject(group_id=FOOD, subject_id=EGG)
     auth.group_add_subject(group_id=FOOD, subject_id=SPAM)

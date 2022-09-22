@@ -28,9 +28,9 @@ def test_affiliation_persistency_json():
     auth.add_subject(subject_id=PEAR)
     auth.add_subject(subject_id=BANANA)
 
-    auth.group_add(group_id=FOOD)
-    auth.group_add(group_id=ANIMAL_BASED)
-    auth.group_add(group_id=PLANT_BASED)
+    auth.add_group(group_id=FOOD)
+    auth.add_group(group_id=ANIMAL_BASED)
+    auth.add_group(group_id=PLANT_BASED)
 
     auth.group_add_subject(group_id=FOOD, subject_id=EGG)
     auth.group_add_subject(group_id=FOOD, subject_id=SPAM)
@@ -73,7 +73,7 @@ def test_permission_persistency_json():
 
     auth.add_subject(subject_id=SPAM)
 
-    auth.group_add(group_id=FOOD)
+    auth.add_group(group_id=FOOD)
     auth.group_add_permission(group_id=FOOD, node=TownyPermissionNode.TOWNY_CHAT_NATION)
     auth.group_add_permission(
         group_id=FOOD, node=TownyPermissionNode.TOWNY_WILD_DESTROY_X, payload="iron"
