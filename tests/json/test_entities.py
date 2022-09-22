@@ -20,7 +20,7 @@ def test_subject_perms_without_groups():
     auth = Authority(nodes=TownyPermissionNode)
 
     ### EGG ### ADD PERMS ##########################################################################
-    auth.subject_add(subject_id=EGG)
+    auth.add_subject(subject_id=EGG)
     auth.subject_add_permission(subject_id=EGG, node=Authority.root_node())
 
     assert (
@@ -43,7 +43,7 @@ def test_subject_perms_without_groups():
     )
 
     ### SPAM ### ADD PERMS ##########################################################################
-    auth.subject_add(subject_id=SPAM)
+    auth.add_subject(subject_id=SPAM)
     auth.subject_add_permission(subject_id=SPAM, node=TownyPermissionNode.TOWNY_CHAT_)
     auth.subject_add_permission(subject_id=SPAM, node=TownyPermissionNode.TOWNY_WILD_)
 
@@ -67,7 +67,7 @@ def test_subject_perms_without_groups():
     )
 
     ### HAM ### ADD PERMS ##########################################################################
-    auth.subject_add(subject_id=HAM)
+    auth.add_subject(subject_id=HAM)
 
     auth.subject_add_permission(subject_id=HAM, node=TownyPermissionNode.TOWNY_CHAT_TOWN)
     assert (
@@ -165,7 +165,7 @@ def test_subject_perms_with_groups():
     auth.group_add(group_id=ANIMAL_BASED)
     auth.group_add(group_id=PLANT_BASED)
 
-    auth.subject_add(subject_id=EGG)
+    auth.add_subject(subject_id=EGG)
 
     auth.group_add_subject(group_id=ANIMAL_BASED, subject_id=EGG)
     auth.group_add_subject(group_id=PLANT_BASED, subject_id=EGG)
@@ -182,14 +182,14 @@ def test_subject_perms_with_groups():
 def test_grouped_subjects():
     auth = Authority()
 
-    auth.subject_add(subject_id=EGG)
-    auth.subject_add(subject_id=SPAM)
-    auth.subject_add(subject_id=HAM)
+    auth.add_subject(subject_id=EGG)
+    auth.add_subject(subject_id=SPAM)
+    auth.add_subject(subject_id=HAM)
 
-    auth.subject_add(subject_id=ORANGE)
-    auth.subject_add(subject_id=APPLE)
-    auth.subject_add(subject_id=PEAR)
-    auth.subject_add(subject_id=BANANA)
+    auth.add_subject(subject_id=ORANGE)
+    auth.add_subject(subject_id=APPLE)
+    auth.add_subject(subject_id=PEAR)
+    auth.add_subject(subject_id=BANANA)
 
     auth.group_add(group_id=FOOD)
     auth.group_add(group_id=ANIMAL_BASED)

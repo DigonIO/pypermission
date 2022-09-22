@@ -19,14 +19,14 @@ PLANT_BASED = "plant_based"
 def test_affiliation_persistency_json():
     auth = Authority()
 
-    auth.subject_add(subject_id=EGG)
-    auth.subject_add(subject_id=SPAM)
-    auth.subject_add(subject_id=HAM)
+    auth.add_subject(subject_id=EGG)
+    auth.add_subject(subject_id=SPAM)
+    auth.add_subject(subject_id=HAM)
 
-    auth.subject_add(subject_id=ORANGE)
-    auth.subject_add(subject_id=APPLE)
-    auth.subject_add(subject_id=PEAR)
-    auth.subject_add(subject_id=BANANA)
+    auth.add_subject(subject_id=ORANGE)
+    auth.add_subject(subject_id=APPLE)
+    auth.add_subject(subject_id=PEAR)
+    auth.add_subject(subject_id=BANANA)
 
     auth.group_add(group_id=FOOD)
     auth.group_add(group_id=ANIMAL_BASED)
@@ -65,13 +65,13 @@ def test_affiliation_persistency_json():
 def test_permission_persistency_json():
     auth = Authority(nodes=TownyPermissionNode)
 
-    auth.subject_add(subject_id=EGG)
+    auth.add_subject(subject_id=EGG)
     auth.subject_add_permission(subject_id=EGG, node=TownyPermissionNode.TOWNY_CHAT_TOWN)
     auth.subject_add_permission(
         subject_id=EGG, node=TownyPermissionNode.TOWNY_WILD_BUILD_X, payload="dirt"
     )
 
-    auth.subject_add(subject_id=SPAM)
+    auth.add_subject(subject_id=SPAM)
 
     auth.group_add(group_id=FOOD)
     auth.group_add_permission(group_id=FOOD, node=TownyPermissionNode.TOWNY_CHAT_NATION)

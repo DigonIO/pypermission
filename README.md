@@ -105,7 +105,7 @@ Create a subject, add it to a group and add a permission:
 ```py
 SUBJECT_ID = "user_bar"  # the subject ID can be str or int
 
-auth.subject_add(subject_id=SUBJECT_ID)
+auth.add_subject(subject_id=SUBJECT_ID)
 auth.group_add_subject(group_id=GROUP_ID, subject_id=SUBJECT_ID)
 
 auth.subject_add_permission(subject_id=SUBJECT_ID, permission=TOWNY_WILD_DESTROY_X, payload="diamond")

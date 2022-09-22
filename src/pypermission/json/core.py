@@ -244,7 +244,7 @@ class Authority(_Authority):
                 group.subject_ids.add(subject_id)
                 self._subjects[subject_id].group_ids.add(group_id)
 
-    def subject_add(self, subject_id: EntityID) -> None:
+    def add_subject(self, subject_id: EntityID) -> None:
         """Create a new subject for a given ID."""
         if subject_id in self._subjects:
             raise EntityIDCollisionError
