@@ -102,9 +102,15 @@ class Authority(ABC):
         self._node_permission_map[RootPermissionNode.ROOT_] = self._root_permission
         self._node_str_permission_map[RootPermissionNode.ROOT_.value] = self._root_permission
 
+        # TODO check that all enum values are strings
         if nodes:
             for node in nodes:
                 self._register_permission(node=node)
+
+    def register_permission_nodes(self, nodes: type[PermissionNode]) -> None:
+        # TODO check that all enum values are strings
+        for node in nodes:
+            self._register_permission(node=node)
 
     @staticmethod
     def root_node() -> PermissionNode:
