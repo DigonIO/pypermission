@@ -1,6 +1,8 @@
 # PyPermission
 
-<p>Lightweight permission system for your python projects. Inspired by the permission system used in the `Bukkit` Minecraft server mod project.
+<p>
+    A node based permission engine for python.
+    Inspired by the permission system used in the `Bukkit` Minecraft server mod project.
 </p>
 
 [![repository](https://img.shields.io/badge/src-GitLab-orange)](https://gitlab.com/DigonIO/scheduler)
@@ -19,8 +21,8 @@
 ## Features
 
 + Permissionable entities
-  + Subjects: e.g. users
-  + Groups: e.g. collection of users
+  + Subjects e.g. users
+  + Groups e.g. collection of users
 + Tree based permissions nodes
   + Parent nodes
   + Leaf nodes
@@ -35,13 +37,13 @@
 
 `PyPermission` can be installed directly from the PyPI repositories.
 
-#### JSON backend
+#### JSON persistency backend
 
 ```bash
 pip install PyPermission
 ```
 
-#### YAML backend
+#### YAML persistency backend
 
 ```bash
 pip install PyPermission[yaml]
@@ -123,7 +125,7 @@ auth.subject_add_permission(
 )
 ```
 
-Now check if a subject has a desired permission:
+Now check if a subject has a desired permission.
 
 ```py
 if auth.subject_has_permission(subject_id=SUBJECT_ID, node=PluginPN.TOWNY_CHAT_TOWN):
@@ -132,12 +134,12 @@ if auth.subject_has_permission(subject_id=SUBJECT_ID, node=PluginPN.TOWNY_CHAT_T
 if auth.subject_has_permission(
     subject_id=SUBJECT_ID, node=PluginPN.TOWNY_WILD_DESTROY_X, payload="iron"
 ):
-    print("Leaf w/ payload permission provided by the group")
+    print("Leaf w/ payload permission provided by the group.")
 
 if auth.subject_has_permission(
     subject_id=SUBJECT_ID, node=PluginPN.TOWNY_WILD_DESTROY_X, payload="diamond"
 ):
-    print("Leaf w/ payload permission provided by the subject itself")
+    print("Leaf w/ payload permission provided by the subject itself.")
 ```
 
 ## Testing
