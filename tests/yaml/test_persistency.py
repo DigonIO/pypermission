@@ -126,3 +126,26 @@ def test_permission_persistency_yaml():
         )
         == False
     )
+
+
+def test_grouped_groups_yaml():
+    auth = Authority()
+
+    auth.add_group(group_id=FOOD)
+    auth.add_group(group_id=ANIMAL_BASED)
+    auth.add_group(group_id=PLANT_BASED)
+
+    auth.group_add_group(parent_id=FOOD, child_id=ANIMAL_BASED)
+    auth.group_add_group(parent_id=FOOD, child_id=PLANT_BASED)
+
+    serial_data = auth.save_to_str()
+
+    auth2 = Authority()
+
+    auth2.load_from_str(serial_data=serial_data)
+
+    assert ANIMAL_BASED in auth2._groups[FOOD].child_ids
+    assert PLANT_BASED in auth2._groups[FOOD].child_ids
+
+    assert FOOD in auth2._groups[ANIMAL_BASED].parent_ids
+    assert FOOD in auth2._groups[PLANT_BASED].parent_ids

@@ -20,8 +20,9 @@ InIDTypeDict = dict[str, type[str | int]]
 
 
 class NonSerialGroup(TypedDict):
-    subjects: set[str]
+    subjects: list[str]
     nodes: list[str]
+    childs: list[str]
 
 
 class NonSerialData(TypedDict):
@@ -172,7 +173,10 @@ class Authority(_Authority):
                 nodes.append(node)
 
             grouped_subjects: list[str] = [str(subject_id) for subject_id in group.subject_ids]
-            groups[str(group_id)] = NonSerialGroup(subjects=grouped_subjects, nodes=nodes)
+            childs: list[str] = [str(child_id) for child_id in group.child_ids]
+            groups[str(group_id)] = NonSerialGroup(
+                subjects=grouped_subjects, nodes=nodes, childs=childs
+            )
 
         for subject_id, subject in self._subjects.items():
             if isinstance(subject_id, str):
@@ -206,7 +210,7 @@ class Authority(_Authority):
             else:
                 subject_id_types[subject_id_str] = int
 
-        # populate subject id types
+        # populate group id types
         group_id_types: InIDTypeDict = {}
         for group_id_str, type_str in data["group_id_types"].items():
             if type_str == "str":
@@ -257,6 +261,17 @@ class Authority(_Authority):
                 subject_id = subject_id_types[subject_id_str](subject_id_str)
                 group.subject_ids.add(subject_id)
                 self._subjects[subject_id].group_ids.add(group_id)
+
+            # add child ids to this group
+            for child_id_str in group_data["childs"]:
+                child_id = group_id_types[child_id_str](child_id_str)
+                group.child_ids.add(child_id)
+
+        # populate group parent_ids
+        for group_id, group in self._groups.items():
+            for child_id in group.child_ids:
+                child = self._groups[child_id]
+                child.parent_ids.add(group_id)
 
     def add_subject(self, subject_id: EntityID) -> None:
         """Create a new subject for a given ID."""
