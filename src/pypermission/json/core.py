@@ -12,6 +12,7 @@ from pypermission.error import (
     UnknownSubjectIDError,
     UnusedPayloadError,
     GroupCycleError,
+    UnknownPermissionNodeError,
 )
 
 OutIDTypeDict = dict[str, Literal["str"] | Literal["int"]]
@@ -293,7 +294,7 @@ class Authority(_Authority):
         self, *, subject_id: EntityID, node: PermissionNode, payload: str | None = None
     ) -> bool:
         """Check if a subject has a wanted permission."""
-        permission = self._node_permission_map[node]  # TODO raise if unknown node
+        permission = self._get_permission(node=node)
         _validate_payload_status(permission=permission, payload=payload)
         subject = self._get_subject(subject_id=subject_id)
 
@@ -313,7 +314,7 @@ class Authority(_Authority):
         self, *, subject_id: EntityID, node: PermissionNode, payload: str | None = None
     ):
         """Add a permission to a subject."""
-        permission = self._node_permission_map[node]  # TODO raise if unknown node
+        permission = self._get_permission(node=node)
         _validate_payload_status(permission=permission, payload=payload)
         permission_map = self._get_subject(subject_id=subject_id).permission_map
 
@@ -325,7 +326,7 @@ class Authority(_Authority):
         self, *, subject_id: EntityID, node: PermissionNode, payload: str | None = None
     ):
         """Remove a permission from a subject."""
-        permission = self._node_permission_map[node]  # TODO raise if unknown node
+        permission = self._get_permission(node=node)
         _validate_payload_status(permission=permission, payload=payload)
         permission_map = self._get_subject(subject_id=subject_id).permission_map
 
@@ -341,7 +342,7 @@ class Authority(_Authority):
         self, *, group_id: EntityID, node: PermissionNode, payload: str | None = None
     ) -> bool:
         """Check if a group has a wanted permission."""
-        permission = self._node_permission_map[node]  # TODO raise if unknown node
+        permission = self._get_permission(node=node)
         _validate_payload_status(permission=permission, payload=payload)
         group = self._get_group(group_id=group_id)
 
@@ -353,7 +354,7 @@ class Authority(_Authority):
         self, *, group_id: EntityID, node: PermissionNode, payload: str | None = None
     ):
         """Add a permission to a group."""
-        permission = self._node_permission_map[node]  # TODO raise if unknown node
+        permission = self._get_permission(node=node)
         _validate_payload_status(permission=permission, payload=payload)
         permission_map = self._get_group(group_id=group_id).permission_map
 
@@ -365,7 +366,7 @@ class Authority(_Authority):
         self, *, group_id: EntityID, node: PermissionNode, payload: str | None = None
     ):
         """Remove a permission from a group."""
-        permission = self._node_permission_map[node]  # TODO raise if unknown node
+        permission = self._get_permission(node=node)
         _validate_payload_status(permission=permission, payload=payload)
         permission_map = self._get_group(group_id=group_id).permission_map
 
@@ -424,6 +425,13 @@ class Authority(_Authority):
             return self._groups[group_id]
         except KeyError:
             raise UnknownSubjectIDError
+
+    def _get_permission(self, *, node: PermissionNode) -> Permission:
+        """Just a simple wrapper to avoid some boilerplate code while getting a node."""
+        try:
+            return self._node_permission_map[node]
+        except KeyError:
+            raise UnknownPermissionNodeError
 
     def _detect_group_cycle(self, parent: Group, child_id: EntityID):
         """Detect a cycle in nested group tree."""

@@ -18,6 +18,10 @@ class EntityIDCollisionError(PyPermissionError):
     ...
 
 
+class UnknownPermissionNodeError(PermissionError):
+    ...
+
+
 class UnknownSubjectIDError(PyPermissionError):
     ...
 

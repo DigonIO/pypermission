@@ -1,7 +1,7 @@
 import pytest
 
 from pypermission.json import Authority
-from pypermission.error import GroupCycleError
+from pypermission.error import GroupCycleError, UnknownPermissionNodeError
 
 from ..helpers import TownyPermissionNode
 
@@ -304,3 +304,17 @@ def test_grouped_subjects():
 
     assert len(auth._subjects[EGG].group_ids) == 2
     assert len(auth._subjects[ORANGE].group_ids) == 2
+
+
+def test_unknown_perm_node():
+    auth = Authority()
+
+    auth.add_subject(subject_id=APPLE)
+
+    auth.add_group(group_id=FOOD)
+
+    with pytest.raises(UnknownPermissionNodeError):
+        auth.subject_add_permission(subject_id=APPLE, node=TownyPermissionNode.TOWNY_CHAT_)
+
+    with pytest.raises(UnknownPermissionNodeError):
+        auth.group_add_permission(group_id=FOOD, node=TownyPermissionNode.TOWNY_CHAT_)
