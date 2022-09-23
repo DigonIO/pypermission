@@ -81,14 +81,26 @@ class Subject(PermissionableEntity):
 class Group(PermissionableEntity):
 
     _subject_ids: set[EntityID]
+    _parent_ids: set[EntityID]
+    _child_ids: set[EntityID]
 
     def __init__(self, *, id: EntityID) -> None:
         super().__init__(id=id)
         self._subject_ids = set()
+        self._parent_ids = set()
+        self._child_ids = set()
 
     @property
     def subject_ids(self) -> set[EntityID]:
         return self._subject_ids
+
+    @property
+    def parent_ids(self) -> set[EntityID]:
+        return self._parent_ids
+
+    @property
+    def child_ids(self) -> set[EntityID]:
+        return self._child_ids
 
 
 class Authority(_Authority):
@@ -360,7 +372,7 @@ class Authority(_Authority):
         """Get a copy of all permissions from a group."""
         return self._get_group(group_id=group_id).permission_map.copy()
 
-    def group_add_subject(self, group_id: EntityID, subject_id: EntityID) -> None:
+    def group_add_subject(self, *, group_id: EntityID, subject_id: EntityID) -> None:
         """Add a subject to a group."""
         group = self._get_group(group_id=group_id)
         subject = self._get_subject(subject_id=subject_id)
@@ -368,13 +380,29 @@ class Authority(_Authority):
         group.subject_ids.add(subject_id)
         subject.group_ids.add(group_id)
 
-    def group_rem_subject(self, group_id: EntityID, subject_id: EntityID) -> None:
+    def group_add_group(self, *, parent_id: EntityID, child_id: EntityID) -> None:
+        """Add a group to a group."""
+        parent = self._get_group(group_id=parent_id)
+        child = self._get_group(group_id=child_id)
+
+        parent.child_ids.add(child_id)
+        child.parent_ids.add(parent_id)
+
+    def group_rem_subject(self, *, group_id: EntityID, subject_id: EntityID) -> None:
         """Remove a subject from a group."""
         group = self._get_group(group_id=group_id)
         subject = self._get_subject(subject_id=subject_id)
 
         group.subject_ids.remove(subject_id)
         subject.group_ids.remove(group_id)
+
+    def group_rem_group(self, *, parent_id: EntityID, child_id: EntityID) -> None:
+        """Remove a group from a group."""
+        parent = self._get_group(group_id=parent_id)
+        child = self._get_group(group_id=child_id)
+
+        parent.child_ids.remove(child_id)
+        child.parent_ids.remove(parent_id)
 
     def _get_subject(self, *, subject_id: EntityID) -> Subject:
         """Just a simple wrapper to avoid some boilerplate code while getting a subject."""

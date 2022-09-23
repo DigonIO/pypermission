@@ -179,6 +179,41 @@ def test_subject_perms_with_groups():
     assert auth.subject_has_permission(subject_id=EGG, node=TownyPermissionNode.TOWNY_WILD_) == True
 
 
+def test_grouped_groups():
+    auth = Authority()
+
+    auth.add_group(group_id=FOOD)
+    auth.add_group(group_id=ANIMAL_BASED)
+    auth.add_group(group_id=PLANT_BASED)
+
+    auth.add_group(group_id=EGG)
+    auth.add_group(group_id=SPAM)
+    auth.add_group(group_id=HAM)
+
+    auth.add_group(group_id=ORANGE)
+    auth.add_group(group_id=APPLE)
+    auth.add_group(group_id=PEAR)
+    auth.add_group(group_id=BANANA)
+
+    auth.group_add_group(parent_id=FOOD, child_id=ANIMAL_BASED)
+    auth.group_add_group(parent_id=FOOD, child_id=PLANT_BASED)
+
+    auth.group_add_group(parent_id=ANIMAL_BASED, child_id=EGG)
+    auth.group_add_group(parent_id=ANIMAL_BASED, child_id=SPAM)
+    auth.group_add_group(parent_id=ANIMAL_BASED, child_id=HAM)
+
+    auth.group_add_group(parent_id=PLANT_BASED, child_id=ORANGE)
+    auth.group_add_group(parent_id=PLANT_BASED, child_id=APPLE)
+    auth.group_add_group(parent_id=PLANT_BASED, child_id=PEAR)
+    auth.group_add_group(parent_id=PLANT_BASED, child_id=BANANA)
+
+    assert len(auth._groups[FOOD].child_ids) == 2
+    assert len(auth._groups[ANIMAL_BASED].parent_ids) == 1
+    assert len(auth._groups[PLANT_BASED].parent_ids) == 1
+
+    assert len(auth._groups[ANIMAL_BASED].child_ids) == 3
+    assert len(auth._groups[PLANT_BASED].child_ids) == 4
+
 def test_grouped_subjects():
     auth = Authority()
 
