@@ -302,7 +302,9 @@ class Authority(_Authority):
 
         for group_id in subject.group_ids:
             group = self._groups[group_id]
-            if group.has_permission(permission=permission, payload=payload):
+            if self._recursive_group_has_permission(
+                group=group, permission=permission, payload=payload
+            ):
                 return True
 
         return False
@@ -343,7 +345,9 @@ class Authority(_Authority):
         _validate_payload_status(permission=permission, payload=payload)
         group = self._get_group(group_id=group_id)
 
-        return group.has_permission(permission=permission, payload=payload)
+        return self._recursive_group_has_permission(
+            group=group, permission=permission, payload=payload
+        )
 
     def group_add_permission(
         self, *, group_id: EntityID, node: PermissionNode, payload: str | None = None
@@ -428,6 +432,22 @@ class Authority(_Authority):
         for parent_parent_id in parent.parent_ids:
             parent_parent = self._groups[parent_parent_id]
             self._detect_group_cycle(parent=parent_parent, child_id=child_id)
+
+    def _recursive_group_has_permission(
+        self, group: Group, permission: Permission, payload: str | None
+    ):
+        """Recursively check whether the group or one of its parents has the perm searched for."""
+        if group.has_permission(permission=permission, payload=payload):
+            return True
+
+        for parent_id in group.parent_ids:
+            parent = self._groups[parent_id]
+            if self._recursive_group_has_permission(
+                group=parent, permission=permission, payload=payload
+            ):
+                return True
+
+        return False
 
     @staticmethod
     def _serialize_data(*, non_serial_data: NonSerialData) -> str:

@@ -233,6 +233,38 @@ def test_cyclic_groups():
         auth.group_add_group(parent_id=PLANT_BASED, child_id=FOOD)
 
 
+def test_recursive_permissions():
+    auth = Authority(nodes=TownyPermissionNode)
+
+    auth.add_group(group_id=FOOD)
+    auth.add_group(group_id=ANIMAL_BASED)
+    auth.add_group(group_id=PLANT_BASED)
+
+    auth.group_add_group(parent_id=FOOD, child_id=ANIMAL_BASED)
+    auth.group_add_group(parent_id=ANIMAL_BASED, child_id=PLANT_BASED)
+
+    auth.group_add_permission(group_id=FOOD, node=TownyPermissionNode.TOWNY_CHAT_)
+
+    assert (
+        auth.group_has_permission(group_id=PLANT_BASED, node=TownyPermissionNode.TOWNY_CHAT_)
+        == True
+    )
+    assert (
+        auth.group_has_permission(group_id=PLANT_BASED, node=TownyPermissionNode.TOWNY_WILD_)
+        == False
+    )
+
+    auth.add_subject(subject_id=APPLE)
+    auth.group_add_subject(group_id=PLANT_BASED, subject_id=APPLE)
+
+    assert (
+        auth.subject_has_permission(subject_id=APPLE, node=TownyPermissionNode.TOWNY_CHAT_) == True
+    )
+    assert (
+        auth.subject_has_permission(subject_id=APPLE, node=TownyPermissionNode.TOWNY_WILD_) == False
+    )
+
+
 def test_grouped_subjects():
     auth = Authority()
 
