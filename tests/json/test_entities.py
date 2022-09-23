@@ -1,4 +1,7 @@
+import pytest
+
 from pypermission.json import Authority
+from pypermission.error import GroupCycleError
 
 from ..helpers import TownyPermissionNode
 
@@ -208,11 +211,27 @@ def test_grouped_groups():
     auth.group_add_group(parent_id=PLANT_BASED, child_id=BANANA)
 
     assert len(auth._groups[FOOD].child_ids) == 2
+    assert len(auth._groups[PLANT_BASED].child_ids) == 4
     assert len(auth._groups[ANIMAL_BASED].parent_ids) == 1
     assert len(auth._groups[PLANT_BASED].parent_ids) == 1
 
     assert len(auth._groups[ANIMAL_BASED].child_ids) == 3
     assert len(auth._groups[PLANT_BASED].child_ids) == 4
+
+
+def test_cyclic_groups():
+    auth = Authority()
+
+    auth.add_group(group_id=FOOD)
+    auth.add_group(group_id=ANIMAL_BASED)
+    auth.add_group(group_id=PLANT_BASED)
+
+    auth.group_add_group(parent_id=FOOD, child_id=ANIMAL_BASED)
+    auth.group_add_group(parent_id=ANIMAL_BASED, child_id=PLANT_BASED)
+
+    with pytest.raises(GroupCycleError):
+        auth.group_add_group(parent_id=PLANT_BASED, child_id=FOOD)
+
 
 def test_grouped_subjects():
     auth = Authority()

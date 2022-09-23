@@ -11,6 +11,7 @@ from pypermission.error import (
     MissingPayloadError,
     UnknownSubjectIDError,
     UnusedPayloadError,
+    GroupCycleError,
 )
 
 OutIDTypeDict = dict[str, Literal["str"] | Literal["int"]]
@@ -385,6 +386,8 @@ class Authority(_Authority):
         parent = self._get_group(group_id=parent_id)
         child = self._get_group(group_id=child_id)
 
+        self._detect_group_cycle(parent=parent, child_id=child_id)
+
         parent.child_ids.add(child_id)
         child.parent_ids.add(parent_id)
 
@@ -417,6 +420,14 @@ class Authority(_Authority):
             return self._groups[group_id]
         except KeyError:
             raise UnknownSubjectIDError
+
+    def _detect_group_cycle(self, parent: Group, child_id: EntityID):
+        """Detect a cycle in nested group tree."""
+        if child_id in parent.parent_ids:
+            raise GroupCycleError
+        for parent_parent_id in parent.parent_ids:
+            parent_parent = self._groups[parent_parent_id]
+            self._detect_group_cycle(parent=parent_parent, child_id=child_id)
 
     @staticmethod
     def _serialize_data(*, non_serial_data: NonSerialData) -> str:

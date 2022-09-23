@@ -2,7 +2,11 @@ class PyPermissionError(Exception):
     ...
 
 
-class MissingPathError(Exception):
+class MissingPathError(PyPermissionError):
+    ...
+
+
+class GroupCycleError(PyPermissionError):
     ...
 
 
