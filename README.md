@@ -154,7 +154,7 @@ or generated using Sphinx with [numpydoc](https://numpydoc.readthedocs.io/en/lat
 formatting. To build, run:
 
 ```bash
-sphinx-build -b html doc/ doc/_build/html
+sphinx-build -b html docs/ docs/_build/html
 ```
 
 
