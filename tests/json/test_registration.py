@@ -1,7 +1,7 @@
 import pytest
 
-from pypermission.json import Authority
 from pypermission.core import Permission, PermissionNode
+from pypermission.json import Authority
 
 from ..helpers import TownyPermissionNode
 

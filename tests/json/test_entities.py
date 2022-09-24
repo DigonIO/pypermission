@@ -1,7 +1,7 @@
 import pytest
 
-from pypermission.json import Authority
 from pypermission.error import GroupCycleError, UnknownPermissionNodeError
+from pypermission.json import Authority
 
 from ..helpers import TownyPermissionNode
 

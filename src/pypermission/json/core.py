@@ -7,12 +7,12 @@ from pypermission.core import Authority as _Authority
 from pypermission.core import EntityID, Permission, PermissionMap, PermissionNode
 from pypermission.error import (
     EntityIDCollisionError,
+    GroupCycleError,
     MissingPathError,
     MissingPayloadError,
+    UnknownPermissionNodeError,
     UnknownSubjectIDError,
     UnusedPayloadError,
-    GroupCycleError,
-    UnknownPermissionNodeError,
 )
 
 OutIDTypeDict = dict[str, Literal["str"] | Literal["int"]]
