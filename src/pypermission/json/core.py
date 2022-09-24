@@ -353,6 +353,11 @@ class Authority(_Authority):
         """Get a copy of all permissions from a subject."""
         return self._get_subject(subject_id=subject_id).permission_map.copy()
 
+    def subject_get_groups(self, *, subject_id: EntityID) -> set[EntityID]:
+        """Get a set of a group IDs of a groups a subject is member of."""
+        subject = self._get_subject(subject_id=subject_id)
+        return subject.group_ids.copy()
+
     def group_has_permission(
         self, *, group_id: EntityID, node: PermissionNode, payload: str | None = None
     ) -> bool:
@@ -392,6 +397,11 @@ class Authority(_Authority):
     def group_get_permissions(self, *, group_id: EntityID) -> PermissionMap:
         """Get a copy of all permissions from a group."""
         return self._get_group(group_id=group_id).permission_map.copy()
+
+    def group_get_groups(self, *, group_id: EntityID) -> set[EntityID]:
+        """Get a set of all parent group IDs of a group."""
+        group = self._get_group(group_id=group_id)
+        return group.parent_ids.copy()
 
     def group_add_subject(self, *, group_id: EntityID, subject_id: EntityID) -> None:
         """Add a subject to a group."""
