@@ -20,16 +20,13 @@
 
 ## Features
 
-+ Permissionable entities
-  + Subjects (e.g. users)
-  + Groups (e.g. collection of users)
-    + Group of subjects
-    + Nested groups possible
++ RBAC
++ UBAC
 + Tree based permissions nodes
   + Parent nodes
   + Leaf nodes
   + Leaf nodes w/ a string payload
-+ Persistency backend
++ Persistency backends
   + JSON
   + YAML
 
