@@ -34,22 +34,18 @@ auth.group_add_permission(group_id=GROUP_ID, node=PluginPN.TOWNY_WILD_DESTROY_X,
 auth.group_add_permission(group_id=GROUP_ID, node=PluginPN.TOWNY_WILD_DESTROY_X, payload="gold")
 
 SUBJECT_ID: EntityID = "user_bar"  # the subject ID can be str or int
-auth.add_subject(subject_id=SUBJECT_ID)
-auth.group_add_subject(group_id=GROUP_ID, subject_id=SUBJECT_ID)
+auth.add_subject(s_id=SUBJECT_ID)
+auth.group_add_subject(group_id=GROUP_ID, s_id=SUBJECT_ID)
 
-auth.subject_add_permission(
-    subject_id=SUBJECT_ID, node=PluginPN.TOWNY_WILD_DESTROY_X, payload="diamond"
-)
+auth.subject_add_permission(s_id=SUBJECT_ID, node=PluginPN.TOWNY_WILD_DESTROY_X, payload="diamond")
 
-if auth.subject_has_permission(subject_id=SUBJECT_ID, node=PluginPN.TOWNY_CHAT_TOWN):
+if auth.subject_has_permission(s_id=SUBJECT_ID, node=PluginPN.TOWNY_CHAT_TOWN):
     print("Parent permission provided by the group.")
 
-if auth.subject_has_permission(
-    subject_id=SUBJECT_ID, node=PluginPN.TOWNY_WILD_DESTROY_X, payload="iron"
-):
+if auth.subject_has_permission(s_id=SUBJECT_ID, node=PluginPN.TOWNY_WILD_DESTROY_X, payload="iron"):
     print("Leaf w/ payload permission provided by the group")
 
 if auth.subject_has_permission(
-    subject_id=SUBJECT_ID, node=PluginPN.TOWNY_WILD_DESTROY_X, payload="diamond"
+    s_id=SUBJECT_ID, node=PluginPN.TOWNY_WILD_DESTROY_X, payload="diamond"
 ):
     print("Leaf w/ payload permission provided by the subject itself")

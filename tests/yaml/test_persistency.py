@@ -22,35 +22,35 @@ PLANT_BASED = "plant_based"
 def test_affiliation_persistency_yaml():
     auth = Authority()
 
-    auth.add_subject(subject_id=EGG)
-    auth.add_subject(subject_id=SPAM)
-    auth.add_subject(subject_id=HAM)
+    auth.add_subject(s_id=EGG)
+    auth.add_subject(s_id=SPAM)
+    auth.add_subject(s_id=HAM)
 
-    auth.add_subject(subject_id=ORANGE)
-    auth.add_subject(subject_id=APPLE)
-    auth.add_subject(subject_id=PEAR)
-    auth.add_subject(subject_id=BANANA)
+    auth.add_subject(s_id=ORANGE)
+    auth.add_subject(s_id=APPLE)
+    auth.add_subject(s_id=PEAR)
+    auth.add_subject(s_id=BANANA)
 
     auth.add_group(group_id=FOOD)
     auth.add_group(group_id=ANIMAL_BASED)
     auth.add_group(group_id=PLANT_BASED)
 
-    auth.group_add_subject(group_id=FOOD, subject_id=EGG)
-    auth.group_add_subject(group_id=FOOD, subject_id=SPAM)
-    auth.group_add_subject(group_id=FOOD, subject_id=HAM)
-    auth.group_add_subject(group_id=FOOD, subject_id=ORANGE)
-    auth.group_add_subject(group_id=FOOD, subject_id=APPLE)
-    auth.group_add_subject(group_id=FOOD, subject_id=PEAR)
-    auth.group_add_subject(group_id=FOOD, subject_id=BANANA)
+    auth.group_add_subject(group_id=FOOD, s_id=EGG)
+    auth.group_add_subject(group_id=FOOD, s_id=SPAM)
+    auth.group_add_subject(group_id=FOOD, s_id=HAM)
+    auth.group_add_subject(group_id=FOOD, s_id=ORANGE)
+    auth.group_add_subject(group_id=FOOD, s_id=APPLE)
+    auth.group_add_subject(group_id=FOOD, s_id=PEAR)
+    auth.group_add_subject(group_id=FOOD, s_id=BANANA)
 
-    auth.group_add_subject(group_id=ANIMAL_BASED, subject_id=EGG)
-    auth.group_add_subject(group_id=ANIMAL_BASED, subject_id=SPAM)
-    auth.group_add_subject(group_id=ANIMAL_BASED, subject_id=HAM)
+    auth.group_add_subject(group_id=ANIMAL_BASED, s_id=EGG)
+    auth.group_add_subject(group_id=ANIMAL_BASED, s_id=SPAM)
+    auth.group_add_subject(group_id=ANIMAL_BASED, s_id=HAM)
 
-    auth.group_add_subject(group_id=PLANT_BASED, subject_id=ORANGE)
-    auth.group_add_subject(group_id=PLANT_BASED, subject_id=APPLE)
-    auth.group_add_subject(group_id=PLANT_BASED, subject_id=PEAR)
-    auth.group_add_subject(group_id=PLANT_BASED, subject_id=BANANA)
+    auth.group_add_subject(group_id=PLANT_BASED, s_id=ORANGE)
+    auth.group_add_subject(group_id=PLANT_BASED, s_id=APPLE)
+    auth.group_add_subject(group_id=PLANT_BASED, s_id=PEAR)
+    auth.group_add_subject(group_id=PLANT_BASED, s_id=BANANA)
 
     serial_data = auth.save_to_str()
 
@@ -60,21 +60,21 @@ def test_affiliation_persistency_yaml():
     assert set(auth._subjects.keys()) == set(auth2._subjects.keys())
     assert set(auth._groups.keys()) == set(auth2._groups.keys())
 
-    assert auth._groups[FOOD]._subject_ids == auth2._groups[FOOD]._subject_ids
-    assert auth._groups[ANIMAL_BASED]._subject_ids == auth2._groups[ANIMAL_BASED]._subject_ids
-    assert auth._groups[PLANT_BASED]._subject_ids == auth2._groups[PLANT_BASED]._subject_ids
+    assert auth._groups[FOOD]._s_ids == auth2._groups[FOOD]._s_ids
+    assert auth._groups[ANIMAL_BASED]._s_ids == auth2._groups[ANIMAL_BASED]._s_ids
+    assert auth._groups[PLANT_BASED]._s_ids == auth2._groups[PLANT_BASED]._s_ids
 
 
 def test_permission_persistency_yaml():
     auth = Authority(nodes=TownyPermissionNode)
 
-    auth.add_subject(subject_id=EGG)
-    auth.subject_add_permission(subject_id=EGG, node=TownyPermissionNode.TOWNY_CHAT_TOWN)
+    auth.add_subject(s_id=EGG)
+    auth.subject_add_permission(s_id=EGG, node=TownyPermissionNode.TOWNY_CHAT_TOWN)
     auth.subject_add_permission(
-        subject_id=EGG, node=TownyPermissionNode.TOWNY_WILD_BUILD_X, payload="dirt"
+        s_id=EGG, node=TownyPermissionNode.TOWNY_WILD_BUILD_X, payload="dirt"
     )
 
-    auth.add_subject(subject_id=SPAM)
+    auth.add_subject(s_id=SPAM)
 
     auth.add_group(group_id=FOOD)
     auth.group_add_permission(group_id=FOOD, node=TownyPermissionNode.TOWNY_CHAT_NATION)
@@ -87,22 +87,17 @@ def test_permission_persistency_yaml():
     auth2 = Authority(nodes=TownyPermissionNode)
     auth2.load_from_str(serial_data=serial_data)
 
-    assert (
-        auth2.subject_has_permission(subject_id=EGG, node=TownyPermissionNode.TOWNY_CHAT_TOWN)
-        == True
-    )
-    assert (
-        auth2.subject_has_permission(subject_id=EGG, node=TownyPermissionNode.TOWNY_CHAT_) == False
-    )
+    assert auth2.subject_has_permission(s_id=EGG, node=TownyPermissionNode.TOWNY_CHAT_TOWN) == True
+    assert auth2.subject_has_permission(s_id=EGG, node=TownyPermissionNode.TOWNY_CHAT_) == False
     assert (
         auth2.subject_has_permission(
-            subject_id=EGG, node=TownyPermissionNode.TOWNY_WILD_BUILD_X, payload="dirt"
+            s_id=EGG, node=TownyPermissionNode.TOWNY_WILD_BUILD_X, payload="dirt"
         )
         == True
     )
     assert (
         auth2.subject_has_permission(
-            subject_id=EGG, node=TownyPermissionNode.TOWNY_WILD_BUILD_X, payload="stone"
+            s_id=EGG, node=TownyPermissionNode.TOWNY_WILD_BUILD_X, payload="stone"
         )
         == False
     )
