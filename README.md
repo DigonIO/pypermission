@@ -59,7 +59,9 @@ Install `PyPermission` from the `git`
 ```bash
 git clone https://gitlab.com/DigonIO/PyPermission.git
 cd PyPermission
-pip install -e .
+python -m venv venv  # optional
+source ./venv/bin/activate # optional
+pip install -e .[dev]
 ```
 
 ## Example code
@@ -143,6 +145,18 @@ if auth.subject_has_permission(
 ):
     print("Leaf w/ payload permission provided by the subject itself.")
 ```
+
+## Documentation
+
+The API documentation can either be viewed
+[online](https://pypermission.readthedocs.io/en/latest/readme.html)
+or generated using Sphinx with [numpydoc](https://numpydoc.readthedocs.io/en/latest/format.html)
+formatting. To build, run:
+
+```bash
+sphinx-build -b html doc/ doc/_build/html
+```
+
 
 ## Testing
 
