@@ -27,15 +27,15 @@ auth = Authority(nodes=BuildinPN)  # register buildin nodes
 auth.register_permission_nodes(nodes=PluginPN)  # method for plugin based node registration
 
 GROUP_ID: EntityID = "group_foo"  # the group ID can be str or int
-auth.add_group(group_id=GROUP_ID)
+auth.add_group(g_id=GROUP_ID)
 
-auth.group_add_permission(group_id=GROUP_ID, node=PluginPN.TOWNY_CHAT_)
-auth.group_add_permission(group_id=GROUP_ID, node=PluginPN.TOWNY_WILD_DESTROY_X, payload="iron")
-auth.group_add_permission(group_id=GROUP_ID, node=PluginPN.TOWNY_WILD_DESTROY_X, payload="gold")
+auth.group_add_permission(g_id=GROUP_ID, node=PluginPN.TOWNY_CHAT_)
+auth.group_add_permission(g_id=GROUP_ID, node=PluginPN.TOWNY_WILD_DESTROY_X, payload="iron")
+auth.group_add_permission(g_id=GROUP_ID, node=PluginPN.TOWNY_WILD_DESTROY_X, payload="gold")
 
 SUBJECT_ID: EntityID = "user_bar"  # the subject ID can be str or int
 auth.add_subject(s_id=SUBJECT_ID)
-auth.group_add_subject(group_id=GROUP_ID, s_id=SUBJECT_ID)
+auth.group_add_subject(g_id=GROUP_ID, s_id=SUBJECT_ID)
 
 auth.subject_add_permission(s_id=SUBJECT_ID, node=PluginPN.TOWNY_WILD_DESTROY_X, payload="diamond")
 

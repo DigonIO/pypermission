@@ -108,11 +108,11 @@ Create a group and add some permissions.
 
 ```py
 GROUP_ID: EntityID = "group_foo"  # str | int
-auth.add_group(group_id=GROUP_ID)
+auth.add_group(g_id=GROUP_ID)
 
-auth.group_add_permission(group_id=GROUP_ID, node=PluginPN.TOWNY_CHAT_)
-auth.group_add_permission(group_id=GROUP_ID, node=PluginPN.TOWNY_WILD_DESTROY_X, payload="iron")
-auth.group_add_permission(group_id=GROUP_ID, node=PluginPN.TOWNY_WILD_DESTROY_X, payload="gold")
+auth.group_add_permission(g_id=GROUP_ID, node=PluginPN.TOWNY_CHAT_)
+auth.group_add_permission(g_id=GROUP_ID, node=PluginPN.TOWNY_WILD_DESTROY_X, payload="iron")
+auth.group_add_permission(g_id=GROUP_ID, node=PluginPN.TOWNY_WILD_DESTROY_X, payload="gold")
 ```
 
 Create a subject, add it to a group and add a permission.
@@ -120,7 +120,7 @@ Create a subject, add it to a group and add a permission.
 ```py
 SUBJECT_ID: EntityID = "user_bar"  # str | int
 auth.add_subject(s_id=SUBJECT_ID)
-auth.group_add_subject(group_id=GROUP_ID, s_id=SUBJECT_ID)
+auth.group_add_subject(g_id=GROUP_ID, s_id=SUBJECT_ID)
 
 auth.subject_add_permission(
     s_id=SUBJECT_ID, node=PluginPN.TOWNY_WILD_DESTROY_X, payload="diamond"
