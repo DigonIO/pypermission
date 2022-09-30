@@ -26,14 +26,14 @@ class PluginPN(PermissionNode):
 auth = Authority(nodes=BuildinPN)  # register buildin nodes
 auth.register_permission_nodes(nodes=PluginPN)  # method for plugin based node registration
 
-GROUP_ID: EntityID = "group_foo"  # the group ID can be str or int
+GROUP_ID: EntityID = "group_foo"  # str | int
 auth.add_group(gid=GROUP_ID)
 
 auth.group_add_permission(gid=GROUP_ID, node=PluginPN.TOWNY_CHAT_)
 auth.group_add_permission(gid=GROUP_ID, node=PluginPN.TOWNY_WILD_DESTROY_X, payload="iron")
 auth.group_add_permission(gid=GROUP_ID, node=PluginPN.TOWNY_WILD_DESTROY_X, payload="gold")
 
-SUBJECT_ID: EntityID = "user_bar"  # the subject ID can be str or int
+SUBJECT_ID: EntityID = "user_bar"  # str | int
 auth.add_subject(sid=SUBJECT_ID)
 auth.group_add_subject(gid=GROUP_ID, sid=SUBJECT_ID)
 

@@ -123,9 +123,7 @@ SUBJECT_ID: EntityID = "user_bar"  # str | int
 auth.add_subject(sid=SUBJECT_ID)
 auth.group_add_subject(gid=GROUP_ID, sid=SUBJECT_ID)
 
-auth.subject_add_permission(
-    sid=SUBJECT_ID, node=PluginPN.TOWNY_WILD_DESTROY_X, payload="diamond"
-)
+auth.subject_add_permission(sid=SUBJECT_ID, node=PluginPN.TOWNY_WILD_DESTROY_X, payload="diamond")
 ```
 
 Now check if a subject has a desired permission.
@@ -134,15 +132,13 @@ Now check if a subject has a desired permission.
 if auth.subject_has_permission(sid=SUBJECT_ID, node=PluginPN.TOWNY_CHAT_TOWN):
     print("Parent permission provided by the group.")
 
-if auth.subject_has_permission(
-    sid=SUBJECT_ID, node=PluginPN.TOWNY_WILD_DESTROY_X, payload="iron"
-):
-    print("Leaf w/ payload permission provided by the group.")
+if auth.subject_has_permission(sid=SUBJECT_ID, node=PluginPN.TOWNY_WILD_DESTROY_X, payload="iron"):
+    print("Leaf w/ payload permission provided by the group")
 
 if auth.subject_has_permission(
     sid=SUBJECT_ID, node=PluginPN.TOWNY_WILD_DESTROY_X, payload="diamond"
 ):
-    print("Leaf w/ payload permission provided by the subject itself.")
+    print("Leaf w/ payload permission provided by the subject itself")
 ```
 
 ## Documentation
