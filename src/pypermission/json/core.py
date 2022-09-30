@@ -121,7 +121,7 @@ class Authority(_Authority):
         self._groups = {}
         self._data_file = data_file
 
-    def save_to_file(self, path: Path | str | None):
+    def save_to_file(self, path: Path | str | None = None):
         """Save the current state to file formatted as JSON."""
         if not path:
             path = self._data_file
@@ -129,10 +129,10 @@ class Authority(_Authority):
             raise MissingPathError
 
         serial_data = self.save_to_str()
-        with open(path, "r") as handle:
+        with open(path, "w") as handle:
             handle.write(serial_data)
 
-    def load_from_file(self, path: Path | str | None) -> None:
+    def load_from_file(self, path: Path | str | None = None) -> None:
         """Load a previous state from a JSON formatted file."""
         if not path:
             path = self._data_file
