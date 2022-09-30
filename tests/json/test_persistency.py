@@ -28,26 +28,26 @@ def test_affiliation_persistency_json():
     auth.add_subject(s_id=PEAR)
     auth.add_subject(s_id=BANANA)
 
-    auth.add_group(g_id=FOOD)
-    auth.add_group(g_id=ANIMAL_BASED)
-    auth.add_group(g_id=PLANT_BASED)
+    auth.add_group(gid=FOOD)
+    auth.add_group(gid=ANIMAL_BASED)
+    auth.add_group(gid=PLANT_BASED)
 
-    auth.group_add_subject(g_id=FOOD, s_id=EGG)
-    auth.group_add_subject(g_id=FOOD, s_id=SPAM)
-    auth.group_add_subject(g_id=FOOD, s_id=HAM)
-    auth.group_add_subject(g_id=FOOD, s_id=ORANGE)
-    auth.group_add_subject(g_id=FOOD, s_id=APPLE)
-    auth.group_add_subject(g_id=FOOD, s_id=PEAR)
-    auth.group_add_subject(g_id=FOOD, s_id=BANANA)
+    auth.group_add_subject(gid=FOOD, s_id=EGG)
+    auth.group_add_subject(gid=FOOD, s_id=SPAM)
+    auth.group_add_subject(gid=FOOD, s_id=HAM)
+    auth.group_add_subject(gid=FOOD, s_id=ORANGE)
+    auth.group_add_subject(gid=FOOD, s_id=APPLE)
+    auth.group_add_subject(gid=FOOD, s_id=PEAR)
+    auth.group_add_subject(gid=FOOD, s_id=BANANA)
 
-    auth.group_add_subject(g_id=ANIMAL_BASED, s_id=EGG)
-    auth.group_add_subject(g_id=ANIMAL_BASED, s_id=SPAM)
-    auth.group_add_subject(g_id=ANIMAL_BASED, s_id=HAM)
+    auth.group_add_subject(gid=ANIMAL_BASED, s_id=EGG)
+    auth.group_add_subject(gid=ANIMAL_BASED, s_id=SPAM)
+    auth.group_add_subject(gid=ANIMAL_BASED, s_id=HAM)
 
-    auth.group_add_subject(g_id=PLANT_BASED, s_id=ORANGE)
-    auth.group_add_subject(g_id=PLANT_BASED, s_id=APPLE)
-    auth.group_add_subject(g_id=PLANT_BASED, s_id=PEAR)
-    auth.group_add_subject(g_id=PLANT_BASED, s_id=BANANA)
+    auth.group_add_subject(gid=PLANT_BASED, s_id=ORANGE)
+    auth.group_add_subject(gid=PLANT_BASED, s_id=APPLE)
+    auth.group_add_subject(gid=PLANT_BASED, s_id=PEAR)
+    auth.group_add_subject(gid=PLANT_BASED, s_id=BANANA)
 
     serial_data = auth.save_to_str()
 
@@ -73,10 +73,10 @@ def test_permission_persistency_json():
 
     auth.add_subject(s_id=SPAM)
 
-    auth.add_group(g_id=FOOD)
-    auth.group_add_permission(g_id=FOOD, node=TownyPermissionNode.TOWNY_CHAT_NATION)
+    auth.add_group(gid=FOOD)
+    auth.group_add_permission(gid=FOOD, node=TownyPermissionNode.TOWNY_CHAT_NATION)
     auth.group_add_permission(
-        g_id=FOOD, node=TownyPermissionNode.TOWNY_WILD_DESTROY_X, payload="iron"
+        gid=FOOD, node=TownyPermissionNode.TOWNY_WILD_DESTROY_X, payload="iron"
     )
 
     serial_data = auth.save_to_str()
@@ -99,17 +99,17 @@ def test_permission_persistency_json():
         == False
     )
 
-    assert auth2.group_has_permission(g_id=FOOD, node=TownyPermissionNode.TOWNY_CHAT_NATION) == True
-    assert auth2.group_has_permission(g_id=FOOD, node=TownyPermissionNode.TOWNY_CHAT_TOWN) == False
+    assert auth2.group_has_permission(gid=FOOD, node=TownyPermissionNode.TOWNY_CHAT_NATION) == True
+    assert auth2.group_has_permission(gid=FOOD, node=TownyPermissionNode.TOWNY_CHAT_TOWN) == False
     assert (
         auth2.group_has_permission(
-            g_id=FOOD, node=TownyPermissionNode.TOWNY_WILD_DESTROY_X, payload="iron"
+            gid=FOOD, node=TownyPermissionNode.TOWNY_WILD_DESTROY_X, payload="iron"
         )
         == True
     )
     assert (
         auth2.group_has_permission(
-            g_id=FOOD, node=TownyPermissionNode.TOWNY_WILD_DESTROY_X, payload="gold"
+            gid=FOOD, node=TownyPermissionNode.TOWNY_WILD_DESTROY_X, payload="gold"
         )
         == False
     )
@@ -118,12 +118,12 @@ def test_permission_persistency_json():
 def test_grouped_groups_json():
     auth = Authority()
 
-    auth.add_group(g_id=FOOD)
-    auth.add_group(g_id=ANIMAL_BASED)
-    auth.add_group(g_id=PLANT_BASED)
+    auth.add_group(gid=FOOD)
+    auth.add_group(gid=ANIMAL_BASED)
+    auth.add_group(gid=PLANT_BASED)
 
-    auth.group_add_group(g_id=ANIMAL_BASED, parent_id=FOOD)
-    auth.group_add_group(g_id=PLANT_BASED, parent_id=FOOD)
+    auth.group_add_group(gid=ANIMAL_BASED, parent_id=FOOD)
+    auth.group_add_group(gid=PLANT_BASED, parent_id=FOOD)
 
     serial_data = auth.save_to_str()
 

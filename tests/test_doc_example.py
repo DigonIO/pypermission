@@ -173,19 +173,19 @@ class BankAPI:
         raise NoPermissionError
 
     def prepare_rbac_setup(self):
-        self._auth.add_group(g_id=GROUP_ADMIN)
-        self._auth.add_group(g_id=GROUP_BANKER)
-        self._auth.add_group(g_id=GROUP_CUSTOMER)
+        self._auth.add_group(gid=GROUP_ADMIN)
+        self._auth.add_group(gid=GROUP_BANKER)
+        self._auth.add_group(gid=GROUP_CUSTOMER)
 
-        self._auth.group_add_permission(g_id=GROUP_ADMIN, node=self._auth.root_node())
+        self._auth.group_add_permission(gid=GROUP_ADMIN, node=self._auth.root_node())
 
-        self._auth.group_add_permission(g_id=GROUP_BANKER, node=NODE.ACCOUNT_CREATE)
-        self._auth.group_add_permission(g_id=GROUP_BANKER, node=NODE.ACCOUNT_GET_)
-        self._auth.group_add_permission(g_id=GROUP_BANKER, node=NODE.ACCOUNT_LIST_)
-        self._auth.group_add_permission(g_id=GROUP_BANKER, node=NODE.ACCOUNT_DELETE)
+        self._auth.group_add_permission(gid=GROUP_BANKER, node=NODE.ACCOUNT_CREATE)
+        self._auth.group_add_permission(gid=GROUP_BANKER, node=NODE.ACCOUNT_GET_)
+        self._auth.group_add_permission(gid=GROUP_BANKER, node=NODE.ACCOUNT_LIST_)
+        self._auth.group_add_permission(gid=GROUP_BANKER, node=NODE.ACCOUNT_DELETE)
 
-        self._auth.group_add_permission(g_id=GROUP_CUSTOMER, node=NODE.ACCOUNT_GET_OWN)
-        self._auth.group_add_permission(g_id=GROUP_CUSTOMER, node=NODE.ACCOUNT_LIST_OWN)
+        self._auth.group_add_permission(gid=GROUP_CUSTOMER, node=NODE.ACCOUNT_GET_OWN)
+        self._auth.group_add_permission(gid=GROUP_CUSTOMER, node=NODE.ACCOUNT_LIST_OWN)
 
         user_admin = User(username=USER_ADMIN, auth=self._auth)
         user_banker = User(username=USER_BANKER, auth=self._auth)
@@ -195,9 +195,9 @@ class BankAPI:
         self._users[user_banker.username] = user_banker
         self._users[user_customer.username] = user_customer
 
-        self._auth.group_add_subject(g_id=GROUP_ADMIN, s_id=user_admin.username)
-        self._auth.group_add_subject(g_id=GROUP_BANKER, s_id=user_banker.username)
-        self._auth.group_add_subject(g_id=GROUP_CUSTOMER, s_id=user_customer.username)
+        self._auth.group_add_subject(gid=GROUP_ADMIN, s_id=user_admin.username)
+        self._auth.group_add_subject(gid=GROUP_BANKER, s_id=user_banker.username)
+        self._auth.group_add_subject(gid=GROUP_CUSTOMER, s_id=user_customer.username)
 
 
 bank_api = BankAPI()
