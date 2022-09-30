@@ -28,7 +28,6 @@ REQUIRE_DOC = [
 REQUIRE_TEST = [
     "pytest==6.2.5",
     "pytest-cov==3.0.0",
-    "pytest-asyncio==0.17.1",
     "coverage==6.1.1",
 ]
 
