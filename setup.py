@@ -10,20 +10,22 @@ with open("src/pypermission/__init__.py", "r") as file:
 with open("README.md", encoding="utf-8") as f:
     LONG_DESCRIPTION = f.read()
 
+DEP_NUMPY_DOC = [
+    "numpydoc==1.1.0",
+]
+
 REQUIRE_YAML = [
     "PyYAML>=6.0",
 ]
 
 
 REQUIRE_DOC = [
-    "pydocstyle==6.1.1",
     "Sphinx==4.5.0",
-    "numpydoc==1.1.0",
     "mistune==0.8.4",
     "m2r2==0.2.7",
     "docutils<=0.16",
     "furo==2022.1.2",
-]
+] + DEP_NUMPY_DOC
 
 REQUIRE_TEST = [
     "pytest==6.2.5",
@@ -35,9 +37,10 @@ REQUIRE_LINT = [
     "mypy==0.942",
     "bandit==1.7.1",
     "pylint==2.7.4",
+    "pydocstyle==6.1.1",
     # below typing stubs
     "types-PyYAML>=6.0.12",
-]
+] + DEP_NUMPY_DOC
 
 EXTRAS_REQUIRE = {
     "yaml": REQUIRE_YAML,
