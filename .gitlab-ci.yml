@@ -55,7 +55,7 @@ pytest_3_10_7:
   image: "python:3.10.7-alpine3.16"
   coverage: '/(?i)total.*? (100(?:\.0+)?\%|[1-9]?\d(?:\.\d+)?\%)$/'
   script:
-    - pip install .[test]
+    - pip install -e .[test]
     - pytest --cov=src/ tests/
 
 pydoctest_3_10_7:
