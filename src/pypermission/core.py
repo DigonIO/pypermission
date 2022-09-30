@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from abc import ABC
 from enum import Enum
+from typing import cast
 
 from pypermission.error import PermissionParsingError
 
@@ -37,7 +38,7 @@ class Permission:
         self._is_leaf = False
 
     @property
-    def node(self) -> str:
+    def node(self) -> PermissionNode:
         return self._node
 
     @property
@@ -65,7 +66,7 @@ class Permission:
         return self._is_leaf
 
     def __str__(self) -> str:
-        return self._node.value
+        return cast(str, self._node.value)  # NOTE would be nice without casting
 
 
 PermissionMap = dict[Permission, set[str]]

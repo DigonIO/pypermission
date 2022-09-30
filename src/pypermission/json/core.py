@@ -28,8 +28,8 @@ class NonSerialGroup(TypedDict):
 class NonSerialData(TypedDict):
     groups: dict[str, NonSerialGroup]
     subjects: dict[str, list[str]]
-    g_id_types: dict[str, str]
-    s_id_types: dict[str, str]
+    g_id_types: OutIDTypeDict
+    s_id_types: OutIDTypeDict
 
 
 class PermissionableEntity:
@@ -113,7 +113,7 @@ class Authority(_Authority):
     _data_file: Path | str | None
 
     def __init__(
-        self, *, nodes: type[Enum] | None = None, data_file: Path | str | None = None
+        self, *, nodes: type[PermissionNode] | None = None, data_file: Path | str | None = None
     ) -> None:
         super().__init__(nodes=nodes)
 
@@ -468,7 +468,7 @@ class Authority(_Authority):
 
     def _recursive_group_has_permission(
         self, group: Group, permission: Permission, payload: str | None
-    ):
+    ) -> bool:
         """Recursively check whether the group or one of its parents has the perm searched for."""
         if group.has_permission(permission=permission, payload=payload):
             return True
