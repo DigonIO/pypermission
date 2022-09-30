@@ -9,4 +9,5 @@
     :caption: Table of Contents
 
     readme
+    examples
     guides

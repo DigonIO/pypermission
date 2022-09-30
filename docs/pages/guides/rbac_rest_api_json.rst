@@ -1,16 +1,26 @@
 
+==================
 RBAC for REST APIs
 ==================
 
-In diesem Guide schauen wir uns an wie man "role based access control" (RBAC) mit Hilfe von
+In diesem Guide lernen wir wie man "role based access control" (RBAC) mit Hilfe von
 PyPermission implementieren kann.
 Dazu verwenden wir Authority die JSON für die Persistenz verwendet.
 Alternativ kann auch die Authority verwendet werden die YAML verwendet, denn ihre API ist die Selbe.
+
 
 Um den Guide anschaulich zu gestalten entwickeln wir einen naiven Dummy für die REST API einer Bank.
 Dabei beschränken wir uns auf den Teil der API, der sich um die Bankkontoverwaltung kümmert.
 Wir nehmen weiter an, dass es drei Nutzerarten für die API gibt, Admins, Bänker und Kunden.
 Aufgrund dieser Gruppenstruktur entscheiden wir uns dazu RBAC zu implementiert.
+
+
+
+
+
+
+
+
 
 Zunächst importieren wir alle nötigen Objekte aus den entsprechenden Modulen.
 
@@ -26,6 +36,16 @@ Hier ist zu beachten, dass ein User der eine parent permission node hat, ebenfal
 child permissions hat.
 Am Ende definieren wir noch eine Exception für die Bank API, die raised wird, falls ein User
 nicht die Rechte für einen gewünschten request hat.
+
+In order to define the relevant permissions of a Accountmanagement API we define a class
+by inheriting from the PermissionNode class.
+The permission nodes are implemented as enum values.
+Keep in mind, that a user with a parent permission node also has all child permissions.
+Additionally we define a exception which is raised if a user does not have the needed permission
+for his request.
+
+
+
 
 .. code-block:: python
 
@@ -48,6 +68,8 @@ nicht die Rechte für einen gewünschten request hat.
 Wir benötigen eine Möglichkeit um Kontonummern zu generieren.
 Dazu schreiben wir uns eine kleine Helferfunktion.
 
+In order to generate Account numbers we define a helper function: 
+
 .. code-block:: python
 
     # global variable to store the next account number
@@ -65,6 +87,8 @@ In unserm Beispiel soll es User und Usergruppen geben.
 Dazu benötigen wir Usernamen und IDs um die Gruppen zu identifizieren.
 Diese Werte definieren wir nun global.
 
+
+
 .. code-block:: python
 
     USER_ADMIN = "Georg Schmied"
@@ -78,6 +102,10 @@ Diese Werte definieren wir nun global.
 Ein Bankkonto wird intern in der Bank API als Klasse repräsentiert.
 Da solche Klassen typischerweise mehr Informationen beinhaltet als man über die REST API versenden
 möchte, definieren wir noch beispielhaft ein Response Objekte.
+
+Internally, a bank account is represented as a class.
+Usually classes contain more information than those one wants to send via the REST API,
+therefore we define a response object.
 
 .. code-block:: python
 
@@ -115,8 +143,13 @@ möchte, definieren wir noch beispielhaft ein Response Objekte.
 
 Genau wie für das Konto, so definieren wir klasse für den User.
 Die Userklasse erleichtert uns die Zuordnung von User und Bankkonto.
-Zusätzlich weißt der User eine Methode auf, mit welcher man einfach die Berechtigungen des Users
+Zusätzlich weist der User eine Methode auf, mit welcher man einfach die Berechtigungen des Users
 überprüfen kann.
+
+The user class is build resembling the bank account class.
+It facilitates the assignment of the user to his bank account.
+Furthermore the user class contains a method which lists all permissions of a user.
+
 
 .. code-block:: python
 
@@ -158,10 +191,13 @@ verwenden möchte.
 Im Anschluss wird geprüft ob der User die Berechtigung zu dieser Funktion hat.
 Dazu besitzt die Bank API eine Instanz der Authority welche als zentrale Anlaufstelle für alle
 permission relevanten Prozesse fungiert.
-Die Methode `BankAPI.prepare_rbac_setup` ist in diesem Beispiel gedacht, den State der API
+Die Methode ``BankAPI.prepare_rbac_setup`` ist in diesem Beispiel gedacht, den State der API
 zu inizieren.
 Die dort simulierte Businesslogik für in einem realen Fall, in anderen Teilen der Bank API
 umgesetzt werden.
+
+
+
 
 .. code-block:: python
 
