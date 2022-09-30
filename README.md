@@ -1,8 +1,10 @@
-# PyPermission
+<h1 align="center">
+  <img alt="PyPermission" src="./docs/_assets/logo_name.svg" width="60%">
+</h1>
 
-<p>
+<p >
     A node based permission engine for python.
-    Inspired by the permission system used in the `Bukkit` Minecraft server mod project.
+    Inspired by the permission system used in the Bukkit Minecraft server mod project.
 </p>
 
 [![repository](https://img.shields.io/badge/src-GitLab-orange)](https://gitlab.com/DigonIO/scheduler)
@@ -20,8 +22,8 @@
 
 ## Features
 
-+ RBAC
-+ UBAC
++ RBAC: Role based access control [(Guide)](https://pypermission.readthedocs.io/en/latest/pages/guides/rbac_rest_api_json.html)
++ UBAC: User based access control
 + Tree based permissions nodes
   + Parent nodes
   + Leaf nodes
@@ -107,38 +109,38 @@ Create a group and add some permissions.
 
 ```py
 GROUP_ID: EntityID = "group_foo"  # str | int
-auth.add_group(g_id=GROUP_ID)
+auth.add_group(gid=GROUP_ID)
 
-auth.group_add_permission(g_id=GROUP_ID, node=PluginPN.TOWNY_CHAT_)
-auth.group_add_permission(g_id=GROUP_ID, node=PluginPN.TOWNY_WILD_DESTROY_X, payload="iron")
-auth.group_add_permission(g_id=GROUP_ID, node=PluginPN.TOWNY_WILD_DESTROY_X, payload="gold")
+auth.group_add_permission(gid=GROUP_ID, node=PluginPN.TOWNY_CHAT_)
+auth.group_add_permission(gid=GROUP_ID, node=PluginPN.TOWNY_WILD_DESTROY_X, payload="iron")
+auth.group_add_permission(gid=GROUP_ID, node=PluginPN.TOWNY_WILD_DESTROY_X, payload="gold")
 ```
 
 Create a subject, add it to a group and add a permission.
 
 ```py
 SUBJECT_ID: EntityID = "user_bar"  # str | int
-auth.add_subject(s_id=SUBJECT_ID)
-auth.group_add_subject(g_id=GROUP_ID, s_id=SUBJECT_ID)
+auth.add_subject(sid=SUBJECT_ID)
+auth.group_add_subject(gid=GROUP_ID, sid=SUBJECT_ID)
 
 auth.subject_add_permission(
-    s_id=SUBJECT_ID, node=PluginPN.TOWNY_WILD_DESTROY_X, payload="diamond"
+    sid=SUBJECT_ID, node=PluginPN.TOWNY_WILD_DESTROY_X, payload="diamond"
 )
 ```
 
 Now check if a subject has a desired permission.
 
 ```py
-if auth.subject_has_permission(s_id=SUBJECT_ID, node=PluginPN.TOWNY_CHAT_TOWN):
+if auth.subject_has_permission(sid=SUBJECT_ID, node=PluginPN.TOWNY_CHAT_TOWN):
     print("Parent permission provided by the group.")
 
 if auth.subject_has_permission(
-    s_id=SUBJECT_ID, node=PluginPN.TOWNY_WILD_DESTROY_X, payload="iron"
+    sid=SUBJECT_ID, node=PluginPN.TOWNY_WILD_DESTROY_X, payload="iron"
 ):
     print("Leaf w/ payload permission provided by the group.")
 
 if auth.subject_has_permission(
-    s_id=SUBJECT_ID, node=PluginPN.TOWNY_WILD_DESTROY_X, payload="diamond"
+    sid=SUBJECT_ID, node=PluginPN.TOWNY_WILD_DESTROY_X, payload="diamond"
 ):
     print("Leaf w/ payload permission provided by the subject itself.")
 ```

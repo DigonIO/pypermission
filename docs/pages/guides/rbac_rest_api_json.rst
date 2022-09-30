@@ -163,7 +163,7 @@ Furthermore the user class contains a method which lists all permissions of a us
             self._auth = auth
             self._accounts = {}
 
-            auth.add_subject(s_id=username)
+            auth.add_subject(sid=username)
 
         @property
         def username(self) -> str:
@@ -174,7 +174,7 @@ Furthermore the user class contains a method which lists all permissions of a us
             return self._accounts
 
         def has_permission(self, node: PermissionNode, payload: str | None = None) -> bool:
-            self._auth.subject_has_permission(s_id=self._username, node=node, payload=payload)
+            self._auth.subject_has_permission(sid=self._username, node=node, payload=payload)
 
         def list_account_responses(self) -> list[AccountResponse]:
             return [response_factory(acc=acc) for num, acc in self._accounts]
@@ -270,19 +270,19 @@ umgesetzt werden.
             raise NoPermissionError
 
         def prepare_rbac_setup(self):
-            self._auth.add_group(g_id=GROUP_ADMIN)
-            self._auth.add_group(g_id=GROUP_BANKER)
-            self._auth.add_group(g_id=GROUP_CUSTOMER)
+            self._auth.add_group(gid=GROUP_ADMIN)
+            self._auth.add_group(gid=GROUP_BANKER)
+            self._auth.add_group(gid=GROUP_CUSTOMER)
 
-            self._auth.group_add_permission(g_id=GROUP_ADMIN, node=self._auth.root_node())
+            self._auth.group_add_permission(gid=GROUP_ADMIN, node=self._auth.root_node())
 
-            self._auth.group_add_permission(g_id=GROUP_BANKER, node=NODE.ACCOUNT_CREATE)
-            self._auth.group_add_permission(g_id=GROUP_BANKER, node=NODE.ACCOUNT_GET_)
-            self._auth.group_add_permission(g_id=GROUP_BANKER, node=NODE.ACCOUNT_LIST_)
-            self._auth.group_add_permission(g_id=GROUP_BANKER, node=NODE.ACCOUNT_DELETE)
+            self._auth.group_add_permission(gid=GROUP_BANKER, node=NODE.ACCOUNT_CREATE)
+            self._auth.group_add_permission(gid=GROUP_BANKER, node=NODE.ACCOUNT_GET_)
+            self._auth.group_add_permission(gid=GROUP_BANKER, node=NODE.ACCOUNT_LIST_)
+            self._auth.group_add_permission(gid=GROUP_BANKER, node=NODE.ACCOUNT_DELETE)
 
-            self._auth.group_add_permission(g_id=GROUP_CUSTOMER, node=NODE.ACCOUNT_GET_OWN)
-            self._auth.group_add_permission(g_id=GROUP_CUSTOMER, node=NODE.ACCOUNT_LIST_OWN)
+            self._auth.group_add_permission(gid=GROUP_CUSTOMER, node=NODE.ACCOUNT_GET_OWN)
+            self._auth.group_add_permission(gid=GROUP_CUSTOMER, node=NODE.ACCOUNT_LIST_OWN)
 
             user_admin = User(username=USER_ADMIN, auth=self._auth)
             user_banker = User(username=USER_BANKER, auth=self._auth)
@@ -292,6 +292,6 @@ umgesetzt werden.
             self._users[user_banker.username] = user_banker
             self._users[user_customer.username] = user_customer
 
-            self._auth.group_add_subject(g_id=GROUP_ADMIN, s_id=user_admin.username)
-            self._auth.group_add_subject(g_id=GROUP_BANKER, s_id=user_banker.username)
-            self._auth.group_add_subject(g_id=GROUP_CUSTOMER, s_id=user_customer.username)
+            self._auth.group_add_subject(gid=GROUP_ADMIN, sid=user_admin.username)
+            self._auth.group_add_subject(gid=GROUP_BANKER, sid=user_banker.username)
+            self._auth.group_add_subject(gid=GROUP_CUSTOMER, sid=user_customer.username)
