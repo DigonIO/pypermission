@@ -74,6 +74,7 @@ html_theme = "furo"
 html_theme_path = [
     "_themes",
 ]
+html_logo = "./_assets/logo.svg"
 
 
 # Add any paths that contain custom static files (such as style sheets) here,
