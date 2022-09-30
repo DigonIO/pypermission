@@ -1,6 +1,6 @@
 from setuptools import setup
 
-with open("scheduler/__init__.py", "r") as file:
+with open("src/pypermission/__init__.py", "r") as file:
     for line in file:
         if "__version__" in line:
             version = line.split('"')[1]
