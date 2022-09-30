@@ -37,8 +37,6 @@ REQUIRE_LINT = [
     "pylint==2.7.4",
 ]
 
-REQUIRE_DEV = REQUIRE_YAML + REQUIRE_DOC + REQUIRE_TEST + REQUIRE_LINT
-
 setup(
     name="PyPermission",
     version=version,
@@ -62,10 +60,10 @@ setup(
     python_requires=">=3.10",
     extras_require={
         "yaml": REQUIRE_YAML,
-        "doc": REQUIRE_DOC,
-        "dev": REQUIRE_DEV,
-        "test": REQUIRE_TEST,
-        "lint": REQUIRE_LINT,
+        "doc": REQUIRE_YAML + REQUIRE_DOC,
+        "dev": REQUIRE_YAML + REQUIRE_DOC + REQUIRE_TEST + REQUIRE_LINT,
+        "test": REQUIRE_YAML + REQUIRE_TEST,
+        "lint": REQUIRE_YAML + REQUIRE_LINT,
     },
     packages=["pypermission"],
     package_dir={"": "src"},
