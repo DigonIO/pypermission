@@ -409,15 +409,15 @@ class Authority(_Authority):
         group.s_ids.add(s_id)
         subject.gids.add(gid)
 
-    def group_add_group(self, *, gid: EntityID, parent_id: EntityID) -> None:
+    def group_add_group(self, *, gid: EntityID, pid: EntityID) -> None:
         """Add a group to a parent group to inherit all its permissions."""
         child = self._get_group(gid=gid)
-        parent = self._get_group(gid=parent_id)
+        parent = self._get_group(gid=pid)
 
         self._detect_group_cycle(parent=parent, child_id=gid)
 
         parent.child_ids.add(gid)
-        child.parent_ids.add(parent_id)
+        child.parent_ids.add(pid)
 
     def group_rem_subject(self, *, gid: EntityID, s_id: EntityID) -> None:
         """Remove a subject from a group."""
@@ -427,13 +427,13 @@ class Authority(_Authority):
         group.s_ids.remove(s_id)
         subject.gids.remove(gid)
 
-    def group_rem_group(self, *, parent_id: EntityID, child_id: EntityID) -> None:
+    def group_rem_group(self, *, pid: EntityID, child_id: EntityID) -> None:
         """Remove a group from a group."""
-        parent = self._get_group(gid=parent_id)
+        parent = self._get_group(gid=pid)
         child = self._get_group(gid=child_id)
 
         parent.child_ids.remove(child_id)
-        child.parent_ids.remove(parent_id)
+        child.parent_ids.remove(pid)
 
     def _get_subject(self, *, s_id: EntityID) -> Subject:
         """Just a simple wrapper to avoid some boilerplate code while getting a subject."""

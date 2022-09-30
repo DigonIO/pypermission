@@ -122,8 +122,8 @@ def test_grouped_groups_json():
     auth.add_group(gid=ANIMAL_BASED)
     auth.add_group(gid=PLANT_BASED)
 
-    auth.group_add_group(gid=ANIMAL_BASED, parent_id=FOOD)
-    auth.group_add_group(gid=PLANT_BASED, parent_id=FOOD)
+    auth.group_add_group(gid=ANIMAL_BASED, pid=FOOD)
+    auth.group_add_group(gid=PLANT_BASED, pid=FOOD)
 
     serial_data = auth.save_to_str()
 
