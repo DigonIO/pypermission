@@ -303,6 +303,14 @@ class Authority(_Authority):
         for sid in group.sids:
             self._subjects[sid].gids.remove(gid)
 
+    def get_subjects(self) -> set[EntityID]:
+        """Get the IDs for all known subjects."""
+        return set(self._subjects.keys())
+
+    def get_groups(self) -> set[EntityID]:
+        """Get the IDs for all known groups."""
+        return set(self._groups.keys())
+
     def subject_has_permission(
         self, *, sid: EntityID, node: PermissionNode, payload: str | None = None
     ) -> bool:
