@@ -181,17 +181,17 @@ def test_grouped_groups():
     auth.add_group(g_id=PEAR)
     auth.add_group(g_id=BANANA)
 
-    auth.group_add_group(parent_id=FOOD, child_id=ANIMAL_BASED)
-    auth.group_add_group(parent_id=FOOD, child_id=PLANT_BASED)
+    auth.group_add_group(parent_id=FOOD, g_id=ANIMAL_BASED)
+    auth.group_add_group(parent_id=FOOD, g_id=PLANT_BASED)
 
-    auth.group_add_group(parent_id=ANIMAL_BASED, child_id=EGG)
-    auth.group_add_group(parent_id=ANIMAL_BASED, child_id=SPAM)
-    auth.group_add_group(parent_id=ANIMAL_BASED, child_id=HAM)
+    auth.group_add_group(parent_id=ANIMAL_BASED, g_id=EGG)
+    auth.group_add_group(parent_id=ANIMAL_BASED, g_id=SPAM)
+    auth.group_add_group(parent_id=ANIMAL_BASED, g_id=HAM)
 
-    auth.group_add_group(parent_id=PLANT_BASED, child_id=ORANGE)
-    auth.group_add_group(parent_id=PLANT_BASED, child_id=APPLE)
-    auth.group_add_group(parent_id=PLANT_BASED, child_id=PEAR)
-    auth.group_add_group(parent_id=PLANT_BASED, child_id=BANANA)
+    auth.group_add_group(parent_id=PLANT_BASED, g_id=ORANGE)
+    auth.group_add_group(parent_id=PLANT_BASED, g_id=APPLE)
+    auth.group_add_group(parent_id=PLANT_BASED, g_id=PEAR)
+    auth.group_add_group(parent_id=PLANT_BASED, g_id=BANANA)
 
     assert len(auth._groups[FOOD].child_ids) == 2
     assert len(auth._groups[PLANT_BASED].child_ids) == 4
@@ -209,11 +209,11 @@ def test_cyclic_groups():
     auth.add_group(g_id=ANIMAL_BASED)
     auth.add_group(g_id=PLANT_BASED)
 
-    auth.group_add_group(parent_id=FOOD, child_id=ANIMAL_BASED)
-    auth.group_add_group(parent_id=ANIMAL_BASED, child_id=PLANT_BASED)
+    auth.group_add_group(parent_id=FOOD, g_id=ANIMAL_BASED)
+    auth.group_add_group(parent_id=ANIMAL_BASED, g_id=PLANT_BASED)
 
     with pytest.raises(GroupCycleError):
-        auth.group_add_group(parent_id=PLANT_BASED, child_id=FOOD)
+        auth.group_add_group(parent_id=PLANT_BASED, g_id=FOOD)
 
 
 def test_recursive_permissions():
@@ -223,8 +223,8 @@ def test_recursive_permissions():
     auth.add_group(g_id=ANIMAL_BASED)
     auth.add_group(g_id=PLANT_BASED)
 
-    auth.group_add_group(parent_id=FOOD, child_id=ANIMAL_BASED)
-    auth.group_add_group(parent_id=ANIMAL_BASED, child_id=PLANT_BASED)
+    auth.group_add_group(parent_id=FOOD, g_id=ANIMAL_BASED)
+    auth.group_add_group(parent_id=ANIMAL_BASED, g_id=PLANT_BASED)
 
     auth.group_add_permission(g_id=FOOD, node=TownyPermissionNode.TOWNY_CHAT_)
 

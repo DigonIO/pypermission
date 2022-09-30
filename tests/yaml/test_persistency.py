@@ -125,8 +125,8 @@ def test_grouped_groups_yaml():
     auth.add_group(g_id=ANIMAL_BASED)
     auth.add_group(g_id=PLANT_BASED)
 
-    auth.group_add_group(parent_id=FOOD, child_id=ANIMAL_BASED)
-    auth.group_add_group(parent_id=FOOD, child_id=PLANT_BASED)
+    auth.group_add_group(g_id=ANIMAL_BASED, parent_id=FOOD)
+    auth.group_add_group(g_id=PLANT_BASED, parent_id=FOOD)
 
     serial_data = auth.save_to_str()
 

@@ -404,21 +404,21 @@ class Authority(_Authority):
         return group.parent_ids.copy()
 
     def group_add_subject(self, *, g_id: EntityID, s_id: EntityID) -> None:
-        """Add a subject to a group."""
+        """Add a subject to a group to inherit all its permissions."""
         group = self._get_group(g_id=g_id)
         subject = self._get_subject(s_id=s_id)
 
         group.s_ids.add(s_id)
         subject.g_ids.add(g_id)
 
-    def group_add_group(self, *, parent_id: EntityID, child_id: EntityID) -> None:
-        """Add a group to a group."""
+    def group_add_group(self, *, g_id: EntityID, parent_id: EntityID) -> None:
+        """Add a group to a parent group to inherit all its permissions."""
+        child = self._get_group(g_id=g_id)
         parent = self._get_group(g_id=parent_id)
-        child = self._get_group(g_id=child_id)
 
-        self._detect_group_cycle(parent=parent, child_id=child_id)
+        self._detect_group_cycle(parent=parent, child_id=g_id)
 
-        parent.child_ids.add(child_id)
+        parent.child_ids.add(g_id)
         child.parent_ids.add(parent_id)
 
     def group_rem_subject(self, *, g_id: EntityID, s_id: EntityID) -> None:
