@@ -1,3 +1,9 @@
+"""
+Core definitions for the PyPermission package.
+
+Including the permission node object, an internal permission class and a base permission authority.
+"""
+
 from __future__ import annotations
 
 from abc import ABC
@@ -11,14 +17,19 @@ from pypermission.error import PermissionParsingError
 # We just have to wait until 3.11 ist the last supported version :)
 # Currently we have to check if the permission node enum has only string values
 class PermissionNode(Enum):
+    """Abstract permission node definition. Inherit from this to define custom permission nodes."""
+
     ...
 
 
 class RootPermissionNode(PermissionNode):
+    """Internal permission node definition. Required for the root of the permission tree."""
+
     ROOT_ = "*"
 
 
 class Permission:
+    """Internal permission class. Represents a node in the tree based permission graph."""
 
     _node: PermissionNode
     _parent: Permission | None
@@ -39,34 +50,42 @@ class Permission:
 
     @property
     def node(self) -> PermissionNode:
+        """Get the permission node."""
         return self._node
 
     @property
     def parent(self) -> Permission | None:
+        """Get the parent permission."""
         return self._parent
 
     @property
     def ancestors(self) -> tuple[Permission, ...]:
+        """Get ancestor permissions."""
         return self._ancestors
 
     @property
     def childs(self) -> set[Permission]:
+        """Get child permissions."""
         return self._childs
 
     @property
     def sub_graph(self) -> dict[str, Permission]:
+        """Get sub graph."""
         return self._sub_graph
 
     @property
     def has_payload(self) -> bool:
+        """Checks if a permission can carry a payload."""
         return self._has_payload
 
     @property
     def is_leaf(self) -> bool:
+        """Checks if a permission is leaf permission."""
         return self._is_leaf
 
     def __str__(self) -> str:
-        return cast(str, self._node.value)  # NOTE would be nice without casting
+        val = self._node.value
+        return cast(str, val)  # NOTE would be nice without casting
 
 
 PermissionMap = dict[Permission, set[str]]
@@ -74,6 +93,8 @@ EntityID = int | str
 
 
 class CustomPermission(Permission):
+    """Internal permission class for custom permission nodes. Have to be registered externally."""
+
     def __init__(
         self, *, node: PermissionNode, parent: Permission, has_payload: bool, is_leaf: bool
     ) -> None:
@@ -90,6 +111,12 @@ class CustomPermission(Permission):
 
 
 class Authority(ABC):
+    """
+    Base permission authority implementation.
+
+    It provides permission node registration, serialization and deserialization methods.
+    """
+
     _root_permission: Permission
     _node_permission_map: dict[PermissionNode, Permission]
     _node_str_permission_map: dict[str, Permission]
@@ -109,22 +136,38 @@ class Authority(ABC):
                 self._register_permission(node=node)
 
     def register_permission_nodes(self, nodes: type[PermissionNode]) -> None:
+        """
+        Register permission nodes.
+
+        Parameters
+        ----------
+
+        nodes : type[PermissionNode]
+            The permission nodes to be registered.
+        """
         # TODO check that all enum values are strings
         for node in nodes:
             self._register_permission(node=node)
 
     @staticmethod
     def root_node() -> PermissionNode:
+        """
+        Get the root permission node of the root permission.
+
+        A subject or a group with the root permission has access to all permissions.
+        """
         return RootPermissionNode.ROOT_
 
     @staticmethod
     def _serialize_permission_node(permission: Permission, payload: str | None) -> str:
+        """Serialize a permission node and its payload."""
         node_str: str = permission.node.value
         if permission.has_payload:
             node_str = f"{node_str[:-2]}{payload}>"
         return node_str
 
     def _deserialize_permission_node(self, node_str: str) -> tuple[Permission, str | None]:
+        """Deserialize a permission node and its payload."""
 
         node_str_sections: list[str] = node_str.split(".")
         last_section: str = node_str_sections[-1]
@@ -137,11 +180,11 @@ class Authority(ABC):
         node_str = ".".join(node_str_sections[:-1]) + "." + last_section
         try:
             return self._node_str_permission_map[node_str], payload
-        except KeyError:
-            raise PermissionParsingError("Unknown permission node!", node_str)
+        except KeyError as err:
+            raise PermissionParsingError("Unknown permission node!", node_str) from err
 
     def _register_permission(self, *, node: PermissionNode):
-        "Register permission"
+        "Register a permission node."
 
         node_str = node.value
 
@@ -169,11 +212,11 @@ class Authority(ABC):
             potential_parent_node = potential_parent_node + "." + section
             try:
                 parent = parent.sub_graph[section]
-            except KeyError:
+            except KeyError as err:
                 raise PermissionParsingError(
                     "A nested permission requires a parent permission!",
                     potential_parent_node[1:] + ".*",
-                )
+                ) from err
 
         if parent.is_leaf:
             raise PermissionParsingError(
@@ -185,8 +228,8 @@ class Authority(ABC):
         )
 
         if not parent_node_str_sections:
-            new_perm._parent = self._root_permission
-        new_perm._update_ancestors()
+            new_perm._parent = self._root_permission  # pylint: disable=protected-access
+        new_perm._update_ancestors()  # pylint: disable=protected-access
 
         parent.sub_graph[last_str_section] = new_perm
         parent.childs.add(new_perm)
