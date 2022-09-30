@@ -87,7 +87,7 @@ class User:
         self._auth = auth
         self._accounts = {}
 
-        auth.add_subject(s_id=username)
+        auth.add_subject(sid=username)
 
     @property
     def username(self) -> str:
@@ -98,7 +98,7 @@ class User:
         return self._accounts
 
     def has_permission(self, node: PermissionNode, payload: str | None = None) -> bool:
-        self._auth.subject_has_permission(s_id=self._username, node=node, payload=payload)
+        self._auth.subject_has_permission(sid=self._username, node=node, payload=payload)
 
     def list_account_responses(self) -> list[AccountResponse]:
         return [response_factory(acc=acc) for num, acc in self._accounts]
@@ -195,9 +195,9 @@ class BankAPI:
         self._users[user_banker.username] = user_banker
         self._users[user_customer.username] = user_customer
 
-        self._auth.group_add_subject(gid=GROUP_ADMIN, s_id=user_admin.username)
-        self._auth.group_add_subject(gid=GROUP_BANKER, s_id=user_banker.username)
-        self._auth.group_add_subject(gid=GROUP_CUSTOMER, s_id=user_customer.username)
+        self._auth.group_add_subject(gid=GROUP_ADMIN, sid=user_admin.username)
+        self._auth.group_add_subject(gid=GROUP_BANKER, sid=user_banker.username)
+        self._auth.group_add_subject(gid=GROUP_CUSTOMER, sid=user_customer.username)
 
 
 bank_api = BankAPI()

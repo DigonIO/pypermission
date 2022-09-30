@@ -23,102 +23,96 @@ def test_subject_perms_without_groups():
     auth = Authority(nodes=TownyPermissionNode)
 
     ### EGG ### ADD PERMS ##########################################################################
-    auth.add_subject(s_id=EGG)
-    auth.subject_add_permission(s_id=EGG, node=Authority.root_node())
+    auth.add_subject(sid=EGG)
+    auth.subject_add_permission(sid=EGG, node=Authority.root_node())
 
-    assert auth.subject_has_permission(s_id=EGG, node=TownyPermissionNode.TOWNY_CHAT_GLOBAL) == True
-    assert auth.subject_has_permission(s_id=EGG, node=TownyPermissionNode.TOWNY_CHAT_NATION) == True
+    assert auth.subject_has_permission(sid=EGG, node=TownyPermissionNode.TOWNY_CHAT_GLOBAL) == True
+    assert auth.subject_has_permission(sid=EGG, node=TownyPermissionNode.TOWNY_CHAT_NATION) == True
     assert (
         auth.subject_has_permission(
-            s_id=EGG, node=TownyPermissionNode.TOWNY_WILD_BUILD_X, payload="dummy"
+            sid=EGG, node=TownyPermissionNode.TOWNY_WILD_BUILD_X, payload="dummy"
         )
         == True
     )
     assert (
-        auth.subject_has_permission(s_id=EGG, node=TownyPermissionNode.TOWNY_WILD_DESTROY_) == True
+        auth.subject_has_permission(sid=EGG, node=TownyPermissionNode.TOWNY_WILD_DESTROY_) == True
     )
 
     ### SPAM ### ADD PERMS ##########################################################################
-    auth.add_subject(s_id=SPAM)
-    auth.subject_add_permission(s_id=SPAM, node=TownyPermissionNode.TOWNY_CHAT_)
-    auth.subject_add_permission(s_id=SPAM, node=TownyPermissionNode.TOWNY_WILD_)
+    auth.add_subject(sid=SPAM)
+    auth.subject_add_permission(sid=SPAM, node=TownyPermissionNode.TOWNY_CHAT_)
+    auth.subject_add_permission(sid=SPAM, node=TownyPermissionNode.TOWNY_WILD_)
 
-    assert (
-        auth.subject_has_permission(s_id=SPAM, node=TownyPermissionNode.TOWNY_CHAT_GLOBAL) == True
-    )
-    assert (
-        auth.subject_has_permission(s_id=SPAM, node=TownyPermissionNode.TOWNY_CHAT_NATION) == True
-    )
+    assert auth.subject_has_permission(sid=SPAM, node=TownyPermissionNode.TOWNY_CHAT_GLOBAL) == True
+    assert auth.subject_has_permission(sid=SPAM, node=TownyPermissionNode.TOWNY_CHAT_NATION) == True
     assert (
         auth.subject_has_permission(
-            s_id=SPAM, node=TownyPermissionNode.TOWNY_WILD_BUILD_X, payload="payload_x"
+            sid=SPAM, node=TownyPermissionNode.TOWNY_WILD_BUILD_X, payload="payload_x"
         )
         == True
     )
     assert (
-        auth.subject_has_permission(s_id=SPAM, node=TownyPermissionNode.TOWNY_WILD_DESTROY_) == True
+        auth.subject_has_permission(sid=SPAM, node=TownyPermissionNode.TOWNY_WILD_DESTROY_) == True
     )
 
     ### HAM ### ADD PERMS ##########################################################################
-    auth.add_subject(s_id=HAM)
+    auth.add_subject(sid=HAM)
 
-    auth.subject_add_permission(s_id=HAM, node=TownyPermissionNode.TOWNY_CHAT_TOWN)
-    assert (
-        auth.subject_has_permission(s_id=HAM, node=TownyPermissionNode.TOWNY_CHAT_GLOBAL) == False
-    )
-    assert auth.subject_has_permission(s_id=HAM, node=TownyPermissionNode.TOWNY_CHAT_TOWN) == True
+    auth.subject_add_permission(sid=HAM, node=TownyPermissionNode.TOWNY_CHAT_TOWN)
+    assert auth.subject_has_permission(sid=HAM, node=TownyPermissionNode.TOWNY_CHAT_GLOBAL) == False
+    assert auth.subject_has_permission(sid=HAM, node=TownyPermissionNode.TOWNY_CHAT_TOWN) == True
 
-    auth.subject_add_permission(s_id=HAM, node=TownyPermissionNode.TOWNY_WILD_BUILD_)
+    auth.subject_add_permission(sid=HAM, node=TownyPermissionNode.TOWNY_WILD_BUILD_)
     assert (
         auth.subject_has_permission(
-            s_id=HAM, node=TownyPermissionNode.TOWNY_WILD_BUILD_X, payload="payload_x"
+            sid=HAM, node=TownyPermissionNode.TOWNY_WILD_BUILD_X, payload="payload_x"
         )
         == True
     )
 
     auth.subject_add_permission(
-        s_id=HAM, node=TownyPermissionNode.TOWNY_WILD_DESTROY_X, payload="payload_1"
+        sid=HAM, node=TownyPermissionNode.TOWNY_WILD_DESTROY_X, payload="payload_1"
     )
     auth.subject_add_permission(
-        s_id=HAM, node=TownyPermissionNode.TOWNY_WILD_DESTROY_X, payload="payload_2"
+        sid=HAM, node=TownyPermissionNode.TOWNY_WILD_DESTROY_X, payload="payload_2"
     )
     assert (
         auth.subject_has_permission(
-            s_id=HAM, node=TownyPermissionNode.TOWNY_WILD_DESTROY_X, payload="payload_1"
+            sid=HAM, node=TownyPermissionNode.TOWNY_WILD_DESTROY_X, payload="payload_1"
         )
         == True
     )
     assert (
         auth.subject_has_permission(
-            s_id=HAM, node=TownyPermissionNode.TOWNY_WILD_DESTROY_X, payload="payload_2"
+            sid=HAM, node=TownyPermissionNode.TOWNY_WILD_DESTROY_X, payload="payload_2"
         )
         == True
     )
     assert (
         auth.subject_has_permission(
-            s_id=HAM, node=TownyPermissionNode.TOWNY_WILD_DESTROY_X, payload="payload_x"
+            sid=HAM, node=TownyPermissionNode.TOWNY_WILD_DESTROY_X, payload="payload_x"
         )
         == False
     )
 
     ### HAM ### REM PERMS ##########################################################################
-    auth.subject_rem_permission(s_id=HAM, node=TownyPermissionNode.TOWNY_CHAT_TOWN)
-    assert auth.subject_has_permission(s_id=HAM, node=TownyPermissionNode.TOWNY_CHAT_TOWN) == False
+    auth.subject_rem_permission(sid=HAM, node=TownyPermissionNode.TOWNY_CHAT_TOWN)
+    assert auth.subject_has_permission(sid=HAM, node=TownyPermissionNode.TOWNY_CHAT_TOWN) == False
 
-    auth.subject_rem_permission(s_id=HAM, node=TownyPermissionNode.TOWNY_WILD_BUILD_)
+    auth.subject_rem_permission(sid=HAM, node=TownyPermissionNode.TOWNY_WILD_BUILD_)
     assert (
         auth.subject_has_permission(
-            s_id=HAM, node=TownyPermissionNode.TOWNY_WILD_BUILD_X, payload="payload_x"
+            sid=HAM, node=TownyPermissionNode.TOWNY_WILD_BUILD_X, payload="payload_x"
         )
         == False
     )
 
     auth.subject_rem_permission(
-        s_id=HAM, node=TownyPermissionNode.TOWNY_WILD_DESTROY_X, payload="payload_1"
+        sid=HAM, node=TownyPermissionNode.TOWNY_WILD_DESTROY_X, payload="payload_1"
     )
     assert (
         auth.subject_has_permission(
-            s_id=HAM, node=TownyPermissionNode.TOWNY_WILD_DESTROY_X, payload="payload_1"
+            sid=HAM, node=TownyPermissionNode.TOWNY_WILD_DESTROY_X, payload="payload_1"
         )
         == False
     )
@@ -151,18 +145,18 @@ def test_subject_perms_with_groups():
     auth.add_group(gid=ANIMAL_BASED)
     auth.add_group(gid=PLANT_BASED)
 
-    auth.add_subject(s_id=EGG)
+    auth.add_subject(sid=EGG)
 
-    auth.group_add_subject(gid=ANIMAL_BASED, s_id=EGG)
-    auth.group_add_subject(gid=PLANT_BASED, s_id=EGG)
+    auth.group_add_subject(gid=ANIMAL_BASED, sid=EGG)
+    auth.group_add_subject(gid=PLANT_BASED, sid=EGG)
     # yeah chickens are some kind of plants too...
 
     auth.group_add_permission(gid=ANIMAL_BASED, node=TownyPermissionNode.TOWNY_CHAT_)
     auth.group_add_permission(gid=PLANT_BASED, node=TownyPermissionNode.TOWNY_WILD_)
 
-    assert auth.subject_has_permission(s_id=EGG, node=TownyPermissionNode.TOWNY_) == False
-    assert auth.subject_has_permission(s_id=EGG, node=TownyPermissionNode.TOWNY_CHAT_) == True
-    assert auth.subject_has_permission(s_id=EGG, node=TownyPermissionNode.TOWNY_WILD_) == True
+    assert auth.subject_has_permission(sid=EGG, node=TownyPermissionNode.TOWNY_) == False
+    assert auth.subject_has_permission(sid=EGG, node=TownyPermissionNode.TOWNY_CHAT_) == True
+    assert auth.subject_has_permission(sid=EGG, node=TownyPermissionNode.TOWNY_WILD_) == True
 
 
 def test_grouped_groups():
@@ -231,49 +225,49 @@ def test_recursive_permissions():
     assert auth.group_has_permission(gid=PLANT_BASED, node=TownyPermissionNode.TOWNY_CHAT_) == True
     assert auth.group_has_permission(gid=PLANT_BASED, node=TownyPermissionNode.TOWNY_WILD_) == False
 
-    auth.add_subject(s_id=APPLE)
-    auth.group_add_subject(gid=PLANT_BASED, s_id=APPLE)
+    auth.add_subject(sid=APPLE)
+    auth.group_add_subject(gid=PLANT_BASED, sid=APPLE)
 
-    assert auth.subject_has_permission(s_id=APPLE, node=TownyPermissionNode.TOWNY_CHAT_) == True
-    assert auth.subject_has_permission(s_id=APPLE, node=TownyPermissionNode.TOWNY_WILD_) == False
+    assert auth.subject_has_permission(sid=APPLE, node=TownyPermissionNode.TOWNY_CHAT_) == True
+    assert auth.subject_has_permission(sid=APPLE, node=TownyPermissionNode.TOWNY_WILD_) == False
 
 
 def test_grouped_subjects():
     auth = Authority()
 
-    auth.add_subject(s_id=EGG)
-    auth.add_subject(s_id=SPAM)
-    auth.add_subject(s_id=HAM)
+    auth.add_subject(sid=EGG)
+    auth.add_subject(sid=SPAM)
+    auth.add_subject(sid=HAM)
 
-    auth.add_subject(s_id=ORANGE)
-    auth.add_subject(s_id=APPLE)
-    auth.add_subject(s_id=PEAR)
-    auth.add_subject(s_id=BANANA)
+    auth.add_subject(sid=ORANGE)
+    auth.add_subject(sid=APPLE)
+    auth.add_subject(sid=PEAR)
+    auth.add_subject(sid=BANANA)
 
     auth.add_group(gid=FOOD)
     auth.add_group(gid=ANIMAL_BASED)
     auth.add_group(gid=PLANT_BASED)
 
-    auth.group_add_subject(gid=FOOD, s_id=EGG)
-    auth.group_add_subject(gid=FOOD, s_id=SPAM)
-    auth.group_add_subject(gid=FOOD, s_id=HAM)
-    auth.group_add_subject(gid=FOOD, s_id=ORANGE)
-    auth.group_add_subject(gid=FOOD, s_id=APPLE)
-    auth.group_add_subject(gid=FOOD, s_id=PEAR)
-    auth.group_add_subject(gid=FOOD, s_id=BANANA)
+    auth.group_add_subject(gid=FOOD, sid=EGG)
+    auth.group_add_subject(gid=FOOD, sid=SPAM)
+    auth.group_add_subject(gid=FOOD, sid=HAM)
+    auth.group_add_subject(gid=FOOD, sid=ORANGE)
+    auth.group_add_subject(gid=FOOD, sid=APPLE)
+    auth.group_add_subject(gid=FOOD, sid=PEAR)
+    auth.group_add_subject(gid=FOOD, sid=BANANA)
 
-    auth.group_add_subject(gid=ANIMAL_BASED, s_id=EGG)
-    auth.group_add_subject(gid=ANIMAL_BASED, s_id=SPAM)
-    auth.group_add_subject(gid=ANIMAL_BASED, s_id=HAM)
+    auth.group_add_subject(gid=ANIMAL_BASED, sid=EGG)
+    auth.group_add_subject(gid=ANIMAL_BASED, sid=SPAM)
+    auth.group_add_subject(gid=ANIMAL_BASED, sid=HAM)
 
-    auth.group_add_subject(gid=PLANT_BASED, s_id=ORANGE)
-    auth.group_add_subject(gid=PLANT_BASED, s_id=APPLE)
-    auth.group_add_subject(gid=PLANT_BASED, s_id=PEAR)
-    auth.group_add_subject(gid=PLANT_BASED, s_id=BANANA)
+    auth.group_add_subject(gid=PLANT_BASED, sid=ORANGE)
+    auth.group_add_subject(gid=PLANT_BASED, sid=APPLE)
+    auth.group_add_subject(gid=PLANT_BASED, sid=PEAR)
+    auth.group_add_subject(gid=PLANT_BASED, sid=BANANA)
 
-    assert len(auth._groups[FOOD].s_ids) == 7
-    assert len(auth._groups[ANIMAL_BASED].s_ids) == 3
-    assert len(auth._groups[PLANT_BASED].s_ids) == 4
+    assert len(auth._groups[FOOD].sids) == 7
+    assert len(auth._groups[ANIMAL_BASED].sids) == 3
+    assert len(auth._groups[PLANT_BASED].sids) == 4
 
     assert len(auth._subjects[EGG].gids) == 2
     assert len(auth._subjects[ORANGE].gids) == 2
@@ -282,12 +276,12 @@ def test_grouped_subjects():
 def test_unknown_perm_node():
     auth = Authority()
 
-    auth.add_subject(s_id=APPLE)
+    auth.add_subject(sid=APPLE)
 
     auth.add_group(gid=FOOD)
 
     with pytest.raises(UnknownPermissionNodeError):
-        auth.subject_add_permission(s_id=APPLE, node=TownyPermissionNode.TOWNY_CHAT_)
+        auth.subject_add_permission(sid=APPLE, node=TownyPermissionNode.TOWNY_CHAT_)
 
     with pytest.raises(UnknownPermissionNodeError):
         auth.group_add_permission(gid=FOOD, node=TownyPermissionNode.TOWNY_CHAT_)

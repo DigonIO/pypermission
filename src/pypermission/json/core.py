@@ -29,7 +29,7 @@ class NonSerialData(TypedDict):
     groups: dict[str, NonSerialGroup]
     subjects: dict[str, list[str]]
     gid_types: OutIDTypeDict
-    s_id_types: OutIDTypeDict
+    sid_types: OutIDTypeDict
 
 
 class PermissionableEntity:
@@ -83,19 +83,19 @@ class Subject(PermissionableEntity):
 
 class Group(PermissionableEntity):
 
-    _s_ids: set[EntityID]
+    _sids: set[EntityID]
     _parent_ids: set[EntityID]
     _child_ids: set[EntityID]
 
     def __init__(self, *, id: EntityID) -> None:
         super().__init__(id=id)
-        self._s_ids = set()
+        self._sids = set()
         self._parent_ids = set()
         self._child_ids = set()
 
     @property
-    def s_ids(self) -> set[EntityID]:
-        return self._s_ids
+    def sids(self) -> set[EntityID]:
+        return self._sids
 
     @property
     def parent_ids(self) -> set[EntityID]:
@@ -147,12 +147,12 @@ class Authority(_Authority):
         """Save the current state to string formatted as JSON."""
         groups: dict[str, NonSerialGroup] = {}
         subjects: dict[str, list[str]] = {}
-        s_id_types: OutIDTypeDict = {}
+        sid_types: OutIDTypeDict = {}
         gid_types: OutIDTypeDict = {}
         data = NonSerialData(
             groups=groups,
             subjects=subjects,
-            s_id_types=s_id_types,
+            sid_types=sid_types,
             gid_types=gid_types,
         )
 
@@ -172,15 +172,15 @@ class Authority(_Authority):
                     node = self._serialize_permission_node(permission=permission, payload=None)
                 nodes.append(node)
 
-            grouped_subjects: list[str] = [str(s_id) for s_id in group.s_ids]
+            grouped_subjects: list[str] = [str(sid) for sid in group.sids]
             childs: list[str] = [str(child_id) for child_id in group.child_ids]
             groups[str(gid)] = NonSerialGroup(subjects=grouped_subjects, nodes=nodes, childs=childs)
 
-        for s_id, subject in self._subjects.items():
-            if isinstance(s_id, str):
-                s_id_types[str(s_id)] = "str"
+        for sid, subject in self._subjects.items():
+            if isinstance(sid, str):
+                sid_types[str(sid)] = "str"
             else:  # isinstance(gid, int):
-                s_id_types[str(s_id)] = "int"
+                sid_types[str(sid)] = "int"
             nodes = []
             for permission, payload_set in subject.permission_map.items():
                 if payload_set:
@@ -192,7 +192,7 @@ class Authority(_Authority):
                     node = self._serialize_permission_node(permission=permission, payload=None)
                 nodes.append(node)
 
-            subjects[str(s_id)] = nodes
+            subjects[str(sid)] = nodes
 
         return self._serialize_data(non_serial_data=data)
 
@@ -201,12 +201,12 @@ class Authority(_Authority):
         data: Any = self._deserialize_data(serial_data=serial_data)
 
         # populate subject id types
-        s_id_types: InIDTypeDict = {}
-        for s_id_str, type_str in data["s_id_types"].items():
+        sid_types: InIDTypeDict = {}
+        for sid_str, type_str in data["sid_types"].items():
             if type_str == "str":
-                s_id_types[s_id_str] = str
+                sid_types[sid_str] = str
             else:
-                s_id_types[s_id_str] = int
+                sid_types[sid_str] = int
 
         # populate group id types
         gid_types: InIDTypeDict = {}
@@ -217,10 +217,10 @@ class Authority(_Authority):
                 gid_types[gid_str] = int
 
         # populate subjects
-        for s_id_str, nodes in data["subjects"].items():
-            s_id = s_id_types[s_id_str](s_id_str)
-            subject = Subject(id=s_id)
-            self._subjects[s_id] = subject
+        for sid_str, nodes in data["subjects"].items():
+            sid = sid_types[sid_str](sid_str)
+            subject = Subject(id=sid)
+            self._subjects[sid] = subject
 
             # add permissions to a subject
             for node_str in nodes:
@@ -255,10 +255,10 @@ class Authority(_Authority):
                     permission_map[permission] = set()
 
             # add group ids to subjects of a group and vice versa
-            for s_id_str in group_data["subjects"]:
-                s_id = s_id_types[s_id_str](s_id_str)
-                group.s_ids.add(s_id)
-                self._subjects[s_id].gids.add(gid)
+            for sid_str in group_data["subjects"]:
+                sid = sid_types[sid_str](sid_str)
+                group.sids.add(sid)
+                self._subjects[sid].gids.add(gid)
 
             # add child ids to this group
             for child_id_str in group_data["childs"]:
@@ -271,13 +271,13 @@ class Authority(_Authority):
                 child = self._groups[child_id]
                 child.parent_ids.add(gid)
 
-    def add_subject(self, s_id: EntityID) -> None:
+    def add_subject(self, sid: EntityID) -> None:
         """Create a new subject for a given ID."""
-        if s_id in self._subjects:
+        if sid in self._subjects:
             raise EntityIDCollisionError
 
-        subject = Subject(id=s_id)
-        self._subjects[s_id] = subject
+        subject = Subject(id=sid)
+        self._subjects[sid] = subject
 
     def add_group(self, gid: EntityID) -> None:
         """Create a new group for a given ID."""
@@ -287,29 +287,29 @@ class Authority(_Authority):
         group = Group(id=gid)
         self._groups[gid] = group
 
-    def rem_subject(self, s_id: EntityID) -> None:
+    def rem_subject(self, sid: EntityID) -> None:
         """Remove a subject for a given ID."""
-        subject = self._subjects.pop(s_id, None)
+        subject = self._subjects.pop(sid, None)
         if subject is None:
             return
         for gid in subject.gids:
-            self._groups[gid].s_ids.remove(s_id)
+            self._groups[gid].sids.remove(sid)
 
     def rem_group(self, gid: EntityID) -> None:
         """Remove a group for a given ID."""
         group = self._groups.pop(gid, None)
         if group is None:
             return
-        for s_id in group.s_ids:
-            self._subjects[s_id].gids.remove(gid)
+        for sid in group.sids:
+            self._subjects[sid].gids.remove(gid)
 
     def subject_has_permission(
-        self, *, s_id: EntityID, node: PermissionNode, payload: str | None = None
+        self, *, sid: EntityID, node: PermissionNode, payload: str | None = None
     ) -> bool:
         """Check if a subject has a wanted permission."""
         permission = self._get_permission(node=node)
         _validate_payload_status(permission=permission, payload=payload)
-        subject = self._get_subject(s_id=s_id)
+        subject = self._get_subject(sid=sid)
 
         if subject.has_permission(permission=permission, payload=payload):
             return True
@@ -324,36 +324,36 @@ class Authority(_Authority):
         return False
 
     def subject_add_permission(
-        self, *, s_id: EntityID, node: PermissionNode, payload: str | None = None
+        self, *, sid: EntityID, node: PermissionNode, payload: str | None = None
     ):
         """Add a permission to a subject."""
         permission = self._get_permission(node=node)
         _validate_payload_status(permission=permission, payload=payload)
-        permission_map = self._get_subject(s_id=s_id).permission_map
+        permission_map = self._get_subject(sid=sid).permission_map
 
         _add_permission_map_entry(
             permission_map=permission_map, permission=permission, payload=payload
         )
 
     def subject_rem_permission(
-        self, *, s_id: EntityID, node: PermissionNode, payload: str | None = None
+        self, *, sid: EntityID, node: PermissionNode, payload: str | None = None
     ):
         """Remove a permission from a subject."""
         permission = self._get_permission(node=node)
         _validate_payload_status(permission=permission, payload=payload)
-        permission_map = self._get_subject(s_id=s_id).permission_map
+        permission_map = self._get_subject(sid=sid).permission_map
 
         _rem_permission_map_entry(
             permission_map=permission_map, permission=permission, payload=payload
         )
 
-    def subject_get_permissions(self, *, s_id: EntityID) -> PermissionMap:
+    def subject_get_permissions(self, *, sid: EntityID) -> PermissionMap:
         """Get a copy of all permissions from a subject."""
-        return self._get_subject(s_id=s_id).permission_map.copy()
+        return self._get_subject(sid=sid).permission_map.copy()
 
-    def subject_get_groups(self, *, s_id: EntityID) -> set[EntityID]:
+    def subject_get_groups(self, *, sid: EntityID) -> set[EntityID]:
         """Get a set of a group IDs of a groups a subject is member of."""
-        subject = self._get_subject(s_id=s_id)
+        subject = self._get_subject(sid=sid)
         return subject.gids.copy()
 
     def group_has_permission(
@@ -401,12 +401,12 @@ class Authority(_Authority):
         group = self._get_group(gid=gid)
         return group.parent_ids.copy()
 
-    def group_add_subject(self, *, gid: EntityID, s_id: EntityID) -> None:
+    def group_add_subject(self, *, gid: EntityID, sid: EntityID) -> None:
         """Add a subject to a group to inherit all its permissions."""
         group = self._get_group(gid=gid)
-        subject = self._get_subject(s_id=s_id)
+        subject = self._get_subject(sid=sid)
 
-        group.s_ids.add(s_id)
+        group.sids.add(sid)
         subject.gids.add(gid)
 
     def group_add_group(self, *, gid: EntityID, pid: EntityID) -> None:
@@ -419,12 +419,12 @@ class Authority(_Authority):
         parent.child_ids.add(gid)
         child.parent_ids.add(pid)
 
-    def group_rem_subject(self, *, gid: EntityID, s_id: EntityID) -> None:
+    def group_rem_subject(self, *, gid: EntityID, sid: EntityID) -> None:
         """Remove a subject from a group."""
         group = self._get_group(gid=gid)
-        subject = self._get_subject(s_id=s_id)
+        subject = self._get_subject(sid=sid)
 
-        group.s_ids.remove(s_id)
+        group.sids.remove(sid)
         subject.gids.remove(gid)
 
     def group_rem_group(self, *, pid: EntityID, child_id: EntityID) -> None:
@@ -435,10 +435,10 @@ class Authority(_Authority):
         parent.child_ids.remove(child_id)
         child.parent_ids.remove(pid)
 
-    def _get_subject(self, *, s_id: EntityID) -> Subject:
+    def _get_subject(self, *, sid: EntityID) -> Subject:
         """Just a simple wrapper to avoid some boilerplate code while getting a subject."""
         try:
-            return self._subjects[s_id]
+            return self._subjects[sid]
         except KeyError:
             raise UnknownSubjectIDError
 
