@@ -35,6 +35,8 @@ REQUIRE_LINT = [
     "mypy==0.942",
     "bandit==1.7.1",
     "pylint==2.7.4",
+    # below typing stubs
+    "types-PyYAML>=6.0.12",
 ]
 
 EXTRAS_REQUIRE = {
