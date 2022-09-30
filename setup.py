@@ -11,8 +11,9 @@ with open("README.md", encoding="utf-8") as f:
     LONG_DESCRIPTION = f.read()
 
 REQUIRE_YAML = [
-    "PyYAML=>6.0",
+    "PyYAML>=6.0",
 ]
+
 
 REQUIRE_DOC = [
     "pydocstyle==6.1.1",
@@ -37,6 +38,14 @@ REQUIRE_LINT = [
     "pylint==2.7.4",
 ]
 
+EXTRAS_REQUIRE = {
+    "yaml": REQUIRE_YAML,
+    "doc": REQUIRE_YAML + REQUIRE_DOC,
+    "dev": REQUIRE_YAML + REQUIRE_DOC + REQUIRE_TEST + REQUIRE_LINT,
+    "test": REQUIRE_YAML + REQUIRE_TEST,
+    "lint": REQUIRE_YAML + REQUIRE_LINT,
+}
+
 setup(
     name="PyPermission",
     version=version,
@@ -58,13 +67,7 @@ setup(
         "Typing :: Typed",
     ],
     python_requires=">=3.10",
-    extras_require={
-        "yaml": REQUIRE_YAML,
-        "doc": REQUIRE_YAML + REQUIRE_DOC,
-        "dev": REQUIRE_YAML + REQUIRE_DOC + REQUIRE_TEST + REQUIRE_LINT,
-        "test": REQUIRE_YAML + REQUIRE_TEST,
-        "lint": REQUIRE_YAML + REQUIRE_LINT,
-    },
+    extras_require=EXTRAS_REQUIRE,
     packages=["pypermission"],
     package_dir={"": "src"},
     package_data={"pypermission": ["py.typed"]},
