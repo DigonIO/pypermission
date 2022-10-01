@@ -417,15 +417,15 @@ class Authority(_Authority):
         group.sids.add(sid)
         subject.gids.add(gid)
 
-    def group_add_group(self, *, gid: EntityID, pid: EntityID) -> None:
+    def group_add_group(self, *, gid: EntityID, cid: EntityID) -> None:
         """Add a group to a parent group to inherit all its permissions."""
-        child = self._get_group(gid=gid)
-        parent = self._get_group(gid=pid)
+        child = self._get_group(gid=cid)
+        parent = self._get_group(gid=gid)
 
-        self._detect_group_cycle(parent=parent, child_id=gid)
+        self._detect_group_cycle(parent=parent, child_id=cid)
 
-        parent.child_ids.add(gid)
-        child.parent_ids.add(pid)
+        parent.child_ids.add(cid)
+        child.parent_ids.add(gid)
 
     def group_rem_subject(self, *, gid: EntityID, sid: EntityID) -> None:
         """Remove a subject from a group."""
