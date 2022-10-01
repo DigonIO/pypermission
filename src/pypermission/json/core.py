@@ -70,7 +70,7 @@ class PermissionableEntity:
 
 class Subject(PermissionableEntity):
 
-    _gids: set[EntityID]
+    _gids: set[EntityID]  # group IDs
 
     def __init__(self, *, id: EntityID) -> None:
         super().__init__(id=id)
@@ -83,9 +83,9 @@ class Subject(PermissionableEntity):
 
 class Group(PermissionableEntity):
 
-    _sids: set[EntityID]
-    _parent_ids: set[EntityID]
-    _child_ids: set[EntityID]
+    _sids: set[EntityID]  # subject IDs
+    _parent_ids: set[EntityID]  # parent group IDs
+    _child_ids: set[EntityID]  # child group IDs
 
     def __init__(self, *, id: EntityID) -> None:
         super().__init__(id=id)
@@ -404,10 +404,10 @@ class Authority(_Authority):
         """Get a copy of all permissions from a group."""
         return self._get_group(gid=gid).permission_map.copy()
 
-    def group_get_groups(self, *, gid: EntityID) -> set[EntityID]:
-        """Get a set of all parent group IDs of a group."""
+    def group_get_subjects(self, *, gid: EntityID) -> set[EntityID]:
+        """Get a set of all subject IDs from a group."""
         group = self._get_group(gid=gid)
-        return group.parent_ids.copy()
+        return group.sids.copy()
 
     def group_add_subject(self, *, gid: EntityID, sid: EntityID) -> None:
         """Add a subject to a group to inherit all its permissions."""
@@ -417,7 +417,7 @@ class Authority(_Authority):
         group.sids.add(sid)
         subject.gids.add(gid)
 
-    def group_add_group(self, *, gid: EntityID, cid: EntityID) -> None:
+    def group_add_child_group(self, *, gid: EntityID, cid: EntityID) -> None:
         """Add a group to a parent group to inherit all its permissions."""
         child = self._get_group(gid=cid)
         parent = self._get_group(gid=gid)
@@ -426,6 +426,16 @@ class Authority(_Authority):
 
         parent.child_ids.add(cid)
         child.parent_ids.add(gid)
+
+    def group_get_child_groups(self, *, gid: EntityID) -> set[EntityID]:
+        """Get a set of all child group IDs of a group."""
+        group = self._get_group(gid=gid)
+        return group.child_ids.copy()
+
+    def group_get_parent_groups(self, *, gid: EntityID) -> set[EntityID]:
+        """Get a set of all parent group IDs of a group."""
+        group = self._get_group(gid=gid)
+        return group.parent_ids.copy()
 
     def group_rem_subject(self, *, gid: EntityID, sid: EntityID) -> None:
         """Remove a subject from a group."""
