@@ -62,7 +62,8 @@ pydoctest_3_10_7:
   stage: testing
   image: "python:3.10.7-alpine3.16"
   script:
-    - pip install .[test]
+    - pip install -e .[test]
+    - pip list
     - pytest --doctest-modules docs/pages/*/*.rst
 
 #### release ####

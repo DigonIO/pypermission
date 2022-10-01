@@ -6,4 +6,5 @@ Examples
     :caption: Table of Contents
 
     pages/examples/subject_api
+    pages/examples/group_api
     pages/examples/persistency
