@@ -75,7 +75,7 @@ html_theme_path = [
     "_themes",
 ]
 html_logo = "./_assets/logo.svg"
-
+html_favicon = html_logo
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
