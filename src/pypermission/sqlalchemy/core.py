@@ -38,6 +38,10 @@ class Authority(_Authority):
 
         DeclarativeMeta.metadata.create_all(bind=engine)
 
+    ################################################################################################
+    ### Create
+    ################################################################################################
+
     def add_subject(self, sid: EntityID, db: Session | None = None) -> None:
         """Create a new subject for a given ID."""
         serial_sid = entity_id_serializer(sid)
@@ -51,34 +55,6 @@ class Authority(_Authority):
         db = self._setup_db_session(db)
 
         create_group(serial_sid=serial_gid, db=db)
-
-    def rem_subject(self, sid: EntityID, db: Session | None = None) -> None:
-        """Remove a subject for a given ID."""
-        serial_sid = entity_id_serializer(sid)
-        db = self._setup_db_session(db)
-
-        delete_subject(serial_sid=serial_sid, db=db)
-
-    def rem_group(self, gid: EntityID, db: Session | None = None) -> None:
-        """Remove a group for a given ID."""
-        serial_gid = entity_id_serializer(gid)
-        db = self._setup_db_session(db)
-
-        delete_group(serial_sid=serial_gid, db=db)
-
-    def get_subjects(self, db: Session | None = None) -> set[EntityID]:
-        """Get the IDs for all known subjects."""
-        db = self._setup_db_session(db)
-
-        subject_entries = db.query(SubjectEntry).all()
-        return set(entity_id_deserializer(entry.serial_eid) for entry in subject_entries)
-
-    def get_groups(self, db: Session | None = None) -> set[EntityID]:
-        """Get the IDs for all known groups."""
-        db = self._setup_db_session(db)
-
-        group_entries = db.query(GroupEntry).all()
-        return set(entity_id_deserializer(entry.serial_eid) for entry in group_entries)
 
     def subject_add_permission(
         self,
@@ -111,6 +87,46 @@ class Authority(_Authority):
         validate_payload_status(permission=permission, payload=payload)
 
         create_group_permission(serial_gid=serial_gid, node=node, payload=payload, db=db)
+
+    ################################################################################################
+    ### Read
+    ################################################################################################
+
+    def get_subjects(self, db: Session | None = None) -> set[EntityID]:
+        """Get the IDs for all known subjects."""
+        db = self._setup_db_session(db)
+
+        subject_entries = db.query(SubjectEntry).all()
+        return set(entity_id_deserializer(entry.serial_eid) for entry in subject_entries)
+
+    def get_groups(self, db: Session | None = None) -> set[EntityID]:
+        """Get the IDs for all known groups."""
+        db = self._setup_db_session(db)
+
+        group_entries = db.query(GroupEntry).all()
+        return set(entity_id_deserializer(entry.serial_eid) for entry in group_entries)
+
+    ################################################################################################
+    ### Delete
+    ################################################################################################
+
+    def rem_subject(self, sid: EntityID, db: Session | None = None) -> None:
+        """Remove a subject for a given ID."""
+        serial_sid = entity_id_serializer(sid)
+        db = self._setup_db_session(db)
+
+        delete_subject(serial_sid=serial_sid, db=db)
+
+    def rem_group(self, gid: EntityID, db: Session | None = None) -> None:
+        """Remove a group for a given ID."""
+        serial_gid = entity_id_serializer(gid)
+        db = self._setup_db_session(db)
+
+        delete_group(serial_sid=serial_gid, db=db)
+
+    ################################################################################################
+    ### Private
+    ################################################################################################
 
     def _setup_db_session(self, db: Session | None) -> Session:
         if db is None:
