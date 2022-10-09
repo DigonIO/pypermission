@@ -1,10 +1,8 @@
-from sqlalchemy import create_engine
 from sqlalchemy.orm import Session
 from sqlalchemy.orm.session import sessionmaker
 from sqlalchemy.engine.base import Engine
-from sqlalchemy.exc import IntegrityError
 
-from pypermission.core import Authority as _Authority
+from pypermission.core import Authority as _Authority, validate_payload_status
 from pypermission.core import EntityID, Permission, PermissionMap, PermissionNode
 from pypermission.sqlalchemy.models import (
     ENTITY_ID_MAX_LENGHT,
@@ -14,6 +12,12 @@ from pypermission.sqlalchemy.models import (
     GroupEntry,
 )
 from pypermission.error import EntityIDCollisionError, UnknownSubjectIDError, UnknownGroupIDError
+from pypermission.sqlalchemy.service import (
+    create_subject,
+    create_group,
+    delete_subject,
+    delete_group,
+)
 
 
 class Authority(_Authority):
@@ -34,53 +38,31 @@ class Authority(_Authority):
 
     def add_subject(self, sid: EntityID, db: Session | None = None) -> None:
         """Create a new subject for a given ID."""
-        serial_eid = entity_id_serializer(sid)
+        serial_sid = entity_id_serializer(sid)
         db = self._setup_db_session(db)
 
-        subject_entry = SubjectEntry(eid=serial_eid)
-        db.add(subject_entry)
-
-        try:
-            db.commit()
-        except IntegrityError as err:
-            raise EntityIDCollisionError from None  # TODO
+        create_subject(serial_sid=serial_sid, db=db)
 
     def add_group(self, gid: EntityID, db: Session | None = None) -> None:
         """Create a new group for a given ID."""
-        serial_eid = entity_id_serializer(gid)
+        serial_gid = entity_id_serializer(gid)
         db = self._setup_db_session(db)
 
-        group_entry = GroupEntry(eid=serial_eid)
-        db.add(group_entry)
-
-        try:
-            db.commit()
-        except IntegrityError as err:
-            raise EntityIDCollisionError from None  # TODO
+        create_group(serial_sid=serial_gid, db=db)
 
     def rem_subject(self, sid: EntityID, db: Session | None = None) -> None:
         """Remove a subject for a given ID."""
-        serial_eid = entity_id_serializer(sid)
+        serial_sid = entity_id_serializer(sid)
         db = self._setup_db_session(db)
 
-        subject_entry = db.query(SubjectEntry).get(serial_eid)
-        if subject_entry is None:
-            raise UnknownSubjectIDError  # TODO
-
-        db.delete(subject_entry)
-        db.commit()
+        delete_subject(serial_sid=serial_sid, db=db)
 
     def rem_group(self, gid: EntityID, db: Session | None = None) -> None:
         """Remove a group for a given ID."""
-        serial_eid = entity_id_serializer(gid)
+        serial_gid = entity_id_serializer(gid)
         db = self._setup_db_session(db)
 
-        group_entry = db.query(GroupEntry).get(serial_eid)
-        if group_entry is None:
-            raise UnknownGroupIDError  # TODO
-
-        db.delete(group_entry)
-        db.commit()
+        delete_group(serial_sid=serial_gid, db=db)
 
     def get_subjects(self, db: Session | None = None) -> set[EntityID]:
         """Get the IDs for all known subjects."""

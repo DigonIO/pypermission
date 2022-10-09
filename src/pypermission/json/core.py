@@ -3,16 +3,13 @@ from enum import Enum
 from pathlib import Path
 from typing import Any, Literal, TypedDict, cast
 
-from pypermission.core import Authority as _Authority
+from pypermission.core import Authority as _Authority, validate_payload_status
 from pypermission.core import EntityID, Permission, PermissionMap, PermissionNode
 from pypermission.error import (
     EntityIDCollisionError,
     GroupCycleError,
     MissingPathError,
-    MissingPayloadError,
-    UnknownPermissionNodeError,
     UnknownSubjectIDError,
-    UnusedPayloadError,
 )
 
 OutIDTypeDict = dict[str, Literal["str"] | Literal["int"]]
@@ -316,7 +313,7 @@ class Authority(_Authority):
     ) -> bool:
         """Check if a subject has a wanted permission."""
         permission = self._get_permission(node=node)
-        _validate_payload_status(permission=permission, payload=payload)
+        validate_payload_status(permission=permission, payload=payload)
         subject = self._get_subject(sid=sid)
 
         if subject.has_permission(permission=permission, payload=payload):
@@ -336,7 +333,7 @@ class Authority(_Authority):
     ):
         """Add a permission to a subject."""
         permission = self._get_permission(node=node)
-        _validate_payload_status(permission=permission, payload=payload)
+        validate_payload_status(permission=permission, payload=payload)
         permission_map = self._get_subject(sid=sid).permission_map
 
         _add_permission_map_entry(
@@ -348,7 +345,7 @@ class Authority(_Authority):
     ):
         """Remove a permission from a subject."""
         permission = self._get_permission(node=node)
-        _validate_payload_status(permission=permission, payload=payload)
+        validate_payload_status(permission=permission, payload=payload)
         permission_map = self._get_subject(sid=sid).permission_map
 
         _rem_permission_map_entry(
@@ -369,7 +366,7 @@ class Authority(_Authority):
     ) -> bool:
         """Check if a group has a wanted permission."""
         permission = self._get_permission(node=node)
-        _validate_payload_status(permission=permission, payload=payload)
+        validate_payload_status(permission=permission, payload=payload)
         group = self._get_group(gid=gid)
 
         return self._recursive_group_has_permission(
@@ -381,7 +378,7 @@ class Authority(_Authority):
     ):
         """Add a permission to a group."""
         permission = self._get_permission(node=node)
-        _validate_payload_status(permission=permission, payload=payload)
+        validate_payload_status(permission=permission, payload=payload)
         permission_map = self._get_group(gid=gid).permission_map
 
         _add_permission_map_entry(
@@ -393,7 +390,7 @@ class Authority(_Authority):
     ):
         """Remove a permission from a group."""
         permission = self._get_permission(node=node)
-        _validate_payload_status(permission=permission, payload=payload)
+        validate_payload_status(permission=permission, payload=payload)
         permission_map = self._get_group(gid=gid).permission_map
 
         _rem_permission_map_entry(
@@ -467,13 +464,6 @@ class Authority(_Authority):
         except KeyError:
             raise UnknownSubjectIDError
 
-    def _get_permission(self, *, node: PermissionNode) -> Permission:
-        """Just a simple wrapper to avoid some boilerplate code while getting a node."""
-        try:
-            return self._node_permission_map[node]
-        except KeyError:
-            raise UnknownPermissionNodeError
-
     def _detect_group_cycle(self, parent: Group, child_id: EntityID):
         """Detect a cycle in nested group tree."""
         if child_id in parent.parent_ids:
@@ -506,15 +496,6 @@ class Authority(_Authority):
     @staticmethod
     def _deserialize_data(*, serial_data: str) -> Any:
         return json.loads(serial_data)
-
-
-def _validate_payload_status(*, permission: Permission, payload: str | None):
-    """Check the permission payload combinatorics."""
-    if permission.has_payload and payload is None:
-        raise MissingPayloadError
-
-    if not permission.has_payload and payload is not None:
-        raise UnusedPayloadError
 
 
 def _add_permission_map_entry(

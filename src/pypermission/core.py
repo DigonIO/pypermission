@@ -10,7 +10,12 @@ from abc import ABC
 from enum import Enum
 from typing import cast
 
-from pypermission.error import PermissionParsingError
+from pypermission.error import (
+    PermissionParsingError,
+    UnknownPermissionNodeError,
+    MissingPayloadError,
+    UnusedPayloadError,
+)
 
 
 # NOTE in 3.11 there will be a StrEnum class, that enforces the enum values type as str
@@ -237,3 +242,19 @@ class Authority(ABC):
         self._node_permission_map[node] = new_perm
         self._node_str_permission_map[node_str] = new_perm
         return new_perm
+
+    def _get_permission(self, *, node: PermissionNode) -> Permission:
+        """Just a simple wrapper to avoid some boilerplate code while getting a node."""
+        try:
+            return self._node_permission_map[node]
+        except KeyError:
+            raise UnknownPermissionNodeError
+
+
+def validate_payload_status(*, permission: Permission, payload: str | None):
+    """Check the permission payload combinatorics."""
+    if permission.has_payload and payload is None:
+        raise MissingPayloadError
+
+    if not permission.has_payload and payload is not None:
+        raise UnusedPayloadError
