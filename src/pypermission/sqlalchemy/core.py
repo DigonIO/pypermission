@@ -19,6 +19,8 @@ from pypermission.sqlalchemy.service import (
     delete_group,
     create_subject_permission,
     create_group_permission,
+    delete_subject_permission,
+    delete_group_permission,
 )
 
 
@@ -124,6 +126,38 @@ class Authority(_Authority):
 
         delete_group(serial_sid=serial_gid, db=db)
 
+    def subject_rem_permission(
+        self,
+        *,
+        sid: EntityID,
+        node: PermissionNode,
+        payload: str | None = None,
+        db: Session | None = None,
+    ):
+        """Remove a permission to a subject."""
+        serial_sid = entity_id_serializer(sid)
+        db = self._setup_db_session(db)
+        permission = self._get_permission(node=node)
+        validate_payload_status(permission=permission, payload=payload)
+
+        delete_subject_permission(serial_sid=serial_sid, node=node, payload=payload, db=db)
+
+    def group_rem_permission(
+        self,
+        *,
+        gid: EntityID,
+        node: PermissionNode,
+        payload: str | None = None,
+        db: Session | None = None,
+    ):
+        """Remove a permission to a group."""
+        serial_gid = entity_id_serializer(gid)
+        db = self._setup_db_session(db)
+        permission = self._get_permission(node=node)
+        validate_payload_status(permission=permission, payload=payload)
+
+        delete_group_permission(serial_gid=serial_gid, node=node, payload=payload, db=db)
+
     ################################################################################################
     ### Private
     ################################################################################################
@@ -134,6 +168,11 @@ class Authority(_Authority):
         if isinstance(db, Session):
             return db
         raise AttributeError("Attribute 'db' must be of type 'sqlalchemy.orm.Session'!")
+
+
+####################################################################################################
+### Util
+####################################################################################################
 
 
 def entity_id_serializer(eid: EntityID) -> str:

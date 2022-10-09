@@ -41,7 +41,7 @@ class TimeStampMixin(object):
 class PermissionableEntityMixin(TimeStampMixin):
     """Permissionable entity mixin."""
 
-    db_id = Column(Integer, primary_key=True)
+    entity_db_id = Column(Integer, primary_key=True)
     serial_eid = Column(String(length=SERIAL_ENTITY_ID_LENGHT), unique=True)  # Entity ID
 
 
@@ -76,10 +76,10 @@ class GroupEntry(DeclarativeMeta, PermissionableEntityMixin):
 class SubjectPermissionEntry(DeclarativeMeta, PermissionPayloadMixin):
     __tablename__ = "subject_permission_table"
     __table_args__ = {"extend_existing": EXTEND_EXISTING}
-    subject_db_id = Column(Integer, ForeignKey("subject_table.db_id"), primary_key=True)
+    entity_db_id = Column(Integer, ForeignKey("subject_table.db_id"), primary_key=True)
 
 
 class GroupPermissionEntry(DeclarativeMeta, PermissionPayloadMixin):
     __tablename__ = "group_permission_table"
     __table_args__ = {"extend_existing": EXTEND_EXISTING}
-    group_db_id = Column(Integer, ForeignKey("group_table.db_id"), primary_key=True)
+    entity_db_id = Column(Integer, ForeignKey("group_table.db_id"), primary_key=True)
