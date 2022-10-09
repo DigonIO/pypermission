@@ -258,3 +258,5 @@ def validate_payload_status(*, permission: Permission, payload: str | None):
 
     if not permission.has_payload and payload is not None:
         raise UnusedPayloadError
+
+    # TODO raise if not str

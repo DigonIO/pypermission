@@ -17,6 +17,8 @@ from pypermission.sqlalchemy.service import (
     create_group,
     delete_subject,
     delete_group,
+    create_subject_permission,
+    create_group_permission,
 )
 
 
@@ -69,14 +71,46 @@ class Authority(_Authority):
         db = self._setup_db_session(db)
 
         subject_entries = db.query(SubjectEntry).all()
-        return set(entity_id_deserializer(entry.eid) for entry in subject_entries)
+        return set(entity_id_deserializer(entry.serial_eid) for entry in subject_entries)
 
     def get_groups(self, db: Session | None = None) -> set[EntityID]:
         """Get the IDs for all known groups."""
         db = self._setup_db_session(db)
 
         group_entries = db.query(GroupEntry).all()
-        return set(entity_id_deserializer(entry.eid) for entry in group_entries)
+        return set(entity_id_deserializer(entry.serial_eid) for entry in group_entries)
+
+    def subject_add_permission(
+        self,
+        *,
+        sid: EntityID,
+        node: PermissionNode,
+        payload: str | None = None,
+        db: Session | None = None,
+    ):
+        """Add a permission to a subject."""
+        serial_sid = entity_id_serializer(sid)
+        db = self._setup_db_session(db)
+        permission = self._get_permission(node=node)
+        validate_payload_status(permission=permission, payload=payload)
+
+        create_subject_permission(serial_sid=serial_sid, node=node, payload=payload, db=db)
+
+    def group_add_permission(
+        self,
+        *,
+        gid: EntityID,
+        node: PermissionNode,
+        payload: str | None = None,
+        db: Session | None = None,
+    ):
+        """Add a permission to a group."""
+        serial_gid = entity_id_serializer(gid)
+        db = self._setup_db_session(db)
+        permission = self._get_permission(node=node)
+        validate_payload_status(permission=permission, payload=payload)
+
+        create_group_permission(serial_gid=serial_gid, node=node, payload=payload, db=db)
 
     def _setup_db_session(self, db: Session | None) -> Session:
         if db is None:
