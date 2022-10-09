@@ -11,8 +11,9 @@ from pypermission.sqlalchemy.models import (
     SERIAL_ENTITY_ID_LENGHT,
     DeclarativeMeta,
     SubjectEntry,
+    GroupEntry,
 )
-from pypermission.error import EntityIDCollisionError, UnknownSubjectIDError
+from pypermission.error import EntityIDCollisionError, UnknownSubjectIDError, UnknownGroupIDError
 
 
 class Authority(_Authority):
@@ -44,6 +45,19 @@ class Authority(_Authority):
         except IntegrityError as err:
             raise EntityIDCollisionError from None  # TODO
 
+    def add_group(self, gid: EntityID, db: Session | None = None) -> None:
+        """Create a new group for a given ID."""
+        serial_eid = entity_id_serializer(gid)
+        db = self._setup_db_session(db)
+
+        group_entry = GroupEntry(eid=serial_eid)
+        db.add(group_entry)
+
+        try:
+            db.commit()
+        except IntegrityError as err:
+            raise EntityIDCollisionError from None  # TODO
+
     def rem_subject(self, sid: EntityID, db: Session | None = None) -> None:
         """Remove a subject for a given ID."""
         serial_eid = entity_id_serializer(sid)
@@ -56,6 +70,18 @@ class Authority(_Authority):
         db.delete(subject_entry)
         db.commit()
 
+    def rem_group(self, gid: EntityID, db: Session | None = None) -> None:
+        """Remove a group for a given ID."""
+        serial_eid = entity_id_serializer(gid)
+        db = self._setup_db_session(db)
+
+        group_entry = db.query(GroupEntry).get(serial_eid)
+        if group_entry is None:
+            raise UnknownGroupIDError  # TODO
+
+        db.delete(group_entry)
+        db.commit()
+
     def get_subjects(self, db: Session | None = None) -> set[EntityID]:
         """Get the IDs for all known subjects."""
         db = self._setup_db_session(db)
@@ -63,10 +89,19 @@ class Authority(_Authority):
         subject_entries = db.query(SubjectEntry).all()
         return set(entity_id_deserializer(entry.eid) for entry in subject_entries)
 
+    def get_groups(self, db: Session | None = None) -> set[EntityID]:
+        """Get the IDs for all known groups."""
+        db = self._setup_db_session(db)
+
+        group_entries = db.query(GroupEntry).all()
+        return set(entity_id_deserializer(entry.eid) for entry in group_entries)
+
     def _setup_db_session(self, db: Session | None) -> Session:
         if db is None:
             return self._session_maker()
-        return db
+        if isinstance(db, Session):
+            return db
+        raise AttributeError("Attribute 'db' must be of type 'sqlalchemy.orm.Session'!")
 
 
 def entity_id_serializer(eid: EntityID) -> str:

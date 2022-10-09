@@ -38,3 +38,8 @@ class PermissionableEntityMixin(TimeStampMixin):
 class SubjectEntry(DeclarativeMeta, PermissionableEntityMixin):
     __tablename__ = "token_table"
     __table_args__ = {"extend_existing": EXTEND_EXISTING}
+
+
+class GroupEntry(DeclarativeMeta, PermissionableEntityMixin):
+    __tablename__ = "token_table"
+    __table_args__ = {"extend_existing": EXTEND_EXISTING}
