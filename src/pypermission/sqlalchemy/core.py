@@ -23,6 +23,7 @@ from pypermission.sqlalchemy.models import (
     GroupEntry,
     SubjectEntry,
     SubjectPermissionEntry,
+    GroupPermissionEntry,
 )
 from pypermission.sqlalchemy.service import (
     create_group,
@@ -173,11 +174,31 @@ class Authority(_Authority):
         subject_entry = read_subject(serial_sid=serial_sid, db=db)
 
         perm_entries: list[SubjectPermissionEntry] = subject_entry.permission_entries
-        for entry in perm_entries:
-            if (entry.node == node.value) and (entry.payload == serialize_payload(payload)):
+        if _has_permission(perm_entries=perm_entries, permission=permission, payload=payload):
+            return True
+
+        ms_entries: list[GroupEntry] = subject_entry.membership_entries
+        for entry in ms_entries:
+            if _recursive_group_has_permission(
+                group_entry=entry, permission=permission, payload=payload
+            ):
                 return True
 
         return False
+
+    def group_has_permission(
+        self, *, gid: EntityID, node: PermissionNode, payload: str | None = None, db: Session
+    ) -> bool:
+        serial_gid = entity_id_serializer(gid)
+        db = self._setup_db_session(db)
+        permission = self._get_permission(node=node)
+        validate_payload_status(permission=permission, payload=payload)
+
+        group_entry = read_group(serial_gid=serial_gid, db=db)
+
+        return _recursive_group_has_permission(
+            group_entry=group_entry, permission=permission, payload=payload
+        )
 
     ################################################################################################
     ### Remove
@@ -298,3 +319,32 @@ def entity_id_deserializer(serial_eid: str) -> EntityID:
         return serial_eid
     else:
         raise ValueError  # TODO
+
+
+def _has_permission(
+    perm_entries: list[SubjectPermissionEntry] | list[GroupPermissionEntry],
+    permission: Permission,
+    payload: str | None,
+) -> bool:
+    for entry in perm_entries:
+        if (entry.node == permission.node.value) and (entry.payload == serialize_payload(payload)):
+            return True
+    return False
+
+
+def _recursive_group_has_permission(
+    group_entry: GroupEntry, permission: Permission, payload: str | None
+) -> bool:
+    """Recursively check whether the group or one of its parents has the perm searched for."""
+    perm_entries: list[GroupPermissionEntry] = group_entry.permission_entries
+    if _has_permission(perm_entries=perm_entries, permission=permission, payload=payload):
+        return True
+
+    parent_entries: list[GroupEntry] = group_entry.parent_entries
+    for entry in parent_entries:
+        if _recursive_group_has_permission(
+            group_entry=entry, permission=permission, payload=payload
+        ):
+            return True
+
+    return False

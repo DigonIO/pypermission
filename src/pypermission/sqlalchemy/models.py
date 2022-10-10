@@ -96,8 +96,12 @@ class MembershipEntry(DeclarativeMeta, TimeStampMixin):
     subject_db_id = Column(Integer, ForeignKey("subject_table.entity_db_id"), primary_key=True)
     group_db_id = Column(Integer, ForeignKey("group_table.entity_db_id"), primary_key=True)
 
-    subject_entry = relationship("SubjectEntry", back_populates="membership_entries")
-    group_entry = relationship("GroupEntry", back_populates="membership_entries")
+    subject_entry = relationship(
+        "SubjectEntry", back_populates="membership_entries", primary_keys=[subject_db_id]
+    )
+    group_entry = relationship(
+        "GroupEntry", back_populates="membership_entries", primary_keys=[group_db_id]
+    )
 
 
 class ParentChildRelationshipEntry(DeclarativeMeta, TimeStampMixin):
@@ -108,8 +112,8 @@ class ParentChildRelationshipEntry(DeclarativeMeta, TimeStampMixin):
     child_db_id = Column(Integer, ForeignKey("group_table.entity_db_id"), primary_key=True)
 
     parent_entry = relationship(
-        "GroupEntry", back_populates="parent_entries", foreign_keys=[parent_db_id]
+        "GroupEntry", back_populates="child_entries", foreign_keys=[parent_db_id]
     )
     child_entry = relationship(
-        "GroupEntry", back_populates="child_entries", foreign_keys=[child_db_id]
+        "GroupEntry", back_populates="parent_entries", foreign_keys=[child_db_id]
     )
