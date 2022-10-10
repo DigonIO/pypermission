@@ -99,16 +99,16 @@ def create_membership(*, serial_sid: str, serial_gid: str, db: Session):
 
 
 def read_subject(*, serial_sid: str, db: Session) -> SubjectEntry:
-    subject_entry = db.query(SubjectEntry).filter(SubjectEntry.serial_eid == serial_sid).all()
-    if subject_entry:
-        return subject_entry[0]
+    subject_entries = db.query(SubjectEntry).filter(SubjectEntry.serial_eid == serial_sid).all()
+    if subject_entries:
+        return subject_entries[0]
     raise UnknownSubjectIDError  # TODO
 
 
 def read_group(*, serial_gid: str, db: Session) -> GroupEntry:
-    group_entry = db.query(GroupEntry).filter(GroupEntry.serial_eid == serial_gid).all()
-    if group_entry:
-        return group_entry[0]
+    group_entries = db.query(GroupEntry).filter(GroupEntry.serial_eid == serial_gid).all()
+    if group_entries:
+        return group_entries[0]
     raise UnknownGroupIDError  # TODO
 
 
@@ -176,6 +176,10 @@ def delete_membership(*, serial_sid: str, serial_gid: str, db: Session):
 ####################################################################################################
 
 
+def serialize_payload(payload: str | None):
+    return "None" if payload is None else payload
+
+
 def _create_permission_entry(
     *,
     table: SubjectPermissionEntry | GroupPermissionEntry,
@@ -188,7 +192,7 @@ def _create_permission_entry(
     perm_entry = table(
         entity_db_id=entity_db_id,
         node=node.value,
-        payload=("None" if payload is None else payload),
+        payload=serialize_payload(payload),
     )
 
     db.add(perm_entry)
@@ -213,7 +217,7 @@ def _delete_permission_entry(
         .filter(
             table.entity_db_id == entity_db_id,
             table.node == node.value,
-            table.payload == ("None" if payload is None else payload),
+            table.payload == serialize_payload(payload),
         )
         .all()  # Should only have one entry
     )

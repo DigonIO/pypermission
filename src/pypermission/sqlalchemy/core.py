@@ -10,8 +10,14 @@ from pypermission.sqlalchemy.models import (
     DeclarativeMeta,
     SubjectEntry,
     GroupEntry,
+    SubjectPermissionEntry,
 )
-from pypermission.error import EntityIDCollisionError, UnknownSubjectIDError, UnknownGroupIDError
+from pypermission.error import (
+    EntityIDCollisionError,
+    UnknownSubjectIDError,
+    UnknownGroupIDError,
+    UnknownPermissionNodeError,
+)
 from pypermission.sqlalchemy.service import (
     create_subject,
     create_group,
@@ -23,6 +29,8 @@ from pypermission.sqlalchemy.service import (
     delete_group_permission,
     create_membership,
     delete_membership,
+    read_subject,
+    serialize_payload,
 )
 
 
@@ -123,6 +131,23 @@ class Authority(_Authority):
 
         group_entries = db.query(GroupEntry).all()
         return set(entity_id_deserializer(entry.serial_eid) for entry in group_entries)
+
+    def subject_has_permission(
+        self, *, sid: EntityID, node: PermissionNode, payload: str | None = None, db: Session
+    ) -> bool:
+        serial_sid = entity_id_serializer(sid)
+        db = self._setup_db_session(db)
+        permission = self._get_permission(node=node)
+        validate_payload_status(permission=permission, payload=payload)
+
+        subject_entry = read_subject(serial_sid=serial_sid, db=db)
+
+        perm_entries: list[SubjectPermissionEntry] = subject_entry.permission_entries
+        for entry in perm_entries:
+            if (entry.node == node.value) and (entry.payload == serialize_payload(payload)):
+                return True
+
+        return False
 
     ################################################################################################
     ### Remove
