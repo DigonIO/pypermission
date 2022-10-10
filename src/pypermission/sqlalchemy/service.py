@@ -8,6 +8,7 @@ from pypermission.sqlalchemy.models import (
     SubjectPermissionEntry,
     GroupPermissionEntry,
     MembershipEntry,
+    ParentChildRelationshipEntry,
 )
 from pypermission.error import EntityIDCollisionError, UnknownSubjectIDError, UnknownGroupIDError
 
@@ -78,7 +79,7 @@ def create_group_permission(
     )
 
 
-def create_membership(*, serial_sid: str, serial_gid: str, db: Session):
+def create_membership(*, serial_sid: str, serial_gid: str, db: Session) -> None:
     subject_entry = read_subject(serial_sid=serial_sid, db=db)
     group_entry = read_group(serial_gid=serial_gid, db=db)
 
@@ -86,6 +87,22 @@ def create_membership(*, serial_sid: str, serial_gid: str, db: Session):
         subject_db_id=subject_entry.entity_db_id, group_db_id=group_entry.entity_db_id
     )
     db.add(ms_entry)
+    try:
+        db.commit()
+    except IntegrityError as err:
+        # raised if the entry already exists
+        ...
+
+
+def create_parent_child_relationship(*, serial_pid: str, serial_cid: str, db: Session) -> None:
+    parent_entry = read_group(serial_gid=serial_pid, db=db)
+    child_entry = read_group(serial_gid=serial_cid, db=db)
+
+    parent_entry = ParentChildRelationshipEntry(
+        parent_db_id=parent_entry.entity_db_id, child_db_id=child_entry.entity_db_id
+    )
+
+    db.add(parent_entry)
     try:
         db.commit()
     except IntegrityError as err:
@@ -161,7 +178,29 @@ def delete_membership(*, serial_sid: str, serial_gid: str, db: Session):
         db.query(MembershipEntry)
         .filter(
             MembershipEntry.subject_db_id == subject_entry.entity_db_id,
-            MembershipEntry.group_db_id == subject_entry.group_entry,
+            MembershipEntry.group_db_id == group_entry.entity_db_id,
+        )
+        .all()  # Should only have one entry
+    )
+
+    if entries:
+        db.delete(entries[0])
+    db.commit()
+
+
+def delete_parent_child_relationship(*, serial_pid: str, serial_cid: str, db: Session) -> None:
+    parent_entry = read_group(serial_gid=serial_pid, db=db)
+    child_entry = read_group(serial_gid=serial_cid, db=db)
+
+    parent_entry = ParentChildRelationshipEntry(
+        parent_db_id=parent_entry.entity_db_id, child_db_id=child_entry.entity_db_id
+    )
+
+    entries = (
+        db.query(ParentChildRelationshipEntry)
+        .filter(
+            ParentChildRelationshipEntry.parent_db_id == parent_entry.entity_db_id,
+            ParentChildRelationshipEntry.child_db_id == child_entry.entity_db_id,
         )
         .all()  # Should only have one entry
     )

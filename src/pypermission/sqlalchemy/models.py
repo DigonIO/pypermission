@@ -74,6 +74,9 @@ class GroupEntry(DeclarativeMeta, PermissionableEntityMixin):
     permission_entries = relationship("GroupPermissionEntry", cascade="all,delete")
     membership_entries = relationship("MembershipEntry", cascade="all,delete")
 
+    parent_entries = relationship("GroupEntry", cascade="all,delete")
+    child_entries = relationship("GroupEntry", cascade="all,delete")
+
 
 class SubjectPermissionEntry(DeclarativeMeta, PermissionPayloadMixin):
     __tablename__ = "subject_permission_table"
@@ -95,3 +98,18 @@ class MembershipEntry(DeclarativeMeta, TimeStampMixin):
 
     subject_entry = relationship("SubjectEntry", back_populates="membership_entries")
     group_entry = relationship("GroupEntry", back_populates="membership_entries")
+
+
+class ParentChildRelationshipEntry(DeclarativeMeta, TimeStampMixin):
+    __tablename__ = "parent_group_table"
+    __table_args__ = {"extend_existing": EXTEND_EXISTING}
+
+    parent_db_id = Column(Integer, ForeignKey("group_table.entity_db_id"), primary_key=True)
+    child_db_id = Column(Integer, ForeignKey("group_table.entity_db_id"), primary_key=True)
+
+    parent_entry = relationship(
+        "GroupEntry", back_populates="parent_entries", foreign_keys=[parent_db_id]
+    )
+    child_entry = relationship(
+        "GroupEntry", back_populates="child_entries", foreign_keys=[child_db_id]
+    )

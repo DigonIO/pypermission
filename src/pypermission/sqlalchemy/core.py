@@ -30,7 +30,10 @@ from pypermission.sqlalchemy.service import (
     create_membership,
     delete_membership,
     read_subject,
+    read_group,
     serialize_payload,
+    create_parent_child_relationship,
+    delete_parent_child_relationship,
 )
 
 
@@ -100,19 +103,22 @@ class Authority(_Authority):
 
         create_group_permission(serial_gid=serial_gid, node=node, payload=payload, db=db)
 
-    def group_add_subject(
-        self,
-        *,
-        gid: EntityID,
-        sid: EntityID,
-        db: Session | None = None,
-    ) -> None:
+    def group_add_subject(self, *, gid: EntityID, sid: EntityID, db: Session | None = None) -> None:
         """Add a subject to a group to inherit all its permissions."""
         serial_gid = entity_id_serializer(gid)
         serial_sid = entity_id_serializer(sid)
         db = self._setup_db_session(db)
 
         create_membership(serial_sid=serial_sid, serial_gid=serial_gid, db=db)
+
+    def group_add_child_group(
+        self, *, gid: EntityID, cid: EntityID, db: Session | None = None
+    ) -> None:
+        """Add a group to a parent group to inherit all its permissions."""
+        serial_gid = entity_id_serializer(gid)
+        serial_cid = entity_id_serializer(cid)
+
+        create_parent_child_relationship(serial_pid=serial_gid, serial_cid=serial_cid, db=db)
 
     ################################################################################################
     ### Get
@@ -131,6 +137,24 @@ class Authority(_Authority):
 
         group_entries = db.query(GroupEntry).all()
         return set(entity_id_deserializer(entry.serial_eid) for entry in group_entries)
+
+    def group_get_child_groups(self, *, gid: EntityID, db: Session | None = None) -> set[EntityID]:
+        """Get a set of all child group IDs of a group."""
+        serial_gid = entity_id_serializer(gid)
+        db = self._setup_db_session(db)
+
+        group_entry = read_group(serial_gid=serial_gid, db=db)
+        child_entries: list[GroupEntry] = group_entry.child_entries
+        return set(entity_id_deserializer(entry.serial_eid) for entry in child_entries)
+
+    def group_get_parent_groups(self, *, gid: EntityID, db: Session | None = None) -> set[EntityID]:
+        """Get a set of all parent group IDs of a group."""
+        serial_gid = entity_id_serializer(gid)
+        db = self._setup_db_session(db)
+
+        group_entry = read_group(serial_gid=serial_gid, db=db)
+        parent_entries: list[GroupEntry] = group_entry.parent_entries
+        return set(entity_id_deserializer(entry.serial_eid) for entry in parent_entries)
 
     def subject_has_permission(
         self, *, sid: EntityID, node: PermissionNode, payload: str | None = None, db: Session
@@ -212,6 +236,15 @@ class Authority(_Authority):
         db = self._setup_db_session(db)
 
         delete_membership(serial_sid=serial_sid, serial_gid=serial_gid, db=db)
+
+    def group_rem_child_group(
+        self, *, gid: EntityID, cid: EntityID, db: Session | None = None
+    ) -> None:
+        """Remove a group from a group."""
+        serial_gid = entity_id_serializer(gid)
+        serial_cid = entity_id_serializer(cid)
+
+        delete_parent_child_relationship(serial_pid=serial_gid, serial_cid=serial_cid, db=db)
 
     ################################################################################################
     ### Private
