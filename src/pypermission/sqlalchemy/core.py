@@ -124,6 +124,7 @@ class Authority(_Authority):
         """Add a group to a parent group to inherit all its permissions."""
         serial_gid = entity_id_serializer(gid)
         serial_cid = entity_id_serializer(cid)
+        db = self._setup_db_session(db)
 
         create_parent_child_relationship(serial_pid=serial_gid, serial_cid=serial_cid, db=db)
 

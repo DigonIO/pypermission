@@ -7,7 +7,7 @@ from pypermission.sqlalchemy.models import (
     GroupEntry,
     GroupPermissionEntry,
     MembershipEntry,
-    ParentChildRelationshipEntry,
+    RelationshipEntry,
     SubjectEntry,
     SubjectPermissionEntry,
 )
@@ -98,7 +98,7 @@ def create_parent_child_relationship(*, serial_pid: str, serial_cid: str, db: Se
     parent_entry = read_group(serial_gid=serial_pid, db=db)
     child_entry = read_group(serial_gid=serial_cid, db=db)
 
-    parent_entry = ParentChildRelationshipEntry(
+    parent_entry = RelationshipEntry(
         parent_db_id=parent_entry.entity_db_id, child_db_id=child_entry.entity_db_id
     )
 
@@ -192,15 +192,15 @@ def delete_parent_child_relationship(*, serial_pid: str, serial_cid: str, db: Se
     parent_entry = read_group(serial_gid=serial_pid, db=db)
     child_entry = read_group(serial_gid=serial_cid, db=db)
 
-    parent_entry = ParentChildRelationshipEntry(
+    parent_entry = RelationshipEntry(
         parent_db_id=parent_entry.entity_db_id, child_db_id=child_entry.entity_db_id
     )
 
     entries = (
-        db.query(ParentChildRelationshipEntry)
+        db.query(RelationshipEntry)
         .filter(
-            ParentChildRelationshipEntry.parent_db_id == parent_entry.entity_db_id,
-            ParentChildRelationshipEntry.child_db_id == child_entry.entity_db_id,
+            RelationshipEntry.parent_db_id == parent_entry.entity_db_id,
+            RelationshipEntry.child_db_id == child_entry.entity_db_id,
         )
         .all()  # Should only have one entry
     )

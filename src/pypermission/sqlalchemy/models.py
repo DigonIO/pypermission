@@ -1,4 +1,6 @@
+from __future__ import annotations
 from datetime import datetime
+from typing import cast
 
 from sqlalchemy import Column, DateTime, ForeignKey, Integer, String, event
 from sqlalchemy.orm import declarative_base, relationship
@@ -64,7 +66,14 @@ class SubjectEntry(DeclarativeMeta, PermissionableEntityMixin):
     __table_args__ = {"extend_existing": EXTEND_EXISTING}
 
     permission_entries = relationship("SubjectPermissionEntry", cascade="all,delete")
-    membership_entries = relationship("MembershipEntry", cascade="all,delete")
+
+    _membership_entries = relationship("MembershipEntry", cascade="all,delete")
+
+    @property
+    def group_entries(self) -> list[GroupEntry]:
+        return [
+            cast(MembershipEntry, membership).group_entry for membership in self._membership_entries
+        ]
 
 
 class GroupEntry(DeclarativeMeta, PermissionableEntityMixin):
@@ -72,10 +81,42 @@ class GroupEntry(DeclarativeMeta, PermissionableEntityMixin):
     __table_args__ = {"extend_existing": EXTEND_EXISTING}
 
     permission_entries = relationship("GroupPermissionEntry", cascade="all,delete")
-    membership_entries = relationship("MembershipEntry", cascade="all,delete")
 
-    parent_entries = relationship("GroupEntry", cascade="all,delete")
-    child_entries = relationship("GroupEntry", cascade="all,delete")
+    _membership_entries = relationship("MembershipEntry", cascade="all,delete")
+
+    _parent_relationship_entries = relationship(
+        "RelationshipEntry",
+        cascade="all,delete",
+        primaryjoin="and_(RelationshipEntry.child_db_id==GroupEntry.entity_db_id)",
+        # viewonly=True,
+    )
+    _child_relationship_entries = relationship(
+        "RelationshipEntry",
+        cascade="all,delete",
+        primaryjoin="and_(RelationshipEntry.parent_db_id==GroupEntry.entity_db_id)",
+        # viewonly=True,
+    )
+
+    @property
+    def subject_entries(self) -> list[GroupEntry]:
+        return [
+            cast(MembershipEntry, membership).subject_entry
+            for membership in self._membership_entries
+        ]
+
+    @property
+    def parent_entries(self) -> list[GroupEntry]:
+        return [
+            cast(RelationshipEntry, relation).parent_entry
+            for relation in self._parent_relationship_entries
+        ]
+
+    @property
+    def child_entries(self) -> list[GroupEntry]:
+        return [
+            cast(RelationshipEntry, relation).child_entry
+            for relation in self._child_relationship_entries
+        ]
 
 
 class SubjectPermissionEntry(DeclarativeMeta, PermissionPayloadMixin):
@@ -96,24 +137,20 @@ class MembershipEntry(DeclarativeMeta, TimeStampMixin):
     subject_db_id = Column(Integer, ForeignKey("subject_table.entity_db_id"), primary_key=True)
     group_db_id = Column(Integer, ForeignKey("group_table.entity_db_id"), primary_key=True)
 
-    subject_entry = relationship(
-        "SubjectEntry", back_populates="membership_entries", primary_keys=[subject_db_id]
-    )
-    group_entry = relationship(
-        "GroupEntry", back_populates="membership_entries", primary_keys=[group_db_id]
-    )
+    subject_entry = relationship("SubjectEntry", back_populates="_membership_entries")
+    group_entry = relationship("GroupEntry", back_populates="_membership_entries")
 
 
-class ParentChildRelationshipEntry(DeclarativeMeta, TimeStampMixin):
-    __tablename__ = "parent_group_table"
+class RelationshipEntry(DeclarativeMeta, TimeStampMixin):
+    __tablename__ = "relationship_table"
     __table_args__ = {"extend_existing": EXTEND_EXISTING}
 
     parent_db_id = Column(Integer, ForeignKey("group_table.entity_db_id"), primary_key=True)
     child_db_id = Column(Integer, ForeignKey("group_table.entity_db_id"), primary_key=True)
 
     parent_entry = relationship(
-        "GroupEntry", back_populates="child_entries", foreign_keys=[parent_db_id]
+        "GroupEntry", foreign_keys=[parent_db_id], back_populates="_child_relationship_entries"
     )
     child_entry = relationship(
-        "GroupEntry", back_populates="parent_entries", foreign_keys=[child_db_id]
+        "GroupEntry", foreign_keys=[child_db_id], back_populates="_parent_relationship_entries"
     )
