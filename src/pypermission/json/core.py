@@ -12,6 +12,10 @@ from pypermission.error import (
     UnknownSubjectIDError,
 )
 
+####################################################################################################
+### Const
+####################################################################################################
+
 OutIDTypeDict = dict[str, Literal["str"] | Literal["int"]]
 InIDTypeDict = dict[str, type[str | int]]
 
@@ -27,6 +31,11 @@ class NonSerialData(TypedDict):
     subjects: dict[str, list[str]]
     gid_types: OutIDTypeDict
     sid_types: OutIDTypeDict
+
+
+####################################################################################################
+### Permissionable entities
+####################################################################################################
 
 
 class PermissionableEntity:
@@ -103,6 +112,11 @@ class Group(PermissionableEntity):
         return self._child_ids
 
 
+####################################################################################################
+### Authority
+####################################################################################################
+
+
 class Authority(_Authority):
 
     _subjects: dict[EntityID, Subject]
@@ -117,6 +131,10 @@ class Authority(_Authority):
         self._subjects = {}
         self._groups = {}
         self._data_file = data_file
+
+    ################################################################################################
+    ### IO
+    ################################################################################################
 
     def save_to_file(self, path: Path | str | None = None):
         """Save the current state to file formatted as JSON."""
@@ -268,6 +286,10 @@ class Authority(_Authority):
                 child = self._groups[child_id]
                 child.parent_ids.add(gid)
 
+    ################################################################################################
+    ### Add
+    ################################################################################################
+
     def add_subject(self, sid: EntityID) -> None:
         """Create a new subject for a given ID."""
         if sid in self._subjects:
@@ -284,21 +306,51 @@ class Authority(_Authority):
         group = Group(id=gid)
         self._groups[gid] = group
 
-    def rem_subject(self, sid: EntityID) -> None:
-        """Remove a subject for a given ID."""
-        subject = self._subjects.pop(sid, None)
-        if subject is None:
-            return
-        for gid in subject.gids:
-            self._groups[gid].sids.remove(sid)
+    def group_add_subject(self, *, gid: EntityID, sid: EntityID) -> None:
+        """Add a subject to a group to inherit all its permissions."""
+        group = self._get_group(gid=gid)
+        subject = self._get_subject(sid=sid)
 
-    def rem_group(self, gid: EntityID) -> None:
-        """Remove a group for a given ID."""
-        group = self._groups.pop(gid, None)
-        if group is None:
-            return
-        for sid in group.sids:
-            self._subjects[sid].gids.remove(gid)
+        group.sids.add(sid)
+        subject.gids.add(gid)
+
+    def group_add_child_group(self, *, gid: EntityID, cid: EntityID) -> None:
+        """Add a group to a parent group to inherit all its permissions."""
+        child = self._get_group(gid=cid)
+        parent = self._get_group(gid=gid)
+
+        self._detect_group_cycle(parent=parent, child_id=cid)
+
+        parent.child_ids.add(cid)
+        child.parent_ids.add(gid)
+
+    def subject_add_permission(
+        self, *, sid: EntityID, node: PermissionNode, payload: str | None = None
+    ):
+        """Add a permission to a subject."""
+        permission = self._get_permission(node=node)
+        validate_payload_status(permission=permission, payload=payload)
+        permission_map = self._get_subject(sid=sid).permission_map
+
+        _add_permission_map_entry(
+            permission_map=permission_map, permission=permission, payload=payload
+        )
+
+    def group_add_permission(
+        self, *, gid: EntityID, node: PermissionNode, payload: str | None = None
+    ):
+        """Add a permission to a group."""
+        permission = self._get_permission(node=node)
+        validate_payload_status(permission=permission, payload=payload)
+        permission_map = self._get_group(gid=gid).permission_map
+
+        _add_permission_map_entry(
+            permission_map=permission_map, permission=permission, payload=payload
+        )
+
+    ################################################################################################
+    ### Get
+    ################################################################################################
 
     def get_subjects(self) -> set[EntityID]:
         """Get the IDs for all known subjects."""
@@ -307,6 +359,26 @@ class Authority(_Authority):
     def get_groups(self) -> set[EntityID]:
         """Get the IDs for all known groups."""
         return set(self._groups.keys())
+
+    def subject_get_groups(self, *, sid: EntityID) -> set[EntityID]:
+        """Get a set of a group IDs of a groups a subject is member of."""
+        subject = self._get_subject(sid=sid)
+        return subject.gids.copy()
+
+    def group_get_subjects(self, *, gid: EntityID) -> set[EntityID]:
+        """Get a set of all subject IDs from a group."""
+        group = self._get_group(gid=gid)
+        return group.sids.copy()
+
+    def group_get_child_groups(self, *, gid: EntityID) -> set[EntityID]:
+        """Get a set of all child group IDs of a group."""
+        group = self._get_group(gid=gid)
+        return group.child_ids.copy()
+
+    def group_get_parent_groups(self, *, gid: EntityID) -> set[EntityID]:
+        """Get a set of all parent group IDs of a group."""
+        group = self._get_group(gid=gid)
+        return group.parent_ids.copy()
 
     def subject_has_permission(
         self, *, sid: EntityID, node: PermissionNode, payload: str | None = None
@@ -328,39 +400,6 @@ class Authority(_Authority):
 
         return False
 
-    def subject_add_permission(
-        self, *, sid: EntityID, node: PermissionNode, payload: str | None = None
-    ):
-        """Add a permission to a subject."""
-        permission = self._get_permission(node=node)
-        validate_payload_status(permission=permission, payload=payload)
-        permission_map = self._get_subject(sid=sid).permission_map
-
-        _add_permission_map_entry(
-            permission_map=permission_map, permission=permission, payload=payload
-        )
-
-    def subject_rem_permission(
-        self, *, sid: EntityID, node: PermissionNode, payload: str | None = None
-    ):
-        """Remove a permission from a subject."""
-        permission = self._get_permission(node=node)
-        validate_payload_status(permission=permission, payload=payload)
-        permission_map = self._get_subject(sid=sid).permission_map
-
-        _rem_permission_map_entry(
-            permission_map=permission_map, permission=permission, payload=payload
-        )
-
-    def subject_get_permissions(self, *, sid: EntityID) -> PermissionMap:
-        """Get a copy of all permissions from a subject."""
-        return self._get_subject(sid=sid).permission_map.copy()
-
-    def subject_get_groups(self, *, sid: EntityID) -> set[EntityID]:
-        """Get a set of a group IDs of a groups a subject is member of."""
-        subject = self._get_subject(sid=sid)
-        return subject.gids.copy()
-
     def group_has_permission(
         self, *, gid: EntityID, node: PermissionNode, payload: str | None = None
     ) -> bool:
@@ -373,15 +412,43 @@ class Authority(_Authority):
             group=group, permission=permission, payload=payload
         )
 
-    def group_add_permission(
-        self, *, gid: EntityID, node: PermissionNode, payload: str | None = None
+    def subject_get_permissions(self, *, sid: EntityID) -> PermissionMap:
+        """Get a copy of all permissions from a subject."""
+        return self._get_subject(sid=sid).permission_map.copy()
+
+    def group_get_permissions(self, *, gid: EntityID) -> PermissionMap:
+        """Get a copy of all permissions from a group."""
+        return self._get_group(gid=gid).permission_map.copy()
+
+    ################################################################################################
+    ### Remove
+    ################################################################################################
+
+    def rem_subject(self, sid: EntityID) -> None:
+        """Remove a subject for a given ID."""
+        subject = self._subjects.pop(sid, None)
+        if subject is None:
+            return
+        for gid in subject.gids:
+            self._groups[gid].sids.remove(sid)
+
+    def rem_group(self, gid: EntityID) -> None:
+        """Remove a group for a given ID."""
+        group = self._groups.pop(gid, None)
+        if group is None:
+            return
+        for sid in group.sids:
+            self._subjects[sid].gids.remove(gid)
+
+    def subject_rem_permission(
+        self, *, sid: EntityID, node: PermissionNode, payload: str | None = None
     ):
-        """Add a permission to a group."""
+        """Remove a permission from a subject."""
         permission = self._get_permission(node=node)
         validate_payload_status(permission=permission, payload=payload)
-        permission_map = self._get_group(gid=gid).permission_map
+        permission_map = self._get_subject(sid=sid).permission_map
 
-        _add_permission_map_entry(
+        _rem_permission_map_entry(
             permission_map=permission_map, permission=permission, payload=payload
         )
 
@@ -396,43 +463,6 @@ class Authority(_Authority):
         _rem_permission_map_entry(
             permission_map=permission_map, permission=permission, payload=payload
         )
-
-    def group_get_permissions(self, *, gid: EntityID) -> PermissionMap:
-        """Get a copy of all permissions from a group."""
-        return self._get_group(gid=gid).permission_map.copy()
-
-    def group_get_subjects(self, *, gid: EntityID) -> set[EntityID]:
-        """Get a set of all subject IDs from a group."""
-        group = self._get_group(gid=gid)
-        return group.sids.copy()
-
-    def group_add_subject(self, *, gid: EntityID, sid: EntityID) -> None:
-        """Add a subject to a group to inherit all its permissions."""
-        group = self._get_group(gid=gid)
-        subject = self._get_subject(sid=sid)
-
-        group.sids.add(sid)
-        subject.gids.add(gid)
-
-    def group_add_child_group(self, *, gid: EntityID, cid: EntityID) -> None:
-        """Add a group to a parent group to inherit all its permissions."""
-        child = self._get_group(gid=cid)
-        parent = self._get_group(gid=gid)
-
-        self._detect_group_cycle(parent=parent, child_id=cid)
-
-        parent.child_ids.add(cid)
-        child.parent_ids.add(gid)
-
-    def group_get_child_groups(self, *, gid: EntityID) -> set[EntityID]:
-        """Get a set of all child group IDs of a group."""
-        group = self._get_group(gid=gid)
-        return group.child_ids.copy()
-
-    def group_get_parent_groups(self, *, gid: EntityID) -> set[EntityID]:
-        """Get a set of all parent group IDs of a group."""
-        group = self._get_group(gid=gid)
-        return group.parent_ids.copy()
 
     def group_rem_subject(self, *, gid: EntityID, sid: EntityID) -> None:
         """Remove a subject from a group."""
@@ -449,6 +479,10 @@ class Authority(_Authority):
 
         parent.child_ids.remove(child_id)
         child.parent_ids.remove(pid)
+
+    ################################################################################################
+    ### Private
+    ################################################################################################
 
     def _get_subject(self, *, sid: EntityID) -> Subject:
         """Just a simple wrapper to avoid some boilerplate code while getting a subject."""
@@ -496,6 +530,11 @@ class Authority(_Authority):
     @staticmethod
     def _deserialize_data(*, serial_data: str) -> Any:
         return json.loads(serial_data)
+
+
+####################################################################################################
+### Util
+####################################################################################################
 
 
 def _add_permission_map_entry(
