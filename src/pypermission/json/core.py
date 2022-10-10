@@ -3,8 +3,14 @@ from enum import Enum
 from pathlib import Path
 from typing import Any, Literal, TypedDict, cast
 
-from pypermission.core import Authority as _Authority, validate_payload_status
-from pypermission.core import EntityID, Permission, PermissionMap, PermissionNode
+from pypermission.core import Authority as _Authority
+from pypermission.core import (
+    EntityID,
+    Permission,
+    PermissionMap,
+    PermissionNode,
+    validate_payload_status,
+)
 from pypermission.error import (
     EntityIDCollisionError,
     GroupCycleError,

@@ -11,9 +11,9 @@ from enum import Enum
 from typing import cast
 
 from pypermission.error import (
+    MissingPayloadError,
     PermissionParsingError,
     UnknownPermissionNodeError,
-    MissingPayloadError,
     UnusedPayloadError,
 )
 
