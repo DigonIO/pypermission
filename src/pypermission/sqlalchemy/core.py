@@ -21,6 +21,8 @@ from pypermission.sqlalchemy.service import (
     create_group_permission,
     delete_subject_permission,
     delete_group_permission,
+    create_membership,
+    delete_membership,
 )
 
 
@@ -41,7 +43,7 @@ class Authority(_Authority):
         DeclarativeMeta.metadata.create_all(bind=engine)
 
     ################################################################################################
-    ### Create
+    ### Add
     ################################################################################################
 
     def add_subject(self, sid: EntityID, db: Session | None = None) -> None:
@@ -56,7 +58,7 @@ class Authority(_Authority):
         serial_gid = entity_id_serializer(gid)
         db = self._setup_db_session(db)
 
-        create_group(serial_sid=serial_gid, db=db)
+        create_group(serial_gid=serial_gid, db=db)
 
     def subject_add_permission(
         self,
@@ -90,8 +92,22 @@ class Authority(_Authority):
 
         create_group_permission(serial_gid=serial_gid, node=node, payload=payload, db=db)
 
+    def group_add_subject(
+        self,
+        *,
+        gid: EntityID,
+        sid: EntityID,
+        db: Session | None = None,
+    ) -> None:
+        """Add a subject to a group to inherit all its permissions."""
+        serial_gid = entity_id_serializer(gid)
+        serial_sid = entity_id_serializer(sid)
+        db = self._setup_db_session(db)
+
+        create_membership(serial_sid=serial_sid, serial_gid=serial_gid, db=db)
+
     ################################################################################################
-    ### Read
+    ### Get
     ################################################################################################
 
     def get_subjects(self, db: Session | None = None) -> set[EntityID]:
@@ -109,7 +125,7 @@ class Authority(_Authority):
         return set(entity_id_deserializer(entry.serial_eid) for entry in group_entries)
 
     ################################################################################################
-    ### Delete
+    ### Remove
     ################################################################################################
 
     def rem_subject(self, sid: EntityID, db: Session | None = None) -> None:
@@ -124,7 +140,7 @@ class Authority(_Authority):
         serial_gid = entity_id_serializer(gid)
         db = self._setup_db_session(db)
 
-        delete_group(serial_sid=serial_gid, db=db)
+        delete_group(serial_gid=serial_gid, db=db)
 
     def subject_rem_permission(
         self,
@@ -157,6 +173,20 @@ class Authority(_Authority):
         validate_payload_status(permission=permission, payload=payload)
 
         delete_group_permission(serial_gid=serial_gid, node=node, payload=payload, db=db)
+
+    def group_rem_subject(
+        self,
+        *,
+        gid: EntityID,
+        sid: EntityID,
+        db: Session | None = None,
+    ) -> None:
+        """Remove a subject from a group."""
+        serial_gid = entity_id_serializer(gid)
+        serial_sid = entity_id_serializer(sid)
+        db = self._setup_db_session(db)
+
+        delete_membership(serial_sid=serial_sid, serial_gid=serial_gid, db=db)
 
     ################################################################################################
     ### Private

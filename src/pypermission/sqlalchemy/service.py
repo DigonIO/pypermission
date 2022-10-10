@@ -7,6 +7,7 @@ from pypermission.sqlalchemy.models import (
     GroupEntry,
     SubjectPermissionEntry,
     GroupPermissionEntry,
+    MembershipEntry,
 )
 from pypermission.error import EntityIDCollisionError, UnknownSubjectIDError, UnknownGroupIDError
 
@@ -77,6 +78,21 @@ def create_group_permission(
     )
 
 
+def create_membership(*, serial_sid: str, serial_gid: str, db: Session):
+    subject_entry = read_subject(serial_sid=serial_sid, db=db)
+    group_entry = read_group(serial_gid=serial_gid, db=db)
+
+    ms_entry = MembershipEntry(
+        subject_db_id=subject_entry.entity_db_id, group_db_id=group_entry.entity_db_id
+    )
+    db.add(ms_entry)
+    try:
+        db.commit()
+    except IntegrityError as err:
+        # raised if the entry already exists
+        ...
+
+
 ####################################################################################################
 ### Read
 ####################################################################################################
@@ -90,7 +106,7 @@ def read_subject(*, serial_sid: str, db: Session) -> SubjectEntry:
 
 
 def read_group(*, serial_gid: str, db: Session) -> GroupEntry:
-    group_entry = db.query(GroupEntry).filter(GroupEntry.serial_eid == serial_gid)
+    group_entry = db.query(GroupEntry).filter(GroupEntry.serial_eid == serial_gid).all()
     if group_entry:
         return group_entry[0]
     raise UnknownGroupIDError  # TODO
@@ -135,6 +151,24 @@ def delete_group_permission(
         node=node,
         payload=payload,
     )
+
+
+def delete_membership(*, serial_sid: str, serial_gid: str, db: Session):
+    subject_entry = read_subject(serial_sid=serial_sid, db=db)
+    group_entry = read_group(serial_gid=serial_gid, db=db)
+
+    entries = (
+        db.query(MembershipEntry)
+        .filter(
+            MembershipEntry.subject_db_id == subject_entry.entity_db_id,
+            MembershipEntry.group_db_id == subject_entry.group_entry,
+        )
+        .all()  # Should only have one entry
+    )
+
+    if entries:
+        db.delete(entries[0])
+    db.commit()
 
 
 ####################################################################################################
@@ -184,6 +218,6 @@ def _delete_permission_entry(
         .all()  # Should only have one entry
     )
 
-    for entry in entries:
-        db.delete(entry)
+    if entries:
+        db.delete(entries[0])
     db.commit()

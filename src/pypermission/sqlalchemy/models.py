@@ -64,6 +64,7 @@ class SubjectEntry(DeclarativeMeta, PermissionableEntityMixin):
     __table_args__ = {"extend_existing": EXTEND_EXISTING}
 
     permission_entries = relationship("SubjectPermissionEntry", cascade="all,delete")
+    membership_entries = relationship("MembershipEntry", cascade="all,delete")
 
 
 class GroupEntry(DeclarativeMeta, PermissionableEntityMixin):
@@ -71,15 +72,26 @@ class GroupEntry(DeclarativeMeta, PermissionableEntityMixin):
     __table_args__ = {"extend_existing": EXTEND_EXISTING}
 
     permission_entries = relationship("GroupPermissionEntry", cascade="all,delete")
+    membership_entries = relationship("MembershipEntry", cascade="all,delete")
 
 
 class SubjectPermissionEntry(DeclarativeMeta, PermissionPayloadMixin):
     __tablename__ = "subject_permission_table"
     __table_args__ = {"extend_existing": EXTEND_EXISTING}
-    entity_db_id = Column(Integer, ForeignKey("subject_table.db_id"), primary_key=True)
+    entity_db_id = Column(Integer, ForeignKey("subject_table.entity_db_id"), primary_key=True)
 
 
 class GroupPermissionEntry(DeclarativeMeta, PermissionPayloadMixin):
     __tablename__ = "group_permission_table"
     __table_args__ = {"extend_existing": EXTEND_EXISTING}
-    entity_db_id = Column(Integer, ForeignKey("group_table.db_id"), primary_key=True)
+    entity_db_id = Column(Integer, ForeignKey("group_table.entity_db_id"), primary_key=True)
+
+
+class MembershipEntry(DeclarativeMeta, TimeStampMixin):
+    __tablename__ = "membership_table"
+    __table_args__ = {"extend_existing": EXTEND_EXISTING}
+    subject_db_id = Column(Integer, ForeignKey("subject_table.entity_db_id"), primary_key=True)
+    group_db_id = Column(Integer, ForeignKey("group_table.entity_db_id"), primary_key=True)
+
+    subject_entry = relationship("SubjectEntry", back_populates="membership_entries")
+    group_entry = relationship("GroupEntry", back_populates="membership_entries")
