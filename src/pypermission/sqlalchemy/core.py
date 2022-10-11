@@ -66,14 +66,14 @@ class Authority(_Authority):
 
     def add_subject(self, sid: EntityID, db: Session | None = None) -> None:
         """Create a new subject for a given ID."""
-        serial_sid = entity_id_serializer(sid)
+        serial_sid = _entity_id_serializer(sid)
         db = self._setup_db_session(db)
 
         create_subject(serial_sid=serial_sid, db=db)
 
     def add_group(self, gid: EntityID, db: Session | None = None) -> None:
         """Create a new group for a given ID."""
-        serial_gid = entity_id_serializer(gid)
+        serial_gid = _entity_id_serializer(gid)
         db = self._setup_db_session(db)
 
         create_group(serial_gid=serial_gid, db=db)
@@ -87,7 +87,7 @@ class Authority(_Authority):
         db: Session | None = None,
     ):
         """Add a permission to a subject."""
-        serial_sid = entity_id_serializer(sid)
+        serial_sid = _entity_id_serializer(sid)
         db = self._setup_db_session(db)
         permission = self._get_permission(node=node)
         validate_payload_status(permission=permission, payload=payload)
@@ -103,7 +103,7 @@ class Authority(_Authority):
         db: Session | None = None,
     ):
         """Add a permission to a group."""
-        serial_gid = entity_id_serializer(gid)
+        serial_gid = _entity_id_serializer(gid)
         db = self._setup_db_session(db)
         permission = self._get_permission(node=node)
         validate_payload_status(permission=permission, payload=payload)
@@ -112,8 +112,8 @@ class Authority(_Authority):
 
     def group_add_subject(self, *, gid: EntityID, sid: EntityID, db: Session | None = None) -> None:
         """Add a subject to a group to inherit all its permissions."""
-        serial_gid = entity_id_serializer(gid)
-        serial_sid = entity_id_serializer(sid)
+        serial_gid = _entity_id_serializer(gid)
+        serial_sid = _entity_id_serializer(sid)
         db = self._setup_db_session(db)
 
         create_membership(serial_sid=serial_sid, serial_gid=serial_gid, db=db)
@@ -122,8 +122,8 @@ class Authority(_Authority):
         self, *, gid: EntityID, cid: EntityID, db: Session | None = None
     ) -> None:
         """Add a group to a parent group to inherit all its permissions."""
-        serial_gid = entity_id_serializer(gid)
-        serial_cid = entity_id_serializer(cid)
+        serial_gid = _entity_id_serializer(gid)
+        serial_cid = _entity_id_serializer(cid)
         db = self._setup_db_session(db)
 
         create_parent_child_relationship(serial_pid=serial_gid, serial_cid=serial_cid, db=db)
@@ -137,37 +137,37 @@ class Authority(_Authority):
         db = self._setup_db_session(db)
 
         subject_entries = db.query(SubjectEntry).all()
-        return set(entity_id_deserializer(entry.serial_eid) for entry in subject_entries)
+        return set(_entity_id_deserializer(entry.serial_eid) for entry in subject_entries)
 
     def get_groups(self, db: Session | None = None) -> set[EntityID]:
         """Get the IDs for all known groups."""
         db = self._setup_db_session(db)
 
         group_entries = db.query(GroupEntry).all()
-        return set(entity_id_deserializer(entry.serial_eid) for entry in group_entries)
+        return set(_entity_id_deserializer(entry.serial_eid) for entry in group_entries)
 
     def group_get_child_groups(self, *, gid: EntityID, db: Session | None = None) -> set[EntityID]:
         """Get a set of all child group IDs of a group."""
-        serial_gid = entity_id_serializer(gid)
+        serial_gid = _entity_id_serializer(gid)
         db = self._setup_db_session(db)
 
         group_entry = read_group(serial_gid=serial_gid, db=db)
         child_entries: list[GroupEntry] = group_entry.child_entries
-        return set(entity_id_deserializer(entry.serial_eid) for entry in child_entries)
+        return set(_entity_id_deserializer(entry.serial_eid) for entry in child_entries)
 
     def group_get_parent_groups(self, *, gid: EntityID, db: Session | None = None) -> set[EntityID]:
         """Get a set of all parent group IDs of a group."""
-        serial_gid = entity_id_serializer(gid)
+        serial_gid = _entity_id_serializer(gid)
         db = self._setup_db_session(db)
 
         group_entry = read_group(serial_gid=serial_gid, db=db)
         parent_entries: list[GroupEntry] = group_entry.parent_entries
-        return set(entity_id_deserializer(entry.serial_eid) for entry in parent_entries)
+        return set(_entity_id_deserializer(entry.serial_eid) for entry in parent_entries)
 
     def subject_has_permission(
         self, *, sid: EntityID, node: PermissionNode, payload: str | None = None, db: Session
     ) -> bool:
-        serial_sid = entity_id_serializer(sid)
+        serial_sid = _entity_id_serializer(sid)
         db = self._setup_db_session(db)
         permission = self._get_permission(node=node)
         validate_payload_status(permission=permission, payload=payload)
@@ -190,7 +190,7 @@ class Authority(_Authority):
     def group_has_permission(
         self, *, gid: EntityID, node: PermissionNode, payload: str | None = None, db: Session
     ) -> bool:
-        serial_gid = entity_id_serializer(gid)
+        serial_gid = _entity_id_serializer(gid)
         db = self._setup_db_session(db)
         permission = self._get_permission(node=node)
         validate_payload_status(permission=permission, payload=payload)
@@ -207,14 +207,14 @@ class Authority(_Authority):
 
     def rem_subject(self, sid: EntityID, db: Session | None = None) -> None:
         """Remove a subject for a given ID."""
-        serial_sid = entity_id_serializer(sid)
+        serial_sid = _entity_id_serializer(sid)
         db = self._setup_db_session(db)
 
         delete_subject(serial_sid=serial_sid, db=db)
 
     def rem_group(self, gid: EntityID, db: Session | None = None) -> None:
         """Remove a group for a given ID."""
-        serial_gid = entity_id_serializer(gid)
+        serial_gid = _entity_id_serializer(gid)
         db = self._setup_db_session(db)
 
         delete_group(serial_gid=serial_gid, db=db)
@@ -228,7 +228,7 @@ class Authority(_Authority):
         db: Session | None = None,
     ):
         """Remove a permission to a subject."""
-        serial_sid = entity_id_serializer(sid)
+        serial_sid = _entity_id_serializer(sid)
         db = self._setup_db_session(db)
         permission = self._get_permission(node=node)
         validate_payload_status(permission=permission, payload=payload)
@@ -244,7 +244,7 @@ class Authority(_Authority):
         db: Session | None = None,
     ):
         """Remove a permission to a group."""
-        serial_gid = entity_id_serializer(gid)
+        serial_gid = _entity_id_serializer(gid)
         db = self._setup_db_session(db)
         permission = self._get_permission(node=node)
         validate_payload_status(permission=permission, payload=payload)
@@ -259,8 +259,8 @@ class Authority(_Authority):
         db: Session | None = None,
     ) -> None:
         """Remove a subject from a group."""
-        serial_gid = entity_id_serializer(gid)
-        serial_sid = entity_id_serializer(sid)
+        serial_gid = _entity_id_serializer(gid)
+        serial_sid = _entity_id_serializer(sid)
         db = self._setup_db_session(db)
 
         delete_membership(serial_sid=serial_sid, serial_gid=serial_gid, db=db)
@@ -269,8 +269,8 @@ class Authority(_Authority):
         self, *, gid: EntityID, cid: EntityID, db: Session | None = None
     ) -> None:
         """Remove a group from a group."""
-        serial_gid = entity_id_serializer(gid)
-        serial_cid = entity_id_serializer(cid)
+        serial_gid = _entity_id_serializer(gid)
+        serial_cid = _entity_id_serializer(cid)
 
         delete_parent_child_relationship(serial_pid=serial_gid, serial_cid=serial_cid, db=db)
 
@@ -291,7 +291,7 @@ class Authority(_Authority):
 ####################################################################################################
 
 
-def entity_id_serializer(eid: EntityID) -> str:
+def _entity_id_serializer(eid: EntityID) -> str:
     if isinstance(eid, int):
         serial_type = "int"
         serial_eid = str(eid)
@@ -307,7 +307,7 @@ def entity_id_serializer(eid: EntityID) -> str:
     return f"{serial_eid}:{serial_type}"
 
 
-def entity_id_deserializer(serial_eid: str) -> EntityID:
+def _entity_id_deserializer(serial_eid: str) -> EntityID:
     if len(serial_eid) > (SERIAL_ENTITY_ID_LENGHT):
         raise ValueError  # TODO
 
