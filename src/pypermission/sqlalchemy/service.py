@@ -2,7 +2,12 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from pypermission.core import PermissionNode
-from pypermission.error import EntityIDCollisionError, UnknownGroupIDError, UnknownSubjectIDError
+from pypermission.error import (
+    EntityIDCollisionError,
+    UnknownGroupIDError,
+    UnknownSubjectIDError,
+    GroupCycleError,
+)
 from pypermission.sqlalchemy.models import (
     GroupEntry,
     GroupPermissionEntry,
@@ -97,6 +102,11 @@ def create_membership(*, serial_sid: str, serial_gid: str, db: Session) -> None:
 def create_parent_child_relationship(*, serial_pid: str, serial_cid: str, db: Session) -> None:
     parent_entry = read_group(serial_gid=serial_pid, db=db)
     child_entry = read_group(serial_gid=serial_cid, db=db)
+
+    _detect_group_cycle(
+        parent_entry=parent_entry,
+        child_entry=child_entry,
+    )
 
     parent_entry = RelationshipEntry(
         parent_db_id=parent_entry.entity_db_id, child_db_id=child_entry.entity_db_id
@@ -264,3 +274,15 @@ def _delete_permission_entry(
     if entries:
         db.delete(entries[0])
     db.commit()
+
+
+def _detect_group_cycle(*, parent_entry: GroupEntry, child_entry: GroupEntry):
+    if parent_entry == child_entry:
+        raise GroupCycleError # TODO single node, single edge graph error message
+
+    parent_entries = parent_entry.parent_entries  # parents of this "parent" group
+
+    if child_entry == parent_entries:
+        raise GroupCycleError # TODO
+    for entry in parent_entries:
+        _detect_group_cycle(parent_entry=entry, child_entry=child_entry)

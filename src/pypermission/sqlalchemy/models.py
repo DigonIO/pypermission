@@ -88,13 +88,13 @@ class GroupEntry(DeclarativeMeta, PermissionableEntityMixin):
         "RelationshipEntry",
         cascade="all,delete",
         primaryjoin="and_(RelationshipEntry.child_db_id==GroupEntry.entity_db_id)",
-        # viewonly=True,
+        # do not use viewonly=True, instead use backpopulate in the linked table to allow cascade
     )
     _child_relationship_entries = relationship(
         "RelationshipEntry",
         cascade="all,delete",
         primaryjoin="and_(RelationshipEntry.parent_db_id==GroupEntry.entity_db_id)",
-        # viewonly=True,
+        # do not use viewonly=True, instead use backpopulate in the linked table to allow cascade
     )
 
     @property
