@@ -43,7 +43,7 @@ class Authority(_Authority):
     _engine: Engine
     _session_maker: sessionmaker
 
-    def __init__(self, *, engine: Engine, nodes: type[PermissionNode] | None = None) -> None:
+    def __init__(self, *, nodes: type[PermissionNode] | None = None, engine: Engine) -> None:
         super().__init__(nodes=nodes)
 
         self._session_maker = sessionmaker(
@@ -71,6 +71,24 @@ class Authority(_Authority):
         db = self._setup_db_session(db)
 
         create_group(serial_gid=serial_gid, db=db)
+
+    def group_add_subject(self, *, gid: EntityID, sid: EntityID, db: Session | None = None) -> None:
+        """Add a subject to a group to inherit all its permissions."""
+        serial_gid = _entity_id_serializer(gid)
+        serial_sid = _entity_id_serializer(sid)
+        db = self._setup_db_session(db)
+
+        create_membership(serial_sid=serial_sid, serial_gid=serial_gid, db=db)
+
+    def group_add_child_group(
+        self, *, gid: EntityID, cid: EntityID, db: Session | None = None
+    ) -> None:
+        """Add a group to a parent group to inherit all its permissions."""
+        serial_gid = _entity_id_serializer(gid)
+        serial_cid = _entity_id_serializer(cid)
+        db = self._setup_db_session(db)
+
+        create_parent_child_relationship(serial_pid=serial_gid, serial_cid=serial_cid, db=db)
 
     def subject_add_permission(
         self,
@@ -104,24 +122,6 @@ class Authority(_Authority):
 
         create_group_permission(serial_gid=serial_gid, node=node, payload=payload, db=db)
 
-    def group_add_subject(self, *, gid: EntityID, sid: EntityID, db: Session | None = None) -> None:
-        """Add a subject to a group to inherit all its permissions."""
-        serial_gid = _entity_id_serializer(gid)
-        serial_sid = _entity_id_serializer(sid)
-        db = self._setup_db_session(db)
-
-        create_membership(serial_sid=serial_sid, serial_gid=serial_gid, db=db)
-
-    def group_add_child_group(
-        self, *, gid: EntityID, cid: EntityID, db: Session | None = None
-    ) -> None:
-        """Add a group to a parent group to inherit all its permissions."""
-        serial_gid = _entity_id_serializer(gid)
-        serial_cid = _entity_id_serializer(cid)
-        db = self._setup_db_session(db)
-
-        create_parent_child_relationship(serial_pid=serial_gid, serial_cid=serial_cid, db=db)
-
     ################################################################################################
     ### Get
     ################################################################################################
@@ -139,6 +139,10 @@ class Authority(_Authority):
 
         group_entries = db.query(GroupEntry).all()
         return set(_entity_id_deserializer(entry.serial_eid) for entry in group_entries)
+
+    # TODO subject_get_groups
+
+    # TODO group_get_subjects
 
     def group_get_child_groups(self, *, gid: EntityID, db: Session | None = None) -> set[EntityID]:
         """Get a set of all child group IDs of a group."""
@@ -194,6 +198,10 @@ class Authority(_Authority):
         return _recursive_group_has_permission(
             group_entry=group_entry, permission=permission, payload=payload
         )
+
+    # TODO subject_get_permissions
+
+    # TODO group_get_permissions
 
     ################################################################################################
     ### Remove

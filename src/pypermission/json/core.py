@@ -478,6 +478,7 @@ class Authority(_Authority):
         group.sids.remove(sid)
         subject.gids.remove(gid)
 
+    # TODO rename to group_rem_child_group
     def group_rem_group(self, *, pid: EntityID, child_id: EntityID) -> None:
         """Remove a group from a group."""
         parent = self._get_group(gid=pid)
