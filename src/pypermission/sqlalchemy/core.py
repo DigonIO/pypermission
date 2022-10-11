@@ -140,9 +140,25 @@ class Authority(_Authority):
         group_entries = db.query(GroupEntry).all()
         return set(_entity_id_deserializer(entry.serial_eid) for entry in group_entries)
 
-    # TODO subject_get_groups
+    def subject_get_groups(self, sid: EntityID, db: Session | None = None) -> set[EntityID]:
+        """Get a set of a group IDs of a groups a subject is member of."""
+        serial_sid = _entity_id_serializer(sid)
+        db = self._setup_db_session(db)
 
-    # TODO group_get_subjects
+        subject_entry = read_subject(serial_sid=serial_sid, db=db)
+        return set(
+            _entity_id_deserializer(entry.serial_eid) for entry in subject_entry.group_entries
+        )
+
+    def group_get_subjects(self, gid: EntityID, db: Session | None = None) -> set[EntityID]:
+        """Get a set of all subject IDs from a group."""
+        serial_gid = _entity_id_serializer(gid)
+        db = self._setup_db_session(db)
+
+        group_entry = read_group(serial_gid=serial_gid, db=db)
+        return set(
+            _entity_id_deserializer(entry.serial_eid) for entry in group_entry.subject_entries
+        )
 
     def group_get_child_groups(self, *, gid: EntityID, db: Session | None = None) -> set[EntityID]:
         """Get a set of all child group IDs of a group."""
@@ -165,6 +181,7 @@ class Authority(_Authority):
     def subject_has_permission(
         self, *, sid: EntityID, node: PermissionNode, payload: str | None = None, db: Session
     ) -> bool:
+        """Check if a subject has a wanted permission."""
         serial_sid = _entity_id_serializer(sid)
         db = self._setup_db_session(db)
         permission = self._get_permission(node=node)
@@ -176,8 +193,8 @@ class Authority(_Authority):
         if _has_permission(perm_entries=perm_entries, permission=permission, payload=payload):
             return True
 
-        ms_entries: list[GroupEntry] = subject_entry.membership_entries
-        for entry in ms_entries:
+        group_entries: list[GroupEntry] = subject_entry.group_entries
+        for entry in group_entries:
             if _recursive_group_has_permission(
                 group_entry=entry, permission=permission, payload=payload
             ):
@@ -188,6 +205,7 @@ class Authority(_Authority):
     def group_has_permission(
         self, *, gid: EntityID, node: PermissionNode, payload: str | None = None, db: Session
     ) -> bool:
+        """Check if a group has a wanted permission."""
         serial_gid = _entity_id_serializer(gid)
         db = self._setup_db_session(db)
         permission = self._get_permission(node=node)
@@ -199,9 +217,45 @@ class Authority(_Authority):
             group_entry=group_entry, permission=permission, payload=payload
         )
 
-    # TODO subject_get_permissions
+    # TODO discuss alternative return value dict[Permission, set[str]], for all Authorities
+    def subject_get_permissions(self, *, sid: EntityID) -> PermissionMap:
+        """Get a copy of all permissions from a subject."""
+        serial_sid = _entity_id_serializer(sid)
+        db = self._setup_db_session(db)
 
-    # TODO group_get_permissions
+        subject_entry = read_subject(serial_sid=serial_sid, db=db)
+        perm_entries: list[SubjectPermissionEntry] = subject_entry.permission_entries
+
+        # TODO create dedicated static function
+        perm_map: PermissionMap = {}
+        for entry in perm_entries:
+            permission = self._get_permission(node=entry.node)  # TODO handle unknown permissions
+            payload_set = set()
+            if permission.has_payload:
+                payload_set.add(entry.payload)
+            perm_map[permission] = payload_set
+
+        return perm_map
+
+    # TODO discuss alternative return value dict[Permission, set[str]], for all Authorities
+    def group_get_permissions(self, *, gid: EntityID) -> PermissionMap:
+        """Get a copy of all permissions from a group."""
+        serial_gid = _entity_id_serializer(gid)
+        db = self._setup_db_session(db)
+
+        group_entry = read_group(serial_gid=serial_gid, db=db)
+        perm_entries: list[GroupPermissionEntry] = group_entry.permission_entries
+
+        # TODO create dedicated static function
+        perm_map: PermissionMap = {}
+        for entry in perm_entries:
+            permission = self._get_permission(node=entry.node)  # TODO handle unknown permissions
+            payload_set = set()
+            if permission.has_payload:
+                payload_set.add(entry.payload)
+            perm_map[permission] = payload_set
+
+        return perm_map
 
     ################################################################################################
     ### Remove
