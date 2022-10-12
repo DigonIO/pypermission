@@ -6,7 +6,7 @@ from pypermission.core import Authority as _Authority
 from pypermission.core import (
     EntityID,
     Permission,
-    PermissionMap,
+    PermissionNodeMap,
     PermissionNode,
     validate_payload_status,
 )
@@ -19,6 +19,7 @@ from pypermission.sqlalchemy.models import (
     SubjectPermissionEntry,
     GroupPermissionEntry,
     PermissionableEntityMixin,
+    PermissionPayloadMixin,
 )
 from pypermission.sqlalchemy.service import (
     create_group,
@@ -222,8 +223,7 @@ class Authority(_Authority):
             group_entry=group_entry, permission=permission, payload=payload
         )
 
-    # TODO discuss alternative return value dict[Permission, set[str]], for all Authorities
-    def subject_get_permissions(self, *, sid: EntityID) -> PermissionMap:
+    def subject_get_permissions(self, *, sid: EntityID) -> PermissionNodeMap:
         """Get a copy of all permissions from a subject."""
         serial_sid = _entity_id_serializer(sid)
         db = self._setup_db_session(db)
@@ -231,19 +231,9 @@ class Authority(_Authority):
         subject_entry = read_subject(serial_sid=serial_sid, db=db)
         perm_entries: list[SubjectPermissionEntry] = subject_entry.permission_entries
 
-        # TODO create dedicated static function
-        perm_map: PermissionMap = {}
-        for entry in perm_entries:
-            permission = self._get_permission(node=entry.node)  # TODO handle unknown permissions
-            payload_set = set()
-            if permission.has_payload:
-                payload_set.add(entry.payload)
-            perm_map[permission] = payload_set
+        return self._build_permission_node_map(perm_entries=perm_entries)
 
-        return perm_map
-
-    # TODO discuss alternative return value dict[Permission, set[str]], for all Authorities
-    def group_get_permissions(self, *, gid: EntityID) -> PermissionMap:
+    def group_get_permissions(self, *, gid: EntityID) -> PermissionNodeMap:
         """Get a copy of all permissions from a group."""
         serial_gid = _entity_id_serializer(gid)
         db = self._setup_db_session(db)
@@ -251,16 +241,7 @@ class Authority(_Authority):
         group_entry = read_group(serial_gid=serial_gid, db=db)
         perm_entries: list[GroupPermissionEntry] = group_entry.permission_entries
 
-        # TODO create dedicated static function
-        perm_map: PermissionMap = {}
-        for entry in perm_entries:
-            permission = self._get_permission(node=entry.node)  # TODO handle unknown permissions
-            payload_set = set()
-            if permission.has_payload:
-                payload_set.add(entry.payload)
-            perm_map[permission] = payload_set
-
-        return perm_map
+        return self._build_permission_node_map(perm_entries=perm_entries)
 
     ################################################################################################
     ### Remove
@@ -350,6 +331,21 @@ class Authority(_Authority):
             return db
         raise AttributeError("Attribute 'db' must be of type 'sqlalchemy.orm.Session'!")
 
+    def _build_permission_node_map(
+        self, *, perm_entries: list[PermissionPayloadMixin]
+    ) -> PermissionNodeMap:
+        node_map: PermissionNodeMap = {}
+        for entry in perm_entries:
+            permission = self._get_permission(node=entry.node)  # TODO handle unknown permissions
+            if permission.node in node_map:
+                payload_set = node_map[permission.node]
+            else:
+                payload_set = set()
+            if permission.has_payload:
+                payload_set.add(entry.payload)
+            node_map[permission.node] = payload_set
+        return node_map
+
 
 ####################################################################################################
 ### Util
@@ -388,7 +384,7 @@ def _entity_id_deserializer(serial_eid: str) -> EntityID:
 
 
 def _has_permission(
-    perm_entries: list[SubjectPermissionEntry] | list[GroupPermissionEntry],
+    perm_entries: list[PermissionPayloadMixin],
     permission: Permission,
     payload: str | None,
 ) -> bool:

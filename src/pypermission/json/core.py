@@ -8,6 +8,7 @@ from pypermission.core import (
     EntityID,
     Permission,
     PermissionMap,
+    PermissionNodeMap,
     PermissionNode,
     validate_payload_status,
 )
@@ -418,13 +419,15 @@ class Authority(_Authority):
             group=group, permission=permission, payload=payload
         )
 
-    def subject_get_permissions(self, *, sid: EntityID) -> PermissionMap:
+    def subject_get_permissions(self, *, sid: EntityID) -> PermissionNodeMap:
         """Get a copy of all permissions from a subject."""
-        return self._get_subject(sid=sid).permission_map.copy()
+        perm_map = self._get_subject(sid=sid).permission_map
+        return _build_permission_node_map(perm_map=perm_map)
 
-    def group_get_permissions(self, *, gid: EntityID) -> PermissionMap:
+    def group_get_permissions(self, *, gid: EntityID) -> PermissionNodeMap:
         """Get a copy of all permissions from a group."""
-        return self._get_group(gid=gid).permission_map.copy()
+        perm_map = self._get_group(gid=gid).permission_map
+        return _build_permission_node_map(perm_map=perm_map)
 
     ################################################################################################
     ### Remove
@@ -542,6 +545,19 @@ class Authority(_Authority):
 ####################################################################################################
 ### Util
 ####################################################################################################
+
+
+def _build_permission_node_map(*, perm_map: PermissionMap) -> PermissionNodeMap:
+    node_map: PermissionNodeMap = {}
+    for perm, payload in perm_map.items():
+        if perm.node in node_map:
+            payload_set = node_map[perm.node]
+        else:
+            payload_set = set()
+        if perm.has_payload:
+            payload_set.add(payload)
+        node_map[perm.node] = payload_set
+    return node_map
 
 
 def _add_permission_map_entry(
