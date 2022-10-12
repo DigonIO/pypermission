@@ -18,6 +18,7 @@ from pypermission.sqlalchemy.models import (
     SubjectEntry,
     SubjectPermissionEntry,
     GroupPermissionEntry,
+    PermissionableEntityMixin,
 )
 from pypermission.sqlalchemy.service import (
     create_group,
@@ -104,7 +105,9 @@ class Authority(_Authority):
         permission = self._get_permission(node=node)
         validate_payload_status(permission=permission, payload=payload)
 
-        create_subject_permission(serial_sid=serial_sid, node=node, payload=payload, db=db)
+        create_subject_permission(
+            serial_sid=serial_sid, permission=permission, payload=payload, db=db
+        )
 
     def group_add_permission(
         self,
@@ -120,7 +123,9 @@ class Authority(_Authority):
         permission = self._get_permission(node=node)
         validate_payload_status(permission=permission, payload=payload)
 
-        create_group_permission(serial_gid=serial_gid, node=node, payload=payload, db=db)
+        create_group_permission(
+            serial_gid=serial_gid, permission=permission, payload=payload, db=db
+        )
 
     ################################################################################################
     ### Get
@@ -130,14 +135,14 @@ class Authority(_Authority):
         """Get the IDs for all known subjects."""
         db = self._setup_db_session(db)
 
-        subject_entries = db.query(SubjectEntry).all()
+        subject_entries: list[PermissionableEntityMixin] = db.query(SubjectEntry).all()
         return set(_entity_id_deserializer(entry.serial_eid) for entry in subject_entries)
 
     def get_groups(self, db: Session | None = None) -> set[EntityID]:
         """Get the IDs for all known groups."""
         db = self._setup_db_session(db)
 
-        group_entries = db.query(GroupEntry).all()
+        group_entries: list[PermissionableEntityMixin] = db.query(GroupEntry).all()
         return set(_entity_id_deserializer(entry.serial_eid) for entry in group_entries)
 
     def subject_get_groups(self, sid: EntityID, db: Session | None = None) -> set[EntityID]:
@@ -289,7 +294,9 @@ class Authority(_Authority):
         permission = self._get_permission(node=node)
         validate_payload_status(permission=permission, payload=payload)
 
-        delete_subject_permission(serial_sid=serial_sid, node=node, payload=payload, db=db)
+        delete_subject_permission(
+            serial_sid=serial_sid, permission=permission, payload=payload, db=db
+        )
 
     def group_rem_permission(
         self,
@@ -305,7 +312,9 @@ class Authority(_Authority):
         permission = self._get_permission(node=node)
         validate_payload_status(permission=permission, payload=payload)
 
-        delete_group_permission(serial_gid=serial_gid, node=node, payload=payload, db=db)
+        delete_group_permission(
+            serial_gid=serial_gid, permission=permission, payload=payload, db=db
+        )
 
     def group_rem_subject(
         self,

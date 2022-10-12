@@ -1,7 +1,7 @@
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
-from pypermission.core import PermissionNode
+from pypermission.core import Permission
 from pypermission.error import (
     EntityIDCollisionError,
     UnknownGroupIDError,
@@ -61,25 +61,25 @@ def create_group(*, serial_gid: str, db: Session) -> None:
 
 
 def create_subject_permission(
-    *, serial_sid: str, node: PermissionNode, payload: str | None, db: Session
+    *, serial_sid: str, permission: Permission, payload: str | None, db: Session
 ) -> None:
     subject_entry = read_subject(serial_sid=serial_sid, db=db)
     _create_permission_entry(
         table=SubjectPermissionEntry,
         entity_db_id=subject_entry.entity_db_id,
-        node=node,
+        permission=permission,
         payload=payload,
     )
 
 
 def create_group_permission(
-    *, serial_gid: str, node: PermissionNode, payload: str | None, db: Session
+    *, serial_gid: str, permission: Permission, payload: str | None, db: Session
 ) -> None:
     group_entry = read_group(serial_gid=serial_gid, db=db)
     _create_permission_entry(
         table=GroupPermissionEntry,
         entity_db_id=group_entry.entity_db_id,
-        node=node,
+        permission=permission,
         payload=payload,
     )
 
@@ -157,25 +157,25 @@ def delete_group(*, serial_gid: str, db: Session) -> None:
 
 
 def delete_subject_permission(
-    *, serial_sid: str, node: PermissionNode, payload: str | None, db: Session
+    *, serial_sid: str, permission: Permission, payload: str | None, db: Session
 ) -> None:
     subject_entry: SubjectPermissionEntry = read_subject(serial_sid=serial_sid, db=db)
     _delete_permission_entry(
         table=SubjectPermissionEntry,
         entity_db_id=subject_entry.entity_db_id,
-        node=node,
+        permission=permission,
         payload=payload,
     )
 
 
 def delete_group_permission(
-    *, serial_gid: str, node: PermissionNode, payload: str | None, db: Session
+    *, serial_gid: str, permission: Permission, payload: str | None, db: Session
 ) -> None:
     group_entry: GroupPermissionEntry = read_subject(serial_gid=serial_gid, db=db)
     _delete_permission_entry(
         table=GroupPermissionEntry,
         entity_db_id=group_entry.entity_db_id,
-        node=node,
+        permission=permission,
         payload=payload,
     )
 
@@ -233,14 +233,14 @@ def _create_permission_entry(
     *,
     table: SubjectPermissionEntry | GroupPermissionEntry,
     entity_db_id: int,
-    node: PermissionNode,
+    permission: Permission,
     payload: str | None,
     db: Session,
 ) -> None:
 
     perm_entry = table(
         entity_db_id=entity_db_id,
-        node=node.value,
+        node=permission.node.value,
         payload=serialize_payload(payload),
     )
 
@@ -256,7 +256,7 @@ def _delete_permission_entry(
     *,
     table: SubjectPermissionEntry | GroupPermissionEntry,
     entity_db_id: int,
-    node: PermissionNode,
+    permission: Permission,
     payload: str | None,
     db: Session,
 ) -> None:
@@ -265,7 +265,7 @@ def _delete_permission_entry(
         db.query(table)
         .filter(
             table.entity_db_id == entity_db_id,
-            table.node == node.value,
+            table.node == permission.node.value,
             table.payload == serialize_payload(payload),
         )
         .all()  # Should only have one entry
@@ -278,11 +278,11 @@ def _delete_permission_entry(
 
 def _detect_group_cycle(*, parent_entry: GroupEntry, child_entry: GroupEntry):
     if parent_entry == child_entry:
-        raise GroupCycleError # TODO single node, single edge graph error message
+        raise GroupCycleError  # TODO single node, single edge graph error message
 
     parent_entries = parent_entry.parent_entries  # parents of this "parent" group
 
     if child_entry == parent_entries:
-        raise GroupCycleError # TODO
+        raise GroupCycleError  # TODO
     for entry in parent_entries:
         _detect_group_cycle(parent_entry=entry, child_entry=child_entry)
