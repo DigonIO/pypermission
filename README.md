@@ -44,6 +44,12 @@
 pip install PyPermission
 ```
 
+#### SQL persistency backend
+
+```bash
+pip install PyPermission[sqlalchemy]
+```
+
 #### YAML persistency backend
 
 ```bash
@@ -68,77 +74,73 @@ pip install -e .[dev]
 Import all required objects. Here we will choose the authority with the JSON persistency backend.
 
 ```py
-from pypermission.json import Authority, PermissionNode, EntityID
+from pypermission import PermissionNode, EntityID
+from pypermission.json import Authority
 ```
 
-Define some permission nodes. We distinguish between buildin and plugin permission nodes.
-Buildin permission nodes are registered when the authority is instantiated.
-Plugin permission nodes can be registered via an extra api after the authority has been created.
+Define an authority with some permission nodes:
 
 ```py
-class BuildinPN(PermissionNode):
-    ADMIN = "admin"  # leaf
-    COMMAND_ = "command.*"  # parent
-    COMMAND_STATS = "command.stats"  # leaf
-    COMMAND_RESPAWN = "command.respawn"  # leaf
+class Nodes(PermissionNode):
+    CHAT_ = "chat.*"  # parent
+    CHAT_GLOBAL = "chat.global"  # leaf
+    CHAT_ROOM_ = "chat.room.*"  # parent
+    CHAT_ROOM_X = "chat.room.<x>"  # leaf w/ payload
+    TICKET_ = "ticket.*"  # parent
+    TICKET_OPEN = "ticket.open"  # leaf
+    TICKET_CLOSE_ = "ticket.close.*"  # parent
+    TICKET_CLOSE_OWN = "ticket.close.own"  # leaf
+    TICKET_CLOSE_ALL = "ticket.close.all"  # leaf
+    TICKET_ASSIGN = "ticket.assign"  # leaf
 
-
-class PluginPN(PermissionNode):
-    # Example permission nodes taken from the towny Minecraft server plugin
-    # https://github.com/TownyAdvanced/Towny/blob/master/src/com/palmergames/bukkit/towny/permissions/PermissionNodes.java
-    TOWNY_ = "towny.*"  # parent
-    TOWNY_CHAT_ = "towny.chat.*"  # parent
-    TOWNY_CHAT_TOWN = "towny.chat.town"  # leaf
-    TOWNY_CHAT_NATION = "towny.chat.nation"  # leaf
-    TOWNY_CHAT_GLOBAL = "towny.chat.global"  # leaf
-    TOWNY_WILD_ = "towny.wild.*"  # parent
-    TOWNY_WILD_BUILD_ = "towny.wild.build.*"  # parent
-    TOWNY_WILD_BUILD_X = "towny.wild.build.<x>"  # leaf w/ payload
-    TOWNY_WILD_DESTROY_ = "towny.wild.destroy.*"  # parent
-    TOWNY_WILD_DESTROY_X = "towny.wild.destroy.<x>"  # leaf w/ payload
+auth = Authority(nodes=Nodes)
 ```
 
-Create an authority and register all permission nodes.
+The following file `save_file.yaml` defines a mixed access control setup (RBAC & UBAC). Alice is
+a member of the moderator group, while Bob is given only permissions of the user group:
 
-```py
-auth = Authority(nodes=BuildinPN)  # register buildin nodes
-auth.register_permission_nodes(nodes=PluginPN)  # api for plugin based node registration
+```yaml
+groups:
+  str, moderator:
+    sub_groups:
+      - user
+    permission_nodes:
+      - app.chat.global
+      - chat.room.*
+      - ticket.*
+    subjects:
+      - Alice
+  str, user:
+    permission_nodes:
+      - ticket.open
+      - ticket.close.own
+    subjects:
+      - Bob
+subjects:
+  str, Alice:
+    - chat.room.<Alice>
+  str, Bob:
+    - chat.room.<Bob>
 ```
 
-Create a group and add some permissions.
-
 ```py
-GROUP_ID: EntityID = "group_foo"  # str | int
-auth.add_group(gid=GROUP_ID)
-
-auth.group_add_permission(gid=GROUP_ID, node=PluginPN.TOWNY_CHAT_)
-auth.group_add_permission(gid=GROUP_ID, node=PluginPN.TOWNY_WILD_DESTROY_X, payload="iron")
-auth.group_add_permission(gid=GROUP_ID, node=PluginPN.TOWNY_WILD_DESTROY_X, payload="gold")
-```
-
-Create a subject, add it to a group and add a permission.
-
-```py
-SUBJECT_ID: EntityID = "user_bar"  # str | int
-auth.add_subject(sid=SUBJECT_ID)
-auth.group_add_subject(gid=GROUP_ID, sid=SUBJECT_ID)
-
-auth.subject_add_permission(sid=SUBJECT_ID, node=PluginPN.TOWNY_WILD_DESTROY_X, payload="diamond")
+auth.load_from_file(path="save_file.yaml")
 ```
 
 Now check if a subject has a desired permission.
 
-```py
-if auth.subject_has_permission(sid=SUBJECT_ID, node=PluginPN.TOWNY_CHAT_TOWN):
-    print("Parent permission provided by the group.")
+```pycon
+>>> auth.subject_has_permission(sid="Bob", node=Nodes.TICKET_OPEN)
+True
 
-if auth.subject_has_permission(sid=SUBJECT_ID, node=PluginPN.TOWNY_WILD_DESTROY_X, payload="iron"):
-    print("Leaf w/ payload permission provided by the group")
+>>> auth.subject_has_permission(sid="Alice", node=Nodes.TICKET_CLOSE_ALL)
+True
 
-if auth.subject_has_permission(
-    sid=SUBJECT_ID, node=PluginPN.TOWNY_WILD_DESTROY_X, payload="diamond"
-):
-    print("Leaf w/ payload permission provided by the subject itself")
+>>> auth.subject_has_permission(sid="Alice", node=Nodes.CHAT_ROOM_X, payload="Bob")
+True
+
+>>> auth.subject_has_permission(sid="Bob", node=Nodes.CHAT_ROOM_X, payload="Alice")
+False
 ```
 
 ## Documentation
@@ -151,7 +153,6 @@ formatting. To build, run:
 ```bash
 sphinx-build -b html docs/ docs/_build/html
 ```
-
 
 ## Testing
 
