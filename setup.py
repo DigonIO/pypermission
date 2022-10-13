@@ -11,7 +11,7 @@ with open("README.md", encoding="utf-8") as f:
     LONG_DESCRIPTION = f.read()
 
 DEP_NUMPY_DOC = [
-    "numpydoc==1.1.0",
+    "numpydoc==1.5.0",
 ]
 
 REQUIRE_YAML = [
@@ -20,23 +20,22 @@ REQUIRE_YAML = [
 
 
 REQUIRE_DOC = [
-    "Sphinx==4.5.0",
-    "mistune==0.8.4",
-    "m2r2==0.2.7",
-    "docutils<=0.16",
-    "furo==2022.1.2",
+    "Sphinx==5.2.3",
+    "m2r2==0.3.3",
+    "docutils==0.19",
+    "furo==2022.9.29",
 ] + DEP_NUMPY_DOC
 
 REQUIRE_TEST = [
-    "pytest==6.2.5",
-    "pytest-cov==3.0.0",
-    "coverage==6.1.1",
+    "pytest==7.1.3",
+    "pytest-cov==4.0.0",
+    "coverage==6.5.0",
 ]
 
 REQUIRE_LINT = [
-    "mypy==0.942",
-    "bandit==1.7.1",
-    "pylint==2.7.4",
+    "mypy==0.981",
+    "bandit==1.7.4",
+    "pylint==2.14.5",
     "pydocstyle==6.1.1",
     # below typing stubs
     "types-PyYAML>=6.0.12",
