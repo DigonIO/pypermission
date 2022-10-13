@@ -1,5 +1,5 @@
-from pypermission.json import Authority, PermissionNode, EntityID
-
+from pypermission import PermissionNode, EntityID
+from pypermission.json import Authority
 
 class BuildinPN(PermissionNode):
     ADMIN = "admin"  # leaf

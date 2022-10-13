@@ -4,6 +4,7 @@ Core definitions for the PyPermission package.
 Including the permission node object, an internal permission class and a base permission authority.
 """
 
+# annotations needed for classes with self referential type hints
 from __future__ import annotations
 
 from abc import ABC
