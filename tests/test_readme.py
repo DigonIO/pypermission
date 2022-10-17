@@ -6,7 +6,7 @@ path = pathlib.Path(__file__).parent.absolute()
 def test_readme_code_example():
 
     from pypermission import PermissionNode
-    from pypermission.json import Authority
+    from pypermission.yaml import Authority
 
     class Nodes(PermissionNode):
         CHAT_ = "chat.*"  # parent

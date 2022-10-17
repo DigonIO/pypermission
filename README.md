@@ -75,7 +75,7 @@ Import all required objects. Here we will choose the authority with the JSON per
 
 ```py
 from pypermission import PermissionNode
-from pypermission.json import Authority
+from pypermission.yaml import Authority
 ```
 
 Define an authority with some permission nodes:
@@ -101,7 +101,7 @@ a member of the moderator group, while Bob is given only permissions of the user
 
 ```yaml
 groups:
-  str, moderator:
+  moderator:
     sub_groups:
       - user
     permission_nodes:
@@ -110,16 +110,16 @@ groups:
       - ticket.*
     subjects:
       - Alice
-  str, user:
+  user:
     permission_nodes:
       - ticket.open
       - ticket.close.own
     subjects:
       - Bob
 subjects:
-  str, Alice:
+  Alice:
     - chat.room.<Alice>
-  str, Bob:
+  Bob:
     - chat.room.<Bob>
 ```
 

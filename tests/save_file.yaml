@@ -1,5 +1,5 @@
 groups:
-  str, moderator:
+  moderator:
     sub_groups:
       - user
     permission_nodes:
@@ -8,14 +8,14 @@ groups:
       - ticket.*
     subjects:
       - Alice
-  str, user:
+  user:
     permission_nodes:
       - ticket.open
       - ticket.close.own
     subjects:
       - Bob
 subjects:
-  str, Alice:
+  Alice:
     - chat.room.<Alice>
-  str, Bob:
+  Bob:
     - chat.room.<Bob>

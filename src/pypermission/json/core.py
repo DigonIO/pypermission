@@ -220,27 +220,11 @@ class Authority(_Authority):
 
     def load_from_str(self, *, serial_data: str) -> None:
         """Load a previous state from a JSON formatted string."""
-        data: Any = self._deserialize_data(serial_data=serial_data)
-
-        # populate subject id types
-        sid_types: InIDTypeDict = {}
-        for sid_str, type_str in data["sid_types"].items():
-            if type_str == "str":
-                sid_types[sid_str] = str
-            else:
-                sid_types[sid_str] = int
-
-        # populate group id types
-        gid_types: InIDTypeDict = {}
-        for gid_str, type_str in data["gid_types"].items():
-            if type_str == "str":
-                gid_types[gid_str] = str
-            else:
-                gid_types[gid_str] = int
+        data: dict = self._deserialize_data(serial_data=serial_data)
 
         # populate subjects
         for sid_str, nodes in data["subjects"].items():
-            sid = sid_types[sid_str](sid_str)
+            sid = _entity_id_deserializer(sid_str)
             subject = Subject(id=sid)
             self._subjects[sid] = subject
 
@@ -259,7 +243,7 @@ class Authority(_Authority):
 
         # populate groups
         for gid_str, group_data in data["groups"].items():
-            gid = gid_types[gid_str](gid_str)
+            gid = _entity_id_deserializer(gid_str)
             group = Group(id=gid)
             self._groups[gid] = group
 
@@ -546,6 +530,30 @@ class Authority(_Authority):
 ### Util
 ####################################################################################################
 
+
+def _entity_id_serializer(eid: EntityID) -> str:
+    if isinstance(eid, int):
+        serial_type = "int"
+        serial_eid = str(eid)
+    elif isinstance(eid, str):
+        serial_type = "str"
+        serial_eid = eid
+    else:
+        raise ValueError  # TODO
+
+    return f"{serial_type}, {serial_eid}"
+
+
+def _entity_id_deserializer(serial_eid: str) -> EntityID:
+    serial_type = serial_eid[:2]
+    serial_eid = serial_eid[4:]
+
+    if serial_type == "int":
+        return int(serial_eid)
+    elif serial_type == "str":
+        return serial_eid
+    else:
+        raise ValueError  # TODO
 
 def _build_permission_node_map(*, perm_map: PermissionMap) -> PermissionNodeMap:
     node_map: PermissionNodeMap = {}
