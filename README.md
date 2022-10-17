@@ -74,7 +74,7 @@ pip install -e .[dev]
 Import all required objects. Here we will choose the authority with the JSON persistency backend.
 
 ```py
-from pypermission import PermissionNode, EntityID
+from pypermission import PermissionNode
 from pypermission.json import Authority
 ```
 

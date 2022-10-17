@@ -1,51 +1,30 @@
-from pypermission import PermissionNode, EntityID
-from pypermission.json import Authority
+import pathlib
 
-class BuildinPN(PermissionNode):
-    ADMIN = "admin"  # leaf
-    COMMAND_ = "command.*"  # parent
-    COMMAND_STATS = "command.stats"  # leaf
-    COMMAND_RESPAWN = "command.respawn"  # leaf
+path = pathlib.Path(__file__).parent.absolute()
 
 
-class PluginPN(PermissionNode):
-    # Permission nodes for testing inspired be the towny permission nodes
-    # https://github.com/TownyAdvanced/Towny/blob/master/src/com/palmergames/bukkit/towny/permissions/PermissionNodes.java
-    TOWNY_ = "towny.*"  # parent
-    TOWNY_CHAT_ = "towny.chat.*"  # parent
-    TOWNY_CHAT_TOWN = "towny.chat.town"  # leaf
-    TOWNY_CHAT_NATION = "towny.chat.nation"  # leaf
-    TOWNY_CHAT_GLOBAL = "towny.chat.global"  # leaf
-    TOWNY_WILD_ = "towny.wild.*"  # parent
-    TOWNY_WILD_BUILD_ = "towny.wild.build.*"  # parent
-    TOWNY_WILD_BUILD_X = "towny.wild.build.<x>"  # leaf w/ payload
-    TOWNY_WILD_DESTROY_ = "towny.wild.destroy.*"  # parent
-    TOWNY_WILD_DESTROY_X = "towny.wild.destroy.<x>"  # leaf w/ payload
+def test_readme_code_example():
 
+    from pypermission import PermissionNode
+    from pypermission.json import Authority
 
-auth = Authority(nodes=BuildinPN)  # register buildin nodes
-auth.register_permission_nodes(nodes=PluginPN)  # method for plugin based node registration
+    class Nodes(PermissionNode):
+        CHAT_ = "chat.*"  # parent
+        CHAT_GLOBAL = "chat.global"  # leaf
+        CHAT_ROOM_ = "chat.room.*"  # parent
+        CHAT_ROOM_X = "chat.room.<x>"  # leaf w/ payload
+        TICKET_ = "ticket.*"  # parent
+        TICKET_OPEN = "ticket.open"  # leaf
+        TICKET_CLOSE_ = "ticket.close.*"  # parent
+        TICKET_CLOSE_OWN = "ticket.close.own"  # leaf
+        TICKET_CLOSE_ALL = "ticket.close.all"  # leaf
+        TICKET_ASSIGN = "ticket.assign"  # leaf
 
-GROUP_ID: EntityID = "group_foo"  # str | int
-auth.add_group(gid=GROUP_ID)
+    auth = Authority(nodes=Nodes)
 
-auth.group_add_permission(gid=GROUP_ID, node=PluginPN.TOWNY_CHAT_)
-auth.group_add_permission(gid=GROUP_ID, node=PluginPN.TOWNY_WILD_DESTROY_X, payload="iron")
-auth.group_add_permission(gid=GROUP_ID, node=PluginPN.TOWNY_WILD_DESTROY_X, payload="gold")
+    auth.load_from_file(path=path/"save_file.yaml")
 
-SUBJECT_ID: EntityID = "user_bar"  # str | int
-auth.add_subject(sid=SUBJECT_ID)
-auth.group_add_subject(gid=GROUP_ID, sid=SUBJECT_ID)
-
-auth.subject_add_permission(sid=SUBJECT_ID, node=PluginPN.TOWNY_WILD_DESTROY_X, payload="diamond")
-
-if auth.subject_has_permission(sid=SUBJECT_ID, node=PluginPN.TOWNY_CHAT_TOWN):
-    print("Parent permission provided by the group.")
-
-if auth.subject_has_permission(sid=SUBJECT_ID, node=PluginPN.TOWNY_WILD_DESTROY_X, payload="iron"):
-    print("Leaf w/ payload permission provided by the group")
-
-if auth.subject_has_permission(
-    sid=SUBJECT_ID, node=PluginPN.TOWNY_WILD_DESTROY_X, payload="diamond"
-):
-    print("Leaf w/ payload permission provided by the subject itself")
+    assert auth.subject_has_permission(sid="Bob", node=Nodes.TICKET_OPEN) == True
+    assert auth.subject_has_permission(sid="Alice", node=Nodes.TICKET_CLOSE_ALL) == True
+    assert auth.subject_has_permission(sid="Alice", node=Nodes.CHAT_ROOM_X, payload="Bob") == True
+    assert auth.subject_has_permission(sid="Bob", node=Nodes.CHAT_ROOM_X, payload="Alice") == False

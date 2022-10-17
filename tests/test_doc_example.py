@@ -1,6 +1,7 @@
 from typing import TypedDict
 
-from pypermission.json import Authority, PermissionNode
+from pypermission import PermissionNode
+from pypermission.json import Authority
 
 
 class BankAPIPermissionNode(PermissionNode):

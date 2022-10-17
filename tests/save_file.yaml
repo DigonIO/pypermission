@@ -1,0 +1,21 @@
+groups:
+  str, moderator:
+    sub_groups:
+      - user
+    permission_nodes:
+      - app.chat.global
+      - chat.room.*
+      - ticket.*
+    subjects:
+      - Alice
+  str, user:
+    permission_nodes:
+      - ticket.open
+      - ticket.close.own
+    subjects:
+      - Bob
+subjects:
+  str, Alice:
+    - chat.room.<Alice>
+  str, Bob:
+    - chat.room.<Bob>
