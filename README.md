@@ -105,7 +105,7 @@ groups:
     sub_groups:
       - user
     permission_nodes:
-      - app.chat.global
+      - chat.global
       - chat.room.*
       - ticket.*
     subjects:
@@ -118,9 +118,11 @@ groups:
       - Bob
 subjects:
   Alice:
-    - chat.room.<Alice>
+    permission_nodes:
+      - chat.room.<Alice>
   Bob:
-    - chat.room.<Bob>
+    permission_nodes:
+      - chat.room.<Bob>
 ```
 
 ```py

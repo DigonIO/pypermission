@@ -22,7 +22,7 @@ def test_readme_code_example():
 
     auth = Authority(nodes=Nodes)
 
-    auth.load_from_file(path=path/"save_file.yaml")
+    auth.load_from_file(path=path / "save_file.yaml")
 
     assert auth.subject_has_permission(sid="Bob", node=Nodes.TICKET_OPEN) == True
     assert auth.subject_has_permission(sid="Alice", node=Nodes.TICKET_CLOSE_ALL) == True
