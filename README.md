@@ -102,20 +102,20 @@ a member of the moderator group, while Bob is given only permissions of the user
 ```yaml
 groups:
   moderator:
-    sub_groups:
-      - user
     permission_nodes:
       - chat.global
       - chat.room.*
       - ticket.*
-    subjects:
+    member_subjects:
       - Alice
   user:
     permission_nodes:
       - ticket.open
       - ticket.close.own
-    subjects:
+    member_subjects:
       - Bob
+    member_groups:
+      - moderator
 subjects:
   Alice:
     permission_nodes:

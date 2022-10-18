@@ -26,17 +26,19 @@ OutIDTypeDict = dict[str, Literal["str"] | Literal["int"]]
 InIDTypeDict = dict[str, type[str | int]]
 
 
-class NonSerialGroup(TypedDict):
-    subjects: list[str]
-    nodes: list[str]
-    childs: list[str]
+class GroupStore(TypedDict):
+    member_subjects: list[str]
+    member_groups: list[str]
+    permission_nodes: list[str]
 
 
-class NonSerialData(TypedDict):
-    groups: dict[str, NonSerialGroup]
-    subjects: dict[str, list[str]]
-    gid_types: OutIDTypeDict
-    sid_types: OutIDTypeDict
+class SubjectStore(TypedDict):
+    permission_nodes: list[str]
+
+
+class DataStore(TypedDict):
+    groups: dict[str, GroupStore]
+    subjects: dict[str, SubjectStore]
 
 
 ####################################################################################################
@@ -166,54 +168,52 @@ class Authority(_Authority):
 
     def save_to_str(self) -> str:
         """Save the current state to string formatted as JSON."""
-        groups: dict[str, NonSerialGroup] = {}
-        subjects: dict[str, list[str]] = {}
-        sid_types: OutIDTypeDict = {}
-        gid_types: OutIDTypeDict = {}
-        data = NonSerialData(
-            groups=groups,
-            subjects=subjects,
-            sid_types=sid_types,
-            gid_types=gid_types,
-        )
+        groups: dict[str, GroupStore] = {}
 
         for gid, group in self._groups.items():
-            if isinstance(gid, str):
-                gid_types[str(gid)] = "str"
-            else:  # isinstance(gid, int):
-                gid_types[str(gid)] = "int"
-            nodes: list[str] = []
+            # TODO create a util function
+            permission_nodes: list[str] = []
             for permission, payload_set in group.permission_map.items():
-                if payload_set:
+                if permission.has_payload:
                     for payload in payload_set:
-                        node = self._serialize_permission_node(
-                            permission=permission, payload=payload
+                        permission_nodes.append(
+                            self._serialize_permission_node(permission=permission, payload=payload)
                         )
                 else:
-                    node = self._serialize_permission_node(permission=permission, payload=None)
-                nodes.append(node)
+                    permission_nodes.append(
+                        self._serialize_permission_node(permission=permission, payload=None)
+                    )
 
-            grouped_subjects: list[str] = [str(sid) for sid in group.sids]
-            childs: list[str] = [str(child_id) for child_id in group.child_ids]
-            groups[str(gid)] = NonSerialGroup(subjects=grouped_subjects, nodes=nodes, childs=childs)
+            groups[gid] = GroupStore(
+                member_groups=list(group.child_ids),
+                member_subjects=list(group.sids),
+                permission_nodes=permission_nodes,
+            )
+
+        subjects: dict[str, SubjectStore] = {}
 
         for sid, subject in self._subjects.items():
-            if isinstance(sid, str):
-                sid_types[str(sid)] = "str"
-            else:  # isinstance(gid, int):
-                sid_types[str(sid)] = "int"
-            nodes = []
+            # TODO create a util function
+            permission_nodes: list[str] = []
             for permission, payload_set in subject.permission_map.items():
-                if payload_set:
+                if permission.has_payload:
                     for payload in payload_set:
-                        node = self._serialize_permission_node(
-                            permission=permission, payload=payload
+                        permission_nodes.append(
+                            self._serialize_permission_node(permission=permission, payload=payload)
                         )
                 else:
-                    node = self._serialize_permission_node(permission=permission, payload=None)
-                nodes.append(node)
+                    permission_nodes.append(
+                        self._serialize_permission_node(permission=permission, payload=None)
+                    )
 
-            subjects[str(sid)] = nodes
+            subjects[sid] = SubjectStore(
+                permission_nodes=permission_nodes,
+            )
+
+        data = DataStore(
+            groups=groups,
+            subjects=subjects,
+        )
 
         return self._serialize_data(non_serial_data=data)
 
@@ -511,7 +511,7 @@ class Authority(_Authority):
         return False
 
     @staticmethod
-    def _serialize_data(*, non_serial_data: NonSerialData) -> str:
+    def _serialize_data(*, non_serial_data: DataStore) -> str:
         # cast only valid with one argument to dumps
         return cast(str, json.dumps(non_serial_data))
 
@@ -523,6 +523,11 @@ class Authority(_Authority):
 ####################################################################################################
 ### Util
 ####################################################################################################
+
+
+def _assertEntityIDType(eid: Any) -> None:
+    if not isinstance(eid, str):
+        raise ValueError  # TODO better Error
 
 
 def _build_permission_node_map(*, perm_map: PermissionMap) -> PermissionNodeMap:

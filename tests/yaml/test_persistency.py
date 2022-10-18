@@ -9,12 +9,12 @@ EGG = "egg"
 SPAM = "spam"
 HAM = "ham"
 
-ORANGE = 1
-APPLE = 2
-PEAR = 3
-BANANA = 4
+ORANGE = "1"
+APPLE = "2"
+PEAR = "3"
+BANANA = "4"
 
-FOOD = 1234
+FOOD = "1234"
 ANIMAL_BASED = "animal_based"
 PLANT_BASED = "plant_based"
 
