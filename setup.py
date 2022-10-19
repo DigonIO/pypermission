@@ -30,6 +30,7 @@ REQUIRE_TEST = [
     "pytest==7.1.3",
     "pytest-cov==4.0.0",
     "coverage==6.5.0",
+    "deepdiff==6.2.1",
 ]
 
 REQUIRE_LINT = [

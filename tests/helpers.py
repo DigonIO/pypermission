@@ -1,4 +1,20 @@
+import pytest
+
 from pypermission.core import PermissionNode
+from pypermission.serial import SerialAuthority
+
+EGG = "egg"
+SPAM = "spam"
+HAM = "ham"
+
+ORANGE = "orange"
+APPLE = "apple"
+PEAR = "pear"
+BANANA = "banana"
+
+FOOD = "food"
+ANIMAL_BASED = "animal_based"
+PLANT_BASED = "plant_based"
 
 
 class TownyPermissionNode(PermissionNode):
@@ -14,3 +30,52 @@ class TownyPermissionNode(PermissionNode):
     TOWNY_WILD_BUILD_X = "towny.wild.build.<x>"
     TOWNY_WILD_DESTROY_ = "towny.wild.destroy.*"
     TOWNY_WILD_DESTROY_X = "towny.wild.destroy.<x>"
+
+
+TPN = TownyPermissionNode
+
+
+@pytest.fixture
+def serial_authority() -> SerialAuthority:
+    # The authority created here should fulfil the properties of the two save files
+    # `./serial/save_file.yaml` and `./serial/save_file.json`
+    auth = SerialAuthority(nodes=TPN)
+
+    auth.add_group(gid=FOOD)
+    auth.add_group(gid=ANIMAL_BASED)
+    auth.add_group(gid=PLANT_BASED)
+
+    auth.add_subject(sid=EGG)
+    auth.add_subject(sid=SPAM)
+    auth.add_subject(sid=HAM)
+
+    auth.add_subject(sid=ORANGE)
+    auth.add_subject(sid=APPLE)
+    auth.add_subject(sid=PEAR)
+    auth.add_subject(sid=BANANA)
+
+    auth.group_add_member_group(gid=FOOD, cid=ANIMAL_BASED)
+    auth.group_add_member_group(gid=FOOD, cid=PLANT_BASED)
+
+    auth.group_add_member_subject(gid=ANIMAL_BASED, sid=EGG)
+    auth.group_add_member_subject(gid=ANIMAL_BASED, sid=SPAM)
+    auth.group_add_member_subject(gid=ANIMAL_BASED, sid=HAM)
+
+    auth.group_add_member_subject(gid=PLANT_BASED, sid=ORANGE)
+    auth.group_add_member_subject(gid=PLANT_BASED, sid=APPLE)
+    auth.group_add_member_subject(gid=PLANT_BASED, sid=PEAR)
+    auth.group_add_member_subject(gid=PLANT_BASED, sid=BANANA)
+
+    auth.group_add_permission(gid=FOOD, node=TPN.TOWNY_CHAT_GLOBAL)
+
+    auth.group_add_permission(gid=ANIMAL_BASED, node=TPN.TOWNY_CHAT_TOWN)
+    auth.group_add_permission(gid=ANIMAL_BASED, node=TPN.TOWNY_WILD_BUILD_X, payload="dirt")
+    auth.group_add_permission(gid=ANIMAL_BASED, node=TPN.TOWNY_WILD_BUILD_X, payload="gold")
+
+    auth.group_add_permission(gid=PLANT_BASED, node=TPN.TOWNY_CHAT_NATION)
+    auth.group_add_permission(gid=PLANT_BASED, node=TPN.TOWNY_WILD_DESTROY_X, payload="dirt")
+    auth.group_add_permission(gid=PLANT_BASED, node=TPN.TOWNY_WILD_DESTROY_X, payload="gold")
+
+    auth.subject_add_permission(sid=HAM, node=TPN.TOWNY_WILD_)
+
+    return auth
