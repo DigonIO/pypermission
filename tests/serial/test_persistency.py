@@ -25,6 +25,19 @@ def test_load_file_yaml():
 
     auth.load_file(path=path / "save_file.yaml")
 
+    assert_loaded_data(auth=auth)
+
+
+def test_load_file_json():
+    auth = SerialAuthority(nodes=TPN)
+
+    auth.load_file(path=path / "save_file.json")
+
+    assert_loaded_data(auth=auth)
+
+
+def assert_loaded_data(auth: SerialAuthority):
+
     assert set(auth._groups.keys()) == {FOOD, ANIMAL_BASED, PLANT_BASED}
     assert set(auth._subjects.keys()) == {
         EGG,
