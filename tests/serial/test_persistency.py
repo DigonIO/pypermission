@@ -1,137 +1,81 @@
+import pathlib
+
 from pypermission.serial import SerialAuthority
 
-from ..helpers import TownyPermissionNode
+from ..helpers import TownyPermissionNode as TPN
 
 EGG = "egg"
 SPAM = "spam"
 HAM = "ham"
 
-ORANGE = "1"
-APPLE = "2"
-PEAR = "3"
-BANANA = "4"
+ORANGE = "orange"
+APPLE = "apple"
+PEAR = "pear"
+BANANA = "banana"
 
-FOOD = "1234"
+FOOD = "food"
 ANIMAL_BASED = "animal_based"
 PLANT_BASED = "plant_based"
 
-
-def test_affiliation_persistency_json():
-    auth = SerialAuthority()
-
-    auth.add_subject(sid=EGG)
-    auth.add_subject(sid=SPAM)
-    auth.add_subject(sid=HAM)
-
-    auth.add_subject(sid=ORANGE)
-    auth.add_subject(sid=APPLE)
-    auth.add_subject(sid=PEAR)
-    auth.add_subject(sid=BANANA)
-
-    auth.add_group(gid=FOOD)
-    auth.add_group(gid=ANIMAL_BASED)
-    auth.add_group(gid=PLANT_BASED)
-
-    auth.group_add_member_subject(gid=FOOD, sid=EGG)
-    auth.group_add_member_subject(gid=FOOD, sid=SPAM)
-    auth.group_add_member_subject(gid=FOOD, sid=HAM)
-    auth.group_add_member_subject(gid=FOOD, sid=ORANGE)
-    auth.group_add_member_subject(gid=FOOD, sid=APPLE)
-    auth.group_add_member_subject(gid=FOOD, sid=PEAR)
-    auth.group_add_member_subject(gid=FOOD, sid=BANANA)
-
-    auth.group_add_member_subject(gid=ANIMAL_BASED, sid=EGG)
-    auth.group_add_member_subject(gid=ANIMAL_BASED, sid=SPAM)
-    auth.group_add_member_subject(gid=ANIMAL_BASED, sid=HAM)
-
-    auth.group_add_member_subject(gid=PLANT_BASED, sid=ORANGE)
-    auth.group_add_member_subject(gid=PLANT_BASED, sid=APPLE)
-    auth.group_add_member_subject(gid=PLANT_BASED, sid=PEAR)
-    auth.group_add_member_subject(gid=PLANT_BASED, sid=BANANA)
-
-    serial_data = auth.dump_JSON()
-
-    auth2 = SerialAuthority(nodes=TownyPermissionNode)
-    auth2.load_JSON(serial_data=serial_data)
-
-    assert set(auth._subjects.keys()) == set(auth2._subjects.keys())
-    assert set(auth._groups.keys()) == set(auth2._groups.keys())
-
-    assert auth._groups[FOOD]._sids == auth2._groups[FOOD]._sids
-    assert auth._groups[ANIMAL_BASED]._sids == auth2._groups[ANIMAL_BASED]._sids
-    assert auth._groups[PLANT_BASED]._sids == auth2._groups[PLANT_BASED]._sids
+path = pathlib.Path(__file__).parent.absolute()
 
 
-def test_permission_persistency_json():
-    auth = SerialAuthority(nodes=TownyPermissionNode)
+def test_load_file_yaml():
+    auth = SerialAuthority(nodes=TPN)
 
-    auth.add_subject(sid=EGG)
-    auth.subject_add_permission(sid=EGG, node=TownyPermissionNode.TOWNY_CHAT_TOWN)
-    auth.subject_add_permission(
-        sid=EGG, node=TownyPermissionNode.TOWNY_WILD_BUILD_X, payload="dirt"
-    )
+    auth.load_file(path=path / "save_file.yaml")
 
-    auth.add_subject(sid=SPAM)
+    assert set(auth._groups.keys()) == {FOOD, ANIMAL_BASED, PLANT_BASED}
+    assert set(auth._subjects.keys()) == {
+        EGG,
+        SPAM,
+        HAM,
+        ORANGE,
+        APPLE,
+        PEAR,
+        BANANA,
+    }
 
-    auth.add_group(gid=FOOD)
-    auth.group_add_permission(gid=FOOD, node=TownyPermissionNode.TOWNY_CHAT_NATION)
-    auth.group_add_permission(
-        gid=FOOD, node=TownyPermissionNode.TOWNY_WILD_DESTROY_X, payload="iron"
-    )
+    assert auth.group_get_member_groups(gid=FOOD) == {ANIMAL_BASED, PLANT_BASED}
+    assert auth.group_get_parent_groups(gid=ANIMAL_BASED) == {FOOD}
+    assert auth.group_get_parent_groups(gid=PLANT_BASED) == {FOOD}
 
-    serial_data = auth.dump_JSON()
+    assert auth.group_get_member_subjects(gid=ANIMAL_BASED) == {EGG, SPAM, HAM}
+    assert auth.group_get_member_subjects(gid=PLANT_BASED) == {ORANGE, APPLE, PEAR, BANANA}
 
-    auth2 = SerialAuthority(nodes=TownyPermissionNode)
-    auth2.load_JSON(serial_data=serial_data)
+    assert auth.subject_has_permission(sid=EGG, node=TPN.TOWNY_CHAT_GLOBAL) == True
+    assert auth.subject_has_permission(sid=EGG, node=TPN.TOWNY_CHAT_TOWN) == True
+    assert auth.subject_has_permission(sid=EGG, node=TPN.TOWNY_CHAT_NATION) == False
 
-    assert auth2.subject_has_permission(sid=EGG, node=TownyPermissionNode.TOWNY_CHAT_TOWN) == True
-    assert auth2.subject_has_permission(sid=EGG, node=TownyPermissionNode.TOWNY_CHAT_) == False
+    assert auth.subject_has_permission(sid=PEAR, node=TPN.TOWNY_CHAT_GLOBAL) == True
+    assert auth.subject_has_permission(sid=PEAR, node=TPN.TOWNY_CHAT_TOWN) == False
+    assert auth.subject_has_permission(sid=PEAR, node=TPN.TOWNY_CHAT_NATION) == True
+
+    assert auth.subject_has_permission(sid=EGG, node=TPN.TOWNY_WILD_BUILD_X, payload="dirt") == True
+    assert auth.subject_has_permission(sid=EGG, node=TPN.TOWNY_WILD_BUILD_X, payload="gold") == True
     assert (
-        auth2.subject_has_permission(
-            sid=EGG, node=TownyPermissionNode.TOWNY_WILD_BUILD_X, payload="dirt"
-        )
-        == True
+        auth.subject_has_permission(sid=EGG, node=TPN.TOWNY_WILD_DESTROY_X, payload="dirt") == False
     )
     assert (
-        auth2.subject_has_permission(
-            sid=EGG, node=TownyPermissionNode.TOWNY_WILD_BUILD_X, payload="stone"
-        )
-        == False
+        auth.subject_has_permission(sid=EGG, node=TPN.TOWNY_WILD_DESTROY_X, payload="gold") == False
     )
 
-    assert auth2.group_has_permission(gid=FOOD, node=TownyPermissionNode.TOWNY_CHAT_NATION) == True
-    assert auth2.group_has_permission(gid=FOOD, node=TownyPermissionNode.TOWNY_CHAT_TOWN) == False
     assert (
-        auth2.group_has_permission(
-            gid=FOOD, node=TownyPermissionNode.TOWNY_WILD_DESTROY_X, payload="iron"
-        )
-        == True
+        auth.subject_has_permission(sid=PEAR, node=TPN.TOWNY_WILD_BUILD_X, payload="dirt") == False
     )
     assert (
-        auth2.group_has_permission(
-            gid=FOOD, node=TownyPermissionNode.TOWNY_WILD_DESTROY_X, payload="gold"
-        )
-        == False
+        auth.subject_has_permission(sid=PEAR, node=TPN.TOWNY_WILD_BUILD_X, payload="gold") == False
+    )
+    assert (
+        auth.subject_has_permission(sid=PEAR, node=TPN.TOWNY_WILD_DESTROY_X, payload="dirt") == True
+    )
+    assert (
+        auth.subject_has_permission(sid=PEAR, node=TPN.TOWNY_WILD_DESTROY_X, payload="gold") == True
     )
 
-
-def test_grouped_groups_json():
-    auth = SerialAuthority()
-
-    auth.add_group(gid=FOOD)
-    auth.add_group(gid=ANIMAL_BASED)
-    auth.add_group(gid=PLANT_BASED)
-
-    auth.group_add_member_group(cid=ANIMAL_BASED, gid=FOOD)
-    auth.group_add_member_group(cid=PLANT_BASED, gid=FOOD)
-
-    serial_data = auth.dump_JSON()
-
-    auth2 = SerialAuthority(nodes=TownyPermissionNode)
-    auth2.load_JSON(serial_data=serial_data)
-
-    assert ANIMAL_BASED in auth2._groups[FOOD].child_ids
-    assert PLANT_BASED in auth2._groups[FOOD].child_ids
-
-    assert FOOD in auth2._groups[ANIMAL_BASED].parent_ids
-    assert FOOD in auth2._groups[PLANT_BASED].parent_ids
+    assert (
+        auth.subject_has_permission(sid=HAM, node=TPN.TOWNY_WILD_DESTROY_X, payload="dirt") == True
+    )
+    assert (
+        auth.subject_has_permission(sid=HAM, node=TPN.TOWNY_WILD_DESTROY_X, payload="gold") == True
+    )
