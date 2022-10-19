@@ -561,15 +561,6 @@ class SerialAuthority(_Authority):
 
         return False
 
-    @staticmethod
-    def _serialize_data(*, non_serial_data: DataStore) -> str:
-        # cast only valid with one argument to dumps
-        return cast(str, json.dumps(non_serial_data))
-
-    @staticmethod
-    def _deserialize_data(*, serial_data: str) -> Any:
-        return json.loads(serial_data)
-
 
 ####################################################################################################
 ### Util
