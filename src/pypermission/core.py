@@ -40,7 +40,7 @@ class Permission:
     _node: PermissionNode
     _parent: Permission | None
     _ancestors: tuple[Permission, ...]
-    _childs: set[Permission]
+    _children: set[Permission]
     _sub_graph: dict[str, Permission]
     _has_payload: bool
     _is_leaf: bool
@@ -49,7 +49,7 @@ class Permission:
         self._node = RootPermissionNode.ROOT_
         self._parent = None
         self._ancestors = tuple()
-        self._childs = set()
+        self._children = set()
         self._sub_graph = {}
         self._has_payload = False
         self._is_leaf = False
@@ -70,9 +70,9 @@ class Permission:
         return self._ancestors
 
     @property
-    def childs(self) -> set[Permission]:
+    def children(self) -> set[Permission]:
         """Get child permissions."""
-        return self._childs
+        return self._children
 
     @property
     def sub_graph(self) -> dict[str, Permission]:
@@ -108,7 +108,7 @@ class CustomPermission(Permission):
         self._node = node
         self._parent = parent
         self._ancestors = tuple()
-        self._childs = set()
+        self._children = set()
         self._sub_graph = {}
         self._has_payload = has_payload
         self._is_leaf = is_leaf
@@ -239,7 +239,7 @@ class Authority(ABC):
         new_perm._update_ancestors()  # pylint: disable=protected-access
 
         parent.sub_graph[last_str_section] = new_perm
-        parent.childs.add(new_perm)
+        parent.children.add(new_perm)
 
         self._node_permission_map[node] = new_perm
         self._node_str_permission_map[node_str] = new_perm

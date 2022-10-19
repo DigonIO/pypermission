@@ -98,7 +98,7 @@ class Subject(PermissionableEntity):
 
 class Group(PermissionableEntity):
 
-    _sids: set[str]  # subject IDs
+    _sids: set[str]  # subject member IDs
     _parent_ids: set[str]  # parent group IDs
     _child_ids: set[str]  # child group IDs
 
