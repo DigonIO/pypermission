@@ -196,9 +196,9 @@ class BankAPI:
         self._users[user_banker.username] = user_banker
         self._users[user_customer.username] = user_customer
 
-        self._auth.group_add_subject(gid=GROUP_ADMIN, sid=user_admin.username)
-        self._auth.group_add_subject(gid=GROUP_BANKER, sid=user_banker.username)
-        self._auth.group_add_subject(gid=GROUP_CUSTOMER, sid=user_customer.username)
+        self._auth.group_add_member_subject(gid=GROUP_ADMIN, sid=user_admin.username)
+        self._auth.group_add_member_subject(gid=GROUP_BANKER, sid=user_banker.username)
+        self._auth.group_add_member_subject(gid=GROUP_CUSTOMER, sid=user_customer.username)
 
 
 bank_api = BankAPI()

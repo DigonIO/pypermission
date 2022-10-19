@@ -147,8 +147,8 @@ def test_subject_perms_with_groups():
 
     auth.add_subject(sid=EGG)
 
-    auth.group_add_subject(gid=ANIMAL_BASED, sid=EGG)
-    auth.group_add_subject(gid=PLANT_BASED, sid=EGG)
+    auth.group_add_member_subject(gid=ANIMAL_BASED, sid=EGG)
+    auth.group_add_member_subject(gid=PLANT_BASED, sid=EGG)
     # yeah chickens are some kind of plants too...
 
     auth.group_add_permission(gid=ANIMAL_BASED, node=TownyPermissionNode.TOWNY_CHAT_)
@@ -175,17 +175,17 @@ def test_grouped_groups():
     auth.add_group(gid=PEAR)
     auth.add_group(gid=BANANA)
 
-    auth.group_add_child_group(gid=FOOD, cid=ANIMAL_BASED)
-    auth.group_add_child_group(gid=FOOD, cid=PLANT_BASED)
+    auth.group_add_member_group(gid=FOOD, cid=ANIMAL_BASED)
+    auth.group_add_member_group(gid=FOOD, cid=PLANT_BASED)
 
-    auth.group_add_child_group(gid=ANIMAL_BASED, cid=EGG)
-    auth.group_add_child_group(gid=ANIMAL_BASED, cid=SPAM)
-    auth.group_add_child_group(gid=ANIMAL_BASED, cid=HAM)
+    auth.group_add_member_group(gid=ANIMAL_BASED, cid=EGG)
+    auth.group_add_member_group(gid=ANIMAL_BASED, cid=SPAM)
+    auth.group_add_member_group(gid=ANIMAL_BASED, cid=HAM)
 
-    auth.group_add_child_group(gid=PLANT_BASED, cid=ORANGE)
-    auth.group_add_child_group(gid=PLANT_BASED, cid=APPLE)
-    auth.group_add_child_group(gid=PLANT_BASED, cid=PEAR)
-    auth.group_add_child_group(gid=PLANT_BASED, cid=BANANA)
+    auth.group_add_member_group(gid=PLANT_BASED, cid=ORANGE)
+    auth.group_add_member_group(gid=PLANT_BASED, cid=APPLE)
+    auth.group_add_member_group(gid=PLANT_BASED, cid=PEAR)
+    auth.group_add_member_group(gid=PLANT_BASED, cid=BANANA)
 
     assert len(auth._groups[FOOD].child_ids) == 2
     assert len(auth._groups[PLANT_BASED].child_ids) == 4
@@ -203,11 +203,11 @@ def test_cyclic_groups():
     auth.add_group(gid=ANIMAL_BASED)
     auth.add_group(gid=PLANT_BASED)
 
-    auth.group_add_child_group(gid=FOOD, cid=ANIMAL_BASED)
-    auth.group_add_child_group(gid=ANIMAL_BASED, cid=PLANT_BASED)
+    auth.group_add_member_group(gid=FOOD, cid=ANIMAL_BASED)
+    auth.group_add_member_group(gid=ANIMAL_BASED, cid=PLANT_BASED)
 
     with pytest.raises(GroupCycleError):
-        auth.group_add_child_group(gid=PLANT_BASED, cid=FOOD)
+        auth.group_add_member_group(gid=PLANT_BASED, cid=FOOD)
 
 
 def test_recursive_permissions():
@@ -217,8 +217,8 @@ def test_recursive_permissions():
     auth.add_group(gid=ANIMAL_BASED)
     auth.add_group(gid=PLANT_BASED)
 
-    auth.group_add_child_group(gid=FOOD, cid=ANIMAL_BASED)
-    auth.group_add_child_group(gid=ANIMAL_BASED, cid=PLANT_BASED)
+    auth.group_add_member_group(gid=FOOD, cid=ANIMAL_BASED)
+    auth.group_add_member_group(gid=ANIMAL_BASED, cid=PLANT_BASED)
 
     auth.group_add_permission(gid=FOOD, node=TownyPermissionNode.TOWNY_CHAT_)
 
@@ -226,7 +226,7 @@ def test_recursive_permissions():
     assert auth.group_has_permission(gid=PLANT_BASED, node=TownyPermissionNode.TOWNY_WILD_) == False
 
     auth.add_subject(sid=APPLE)
-    auth.group_add_subject(gid=PLANT_BASED, sid=APPLE)
+    auth.group_add_member_subject(gid=PLANT_BASED, sid=APPLE)
 
     assert auth.subject_has_permission(sid=APPLE, node=TownyPermissionNode.TOWNY_CHAT_) == True
     assert auth.subject_has_permission(sid=APPLE, node=TownyPermissionNode.TOWNY_WILD_) == False
@@ -248,22 +248,22 @@ def test_grouped_subjects():
     auth.add_group(gid=ANIMAL_BASED)
     auth.add_group(gid=PLANT_BASED)
 
-    auth.group_add_subject(gid=FOOD, sid=EGG)
-    auth.group_add_subject(gid=FOOD, sid=SPAM)
-    auth.group_add_subject(gid=FOOD, sid=HAM)
-    auth.group_add_subject(gid=FOOD, sid=ORANGE)
-    auth.group_add_subject(gid=FOOD, sid=APPLE)
-    auth.group_add_subject(gid=FOOD, sid=PEAR)
-    auth.group_add_subject(gid=FOOD, sid=BANANA)
+    auth.group_add_member_subject(gid=FOOD, sid=EGG)
+    auth.group_add_member_subject(gid=FOOD, sid=SPAM)
+    auth.group_add_member_subject(gid=FOOD, sid=HAM)
+    auth.group_add_member_subject(gid=FOOD, sid=ORANGE)
+    auth.group_add_member_subject(gid=FOOD, sid=APPLE)
+    auth.group_add_member_subject(gid=FOOD, sid=PEAR)
+    auth.group_add_member_subject(gid=FOOD, sid=BANANA)
 
-    auth.group_add_subject(gid=ANIMAL_BASED, sid=EGG)
-    auth.group_add_subject(gid=ANIMAL_BASED, sid=SPAM)
-    auth.group_add_subject(gid=ANIMAL_BASED, sid=HAM)
+    auth.group_add_member_subject(gid=ANIMAL_BASED, sid=EGG)
+    auth.group_add_member_subject(gid=ANIMAL_BASED, sid=SPAM)
+    auth.group_add_member_subject(gid=ANIMAL_BASED, sid=HAM)
 
-    auth.group_add_subject(gid=PLANT_BASED, sid=ORANGE)
-    auth.group_add_subject(gid=PLANT_BASED, sid=APPLE)
-    auth.group_add_subject(gid=PLANT_BASED, sid=PEAR)
-    auth.group_add_subject(gid=PLANT_BASED, sid=BANANA)
+    auth.group_add_member_subject(gid=PLANT_BASED, sid=ORANGE)
+    auth.group_add_member_subject(gid=PLANT_BASED, sid=APPLE)
+    auth.group_add_member_subject(gid=PLANT_BASED, sid=PEAR)
+    auth.group_add_member_subject(gid=PLANT_BASED, sid=BANANA)
 
     assert len(auth._groups[FOOD].sids) == 7
     assert len(auth._groups[ANIMAL_BASED].sids) == 3

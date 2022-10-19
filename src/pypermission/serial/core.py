@@ -350,7 +350,7 @@ class SerialAuthority(_Authority):
         group = Group(id=gid)
         self._groups[gid] = group
 
-    def group_add_subject(self, *, gid: str, sid: str) -> None:
+    def group_add_member_subject(self, *, gid: str, sid: str) -> None:
         """Add a subject to a group to inherit all its permissions."""
         group = self._get_group(gid=gid)
         subject = self._get_subject(sid=sid)
@@ -358,7 +358,7 @@ class SerialAuthority(_Authority):
         group.sids.add(sid)
         subject.gids.add(gid)
 
-    def group_add_child_group(self, *, gid: str, cid: str) -> None:
+    def group_add_member_group(self, *, gid: str, cid: str) -> None:
         """Add a group to a parent group to inherit all its permissions."""
         child = self._get_group(gid=cid)
         parent = self._get_group(gid=gid)
@@ -405,12 +405,12 @@ class SerialAuthority(_Authority):
         subject = self._get_subject(sid=sid)
         return subject.gids.copy()
 
-    def group_get_subjects(self, *, gid: str) -> set[str]:
+    def group_get_member_subjects(self, *, gid: str) -> set[str]:
         """Get a set of all subject IDs from a group."""
         group = self._get_group(gid=gid)
         return group.sids.copy()
 
-    def group_get_child_groups(self, *, gid: str) -> set[str]:
+    def group_get_member_groups(self, *, gid: str) -> set[str]:
         """Get a set of all child group IDs of a group."""
         group = self._get_group(gid=gid)
         return group.child_ids.copy()
@@ -502,7 +502,7 @@ class SerialAuthority(_Authority):
             permission_map=permission_map, permission=permission, payload=payload
         )
 
-    def group_rem_subject(self, *, gid: str, sid: str) -> None:
+    def group_rem_member_subject(self, *, gid: str, sid: str) -> None:
         """Remove a subject from a group."""
         group = self._get_group(gid=gid)
         subject = self._get_subject(sid=sid)
@@ -510,8 +510,7 @@ class SerialAuthority(_Authority):
         group.sids.remove(sid)
         subject.gids.remove(gid)
 
-    # TODO rename to group_rem_child_group
-    def group_rem_group(self, *, pid: str, child_id: str) -> None:
+    def group_rem_member_group(self, *, pid: str, child_id: str) -> None:
         """Remove a group from a group."""
         parent = self._get_group(gid=pid)
         child = self._get_group(gid=child_id)

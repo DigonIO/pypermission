@@ -32,22 +32,22 @@ def test_affiliation_persistency_json():
     auth.add_group(gid=ANIMAL_BASED)
     auth.add_group(gid=PLANT_BASED)
 
-    auth.group_add_subject(gid=FOOD, sid=EGG)
-    auth.group_add_subject(gid=FOOD, sid=SPAM)
-    auth.group_add_subject(gid=FOOD, sid=HAM)
-    auth.group_add_subject(gid=FOOD, sid=ORANGE)
-    auth.group_add_subject(gid=FOOD, sid=APPLE)
-    auth.group_add_subject(gid=FOOD, sid=PEAR)
-    auth.group_add_subject(gid=FOOD, sid=BANANA)
+    auth.group_add_member_subject(gid=FOOD, sid=EGG)
+    auth.group_add_member_subject(gid=FOOD, sid=SPAM)
+    auth.group_add_member_subject(gid=FOOD, sid=HAM)
+    auth.group_add_member_subject(gid=FOOD, sid=ORANGE)
+    auth.group_add_member_subject(gid=FOOD, sid=APPLE)
+    auth.group_add_member_subject(gid=FOOD, sid=PEAR)
+    auth.group_add_member_subject(gid=FOOD, sid=BANANA)
 
-    auth.group_add_subject(gid=ANIMAL_BASED, sid=EGG)
-    auth.group_add_subject(gid=ANIMAL_BASED, sid=SPAM)
-    auth.group_add_subject(gid=ANIMAL_BASED, sid=HAM)
+    auth.group_add_member_subject(gid=ANIMAL_BASED, sid=EGG)
+    auth.group_add_member_subject(gid=ANIMAL_BASED, sid=SPAM)
+    auth.group_add_member_subject(gid=ANIMAL_BASED, sid=HAM)
 
-    auth.group_add_subject(gid=PLANT_BASED, sid=ORANGE)
-    auth.group_add_subject(gid=PLANT_BASED, sid=APPLE)
-    auth.group_add_subject(gid=PLANT_BASED, sid=PEAR)
-    auth.group_add_subject(gid=PLANT_BASED, sid=BANANA)
+    auth.group_add_member_subject(gid=PLANT_BASED, sid=ORANGE)
+    auth.group_add_member_subject(gid=PLANT_BASED, sid=APPLE)
+    auth.group_add_member_subject(gid=PLANT_BASED, sid=PEAR)
+    auth.group_add_member_subject(gid=PLANT_BASED, sid=BANANA)
 
     serial_data = auth.dump_JSON()
 
@@ -122,8 +122,8 @@ def test_grouped_groups_json():
     auth.add_group(gid=ANIMAL_BASED)
     auth.add_group(gid=PLANT_BASED)
 
-    auth.group_add_child_group(cid=ANIMAL_BASED, gid=FOOD)
-    auth.group_add_child_group(cid=PLANT_BASED, gid=FOOD)
+    auth.group_add_member_group(cid=ANIMAL_BASED, gid=FOOD)
+    auth.group_add_member_group(cid=PLANT_BASED, gid=FOOD)
 
     serial_data = auth.dump_JSON()
 
