@@ -2,7 +2,7 @@ class PyPermissionError(Exception):
     """Basic PyPermission error definition."""
 
 
-class MissingPathError(PyPermissionError):
+class PathError(PyPermissionError):
     """Raised if no file path is defined while saving to or reading from a file."""
 
 

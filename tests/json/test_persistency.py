@@ -1,4 +1,4 @@
-from pypermission.json import Authority
+from pypermission.serial import Authority
 
 from ..helpers import TownyPermissionNode
 

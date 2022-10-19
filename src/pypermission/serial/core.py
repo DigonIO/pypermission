@@ -14,8 +14,9 @@ from pypermission.core import (
 from pypermission.error import (
     EntityIDCollisionError,
     GroupCycleError,
-    MissingPathError,
+    PathError,
     UnknownSubjectIDError,
+    PathError,
 )
 
 ####################################################################################################
@@ -125,7 +126,7 @@ class Group(PermissionableEntity):
 ####################################################################################################
 
 
-class Authority(_Authority):
+class SerialAuthority(_Authority):
 
     _subjects: dict[str, Subject]
     _groups: dict[str, Group]
@@ -144,29 +145,81 @@ class Authority(_Authority):
     ### IO
     ################################################################################################
 
-    def save_to_file(self, path: Path | str | None = None):
-        """Save the current state to file formatted as JSON."""
+    def save_file(self, path: Path | str | None = None):
+        """Save the current state to file formatted as JSON or YAML."""
+        path = path or self._data_file
         if not path:
-            path = self._data_file
-        if not path:
-            raise MissingPathError
+            raise PathError("No file path to save to has been specified!")
 
-        serial_data = self.save_to_str()
+        path = Path(path)
+        ftype = path.suffix[1:]
+
+        if ftype == "json":
+            serial_data = self.dump_JSON()
+        elif ftype in ["yaml", "yml"]:
+            serial_data = self.dump_YAML()
+        else:
+            raise PathError(
+                f"Unknown file extension `{ftype}`! Possible extensions are: `json`, `yaml`"
+            )
+
         with open(path, "w") as handle:
             handle.write(serial_data)
 
-    def load_from_file(self, path: Path | str | None = None) -> None:
-        """Load a previous state from a JSON formatted file."""
+    def load_file(self, path: Path | str | None = None) -> None:
+        """Load a previous state from a file formatted as JSON or YAML."""
+        path = path or self._data_file
         if not path:
-            path = self._data_file
-        if not path:
-            raise MissingPathError
+            raise PathError("No file path to load from has been specified!")
 
-        with open(path, "r") as handle:
-            serial_data = handle.read()
-        self.load_from_str(serial_data=serial_data)
+        path = Path(path)
+        ftype = path.suffix[1:]
 
-    def save_to_str(self) -> str:
+        if ftype == "json":
+            with open(path, "r") as handle:
+                serial_data = handle.read()
+            self.load_JSON(serial_data=serial_data)
+        elif ftype in ["yaml", "yml"]:
+            with open(path, "r") as handle:
+                serial_data = handle.read()
+            self.load_YAML(serial_data=serial_data)
+        else:
+            raise PathError(
+                f"Unknown file extension `{ftype}`! Possible extensions are: `json`, `yaml`"
+            )
+
+    def dump_JSON(self) -> str:
+        return json.dumps(self._write_data_store())
+
+    def dump_YAML(self) -> str:
+        # TODO: try/except
+        try:
+            import yaml
+        except ModuleNotFoundError:
+            raise ModuleNotFoundError(
+                "Dumping to YAML requires the installation of the optional dependency PyYAML."
+                "To install PyYAML, use your preferred python package manager."
+            )
+        return yaml.safe_dump(self._write_data_store())
+
+    def load_JSON(self, *, serial_data: str) -> None:
+        data = json.loads(serial_data)
+        self._load_data_store(data=data)
+
+    def load_YAML(self, *, serial_data: str) -> None:
+        # TODO: try/except
+        try:
+            import yaml
+        except ModuleNotFoundError:
+            raise ModuleNotFoundError(
+                "Loading from YAML requires the installation of the optional dependency PyYAML."
+                "To install PyYAML, use your preferred python package manager."
+            )
+
+        data = yaml.safe_load(serial_data)
+        self._load_data_store(data=data)
+
+    def _write_data_store(self) -> DataStore:
         """Save the current state to string formatted as JSON."""
         groups: dict[str, GroupStore] = {}
 
@@ -214,12 +267,10 @@ class Authority(_Authority):
             groups=groups,
             subjects=subjects,
         )
+        return data
 
-        return self._serialize_data(non_serial_data=data)
-
-    def load_from_str(self, *, serial_data: str) -> None:
-        """Load a previous state from a JSON formatted string."""
-        data: dict = self._deserialize_data(serial_data=serial_data)
+    def _load_data_store(self, *, data: DataStore) -> None:
+        """Load state from DataStore dictionary."""
 
         # populate subjects
         for sid, sdefs in data.get("subjects", {}).items():
