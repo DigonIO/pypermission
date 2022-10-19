@@ -1,7 +1,7 @@
 import pytest
 
 from pypermission.core import Permission, PermissionNode
-from pypermission.serial import Authority
+from pypermission.serial import SerialAuthority
 
 from ..helpers import TownyPermissionNode
 
@@ -10,7 +10,7 @@ from ..helpers import TownyPermissionNode
     "node, is_leaf, has_payload",
     [
         # (node, is_leaf, has_payload)
-        (Authority.root_node(), False, False),
+        (SerialAuthority.root_node(), False, False),
         (TownyPermissionNode.TOWNY_, False, False),
         (TownyPermissionNode.TOWNY_CHAT_, False, False),
         (TownyPermissionNode.TOWNY_CHAT_TOWN, True, False),
@@ -24,7 +24,7 @@ from ..helpers import TownyPermissionNode
     ],
 )
 def test_register_buildin_nodes(node: PermissionNode, is_leaf: bool, has_payload: bool):
-    auth = Authority(nodes=TownyPermissionNode)
+    auth = SerialAuthority(nodes=TownyPermissionNode)
 
     permission: Permission = auth._node_permission_map[node]
     assert permission.node == node
@@ -36,7 +36,7 @@ def test_register_buildin_nodes(node: PermissionNode, is_leaf: bool, has_payload
     "node, is_leaf, has_payload",
     [
         # (node, is_leaf, has_payload)
-        (Authority.root_node(), False, False),
+        (SerialAuthority.root_node(), False, False),
         (TownyPermissionNode.TOWNY_, False, False),
         (TownyPermissionNode.TOWNY_CHAT_, False, False),
         (TownyPermissionNode.TOWNY_CHAT_TOWN, True, False),
@@ -50,7 +50,7 @@ def test_register_buildin_nodes(node: PermissionNode, is_leaf: bool, has_payload
     ],
 )
 def test_register_plugin_nodes(node: PermissionNode, is_leaf: bool, has_payload: bool):
-    auth = Authority()
+    auth = SerialAuthority()
     auth.register_permission_nodes(nodes=TownyPermissionNode)
 
     permission: Permission = auth._node_permission_map[node]

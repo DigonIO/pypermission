@@ -1,7 +1,7 @@
 import pytest
 
 from pypermission.error import GroupCycleError, UnknownPermissionNodeError
-from pypermission.serial import Authority
+from pypermission.serial import SerialAuthority
 
 from ..helpers import TownyPermissionNode
 
@@ -20,11 +20,11 @@ PLANT_BASED = "plant_based"
 
 
 def test_subject_perms_without_groups():
-    auth = Authority(nodes=TownyPermissionNode)
+    auth = SerialAuthority(nodes=TownyPermissionNode)
 
     ### EGG ### ADD PERMS ##########################################################################
     auth.add_subject(sid=EGG)
-    auth.subject_add_permission(sid=EGG, node=Authority.root_node())
+    auth.subject_add_permission(sid=EGG, node=SerialAuthority.root_node())
 
     assert auth.subject_has_permission(sid=EGG, node=TownyPermissionNode.TOWNY_CHAT_GLOBAL) == True
     assert auth.subject_has_permission(sid=EGG, node=TownyPermissionNode.TOWNY_CHAT_NATION) == True
@@ -120,11 +120,11 @@ def test_subject_perms_without_groups():
 
 # Just a short integration test, because groups using the same permission backend like subjects
 def test_group_perms():
-    auth = Authority(nodes=TownyPermissionNode)
+    auth = SerialAuthority(nodes=TownyPermissionNode)
 
     auth.add_group(ANIMAL_BASED)
 
-    auth.group_add_permission(gid=ANIMAL_BASED, node=Authority.root_node())
+    auth.group_add_permission(gid=ANIMAL_BASED, node=SerialAuthority.root_node())
     assert (
         auth.group_has_permission(gid=ANIMAL_BASED, node=TownyPermissionNode.TOWNY_CHAT_TOWN)
         == True
@@ -140,7 +140,7 @@ def test_group_perms():
 
 
 def test_subject_perms_with_groups():
-    auth = Authority(nodes=TownyPermissionNode)
+    auth = SerialAuthority(nodes=TownyPermissionNode)
 
     auth.add_group(gid=ANIMAL_BASED)
     auth.add_group(gid=PLANT_BASED)
@@ -160,7 +160,7 @@ def test_subject_perms_with_groups():
 
 
 def test_grouped_groups():
-    auth = Authority()
+    auth = SerialAuthority()
 
     auth.add_group(gid=FOOD)
     auth.add_group(gid=ANIMAL_BASED)
@@ -197,7 +197,7 @@ def test_grouped_groups():
 
 
 def test_cyclic_groups():
-    auth = Authority()
+    auth = SerialAuthority()
 
     auth.add_group(gid=FOOD)
     auth.add_group(gid=ANIMAL_BASED)
@@ -211,7 +211,7 @@ def test_cyclic_groups():
 
 
 def test_recursive_permissions():
-    auth = Authority(nodes=TownyPermissionNode)
+    auth = SerialAuthority(nodes=TownyPermissionNode)
 
     auth.add_group(gid=FOOD)
     auth.add_group(gid=ANIMAL_BASED)
@@ -233,7 +233,7 @@ def test_recursive_permissions():
 
 
 def test_grouped_subjects():
-    auth = Authority()
+    auth = SerialAuthority()
 
     auth.add_subject(sid=EGG)
     auth.add_subject(sid=SPAM)
@@ -274,7 +274,7 @@ def test_grouped_subjects():
 
 
 def test_unknown_perm_node():
-    auth = Authority()
+    auth = SerialAuthority()
 
     auth.add_subject(sid=APPLE)
 

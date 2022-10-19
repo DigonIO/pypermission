@@ -1,4 +1,4 @@
-from pypermission.serial import Authority
+from pypermission.serial import SerialAuthority
 
 from ..helpers import TownyPermissionNode
 
@@ -17,7 +17,7 @@ PLANT_BASED = "plant_based"
 
 
 def test_affiliation_persistency_json():
-    auth = Authority()
+    auth = SerialAuthority()
 
     auth.add_subject(sid=EGG)
     auth.add_subject(sid=SPAM)
@@ -49,10 +49,10 @@ def test_affiliation_persistency_json():
     auth.group_add_subject(gid=PLANT_BASED, sid=PEAR)
     auth.group_add_subject(gid=PLANT_BASED, sid=BANANA)
 
-    serial_data = auth.save_to_str()
+    serial_data = auth.dump_JSON()
 
-    auth2 = Authority()
-    auth2.load_from_str(serial_data=serial_data)
+    auth2 = SerialAuthority(nodes=TownyPermissionNode)
+    auth2.load_JSON(serial_data=serial_data)
 
     assert set(auth._subjects.keys()) == set(auth2._subjects.keys())
     assert set(auth._groups.keys()) == set(auth2._groups.keys())
@@ -63,7 +63,7 @@ def test_affiliation_persistency_json():
 
 
 def test_permission_persistency_json():
-    auth = Authority(nodes=TownyPermissionNode)
+    auth = SerialAuthority(nodes=TownyPermissionNode)
 
     auth.add_subject(sid=EGG)
     auth.subject_add_permission(sid=EGG, node=TownyPermissionNode.TOWNY_CHAT_TOWN)
@@ -79,10 +79,10 @@ def test_permission_persistency_json():
         gid=FOOD, node=TownyPermissionNode.TOWNY_WILD_DESTROY_X, payload="iron"
     )
 
-    serial_data = auth.save_to_str()
+    serial_data = auth.dump_JSON()
 
-    auth2 = Authority(nodes=TownyPermissionNode)
-    auth2.load_from_str(serial_data=serial_data)
+    auth2 = SerialAuthority(nodes=TownyPermissionNode)
+    auth2.load_JSON(serial_data=serial_data)
 
     assert auth2.subject_has_permission(sid=EGG, node=TownyPermissionNode.TOWNY_CHAT_TOWN) == True
     assert auth2.subject_has_permission(sid=EGG, node=TownyPermissionNode.TOWNY_CHAT_) == False
@@ -116,7 +116,7 @@ def test_permission_persistency_json():
 
 
 def test_grouped_groups_json():
-    auth = Authority()
+    auth = SerialAuthority()
 
     auth.add_group(gid=FOOD)
     auth.add_group(gid=ANIMAL_BASED)
@@ -125,11 +125,10 @@ def test_grouped_groups_json():
     auth.group_add_child_group(cid=ANIMAL_BASED, gid=FOOD)
     auth.group_add_child_group(cid=PLANT_BASED, gid=FOOD)
 
-    serial_data = auth.save_to_str()
+    serial_data = auth.dump_JSON()
 
-    auth2 = Authority()
-
-    auth2.load_from_str(serial_data=serial_data)
+    auth2 = SerialAuthority(nodes=TownyPermissionNode)
+    auth2.load_JSON(serial_data=serial_data)
 
     assert ANIMAL_BASED in auth2._groups[FOOD].child_ids
     assert PLANT_BASED in auth2._groups[FOOD].child_ids

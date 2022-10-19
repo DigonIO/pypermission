@@ -1,7 +1,7 @@
 from typing import TypedDict
 
 from pypermission import PermissionNode
-from pypermission.serial import Authority
+from pypermission.serial import SerialAuthority
 
 
 class BankAPIPermissionNode(PermissionNode):
@@ -80,10 +80,10 @@ def response_factory(acc: Account) -> AccountResponse:
 
 class User:
     _username: str
-    _auth = Authority
+    _auth = SerialAuthority
     _accounts: dict[int, Account]
 
-    def __init__(self, username: str, auth: Authority) -> None:
+    def __init__(self, username: str, auth: SerialAuthority) -> None:
         self._username = username
         self._auth = auth
         self._accounts = {}
@@ -106,12 +106,12 @@ class User:
 
 
 class BankAPI:
-    _auth: Authority
+    _auth: SerialAuthority
     _users: dict[str, User]
     _accounts: dict[int, Account]
 
     def __init__(self):
-        self._auth = Authority(nodes=NODE)
+        self._auth = SerialAuthority(nodes=NODE)
         self._users = {}
         self._accounts = {}
 

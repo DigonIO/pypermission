@@ -6,7 +6,7 @@ path = pathlib.Path(__file__).parent.absolute()
 def test_readme_code_example():
 
     from pypermission import PermissionNode
-    from pypermission.yaml import Authority
+    from pypermission.serial import SerialAuthority
 
     class Nodes(PermissionNode):
         CHAT_ = "chat.*"  # parent
@@ -20,9 +20,9 @@ def test_readme_code_example():
         TICKET_CLOSE_ALL = "ticket.close.all"  # leaf
         TICKET_ASSIGN = "ticket.assign"  # leaf
 
-    auth = Authority(nodes=Nodes)
+    auth = SerialAuthority(nodes=Nodes)
 
-    auth.load_from_file(path=path / "save_file.yaml")
+    auth.load_file(path=path / "save_file.yaml")
 
     assert auth.subject_has_permission(sid="Bob", node=Nodes.TICKET_OPEN) == True
     assert auth.subject_has_permission(sid="Alice", node=Nodes.TICKET_CLOSE_ALL) == True

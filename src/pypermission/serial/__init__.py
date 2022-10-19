@@ -1,1 +1,1 @@
-from pypermission.serial.core import Authority
+from pypermission.serial.core import SerialAuthority

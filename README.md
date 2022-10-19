@@ -75,7 +75,7 @@ Import all required objects. Here we will choose the authority with the JSON per
 
 ```py
 from pypermission import PermissionNode
-from pypermission.yaml import Authority
+from pypermission.yaml import SerialAuthority
 ```
 
 Define an authority with some permission nodes:
@@ -93,7 +93,7 @@ class Nodes(PermissionNode):
     TICKET_CLOSE_ALL = "ticket.close.all"  # leaf
     TICKET_ASSIGN = "ticket.assign"  # leaf
 
-auth = Authority(nodes=Nodes)
+auth = SerialAuthority(nodes=Nodes)
 ```
 
 The following file `save_file.yaml` defines a mixed access control setup (RBAC & UBAC). Alice is
@@ -126,7 +126,7 @@ subjects:
 ```
 
 ```py
-auth.load_from_file(path="save_file.yaml")
+auth.load_file(path="save_file.yaml")
 ```
 
 Now check if a subject has a desired permission.
