@@ -54,17 +54,17 @@ def serial_authority() -> SerialAuthority:
     auth.add_subject(sid=PEAR)
     auth.add_subject(sid=BANANA)
 
-    auth.group_add_member_group(gid=FOOD, cid=ANIMAL_BASED)
-    auth.group_add_member_group(gid=FOOD, cid=PLANT_BASED)
+    auth.group_add_member_group(gid=FOOD, member_gid=ANIMAL_BASED)
+    auth.group_add_member_group(gid=FOOD, member_gid=PLANT_BASED)
 
-    auth.group_add_member_subject(gid=ANIMAL_BASED, sid=EGG)
-    auth.group_add_member_subject(gid=ANIMAL_BASED, sid=SPAM)
-    auth.group_add_member_subject(gid=ANIMAL_BASED, sid=HAM)
+    auth.group_add_member_subject(gid=ANIMAL_BASED, member_sid=EGG)
+    auth.group_add_member_subject(gid=ANIMAL_BASED, member_sid=SPAM)
+    auth.group_add_member_subject(gid=ANIMAL_BASED, member_sid=HAM)
 
-    auth.group_add_member_subject(gid=PLANT_BASED, sid=ORANGE)
-    auth.group_add_member_subject(gid=PLANT_BASED, sid=APPLE)
-    auth.group_add_member_subject(gid=PLANT_BASED, sid=PEAR)
-    auth.group_add_member_subject(gid=PLANT_BASED, sid=BANANA)
+    auth.group_add_member_subject(gid=PLANT_BASED, member_sid=ORANGE)
+    auth.group_add_member_subject(gid=PLANT_BASED, member_sid=APPLE)
+    auth.group_add_member_subject(gid=PLANT_BASED, member_sid=PEAR)
+    auth.group_add_member_subject(gid=PLANT_BASED, member_sid=BANANA)
 
     auth.group_add_permission(gid=FOOD, node=TPN.TOWNY_CHAT_GLOBAL)
 

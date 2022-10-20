@@ -130,27 +130,19 @@ class SerialAuthority(_Authority):
 
     _subjects: dict[str, Subject]
     _groups: dict[str, Group]
-    _data_file: Path | str | None
 
-    def __init__(
-        self, *, nodes: type[PermissionNode] | None = None, data_file: Path | str | None = None
-    ) -> None:
+    def __init__(self, *, nodes: type[PermissionNode] | None = None) -> None:
         super().__init__(nodes=nodes)
 
         self._subjects = {}
         self._groups = {}
-        self._data_file = data_file
 
     ################################################################################################
     ### IO
     ################################################################################################
 
-    def save_file(self, path: Path | str | None = None):
+    def save_file(self, *, path: Path | str):
         """Save the current state to file formatted as JSON or YAML."""
-        path = path or self._data_file
-        if not path:
-            raise PathError("No file path to save to has been specified!")
-
         path = Path(path)
         ftype = path.suffix[1:]
 
@@ -166,12 +158,8 @@ class SerialAuthority(_Authority):
         with open(path, "w") as handle:
             handle.write(serial_data)
 
-    def load_file(self, path: Path | str | None = None) -> None:
+    def load_file(self, *, path: Path | str) -> None:
         """Load a previous state from a file formatted as JSON or YAML."""
-        path = path or self._data_file
-        if not path:
-            raise PathError("No file path to load from has been specified!")
-
         path = Path(path)
         ftype = path.suffix[1:]
 
@@ -334,7 +322,7 @@ class SerialAuthority(_Authority):
     ### Add
     ################################################################################################
 
-    def add_subject(self, sid: str) -> None:
+    def add_subject(self, *, sid: str) -> None:
         """Create a new subject for a given ID."""
         _assertEntityIDType(eid=sid)
 
@@ -344,7 +332,7 @@ class SerialAuthority(_Authority):
         subject = Subject(id=sid)
         self._subjects[sid] = subject
 
-    def add_group(self, gid: str) -> None:
+    def add_group(self, *, gid: str) -> None:
         """Create a new group for a given ID."""
         _assertEntityIDType(eid=gid)
 
@@ -354,28 +342,28 @@ class SerialAuthority(_Authority):
         group = Group(id=gid)
         self._groups[gid] = group
 
-    def group_add_member_subject(self, *, gid: str, sid: str) -> None:
+    def group_add_member_subject(self, *, gid: str, member_sid: str) -> None:
         """Add a subject to a group to inherit all its permissions."""
         _assertEntityIDType(eid=gid)
-        _assertEntityIDType(eid=sid)
+        _assertEntityIDType(eid=member_sid)
 
         group = self._get_group(gid=gid)
-        subject = self._get_subject(sid=sid)
+        subject = self._get_subject(sid=member_sid)
 
-        group.sids.add(sid)
+        group.sids.add(member_sid)
         subject.gids.add(gid)
 
-    def group_add_member_group(self, *, gid: str, cid: str) -> None:
+    def group_add_member_group(self, *, gid: str, member_gid: str) -> None:
         """Add a group to a parent group to inherit all its permissions."""
         _assertEntityIDType(eid=gid)
-        _assertEntityIDType(eid=cid)
+        _assertEntityIDType(eid=member_gid)
 
-        child = self._get_group(gid=cid)
+        child = self._get_group(gid=member_gid)
         parent = self._get_group(gid=gid)
 
-        self._detect_group_cycle(parent=parent, child_id=cid)
+        self._detect_group_cycle(parent=parent, child_id=member_gid)
 
-        parent.child_ids.add(cid)
+        parent.child_ids.add(member_gid)
         child.parent_ids.add(gid)
 
     def subject_add_permission(self, *, sid: str, node: PermissionNode, payload: str | None = None):
@@ -492,7 +480,7 @@ class SerialAuthority(_Authority):
     ### Remove
     ################################################################################################
 
-    def rem_subject(self, sid: str) -> None:
+    def rm_subject(self, sid: str) -> None:
         """Remove a subject for a given ID."""
         _assertEntityIDType(eid=sid)
 
@@ -502,7 +490,7 @@ class SerialAuthority(_Authority):
         for gid in subject.gids:
             self._groups[gid].sids.remove(sid)
 
-    def rem_group(self, gid: str) -> None:
+    def rm_group(self, gid: str) -> None:
         """Remove a group for a given ID."""
         _assertEntityIDType(eid=gid)
 
@@ -512,7 +500,7 @@ class SerialAuthority(_Authority):
         for sid in group.sids:
             self._subjects[sid].gids.remove(gid)
 
-    def subject_rem_permission(self, *, sid: str, node: PermissionNode, payload: str | None = None):
+    def subject_rm_permission(self, *, sid: str, node: PermissionNode, payload: str | None = None):
         """Remove a permission from a subject."""
         _assertEntityIDType(eid=sid)
         permission = self._get_permission(node=node)
@@ -523,7 +511,7 @@ class SerialAuthority(_Authority):
             permission_map=permission_map, permission=permission, payload=payload
         )
 
-    def group_rem_permission(self, *, gid: str, node: PermissionNode, payload: str | None = None):
+    def group_rm_permission(self, *, gid: str, node: PermissionNode, payload: str | None = None):
         """Remove a permission from a group."""
         _assertEntityIDType(eid=gid)
         permission = self._get_permission(node=node)
@@ -534,27 +522,27 @@ class SerialAuthority(_Authority):
             permission_map=permission_map, permission=permission, payload=payload
         )
 
-    def group_rem_member_subject(self, *, gid: str, sid: str) -> None:
+    def group_rm_member_subject(self, *, gid: str, member_sid: str) -> None:
         """Remove a subject from a group."""
         _assertEntityIDType(eid=gid)
-        _assertEntityIDType(eid=sid)
+        _assertEntityIDType(eid=member_sid)
 
         group = self._get_group(gid=gid)
-        subject = self._get_subject(sid=sid)
+        subject = self._get_subject(sid=member_sid)
 
-        group.sids.remove(sid)
+        group.sids.remove(member_sid)
         subject.gids.remove(gid)
 
-    def group_rem_member_group(self, *, pid: str, child_id: str) -> None:
+    def group_rm_member_group(self, *, gid: str, member_gid: str) -> None:
         """Remove a group from a group."""
-        _assertEntityIDType(eid=pid)
-        _assertEntityIDType(eid=child_id)
+        _assertEntityIDType(eid=gid)
+        _assertEntityIDType(eid=member_gid)
 
-        parent = self._get_group(gid=pid)
-        child = self._get_group(gid=child_id)
+        parent = self._get_group(gid=gid)
+        child = self._get_group(gid=member_gid)
 
-        parent.child_ids.remove(child_id)
-        child.parent_ids.remove(pid)
+        parent.child_ids.remove(member_gid)
+        child.parent_ids.remove(gid)
 
     ################################################################################################
     ### Private
@@ -606,7 +594,7 @@ class SerialAuthority(_Authority):
 
 def _assertEntityIDType(eid: str) -> None:
     if not isinstance(eid, str):
-        raise ValueError  # TODO better Error
+        raise TypeError  # TODO better Error
 
 
 def _build_permission_node_map(*, perm_map: PermissionMap) -> PermissionNodeMap:
