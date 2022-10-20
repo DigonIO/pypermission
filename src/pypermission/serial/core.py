@@ -280,7 +280,7 @@ class SerialAuthority(_Authority):
                         permission_map[permission] = payload_set
                     payload_set.add(payload)
                 else:
-                    permission_map[permission] = None
+                    permission_map[permission] = set()
 
         # populate groups
         for gid, gdefs in data.get("groups", {}).items():
@@ -298,7 +298,7 @@ class SerialAuthority(_Authority):
                         permission_map[permission] = payload_set
                     payload_set.add(payload)
                 else:
-                    permission_map[permission] = None
+                    permission_map[permission] = set()
 
             # add group ids to subjects of a group and vice versa
             for sid in gdefs.get("member_subjects", []):
@@ -483,7 +483,7 @@ class SerialAuthority(_Authority):
         """Remove a subject for a given ID."""
         _assertEntityIDType(eid=sid)
 
-        subject = self._subjects.pop(sid, None)
+        subject = self._subjects.pop(sid)
         if subject is None:
             return
         for gid in subject.gids:
@@ -493,11 +493,15 @@ class SerialAuthority(_Authority):
         """Remove a group for a given ID."""
         _assertEntityIDType(eid=gid)
 
-        group = self._groups.pop(gid, None)
+        group = self._groups.pop(gid)
         if group is None:
             return
         for sid in group.sids:
             self._subjects[sid].gids.remove(gid)
+        for parent_id in group.parent_ids:
+            self._groups[parent_id].child_ids.remove(gid)
+        for child_id in group.child_ids:
+            self._groups[child_id].parent_ids.remove(gid)
 
     def subject_rm_permission(self, *, sid: str, node: PermissionNode, payload: str | None = None):
         """Remove a permission from a subject."""
@@ -598,14 +602,8 @@ def _assertEntityIDType(eid: str) -> None:
 
 def _build_permission_node_map(*, perm_map: PermissionMap) -> PermissionNodeMap:
     node_map: PermissionNodeMap = {}
-    for perm, payload in perm_map.items():
-        if perm.node in node_map:
-            payload_set = node_map[perm.node]
-        else:
-            payload_set = set()
-        if perm.has_payload:
-            payload_set.add(payload)
-        node_map[perm.node] = payload_set
+    for perm, payload_set in perm_map.items():
+        node_map[perm.node] = payload_set.copy()
     return node_map
 
 

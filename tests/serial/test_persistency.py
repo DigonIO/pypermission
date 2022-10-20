@@ -68,8 +68,8 @@ def test_write_file_json(serial_authority):
 
 def assert_loaded_authority(auth: SerialAuthority):
 
-    assert set(auth._groups.keys()) == {FOOD, ANIMAL_BASED, PLANT_BASED}
-    assert set(auth._subjects.keys()) == {
+    assert auth.get_groups() == {FOOD, ANIMAL_BASED, PLANT_BASED}
+    assert auth.get_subjects() == {
         EGG,
         SPAM,
         HAM,
@@ -84,8 +84,10 @@ def assert_loaded_authority(auth: SerialAuthority):
     assert auth.group_get_parent_groups(gid=PLANT_BASED) == {FOOD}
 
     assert auth.group_get_member_subjects(gid=ANIMAL_BASED) == {EGG, SPAM, HAM}
+    assert auth.subject_get_groups(sid=EGG) == {ANIMAL_BASED}
 
     assert auth.group_get_member_subjects(gid=PLANT_BASED) == {ORANGE, APPLE, PEAR, BANANA}
+    assert auth.subject_get_groups(sid=ORANGE) == {PLANT_BASED}
 
     assert auth.subject_has_permission(sid=EGG, node=TPN.TOWNY_CHAT_GLOBAL) == True
     assert auth.subject_has_permission(sid=PEAR, node=TPN.TOWNY_CHAT_GLOBAL) == True
