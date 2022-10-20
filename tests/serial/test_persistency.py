@@ -31,7 +31,7 @@ def test_load_file_yaml():
 
     auth.load_file(path=path / "save_file.yaml")
 
-    assert_loaded_data(auth=auth)
+    assert_loaded_authority(auth=auth)
 
 
 def test_load_file_json():
@@ -39,7 +39,7 @@ def test_load_file_json():
 
     auth.load_file(path=path / "save_file.json")
 
-    assert_loaded_data(auth=auth)
+    assert_loaded_authority(auth=auth)
 
 
 def test_write_file_yaml(serial_authority):
@@ -66,7 +66,7 @@ def test_write_file_json(serial_authority):
     assert DeepDiff(save_data, SAVE_DATA, ignore_order=True) == {}
 
 
-def assert_loaded_data(auth: SerialAuthority):
+def assert_loaded_authority(auth: SerialAuthority):
 
     assert set(auth._groups.keys()) == {FOOD, ANIMAL_BASED, PLANT_BASED}
     assert set(auth._subjects.keys()) == {
@@ -84,13 +84,15 @@ def assert_loaded_data(auth: SerialAuthority):
     assert auth.group_get_parent_groups(gid=PLANT_BASED) == {FOOD}
 
     assert auth.group_get_member_subjects(gid=ANIMAL_BASED) == {EGG, SPAM, HAM}
+
     assert auth.group_get_member_subjects(gid=PLANT_BASED) == {ORANGE, APPLE, PEAR, BANANA}
 
     assert auth.subject_has_permission(sid=EGG, node=TPN.TOWNY_CHAT_GLOBAL) == True
+    assert auth.subject_has_permission(sid=PEAR, node=TPN.TOWNY_CHAT_GLOBAL) == True
+
     assert auth.subject_has_permission(sid=EGG, node=TPN.TOWNY_CHAT_TOWN) == True
     assert auth.subject_has_permission(sid=EGG, node=TPN.TOWNY_CHAT_NATION) == False
 
-    assert auth.subject_has_permission(sid=PEAR, node=TPN.TOWNY_CHAT_GLOBAL) == True
     assert auth.subject_has_permission(sid=PEAR, node=TPN.TOWNY_CHAT_TOWN) == False
     assert auth.subject_has_permission(sid=PEAR, node=TPN.TOWNY_CHAT_NATION) == True
 
@@ -122,6 +124,10 @@ def assert_loaded_data(auth: SerialAuthority):
     assert (
         auth.subject_has_permission(sid=HAM, node=TPN.TOWNY_WILD_DESTROY_X, payload="gold") == True
     )
+
+    assert auth.subject_has_permission(sid=HAM, node=TPN.TOWNY_WILD_BUILD_X, payload="dirt") == True
+    assert auth.subject_has_permission(sid=HAM, node=TPN.TOWNY_WILD_BUILD_X, payload="gold") == True
+    assert auth.subject_has_permission(sid=HAM, node=TPN.TOWNY_WILD_BUILD_X, payload="iron") == True
 
 
 # Fulfil the properties of the fixture `serial_authority`

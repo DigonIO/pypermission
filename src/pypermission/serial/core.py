@@ -1,5 +1,4 @@
 import json
-from enum import Enum
 from pathlib import Path
 from typing import Any, Literal, TypedDict, cast
 
@@ -15,7 +14,7 @@ from pypermission.error import (
     EntityIDCollisionError,
     GroupCycleError,
     PathError,
-    UnknownSubjectIDError,
+    UnknownEntityIDError,
     PathError,
 )
 
@@ -553,14 +552,14 @@ class SerialAuthority(_Authority):
         try:
             return self._subjects[sid]
         except KeyError:
-            raise UnknownSubjectIDError
+            raise UnknownEntityIDError  # TODO msg
 
     def _get_group(self, *, gid: str) -> Group:
         """Just a simple wrapper to avoid some boilerplate code while getting a group."""
         try:
             return self._groups[gid]
         except KeyError:
-            raise UnknownSubjectIDError
+            raise UnknownEntityIDError  # TODO msg
 
     def _detect_group_cycle(self, parent: Group, child_id: str):
         """Detect a cycle in nested group tree."""

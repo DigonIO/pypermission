@@ -22,11 +22,7 @@ class UnknownPermissionNodeError(PermissionError):
     ...
 
 
-class UnknownSubjectIDError(PyPermissionError):
-    ...
-
-
-class UnknownGroupIDError(PyPermissionError):
+class UnknownEntityIDError(PyPermissionError):
     ...
 
 

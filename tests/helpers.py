@@ -41,18 +41,18 @@ def serial_authority() -> SerialAuthority:
     # `./serial/save_file.yaml` and `./serial/save_file.json`
     auth = SerialAuthority(nodes=TPN)
 
-    auth.add_group(gid=FOOD)
-    auth.add_group(gid=ANIMAL_BASED)
-    auth.add_group(gid=PLANT_BASED)
-
-    auth.add_subject(sid=EGG)
-    auth.add_subject(sid=SPAM)
-    auth.add_subject(sid=HAM)
-
-    auth.add_subject(sid=ORANGE)
-    auth.add_subject(sid=APPLE)
-    auth.add_subject(sid=PEAR)
-    auth.add_subject(sid=BANANA)
+    for group in [FOOD, ANIMAL_BASED, PLANT_BASED]:
+        auth.add_group(gid=group)
+    for subject in [
+        EGG,
+        SPAM,
+        HAM,
+        ORANGE,
+        APPLE,
+        PEAR,
+        BANANA,
+    ]:
+        auth.add_subject(sid=subject)
 
     auth.group_add_member_group(gid=FOOD, member_gid=ANIMAL_BASED)
     auth.group_add_member_group(gid=FOOD, member_gid=PLANT_BASED)
@@ -69,10 +69,12 @@ def serial_authority() -> SerialAuthority:
     auth.group_add_permission(gid=FOOD, node=TPN.TOWNY_CHAT_GLOBAL)
 
     auth.group_add_permission(gid=ANIMAL_BASED, node=TPN.TOWNY_CHAT_TOWN)
+
+    auth.group_add_permission(gid=PLANT_BASED, node=TPN.TOWNY_CHAT_NATION)
+
     auth.group_add_permission(gid=ANIMAL_BASED, node=TPN.TOWNY_WILD_BUILD_X, payload="dirt")
     auth.group_add_permission(gid=ANIMAL_BASED, node=TPN.TOWNY_WILD_BUILD_X, payload="gold")
 
-    auth.group_add_permission(gid=PLANT_BASED, node=TPN.TOWNY_CHAT_NATION)
     auth.group_add_permission(gid=PLANT_BASED, node=TPN.TOWNY_WILD_DESTROY_X, payload="dirt")
     auth.group_add_permission(gid=PLANT_BASED, node=TPN.TOWNY_WILD_DESTROY_X, payload="gold")
 
