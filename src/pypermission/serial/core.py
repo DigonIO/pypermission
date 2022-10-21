@@ -1,6 +1,6 @@
 import json
 from pathlib import Path
-from typing import Any, Literal, TypedDict, cast
+from typing import Any, Literal, TypedDict, cast, TypeVar
 
 from pypermission.core import Authority as _Authority
 from pypermission.core import (
@@ -259,13 +259,14 @@ class SerialAuthority(_Authority):
         """Load state from DataStore dictionary."""
 
         # populate subjects
-        for sid, sdefs in data.get("subjects", {}).items():
+        for sid, sdefs in _dict_get_or_default(data, "subjects", {}).items():
+            sdefs = {} if sdefs is None else sdefs
             # TODO sid sanity check
             subject = Subject(id=sid)
             self._subjects[sid] = subject
 
             # add permissions to a subject
-            for node_str in sdefs.get("permission_nodes", {}):
+            for node_str in _dict_get_or_default(sdefs, "permission_nodes", {}):
                 # "chat.room.<Alice>" => payload = Alice
 
                 permission, payload = self._deserialize_permission_node(node_str=node_str)
@@ -282,13 +283,19 @@ class SerialAuthority(_Authority):
                     permission_map[permission] = set()
 
         # populate groups
-        for gid, gdefs in data.get("groups", {}).items():
+        for gid, gdefs in _dict_get_or_default(data, "groups", {}).items():
+            gdefs = {} if gdefs is None else gdefs
             # TODO giud sanity check
             group = Group(id=gid)
             self._groups[gid] = group
 
             # add permissions to a group
-            for node_str in gdefs.get("permission_nodes", []):
+            if gdefs is None:
+                import pdb
+
+                pdb.set_trace()
+
+            for node_str in _dict_get_or_default(gdefs, "permission_nodes", []):
                 permission, payload = self._deserialize_permission_node(node_str=node_str)
                 permission_map = group.permission_map
                 if payload:
@@ -300,15 +307,16 @@ class SerialAuthority(_Authority):
                     permission_map[permission] = set()
 
             # add group ids to subjects of a group and vice versa
-            for sid in gdefs.get("member_subjects", []):
+            for sid in _dict_get_or_default(gdefs, "member_subjects", []):
                 # TODO sanity checks
                 group.sids.add(sid)
                 self._subjects[sid].gids.add(gid)
 
         # sub group loop
-        for gid, gdefs in data.get("groups", {}).items():
+        for gid, gdefs in _dict_get_or_default(data, "groups", {}).items():
+            gdefs = {} if gdefs is None else gdefs
             group = self._groups[gid]
-            for sub_gid in gdefs.get("member_groups", []):
+            for sub_gid in _dict_get_or_default(gdefs, "member_groups", []):
                 if sub_gid not in self._groups:
                     raise ParsingError(f"Member group `{sub_gid}` was never defined!")
                 group.child_ids.add(sub_gid)
@@ -593,6 +601,13 @@ class SerialAuthority(_Authority):
 ####################################################################################################
 ### Util
 ####################################################################################################
+
+T = TypeVar("T")
+
+
+def _dict_get_or_default(d: dict[str, T], key: str, default: T) -> T:
+    # if value for key is falsy, returns default as well
+    return d.get(key, default) or default
 
 
 def _assertEntityIDType(eid: str) -> None:

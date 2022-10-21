@@ -18,7 +18,55 @@ class TestCycleDetection:
     """
 
     @pytest.fixture
-    def common_yaml(self):
+    def acyclic_yaml(self):
+        return """
+groups:
+  A:
+    member_groups:
+      - B
+      - C
+  B:
+
+    member_groups:
+      - F
+  C:
+    member_groups:
+      - D
+      - E
+  D:
+    member_groups:
+      - F
+  E:
+  F:
+"""
+
+    @pytest.fixture
+    def cyclic_a_yaml(self):
+        return """
+groups:
+  A:
+    member_groups:
+      - B
+      - C
+  B:
+
+    member_groups:
+      - F
+  C:
+    member_groups:
+      - D
+      - E
+  D:
+    member_groups:
+      - F
+  E:
+    member_groups:
+      - A
+  F:
+"""
+
+    @pytest.fixture
+    def cyclic_b_yaml(self):
         return """
 groups:
   A:
@@ -35,38 +83,11 @@ groups:
   D:
     member_groups:
       - F
-"""
-
-    @pytest.fixture
-    def acyclic_yaml(self, common_yaml):
-        return (
-            common_yaml
-            + """  E:
-  F:
-"""
-        )
-
-    @pytest.fixture
-    def cyclic_a_yaml(self, common_yaml):
-        return (
-            common_yaml
-            + """  E:
-    member_groups:
-      - A
-  F:
-"""
-        )
-
-    @pytest.fixture
-    def cyclic_b_yaml(self, common_yaml):
-        return (
-            common_yaml
-            + """  E:
+  E:
   F:
     member_groups:
       - A
 """
-        )
 
     # TODO: exception handling
     def test_acyclic_groups(self, acyclic_yaml):
