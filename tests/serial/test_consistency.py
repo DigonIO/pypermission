@@ -22,18 +22,18 @@ class TestCycleDetection:
         return """
 groups:
   A:
-    member_subjects:
+    member_groups:
       - B
       - C
   B:
-    member_subjects:
+    member_groups:
       - F
   C:
-    member_subjects:
+    member_groups:
       - D
       - E
   D:
-    member_subjects:
+    member_groups:
       - F
 """
 
@@ -51,7 +51,7 @@ groups:
         return (
             common_yaml
             + """  E:
-    member_subjects:
+    member_groups:
       - A
   F:
 """
@@ -63,7 +63,7 @@ groups:
             common_yaml
             + """  E:
   F:
-    member_subjects:
+    member_groups:
       - A
 """
         )
