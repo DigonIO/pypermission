@@ -508,7 +508,7 @@ class SerialAuthority(_Authority):
         validate_payload_status(permission=permission, payload=payload)
         permission_map = self._get_subject(sid=sid).permission_map
 
-        _rem_permission_map_entry(
+        _rm_permission_map_entry(
             permission_map=permission_map, permission=permission, payload=payload
         )
 
@@ -519,7 +519,7 @@ class SerialAuthority(_Authority):
         validate_payload_status(permission=permission, payload=payload)
         permission_map = self._get_group(gid=gid).permission_map
 
-        _rem_permission_map_entry(
+        _rm_permission_map_entry(
             permission_map=permission_map, permission=permission, payload=payload
         )
 
@@ -623,7 +623,7 @@ def _add_permission_map_entry(
         payload_set.add(payload)
 
 
-def _rem_permission_map_entry(
+def _rm_permission_map_entry(
     *, permission_map: PermissionMap, permission: Permission, payload: str | None
 ) -> None:
     """Remove a permission from a permission map."""
