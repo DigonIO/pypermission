@@ -1,6 +1,6 @@
+import json
 import pathlib
 import tempfile
-import json
 
 import yaml
 from deepdiff import DeepDiff
@@ -8,7 +8,6 @@ from deepdiff import DeepDiff
 from pypermission.serial import SerialAuthority
 
 from ..helpers import TownyPermissionNode as TPN
-from ..helpers import serial_authority
 
 EGG = "egg"
 SPAM = "spam"

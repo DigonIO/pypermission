@@ -1,6 +1,7 @@
 import pytest
-from pypermission.serial import SerialAuthority
+
 from pypermission.error import GroupCycleError
+from pypermission.serial import SerialAuthority
 
 ACYCLIC_YAML = """
 groups:

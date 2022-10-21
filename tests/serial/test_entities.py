@@ -5,9 +5,6 @@ from pypermission.serial import SerialAuthority
 
 from ..helpers import TownyPermissionNode
 from ..helpers import TownyPermissionNode as TPN
-
-from ..helpers import serial_authority
-
 from .test_persistency import assert_loaded_authority
 
 EGG = "egg"
