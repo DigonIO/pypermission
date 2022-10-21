@@ -13,7 +13,7 @@ from typing import cast
 
 from pypermission.error import (
     MissingPayloadError,
-    PermissionParsingError,
+    ParsingError,
     UnknownPermissionNodeError,
     UnusedPayloadError,
 )
@@ -188,7 +188,7 @@ class Authority(ABC):
         try:
             return self._node_str_permission_map[node_str], payload
         except KeyError as err:
-            raise PermissionParsingError("Unknown permission node!", node_str) from err
+            raise ParsingError("Unknown permission node!", node_str) from err
 
     def _register_permission(self, *, node: PermissionNode):
         "Register a permission node."
@@ -196,7 +196,7 @@ class Authority(ABC):
         node_str = node.value
 
         if node_str in self._node_str_permission_map:
-            raise PermissionParsingError("Permission has been registered before!", node)
+            raise ParsingError("Permission has been registered before!", node)
 
         node_str_sections: list[str] = node_str.split(".")
         last_str_section: str = node_str_sections[-1]
@@ -220,15 +220,13 @@ class Authority(ABC):
             try:
                 parent = parent.sub_graph[section]
             except KeyError as err:
-                raise PermissionParsingError(
+                raise ParsingError(
                     "A nested permission requires a parent permission!",
                     potential_parent_node[1:] + ".*",
                 ) from err
 
         if parent.is_leaf:
-            raise PermissionParsingError(
-                "The desired parent permission is a leave permission!", parent.node
-            )
+            raise ParsingError("The desired parent permission is a leave permission!", parent.node)
 
         new_perm = CustomPermission(
             node=node, parent=parent, has_payload=has_payload, is_leaf=is_leaf

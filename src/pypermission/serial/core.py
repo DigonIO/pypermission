@@ -11,11 +11,10 @@ from pypermission.core import (
     validate_payload_status,
 )
 from pypermission.error import (
-    EntityIDCollisionError,
+    EntityIDError,
     GroupCycleError,
     PathError,
-    UnknownEntityIDError,
-    PathError,
+    ParsingError,
 )
 
 ####################################################################################################
@@ -311,8 +310,7 @@ class SerialAuthority(_Authority):
             group = self._groups[gid]
             for sub_gid in gdefs.get("member_groups", []):
                 if sub_gid not in self._groups:
-                    # TODO: more descriptive Error raising
-                    raise ValueError  # TODO raise ParsingError?
+                    raise ParsingError(f"Member group `{sub_gid}` was never defined!")
                 group.child_ids.add(sub_gid)
                 child = self._groups[sub_gid]
                 child.parent_ids.add(gid)
@@ -326,7 +324,7 @@ class SerialAuthority(_Authority):
         _assertEntityIDType(eid=sid)
 
         if sid in self._subjects:
-            raise EntityIDCollisionError
+            raise EntityIDError(f"Subject ID `{sid}` is in use!")
 
         subject = Subject(id=sid)
         self._subjects[sid] = subject
@@ -336,7 +334,7 @@ class SerialAuthority(_Authority):
         _assertEntityIDType(eid=gid)
 
         if gid in self._subjects:
-            raise EntityIDCollisionError
+            raise EntityIDError(f"Group ID `{gid}` is in use!")
 
         group = Group(id=gid)
         self._groups[gid] = group
@@ -485,7 +483,7 @@ class SerialAuthority(_Authority):
 
         subject = self._subjects.pop(sid)
         if subject is None:
-            return
+            raise EntityIDError(f"Can not remove non existing subject `{sid}`!")
         for gid in subject.gids:
             self._groups[gid].sids.remove(sid)
 
@@ -495,7 +493,7 @@ class SerialAuthority(_Authority):
 
         group = self._groups.pop(gid)
         if group is None:
-            return
+            raise EntityIDError(f"Can not remove non existing group `{gid}`!")
         for sid in group.sids:
             self._subjects[sid].gids.remove(gid)
         for parent_id in group.parent_ids:
@@ -534,7 +532,7 @@ class SerialAuthority(_Authority):
         subject = self._get_subject(sid=member_sid)
 
         group.sids.remove(member_sid)
-        subject.gids.remove(gid)
+        subject.gids.remove(gid),
 
     def group_rm_member_group(self, *, gid: str, member_gid: str) -> None:
         """Remove a group from a group."""
@@ -556,19 +554,21 @@ class SerialAuthority(_Authority):
         try:
             return self._subjects[sid]
         except KeyError:
-            raise UnknownEntityIDError  # TODO msg
+            raise EntityIDError(f"Can not find subject `{sid}`!")
 
     def _get_group(self, *, gid: str) -> Group:
         """Just a simple wrapper to avoid some boilerplate code while getting a group."""
         try:
             return self._groups[gid]
         except KeyError:
-            raise UnknownEntityIDError  # TODO msg
+            raise EntityIDError(f"Can not find group `{gid}`!")
 
     def _detect_group_cycle(self, parent: Group, child_id: str):
         """Detect a cycle in nested group tree."""
         if child_id in parent.parent_ids:
-            raise GroupCycleError
+            raise GroupCycleError(
+                f"Cyclic dependencies detected between groups `{parent.id}` and `{child_id}`!"
+            )
         for parent_parent_id in parent.parent_ids:
             parent_parent = self._groups[parent_parent_id]
             self._detect_group_cycle(parent=parent_parent, child_id=child_id)
@@ -597,7 +597,9 @@ class SerialAuthority(_Authority):
 
 def _assertEntityIDType(eid: str) -> None:
     if not isinstance(eid, str):
-        raise TypeError  # TODO better Error
+        raise EntityIDError(
+            f"Subject and group IDs have to be of type string! Got type `{type(eid)}` for `{eid}`."
+        )
 
 
 def _build_permission_node_map(*, perm_map: PermissionMap) -> PermissionNodeMap:

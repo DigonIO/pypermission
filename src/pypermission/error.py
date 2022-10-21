@@ -10,19 +10,15 @@ class GroupCycleError(PyPermissionError):
     """Raised to prevent a group cycle."""
 
 
-class PermissionParsingError(PyPermissionError):
+class ParsingError(PyPermissionError):
     ...
 
 
-class EntityIDCollisionError(PyPermissionError):
+class UnknownPermissionNodeError(PyPermissionError):
     ...
 
 
-class UnknownPermissionNodeError(PermissionError):
-    ...
-
-
-class UnknownEntityIDError(PyPermissionError):
+class EntityIDError(PyPermissionError):
     ...
 
 
