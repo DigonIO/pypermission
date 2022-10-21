@@ -5,6 +5,7 @@ from pypermission.serial import SerialAuthority
 
 from ..helpers import TownyPermissionNode
 from ..helpers import TownyPermissionNode as TPN
+
 from ..helpers import serial_authority
 
 from .test_persistency import assert_loaded_authority
@@ -140,20 +141,6 @@ def test_rm_member_subject(serial_authority: SerialAuthority):
 
     assert auth.group_get_member_subjects(gid=ANIMAL_BASED) == {SPAM, HAM}
     assert auth.subject_get_groups(sid=EGG) == set()
-
-
-def test_cyclic_groups():
-    auth = SerialAuthority()
-
-    auth.add_group(gid=FOOD)
-    auth.add_group(gid=ANIMAL_BASED)
-    auth.add_group(gid=PLANT_BASED)
-
-    auth.group_add_member_group(gid=FOOD, member_gid=ANIMAL_BASED)
-    auth.group_add_member_group(gid=ANIMAL_BASED, member_gid=PLANT_BASED)
-
-    with pytest.raises(GroupCycleError):
-        auth.group_add_member_group(gid=PLANT_BASED, member_gid=FOOD)
 
 
 def test_unknown_perm_node():

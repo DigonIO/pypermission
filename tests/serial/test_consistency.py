@@ -1,5 +1,70 @@
 import pytest
 from pypermission.serial import SerialAuthority
+from pypermission.error import GroupCycleError
+
+ACYCLIC_YAML = """
+groups:
+  A:
+    member_groups:
+      - B
+      - C
+  B:
+    member_groups:
+      - F
+  C:
+    member_groups:
+      - D
+      - E
+  D:
+    member_groups:
+      - F
+  E:
+  F:
+"""
+
+CYCLIC_A_YAML = """
+groups:
+  A:
+    member_groups:
+      - B
+      - C
+  B:
+    member_groups:
+      - F
+  C:
+    member_groups:
+      - D
+      - E
+  D:
+    member_groups:
+      - F
+  E:
+    member_groups:
+      - A
+  F:
+"""
+
+CYCLIC_B_YAML = """
+groups:
+  A:
+    member_groups:
+      - B
+      - C
+  B:
+    member_groups:
+      - F
+  C:
+    member_groups:
+      - D
+      - E
+  D:
+    member_groups:
+      - F
+  E:
+  F:
+    member_groups:
+      - A
+"""
 
 
 class TestCycleDetection:
@@ -17,89 +82,42 @@ class TestCycleDetection:
     |                |                  |    A             |
     """
 
-    @pytest.fixture
-    def acyclic_yaml(self):
-        return """
-groups:
-  A:
-    member_groups:
-      - B
-      - C
-  B:
-
-    member_groups:
-      - F
-  C:
-    member_groups:
-      - D
-      - E
-  D:
-    member_groups:
-      - F
-  E:
-  F:
-"""
-
-    @pytest.fixture
-    def cyclic_a_yaml(self):
-        return """
-groups:
-  A:
-    member_groups:
-      - B
-      - C
-  B:
-
-    member_groups:
-      - F
-  C:
-    member_groups:
-      - D
-      - E
-  D:
-    member_groups:
-      - F
-  E:
-    member_groups:
-      - A
-  F:
-"""
-
-    @pytest.fixture
-    def cyclic_b_yaml(self):
-        return """
-groups:
-  A:
-    member_groups:
-      - B
-      - C
-  B:
-    member_groups:
-      - F
-  C:
-    member_groups:
-      - D
-      - E
-  D:
-    member_groups:
-      - F
-  E:
-  F:
-    member_groups:
-      - A
-"""
-
     # TODO: exception handling
-    def test_acyclic_groups(self, acyclic_yaml):
+    def test_acyclic_groups(self):
         # No permission nodes needed for testing group hierarchy
         auth = SerialAuthority(nodes=None)
-        auth.load_YAML(serial_data=acyclic_yaml)
+        auth.load_YAML(serial_data=ACYCLIC_YAML)
 
-    # TODO: exception handling
-    def test_cyclic_groups(self, cyclic_a_yaml, cyclic_b_yaml):
+    @pytest.mark.parametrize(
+        "yaml_str, err_msg",
+        (
+            [
+                CYCLIC_A_YAML,
+                "Cyclic dependencies detected between groups `C` and `A`!",
+            ],
+            [
+                CYCLIC_B_YAML,
+                "Cyclic dependencies detected between groups `[CB]` and `A`!",
+            ],
+        ),
+    )
+    def test_cyclic_groups(self, yaml_str, err_msg):
         # No permission nodes needed for testing group hierarchy
-        auth_a = SerialAuthority(nodes=None)
-        auth_a.load_YAML(serial_data=cyclic_a_yaml)
+        auth = SerialAuthority(nodes=None)
+        with pytest.raises(GroupCycleError, match=err_msg):
+            auth.load_YAML(serial_data=yaml_str)
 
-        auth_b = SerialAuthority(nodes=None)
-        auth_b.load_YAML(serial_data=cyclic_b_yaml)
+    @pytest.mark.parametrize(
+        "gid, err_msg",
+        (
+            ["E", "Cyclic dependencies detected between groups `C` and `A`!"],
+            ["F", "Cyclic dependencies detected between groups `[CB]` and `A`!"],
+        ),
+    )
+    def test_cyclic_groups_inserts(self, gid, err_msg):
+        # No permission nodes needed for testing group hierarchy
+        auth = SerialAuthority(nodes=None)
+        auth.load_YAML(serial_data=ACYCLIC_YAML)
+
+        with pytest.raises(GroupCycleError, match=err_msg):
+            auth.group_add_member_group(gid=gid, member_gid="A")
