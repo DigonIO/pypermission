@@ -290,11 +290,6 @@ class SerialAuthority(_Authority):
             self._groups[gid] = group
 
             # add permissions to a group
-            if gdefs is None:
-                import pdb
-
-                pdb.set_trace()
-
             for node_str in _dict_get_or_default(gdefs, "permission_nodes", []):
                 permission, payload = self._deserialize_permission_node(node_str=node_str)
                 permission_map = group.permission_map
@@ -316,12 +311,10 @@ class SerialAuthority(_Authority):
         for gid, gdefs in _dict_get_or_default(data, "groups", {}).items():
             gdefs = {} if gdefs is None else gdefs
             group = self._groups[gid]
-            for sub_gid in _dict_get_or_default(gdefs, "member_groups", []):
-                if sub_gid not in self._groups:
-                    raise ParsingError(f"Member group `{sub_gid}` was never defined!")
-                group.child_ids.add(sub_gid)
-                child = self._groups[sub_gid]
-                child.parent_ids.add(gid)
+            for member_gid in _dict_get_or_default(gdefs, "member_groups", []):
+                if member_gid not in self._groups:
+                    raise ParsingError(f"Member group `{member_gid}` was never defined!")
+                self.group_add_member_group(gid=gid, member_gid=member_gid)
 
     ################################################################################################
     ### Add
@@ -363,13 +356,13 @@ class SerialAuthority(_Authority):
         _assertEntityIDType(eid=gid)
         _assertEntityIDType(eid=member_gid)
 
-        child = self._get_group(gid=member_gid)
-        parent = self._get_group(gid=gid)
+        group = self._get_group(gid=gid)
+        member = self._get_group(gid=member_gid)
 
-        self._detect_group_cycle(parent=parent, child_id=member_gid)
+        self._detect_group_cycle(group=group, member_gid=member_gid)
 
-        parent.child_ids.add(member_gid)
-        child.parent_ids.add(gid)
+        group.child_ids.add(member_gid)
+        member.parent_ids.add(gid)
 
     def subject_add_permission(self, *, sid: str, node: PermissionNode, payload: str | None = None):
         """Add a permission to a subject."""
@@ -571,15 +564,16 @@ class SerialAuthority(_Authority):
         except KeyError:
             raise EntityIDError(f"Can not find group `{gid}`!")
 
-    def _detect_group_cycle(self, parent: Group, child_id: str):
+    # TODO: build graph/subgraph ordering instead
+    def _detect_group_cycle(self, group: Group, member_gid: str):
         """Detect a cycle in nested group tree."""
-        if child_id in parent.parent_ids:
+        if member_gid in group.parent_ids:
             raise GroupCycleError(
-                f"Cyclic dependencies detected between groups `{parent.id}` and `{child_id}`!"
+                f"Cyclic dependencies detected between groups `{group.id}` and `{member_gid}`!"
             )
-        for parent_parent_id in parent.parent_ids:
+        for parent_parent_id in group.parent_ids:
             parent_parent = self._groups[parent_parent_id]
-            self._detect_group_cycle(parent=parent_parent, child_id=child_id)
+            self._detect_group_cycle(group=parent_parent, member_gid=member_gid)
 
     def _recursive_group_has_permission(
         self, group: Group, permission: Permission, payload: str | None
