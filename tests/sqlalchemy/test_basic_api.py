@@ -20,12 +20,10 @@ PLANT_BASED = "plant_based"
 @pytest.mark.parametrize(
     "sqlalchemy_authority",
     (
-        #URL_SQLITE,
+        URL_SQLITE,
         URL_MARIADB,
     ),
     indirect=["sqlalchemy_authority"],
 )
 def test_basic_integration(sqlalchemy_authority):
-    import pdb
-    pdb.set_trace()
     assert_loaded_authority(sqlalchemy_authority)

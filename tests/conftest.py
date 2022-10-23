@@ -1,7 +1,5 @@
 import pytest
 from sqlalchemy import create_engine
-from sqlalchemy.engine import Engine
-from sqlalchemy.orm import sessionmaker, Session
 
 from pypermission.serial import SerialAuthority
 from pypermission.sqlalchemy import SQLAlchemyAuthority
@@ -33,11 +31,11 @@ def serial_authority() -> SerialAuthority:
 
 @pytest.fixture
 def db_engine(request):
-    engine = create_engine(request._parent_request.param, echo=True)
+    engine = create_engine(request._parent_request.param, echo=False)
 
     yield engine
 
-    DeclarativeMeta.metadata.drop_all(bind=engine)
+    DeclarativeMeta.metadata.drop_all(bind=engine)  # clean the db for the next test
 
 
 @pytest.fixture

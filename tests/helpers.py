@@ -38,12 +38,7 @@ def assert_loaded_authority(auth: SerialAuthority | SQLAlchemyAuthority):
     # The authority tested here should fulfil the properties of the two save files
     # `./serial/save_file.yaml` and `./serial/save_file.json`
 
-    import pdb
-
-    pdb.set_trace()
-
     assert auth.get_groups() == {FOOD, ANIMAL_BASED, PLANT_BASED}
-    pdb.set_trace()
 
     assert auth.get_subjects() == {
         EGG,
@@ -54,7 +49,6 @@ def assert_loaded_authority(auth: SerialAuthority | SQLAlchemyAuthority):
         PEAR,
         BANANA,
     }
-    pdb.set_trace()
 
     assert auth.group_get_member_groups(gid=FOOD) == {ANIMAL_BASED, PLANT_BASED}
     assert auth.group_get_parent_groups(gid=ANIMAL_BASED) == {FOOD}
@@ -109,6 +103,3 @@ def assert_loaded_authority(auth: SerialAuthority | SQLAlchemyAuthority):
     assert (
         auth.subject_has_permission(sid=HAM, node=TPN.TOWNY_WILD_DESTROY_X, payload="gold") == True
     )
-
-    pdb.set_trace()
-    print("end")
