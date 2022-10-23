@@ -1,3 +1,5 @@
+from pypermission.serial import SerialAuthority
+from pypermission.sqlalchemy import SQLAlchemyAuthority
 from pypermission.core import PermissionNode
 
 EGG = "egg"
@@ -30,3 +32,83 @@ class TownyPermissionNode(PermissionNode):
 
 
 TPN = TownyPermissionNode
+
+
+def assert_loaded_authority(auth: SerialAuthority | SQLAlchemyAuthority):
+    # The authority tested here should fulfil the properties of the two save files
+    # `./serial/save_file.yaml` and `./serial/save_file.json`
+
+    import pdb
+
+    pdb.set_trace()
+
+    assert auth.get_groups() == {FOOD, ANIMAL_BASED, PLANT_BASED}
+    pdb.set_trace()
+
+    assert auth.get_subjects() == {
+        EGG,
+        SPAM,
+        HAM,
+        ORANGE,
+        APPLE,
+        PEAR,
+        BANANA,
+    }
+    pdb.set_trace()
+
+    assert auth.group_get_member_groups(gid=FOOD) == {ANIMAL_BASED, PLANT_BASED}
+    assert auth.group_get_parent_groups(gid=ANIMAL_BASED) == {FOOD}
+    assert auth.group_get_parent_groups(gid=PLANT_BASED) == {FOOD}
+
+    assert auth.group_get_member_subjects(gid=ANIMAL_BASED) == {EGG, SPAM, HAM}
+    assert auth.subject_get_groups(sid=EGG) == {ANIMAL_BASED}
+
+    assert auth.group_get_member_subjects(gid=PLANT_BASED) == {ORANGE, APPLE, PEAR, BANANA}
+    assert auth.subject_get_groups(sid=ORANGE) == {PLANT_BASED}
+
+    assert auth.subject_has_permission(sid=EGG, node=TPN.TOWNY_CHAT_GLOBAL) == True
+    assert auth.subject_has_permission(sid=PEAR, node=TPN.TOWNY_CHAT_GLOBAL) == True
+
+    assert auth.subject_has_permission(sid=EGG, node=TPN.TOWNY_CHAT_TOWN) == True
+    assert auth.subject_has_permission(sid=EGG, node=TPN.TOWNY_CHAT_NATION) == False
+
+    assert auth.subject_has_permission(sid=PEAR, node=TPN.TOWNY_CHAT_TOWN) == False
+    assert auth.subject_has_permission(sid=PEAR, node=TPN.TOWNY_CHAT_NATION) == True
+
+    # test EGG
+    assert auth.subject_has_permission(sid=EGG, node=TPN.TOWNY_WILD_BUILD_X, payload="dirt") == True
+    assert auth.subject_has_permission(sid=EGG, node=TPN.TOWNY_WILD_BUILD_X, payload="gold") == True
+    assert (
+        auth.subject_has_permission(sid=EGG, node=TPN.TOWNY_WILD_DESTROY_X, payload="dirt") == False
+    )
+    assert (
+        auth.subject_has_permission(sid=EGG, node=TPN.TOWNY_WILD_DESTROY_X, payload="gold") == False
+    )
+
+    # test PEAR
+    assert (
+        auth.subject_has_permission(sid=PEAR, node=TPN.TOWNY_WILD_BUILD_X, payload="dirt") == False
+    )
+    assert (
+        auth.subject_has_permission(sid=PEAR, node=TPN.TOWNY_WILD_BUILD_X, payload="gold") == False
+    )
+    assert (
+        auth.subject_has_permission(sid=PEAR, node=TPN.TOWNY_WILD_DESTROY_X, payload="dirt") == True
+    )
+    assert (
+        auth.subject_has_permission(sid=PEAR, node=TPN.TOWNY_WILD_DESTROY_X, payload="gold") == True
+    )
+
+    # test HAM
+    assert auth.subject_has_permission(sid=HAM, node=TPN.TOWNY_WILD_BUILD_X, payload="dirt") == True
+    assert auth.subject_has_permission(sid=HAM, node=TPN.TOWNY_WILD_BUILD_X, payload="gold") == True
+    assert auth.subject_has_permission(sid=HAM, node=TPN.TOWNY_WILD_BUILD_X, payload="iron") == True
+    assert (
+        auth.subject_has_permission(sid=HAM, node=TPN.TOWNY_WILD_DESTROY_X, payload="dirt") == True
+    )
+    assert (
+        auth.subject_has_permission(sid=HAM, node=TPN.TOWNY_WILD_DESTROY_X, payload="gold") == True
+    )
+
+    pdb.set_trace()
+    print("end")

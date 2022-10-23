@@ -1,7 +1,11 @@
 import pytest
+from sqlalchemy import create_engine
+from sqlalchemy.engine import Engine
+from sqlalchemy.orm import sessionmaker, Session
 
 from pypermission.serial import SerialAuthority
-
+from pypermission.sqlalchemy import SQLAlchemyAuthority
+from pypermission.sqlalchemy.models import DeclarativeMeta
 from .helpers import (
     ANIMAL_BASED,
     APPLE,
@@ -16,12 +20,36 @@ from .helpers import (
     TPN,
 )
 
+URL_SQLITE = "sqlite:///pp_test.db"
+URL_MARIADB = "mariadb+mariadbconnector://pp_test:pp_test@127.0.0.1:3306/pp_test"
+
 
 @pytest.fixture
 def serial_authority() -> SerialAuthority:
+    auth = SerialAuthority(nodes=TPN)
+    init_auth(auth)
+    return auth
+
+
+@pytest.fixture
+def db_engine(request):
+    engine = create_engine(request._parent_request.param, echo=True)
+
+    yield engine
+
+    DeclarativeMeta.metadata.drop_all(bind=engine)
+
+
+@pytest.fixture
+def sqlalchemy_authority(db_engine):
+    auth = SQLAlchemyAuthority(nodes=TPN, engine=db_engine)
+    init_auth(auth)
+    return auth
+
+
+def init_auth(auth: SerialAuthority | SQLAlchemyAuthority):
     # The authority created here should fulfil the properties of the two save files
     # `./serial/save_file.yaml` and `./serial/save_file.json`
-    auth = SerialAuthority(nodes=TPN)
 
     for group in [FOOD, ANIMAL_BASED, PLANT_BASED]:
         auth.add_group(gid=group)
@@ -61,5 +89,3 @@ def serial_authority() -> SerialAuthority:
     auth.group_add_permission(gid=PLANT_BASED, node=TPN.TOWNY_WILD_DESTROY_X, payload="gold")
 
     auth.subject_add_permission(sid=HAM, node=TPN.TOWNY_WILD_)
-
-    return auth

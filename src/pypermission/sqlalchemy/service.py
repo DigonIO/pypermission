@@ -67,6 +67,7 @@ def create_subject_permission(
         entity_db_id=subject_entry.entity_db_id,
         permission=permission,
         payload=payload,
+        db=db,
     )
 
 
@@ -79,6 +80,7 @@ def create_group_permission(
         entity_db_id=group_entry.entity_db_id,
         permission=permission,
         payload=payload,
+        db=db,
     )
 
 

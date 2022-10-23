@@ -8,6 +8,7 @@ from deepdiff import DeepDiff
 from pypermission.serial import SerialAuthority
 
 from ..helpers import TownyPermissionNode as TPN
+from ..helpers import assert_loaded_authority
 
 EGG = "egg"
 SPAM = "spam"
@@ -63,72 +64,6 @@ def test_write_file_json(serial_authority):
         save_data = json.loads(content)
 
     assert DeepDiff(save_data, SAVE_DATA, ignore_order=True) == {}
-
-
-def assert_loaded_authority(auth: SerialAuthority):
-
-    assert auth.get_groups() == {FOOD, ANIMAL_BASED, PLANT_BASED}
-    assert auth.get_subjects() == {
-        EGG,
-        SPAM,
-        HAM,
-        ORANGE,
-        APPLE,
-        PEAR,
-        BANANA,
-    }
-
-    assert auth.group_get_member_groups(gid=FOOD) == {ANIMAL_BASED, PLANT_BASED}
-    assert auth.group_get_parent_groups(gid=ANIMAL_BASED) == {FOOD}
-    assert auth.group_get_parent_groups(gid=PLANT_BASED) == {FOOD}
-
-    assert auth.group_get_member_subjects(gid=ANIMAL_BASED) == {EGG, SPAM, HAM}
-    assert auth.subject_get_groups(sid=EGG) == {ANIMAL_BASED}
-
-    assert auth.group_get_member_subjects(gid=PLANT_BASED) == {ORANGE, APPLE, PEAR, BANANA}
-    assert auth.subject_get_groups(sid=ORANGE) == {PLANT_BASED}
-
-    assert auth.subject_has_permission(sid=EGG, node=TPN.TOWNY_CHAT_GLOBAL) == True
-    assert auth.subject_has_permission(sid=PEAR, node=TPN.TOWNY_CHAT_GLOBAL) == True
-
-    assert auth.subject_has_permission(sid=EGG, node=TPN.TOWNY_CHAT_TOWN) == True
-    assert auth.subject_has_permission(sid=EGG, node=TPN.TOWNY_CHAT_NATION) == False
-
-    assert auth.subject_has_permission(sid=PEAR, node=TPN.TOWNY_CHAT_TOWN) == False
-    assert auth.subject_has_permission(sid=PEAR, node=TPN.TOWNY_CHAT_NATION) == True
-
-    assert auth.subject_has_permission(sid=EGG, node=TPN.TOWNY_WILD_BUILD_X, payload="dirt") == True
-    assert auth.subject_has_permission(sid=EGG, node=TPN.TOWNY_WILD_BUILD_X, payload="gold") == True
-    assert (
-        auth.subject_has_permission(sid=EGG, node=TPN.TOWNY_WILD_DESTROY_X, payload="dirt") == False
-    )
-    assert (
-        auth.subject_has_permission(sid=EGG, node=TPN.TOWNY_WILD_DESTROY_X, payload="gold") == False
-    )
-
-    assert (
-        auth.subject_has_permission(sid=PEAR, node=TPN.TOWNY_WILD_BUILD_X, payload="dirt") == False
-    )
-    assert (
-        auth.subject_has_permission(sid=PEAR, node=TPN.TOWNY_WILD_BUILD_X, payload="gold") == False
-    )
-    assert (
-        auth.subject_has_permission(sid=PEAR, node=TPN.TOWNY_WILD_DESTROY_X, payload="dirt") == True
-    )
-    assert (
-        auth.subject_has_permission(sid=PEAR, node=TPN.TOWNY_WILD_DESTROY_X, payload="gold") == True
-    )
-
-    assert (
-        auth.subject_has_permission(sid=HAM, node=TPN.TOWNY_WILD_DESTROY_X, payload="dirt") == True
-    )
-    assert (
-        auth.subject_has_permission(sid=HAM, node=TPN.TOWNY_WILD_DESTROY_X, payload="gold") == True
-    )
-
-    assert auth.subject_has_permission(sid=HAM, node=TPN.TOWNY_WILD_BUILD_X, payload="dirt") == True
-    assert auth.subject_has_permission(sid=HAM, node=TPN.TOWNY_WILD_BUILD_X, payload="gold") == True
-    assert auth.subject_has_permission(sid=HAM, node=TPN.TOWNY_WILD_BUILD_X, payload="iron") == True
 
 
 # Fulfil the properties of the fixture `serial_authority`
