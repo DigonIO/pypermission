@@ -3,9 +3,7 @@ from sqlalchemy.orm import Session
 
 from pypermission.core import Permission
 from pypermission.error import (
-    EntityIDCollisionError,
-    UnknownGroupIDError,
-    UnknownSubjectIDError,
+    EntityIDError,
     GroupCycleError,
 )
 from pypermission.sqlalchemy.models import (
@@ -26,10 +24,10 @@ def create_subject(*, serial_sid: str, db: Session) -> None:
     ### /* Prevents SQLAlchemy ID skipping
     try:
         read_subject(serial_sid=serial_sid, db=db)
-    except UnknownSubjectIDError:
+    except EntityIDError:
         ...
     else:
-        raise EntityIDCollisionError from None  # TODO
+        raise EntityIDError from None  # TODO
     ### */
 
     subject_entry = SubjectEntry(serial_eid=serial_sid)
@@ -37,7 +35,7 @@ def create_subject(*, serial_sid: str, db: Session) -> None:
     try:
         db.commit()
     except IntegrityError as err:
-        raise EntityIDCollisionError from None  # TODO
+        raise EntityIDError from None  # TODO
         # Skips a SQLAlchemy ID if raised
 
 
@@ -45,10 +43,10 @@ def create_group(*, serial_gid: str, db: Session) -> None:
     ### /* Prevents SQLAlchemy ID skipping
     try:
         read_group(serial_gid=serial_gid, db=db)
-    except UnknownGroupIDError:
+    except EntityIDError:
         ...
     else:
-        raise EntityIDCollisionError from None  # TODO
+        raise EntityIDError from None  # TODO
     ### */
 
     group_entry = GroupEntry(serial_eid=serial_gid)
@@ -56,7 +54,7 @@ def create_group(*, serial_gid: str, db: Session) -> None:
     try:
         db.commit()
     except IntegrityError as err:
-        raise EntityIDCollisionError from None  # TODO
+        raise EntityIDError from None  # TODO
         # Skips a SQLAlchemy ID if raised
 
 
@@ -129,14 +127,14 @@ def read_subject(*, serial_sid: str, db: Session) -> SubjectEntry:
     subject_entries = db.query(SubjectEntry).filter(SubjectEntry.serial_eid == serial_sid).all()
     if subject_entries:
         return subject_entries[0]
-    raise UnknownSubjectIDError  # TODO
+    raise EntityIDError  # TODO
 
 
 def read_group(*, serial_gid: str, db: Session) -> GroupEntry:
     group_entries = db.query(GroupEntry).filter(GroupEntry.serial_eid == serial_gid).all()
     if group_entries:
         return group_entries[0]
-    raise UnknownGroupIDError  # TODO
+    raise EntityIDError  # TODO
 
 
 ####################################################################################################

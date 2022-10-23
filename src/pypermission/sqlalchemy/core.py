@@ -2,7 +2,7 @@ from sqlalchemy.engine.base import Engine
 from sqlalchemy.orm import Session
 from sqlalchemy.orm.session import sessionmaker
 
-from pypermission.core import Authority as _Authority
+from pypermission.core import Authority
 from pypermission.core import (
     Permission,
     PermissionNodeMap,
@@ -41,7 +41,7 @@ from pypermission.sqlalchemy.service import (
 EntityID = int | str
 
 
-class Authority(_Authority):
+class SQLAlchemyAuthority(Authority):
 
     _engine: Engine
     _session_maker: sessionmaker

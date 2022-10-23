@@ -1,1 +1,1 @@
-from pypermission.sqlalchemy.core import Authority
+from pypermission.sqlalchemy.core import SQLAlchemyAuthority
