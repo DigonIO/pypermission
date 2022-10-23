@@ -96,8 +96,6 @@ class Permission:
 
 PermissionMap = dict[Permission, set[str]]
 PermissionNodeMap = dict[PermissionNode, set[str]]
-EntityID = int | str
-
 
 class CustomPermission(Permission):
     """Internal permission class for custom permission nodes. Have to be registered externally."""
