@@ -11,11 +11,15 @@ from sqlalchemy.orm import declarative_base, relationship
 
 DeclarativeMeta: type = declarative_base()
 
+TABLE_PREFIX = "PyPermission_"
+# The table prefix allows to distinguish between your own tables and PyPermission tables
+# if they are used in the same database.
+
 EXTEND_EXISTING = True
 ENTITY_ID_MAX_LENGHT = 60
 SERIAL_ENTITY_ID_LENGHT = ENTITY_ID_MAX_LENGHT + 4
-PERMISSION_NODE_LENGTH = 64
-PERMISSION_PAYLOAD_LENGTH = 64
+PERMISSION_NODE_LENGTH = 64  # TODO raise if node is to long while registration
+PERMISSION_PAYLOAD_LENGTH = 64  # TODO raise if payload is to long
 
 ####################################################################################################
 ### Mixin
@@ -62,7 +66,7 @@ class PermissionPayloadMixin(TimeStampMixin):
 
 
 class SubjectEntry(DeclarativeMeta, PermissionableEntityMixin):
-    __tablename__ = "subject_table"
+    __tablename__ = TABLE_PREFIX + "subject_table"
     __table_args__ = {"extend_existing": EXTEND_EXISTING}
 
     permission_entries = relationship("SubjectPermissionEntry", cascade="all,delete")
@@ -77,7 +81,7 @@ class SubjectEntry(DeclarativeMeta, PermissionableEntityMixin):
 
 
 class GroupEntry(DeclarativeMeta, PermissionableEntityMixin):
-    __tablename__ = "group_table"
+    __tablename__ = TABLE_PREFIX + "group_table"
     __table_args__ = {"extend_existing": EXTEND_EXISTING}
 
     permission_entries = relationship("GroupPermissionEntry", cascade="all,delete")
@@ -120,33 +124,45 @@ class GroupEntry(DeclarativeMeta, PermissionableEntityMixin):
 
 
 class SubjectPermissionEntry(DeclarativeMeta, PermissionPayloadMixin):
-    __tablename__ = "subject_permission_table"
+    __tablename__ = TABLE_PREFIX + "subject_permission_table"
     __table_args__ = {"extend_existing": EXTEND_EXISTING}
-    entity_db_id = Column(Integer, ForeignKey("subject_table.entity_db_id"), primary_key=True)
+    entity_db_id = Column(
+        Integer, ForeignKey(TABLE_PREFIX + "subject_table.entity_db_id"), primary_key=True
+    )
 
 
 class GroupPermissionEntry(DeclarativeMeta, PermissionPayloadMixin):
-    __tablename__ = "group_permission_table"
+    __tablename__ = TABLE_PREFIX + "group_permission_table"
     __table_args__ = {"extend_existing": EXTEND_EXISTING}
-    entity_db_id = Column(Integer, ForeignKey("group_table.entity_db_id"), primary_key=True)
+    entity_db_id = Column(
+        Integer, ForeignKey(TABLE_PREFIX + "group_table.entity_db_id"), primary_key=True
+    )
 
 
 class MembershipEntry(DeclarativeMeta, TimeStampMixin):
-    __tablename__ = "membership_table"
+    __tablename__ = TABLE_PREFIX + "membership_table"
     __table_args__ = {"extend_existing": EXTEND_EXISTING}
-    subject_db_id = Column(Integer, ForeignKey("subject_table.entity_db_id"), primary_key=True)
-    group_db_id = Column(Integer, ForeignKey("group_table.entity_db_id"), primary_key=True)
+    subject_db_id = Column(
+        Integer, ForeignKey(TABLE_PREFIX + "subject_table.entity_db_id"), primary_key=True
+    )
+    group_db_id = Column(
+        Integer, ForeignKey(TABLE_PREFIX + "group_table.entity_db_id"), primary_key=True
+    )
 
     subject_entry = relationship("SubjectEntry", back_populates="_membership_entries")
     group_entry = relationship("GroupEntry", back_populates="_membership_entries")
 
 
 class RelationshipEntry(DeclarativeMeta, TimeStampMixin):
-    __tablename__ = "relationship_table"
+    __tablename__ = TABLE_PREFIX + "relationship_table"
     __table_args__ = {"extend_existing": EXTEND_EXISTING}
 
-    parent_db_id = Column(Integer, ForeignKey("group_table.entity_db_id"), primary_key=True)
-    child_db_id = Column(Integer, ForeignKey("group_table.entity_db_id"), primary_key=True)
+    parent_db_id = Column(
+        Integer, ForeignKey(TABLE_PREFIX + "group_table.entity_db_id"), primary_key=True
+    )
+    child_db_id = Column(
+        Integer, ForeignKey(TABLE_PREFIX + "group_table.entity_db_id"), primary_key=True
+    )
 
     parent_entry = relationship(
         "GroupEntry", foreign_keys=[parent_db_id], back_populates="_child_relationship_entries"
