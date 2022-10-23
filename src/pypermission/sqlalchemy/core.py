@@ -188,7 +188,12 @@ class SQLAlchemyAuthority(Authority):
         return set(_entity_id_deserializer(entry.serial_eid) for entry in parent_entries)
 
     def subject_has_permission(
-        self, *, sid: EntityID, node: PermissionNode, payload: str | None = None, db: Session
+        self,
+        *,
+        sid: EntityID,
+        node: PermissionNode,
+        payload: str | None = None,
+        db: Session | None = None,
     ) -> bool:
         """Check if a subject has a wanted permission."""
         serial_sid = _entity_id_serializer(sid)
@@ -212,7 +217,12 @@ class SQLAlchemyAuthority(Authority):
         return False
 
     def group_has_permission(
-        self, *, gid: EntityID, node: PermissionNode, payload: str | None = None, db: Session
+        self,
+        *,
+        gid: EntityID,
+        node: PermissionNode,
+        payload: str | None = None,
+        db: Session | None = None,
     ) -> bool:
         """Check if a group has a wanted permission."""
         serial_gid = _entity_id_serializer(gid)
@@ -226,7 +236,12 @@ class SQLAlchemyAuthority(Authority):
             group_entry=group_entry, permission=permission, payload=payload
         )
 
-    def subject_get_permissions(self, *, sid: EntityID) -> PermissionNodeMap:
+    def subject_get_permissions(
+        self,
+        *,
+        sid: EntityID,
+        db: Session | None = None,
+    ) -> PermissionNodeMap:
         """Get a copy of all permissions from a subject."""
         serial_sid = _entity_id_serializer(sid)
         db = self._setup_db_session(db)
@@ -236,7 +251,12 @@ class SQLAlchemyAuthority(Authority):
 
         return self._build_permission_node_map(perm_entries=perm_entries)
 
-    def group_get_permissions(self, *, gid: EntityID) -> PermissionNodeMap:
+    def group_get_permissions(
+        self,
+        *,
+        gid: EntityID,
+        db: Session | None = None,
+    ) -> PermissionNodeMap:
         """Get a copy of all permissions from a group."""
         serial_gid = _entity_id_serializer(gid)
         db = self._setup_db_session(db)
@@ -394,6 +414,10 @@ def _has_permission(
     for entry in perm_entries:
         if (entry.node == permission.node.value) and (entry.payload == serialize_payload(payload)):
             return True
+    for ancestor in permission.ancestors:
+        for entry in perm_entries:
+            if entry.node == ancestor.node.value:  # ancestors carry no payload
+                return True
     return False
 
 
