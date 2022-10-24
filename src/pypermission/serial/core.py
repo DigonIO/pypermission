@@ -210,43 +210,17 @@ class SerialAuthority(_Authority):
         groups: dict[str, GroupStore] = {}
 
         for gid, group in self._groups.items():
-            # TODO create a util function
-            permission_nodes: list[str] = []
-            for permission, payload_set in group.permission_map.items():
-                if permission.has_payload:
-                    for payload in payload_set:
-                        permission_nodes.append(
-                            self._serialize_permission_node(permission=permission, payload=payload)
-                        )
-                else:
-                    permission_nodes.append(
-                        self._serialize_permission_node(permission=permission, payload=None)
-                    )
-
             groups[gid] = GroupStore(
                 member_groups=list(group.child_ids),
                 member_subjects=list(group.sids),
-                permission_nodes=permission_nodes,
+                permission_nodes=self._generate_permission_node_list(group),
             )
 
         subjects: dict[str, SubjectStore] = {}
 
         for sid, subject in self._subjects.items():
-            # TODO create a util function
-            permission_nodes: list[str] = []
-            for permission, payload_set in subject.permission_map.items():
-                if permission.has_payload:
-                    for payload in payload_set:
-                        permission_nodes.append(
-                            self._serialize_permission_node(permission=permission, payload=payload)
-                        )
-                else:
-                    permission_nodes.append(
-                        self._serialize_permission_node(permission=permission, payload=None)
-                    )
-
             subjects[sid] = SubjectStore(
-                permission_nodes=permission_nodes,
+                permission_nodes=self._generate_permission_node_list(subject),
             )
 
         data = DataStore(
@@ -590,6 +564,20 @@ class SerialAuthority(_Authority):
                 return True
 
         return False
+
+    def _generate_permission_node_list(self, entity: PermissionableEntity) -> list[str]:
+        permission_nodes: list[str] = []
+        for permission, payload_set in entity.permission_map.items():
+            if permission.has_payload:
+                for payload in payload_set:
+                    permission_nodes.append(
+                        self._serialize_permission_node(permission=permission, payload=payload)
+                    )
+            else:
+                permission_nodes.append(
+                    self._serialize_permission_node(permission=permission, payload=None)
+                )
+        return permission_nodes
 
 
 ####################################################################################################
