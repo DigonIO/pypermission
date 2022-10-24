@@ -50,7 +50,6 @@ class PermissionableEntityMixin(TimeStampMixin):
     entity_db_id = Column(Integer, primary_key=True)
     serial_eid = Column(String(length=SERIAL_ENTITY_ID_LENGHT), unique=True)  # Entity ID
 
-
 class PermissionPayloadMixin(TimeStampMixin):
     """Permission and payload mixin."""
 

@@ -21,40 +21,26 @@ from pypermission.sqlalchemy.models import (
 
 
 def create_subject(*, serial_sid: str, db: Session) -> None:
-    ### /* Prevents SQLAlchemy ID skipping
-    try:
-        read_subject(serial_sid=serial_sid, db=db)
-    except EntityIDError:
-        ...
-    else:
-        raise EntityIDError from None  # TODO
-    ### */
-
     subject_entry = SubjectEntry(serial_eid=serial_sid)
     db.add(subject_entry)
     try:
         db.commit()
     except IntegrityError as err:
-        raise EntityIDError from None  # TODO
+        raise EntityIDError(
+            "ID collision: Subject with ID `{serial_sid}` already exists in database!"
+        ) from err
         # Skips a SQLAlchemy ID if raised
 
 
 def create_group(*, serial_gid: str, db: Session) -> None:
-    ### /* Prevents SQLAlchemy ID skipping
-    try:
-        read_group(serial_gid=serial_gid, db=db)
-    except EntityIDError:
-        ...
-    else:
-        raise EntityIDError from None  # TODO
-    ### */
-
     group_entry = GroupEntry(serial_eid=serial_gid)
     db.add(group_entry)
     try:
         db.commit()
     except IntegrityError as err:
-        raise EntityIDError from None  # TODO
+        raise EntityIDError(
+            "ID collision: Group with ID `{serial_gid}` already exists in database!"
+        ) from err
         # Skips a SQLAlchemy ID if raised
 
 
@@ -95,7 +81,7 @@ def create_membership(*, serial_sid: str, serial_gid: str, db: Session) -> None:
     try:
         db.commit()
     except IntegrityError as err:
-        # raised if the entry already exists
+        # don't raise here, desired state already exists
         ...
 
 
@@ -116,7 +102,7 @@ def create_parent_child_relationship(*, serial_pid: str, serial_cid: str, db: Se
     try:
         db.commit()
     except IntegrityError as err:
-        # raised if the entry already exists
+        # don't raise here, desired state already exists
         ...
 
 
@@ -129,14 +115,14 @@ def read_subject(*, serial_sid: str, db: Session) -> SubjectEntry:
     subject_entries = db.query(SubjectEntry).filter(SubjectEntry.serial_eid == serial_sid).all()
     if subject_entries:
         return subject_entries[0]
-    raise EntityIDError  # TODO
+    raise EntityIDError(f"Unknown subject ID `{serial_sid}`!")
 
 
 def read_group(*, serial_gid: str, db: Session) -> GroupEntry:
     group_entries = db.query(GroupEntry).filter(GroupEntry.serial_eid == serial_gid).all()
     if group_entries:
         return group_entries[0]
-    raise EntityIDError  # TODO
+    raise EntityIDError(f"Unknown group ID `{serial_gid}`!")
 
 
 ####################################################################################################
@@ -248,7 +234,7 @@ def _create_permission_entry(
     try:
         db.commit()
     except IntegrityError as err:
-        # raised if the entry already exists
+        # don't raise here, desired state already exists
         ...
 
 
@@ -282,7 +268,9 @@ def _detect_group_cycle(*, parent_entry: GroupEntry, child_entry: GroupEntry):
 
     parent_entries = parent_entry.parent_entries  # parents of this "parent" group
 
-    if child_entry == parent_entries:
-        raise GroupCycleError  # TODO
+    if child_entry in parent_entries:
+        raise GroupCycleError(
+            f"Cyclic dependencies detected between groups `{parent_entry.serial_eid}` and `{child_entry.serial_eid}`!"
+        )
     for entry in parent_entries:
         _detect_group_cycle(parent_entry=entry, child_entry=child_entry)

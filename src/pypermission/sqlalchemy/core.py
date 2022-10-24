@@ -457,7 +457,6 @@ def _entity_id_serializer(eid: EntityID) -> str:
 
     return f"{serial_eid}:{serial_type}"
 
-
 def _entity_id_deserializer(serial_eid: str) -> EntityID:
     if len(serial_eid) > (SERIAL_ENTITY_ID_LENGHT):
         raise ValueError  # TODO
