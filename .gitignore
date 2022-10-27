@@ -1,6 +1,6 @@
 #venv
 venv/
-tmp.*
+tmp*.*
 
 # Byte-compiled / optimized / DLL files
 .DS_Store

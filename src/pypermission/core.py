@@ -96,7 +96,8 @@ class Permission:
 
 
 PermissionMap = dict[Permission, set[str]]
-PermissionNodeMap = dict[PermissionNode, set[str]]
+NodeMap = dict[PermissionNode, set[str]]
+
 EntityID = int | str
 
 

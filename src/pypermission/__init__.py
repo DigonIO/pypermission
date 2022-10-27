@@ -7,4 +7,4 @@ Author: Jendrik A. Potyka
 __version__ = "0.1.0"
 __author__ = "Jendrik A. Potyka"
 
-from pypermission.core import PermissionNode, PermissionNodeMap
+from pypermission.core import PermissionNode, NodeMap

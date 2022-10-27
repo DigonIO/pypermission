@@ -50,6 +50,7 @@ class PermissionableEntityMixin(TimeStampMixin):
     entity_db_id = Column(Integer, primary_key=True)
     serial_eid = Column(String(length=SERIAL_ENTITY_ID_LENGHT), unique=True)  # Entity ID
 
+
 class PermissionPayloadMixin(TimeStampMixin):
     """Permission and payload mixin."""
 
@@ -68,32 +69,38 @@ class SubjectEntry(DeclarativeMeta, PermissionableEntityMixin):
     __tablename__ = PREFIX + "subject_table"
     __table_args__ = {"extend_existing": EXTEND_EXISTING}
 
-    permission_entries = relationship("SubjectPermissionEntry", cascade="all,delete")
+    permission_entries: SubjectPermissionEntry = relationship(
+        "SubjectPermissionEntry", cascade="all,delete"
+    )
 
-    _membership_entries = relationship("MembershipEntry", cascade="all,delete")
+    _membership_entries: list[MembershipEntry] = relationship(
+        "MembershipEntry", cascade="all,delete"
+    )
 
     @property
     def group_entries(self) -> list[GroupEntry]:
-        return [
-            cast(MembershipEntry, membership).group_entry for membership in self._membership_entries
-        ]
+        return [membership.group_entry for membership in self._membership_entries]
 
 
 class GroupEntry(DeclarativeMeta, PermissionableEntityMixin):
     __tablename__ = PREFIX + "group_table"
     __table_args__ = {"extend_existing": EXTEND_EXISTING}
 
-    permission_entries = relationship("GroupPermissionEntry", cascade="all,delete")
+    permission_entries: GroupPermissionEntry = relationship(
+        "GroupPermissionEntry", cascade="all,delete"
+    )
 
-    _membership_entries = relationship("MembershipEntry", cascade="all,delete")
+    _membership_entries: list[MembershipEntry] = relationship(
+        "MembershipEntry", cascade="all,delete"
+    )
 
-    _parent_relationship_entries = relationship(
+    _parent_relationship_entries: list[RelationshipEntry] = relationship(
         "RelationshipEntry",
         cascade="all,delete",
         primaryjoin="and_(RelationshipEntry.child_db_id==GroupEntry.entity_db_id)",
         # do not use viewonly=True, instead use backpopulate in the linked table to allow cascade
     )
-    _child_relationship_entries = relationship(
+    _child_relationship_entries: list[RelationshipEntry] = relationship(
         "RelationshipEntry",
         cascade="all,delete",
         primaryjoin="and_(RelationshipEntry.parent_db_id==GroupEntry.entity_db_id)",
@@ -102,30 +109,21 @@ class GroupEntry(DeclarativeMeta, PermissionableEntityMixin):
 
     @property
     def subject_entries(self) -> list[GroupEntry]:
-        return [
-            cast(MembershipEntry, membership).subject_entry
-            for membership in self._membership_entries
-        ]
+        return [membership.subject_entry for membership in self._membership_entries]
 
     @property
     def parent_entries(self) -> list[GroupEntry]:
-        return [
-            cast(RelationshipEntry, relation).parent_entry
-            for relation in self._parent_relationship_entries
-        ]
+        return [relation.parent_entry for relation in self._parent_relationship_entries]
 
     @property
     def child_entries(self) -> list[GroupEntry]:
-        return [
-            cast(RelationshipEntry, relation).child_entry
-            for relation in self._child_relationship_entries
-        ]
+        return [relation.child_entry for relation in self._child_relationship_entries]
 
 
 class SubjectPermissionEntry(DeclarativeMeta, PermissionPayloadMixin):
     __tablename__ = PREFIX + "subject_permission_table"
     __table_args__ = {"extend_existing": EXTEND_EXISTING}
-    entity_db_id = Column(
+    entity_db_id: int = Column(
         Integer, ForeignKey(PREFIX + "subject_table.entity_db_id"), primary_key=True
     )
 
@@ -144,12 +142,10 @@ class MembershipEntry(DeclarativeMeta, TimeStampMixin):
     subject_db_id = Column(
         Integer, ForeignKey(PREFIX + "subject_table.entity_db_id"), primary_key=True
     )
-    group_db_id = Column(
-        Integer, ForeignKey(PREFIX + "group_table.entity_db_id"), primary_key=True
-    )
+    group_db_id = Column(Integer, ForeignKey(PREFIX + "group_table.entity_db_id"), primary_key=True)
 
-    subject_entry = relationship("SubjectEntry", back_populates="_membership_entries")
-    group_entry = relationship("GroupEntry", back_populates="_membership_entries")
+    subject_entry: SubjectEntry = relationship("SubjectEntry", back_populates="_membership_entries")
+    group_entry: GroupEntry = relationship("GroupEntry", back_populates="_membership_entries")
 
 
 class RelationshipEntry(DeclarativeMeta, TimeStampMixin):
@@ -159,13 +155,11 @@ class RelationshipEntry(DeclarativeMeta, TimeStampMixin):
     parent_db_id = Column(
         Integer, ForeignKey(PREFIX + "group_table.entity_db_id"), primary_key=True
     )
-    child_db_id = Column(
-        Integer, ForeignKey(PREFIX + "group_table.entity_db_id"), primary_key=True
-    )
+    child_db_id = Column(Integer, ForeignKey(PREFIX + "group_table.entity_db_id"), primary_key=True)
 
-    parent_entry = relationship(
+    parent_entry: GroupEntry = relationship(
         "GroupEntry", foreign_keys=[parent_db_id], back_populates="_child_relationship_entries"
     )
-    child_entry = relationship(
+    child_entry: GroupEntry = relationship(
         "GroupEntry", foreign_keys=[child_db_id], back_populates="_parent_relationship_entries"
     )

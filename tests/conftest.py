@@ -81,19 +81,19 @@ def init_auth(auth: SerialAuthority | SQLAlchemyAuthority):
     auth.group_add_member_subject(gid=PLANT_BASED, member_sid=PEAR)
     auth.group_add_member_subject(gid=PLANT_BASED, member_sid=BANANA)
 
-    auth.group_add_permission(gid=FOOD, node=TPN.TOWNY_CHAT_GLOBAL)
+    auth.group_add_node(gid=FOOD, node=TPN.TOWNY_CHAT_GLOBAL)
 
-    auth.group_add_permission(gid=ANIMAL_BASED, node=TPN.TOWNY_CHAT_TOWN)
+    auth.group_add_node(gid=ANIMAL_BASED, node=TPN.TOWNY_CHAT_TOWN)
 
-    auth.group_add_permission(gid=PLANT_BASED, node=TPN.TOWNY_CHAT_NATION)
+    auth.group_add_node(gid=PLANT_BASED, node=TPN.TOWNY_CHAT_NATION)
 
-    auth.group_add_permission(gid=ANIMAL_BASED, node=TPN.TOWNY_WILD_BUILD_X, payload="dirt")
-    auth.group_add_permission(gid=ANIMAL_BASED, node=TPN.TOWNY_WILD_BUILD_X, payload="gold")
+    auth.group_add_node(gid=ANIMAL_BASED, node=TPN.TOWNY_WILD_BUILD_X, payload="dirt")
+    auth.group_add_node(gid=ANIMAL_BASED, node=TPN.TOWNY_WILD_BUILD_X, payload="gold")
 
-    auth.group_add_permission(gid=PLANT_BASED, node=TPN.TOWNY_WILD_DESTROY_X, payload="dirt")
-    auth.group_add_permission(gid=PLANT_BASED, node=TPN.TOWNY_WILD_DESTROY_X, payload="gold")
+    auth.group_add_node(gid=PLANT_BASED, node=TPN.TOWNY_WILD_DESTROY_X, payload="dirt")
+    auth.group_add_node(gid=PLANT_BASED, node=TPN.TOWNY_WILD_DESTROY_X, payload="gold")
 
-    auth.subject_add_permission(sid=HAM, node=TPN.TOWNY_WILD_)
+    auth.subject_add_node(sid=HAM, node=TPN.TOWNY_WILD_)
 
 
 @pytest.fixture

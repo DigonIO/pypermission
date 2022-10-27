@@ -29,26 +29,26 @@ def test_rm_permission(serial_authority: SerialAuthority):
     auth = serial_authority
 
     assert auth.group_has_permission(gid=FOOD, node=TPN.TOWNY_CHAT_GLOBAL) == True
-    auth.group_rm_permission(gid=FOOD, node=TPN.TOWNY_CHAT_GLOBAL)
+    auth.group_rm_node(gid=FOOD, node=TPN.TOWNY_CHAT_GLOBAL)
     assert auth.group_has_permission(gid=FOOD, node=TPN.TOWNY_CHAT_GLOBAL) == False
 
     assert auth.subject_has_permission(sid=HAM, node=TPN.TOWNY_WILD_) == True
-    auth.subject_rm_permission(sid=HAM, node=TPN.TOWNY_WILD_)
+    auth.subject_rm_node(sid=HAM, node=TPN.TOWNY_WILD_)
     assert auth.subject_has_permission(sid=HAM, node=TPN.TOWNY_WILD_) == False
 
 
 def test_subject_get_permissions(serial_authority: SerialAuthority):
     auth = serial_authority
 
-    assert auth.subject_get_permissions(sid=EGG) == {}
-    assert auth.subject_get_permissions(sid=HAM) == {TPN.TOWNY_WILD_: set()}
+    assert auth.subject_get_nodes(sid=EGG) == {}
+    assert auth.subject_get_nodes(sid=HAM) == {TPN.TOWNY_WILD_: set()}
 
 
 def test_group_get_permissions(serial_authority: SerialAuthority):
     auth = serial_authority
 
-    assert auth.group_get_permissions(gid=FOOD) == {TPN.TOWNY_CHAT_GLOBAL: set()}
-    assert auth.group_get_permissions(gid=ANIMAL_BASED) == {
+    assert auth.group_get_nodes(gid=FOOD) == {TPN.TOWNY_CHAT_GLOBAL: set()}
+    assert auth.group_get_nodes(gid=ANIMAL_BASED) == {
         TPN.TOWNY_CHAT_TOWN: set(),
         TPN.TOWNY_WILD_BUILD_X: {"dirt", "gold"},
     }
@@ -148,7 +148,7 @@ def test_unknown_perm_node():
     auth.add_group(gid=FOOD)
 
     with pytest.raises(UnknownPermissionNodeError):
-        auth.subject_add_permission(sid=APPLE, node=TownyPermissionNode.TOWNY_CHAT_)
+        auth.subject_add_node(sid=APPLE, node=TownyPermissionNode.TOWNY_CHAT_)
 
     with pytest.raises(UnknownPermissionNodeError):
-        auth.group_add_permission(gid=FOOD, node=TownyPermissionNode.TOWNY_CHAT_)
+        auth.group_add_node(gid=FOOD, node=TownyPermissionNode.TOWNY_CHAT_)

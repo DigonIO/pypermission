@@ -178,15 +178,15 @@ class BankAPI:
         self._auth.add_group(gid=GROUP_BANKER)
         self._auth.add_group(gid=GROUP_CUSTOMER)
 
-        self._auth.group_add_permission(gid=GROUP_ADMIN, node=self._auth.root_node())
+        self._auth.group_add_node(gid=GROUP_ADMIN, node=self._auth.root_node())
 
-        self._auth.group_add_permission(gid=GROUP_BANKER, node=NODE.ACCOUNT_CREATE)
-        self._auth.group_add_permission(gid=GROUP_BANKER, node=NODE.ACCOUNT_GET_)
-        self._auth.group_add_permission(gid=GROUP_BANKER, node=NODE.ACCOUNT_LIST_)
-        self._auth.group_add_permission(gid=GROUP_BANKER, node=NODE.ACCOUNT_DELETE)
+        self._auth.group_add_node(gid=GROUP_BANKER, node=NODE.ACCOUNT_CREATE)
+        self._auth.group_add_node(gid=GROUP_BANKER, node=NODE.ACCOUNT_GET_)
+        self._auth.group_add_node(gid=GROUP_BANKER, node=NODE.ACCOUNT_LIST_)
+        self._auth.group_add_node(gid=GROUP_BANKER, node=NODE.ACCOUNT_DELETE)
 
-        self._auth.group_add_permission(gid=GROUP_CUSTOMER, node=NODE.ACCOUNT_GET_OWN)
-        self._auth.group_add_permission(gid=GROUP_CUSTOMER, node=NODE.ACCOUNT_LIST_OWN)
+        self._auth.group_add_node(gid=GROUP_CUSTOMER, node=NODE.ACCOUNT_GET_OWN)
+        self._auth.group_add_node(gid=GROUP_CUSTOMER, node=NODE.ACCOUNT_LIST_OWN)
 
         user_admin = User(username=USER_ADMIN, auth=self._auth)
         user_banker = User(username=USER_BANKER, auth=self._auth)

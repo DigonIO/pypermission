@@ -10,6 +10,7 @@ class TownyPermissionNode(PermissionNode):
     TOWNY_WILD_ = "towny.wild.*"
     TOWNY_WILD_BUILD_ = "towny.wild.build.*"
     TOWNY_WILD_BUILD_X = "towny.wild.build.<x>"
+    TOWNY_WILD_BUILD_IRON = "towny.wild.build.iron"
     TOWNY_WILD_DESTROY_ = "towny.wild.destroy.*"
     TOWNY_WILD_DESTROY_X = "towny.wild.destroy.<x>"
 ```
@@ -28,12 +29,53 @@ groups:
     permission_nodes:
       - towny.chat.town
       - towny.wild.build.<iron>
+      - towny.wild.build.iron
 subjects:
   user:
     permission_nodes:
       - towny.build.*
+permission_nodes:
+  towny.chat.*:
+    towny.chat.town: Null
+    towny.chat.global: Null
+    towny.chat.nation: Null
+  towny.wild.*:
+    towny.wild.build.*:
+      towny.wild.build.<x>: []
+      towny.wild.build.iron: Null
+    towny.wild.destroy.*:
+      towny.wild.destroy.<x>: []
+  towny.chat.town: Null
+  towny.wild.build.<x>: ["iron"]
+  towny.wild.build.iron: Null
 ```
 
+```yaml
+permission_nodes:
+  t
+```
+
+```yaml
+permission_nodes:
+  towny.*:
+    towny.chat.*:
+  towny.chat.*:
+    - towny.chat.town
+    - towny.chat.global
+    - towny.chat.nation
+    - towny.chat.foo.*
+  towny.chat.foo.*:
+    - ddd
+  towny.chat.town: []
+```
+
+```txt
+- towny.chat.*: user->child_group->parent_group
+- towny.wild.*: user->child_group->parent_group
+- towny.wild.build.<iron>: user->child_group
+- towny.build.*: user
+- towny.chat.town: user->child_group
+```
 
 ```txt
 - towny.chat.*: parent_group

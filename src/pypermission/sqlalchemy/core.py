@@ -1,3 +1,4 @@
+from typing import Sequence
 from sqlalchemy.engine.base import Engine
 from sqlalchemy.orm import Session
 from sqlalchemy.orm.session import sessionmaker
@@ -5,7 +6,7 @@ from sqlalchemy.orm.session import sessionmaker
 from pypermission.core import Authority
 from pypermission.core import (
     Permission,
-    PermissionNodeMap,
+    NodeMap,
     PermissionNode,
     validate_payload_status,
     EntityID,
@@ -44,7 +45,6 @@ from pypermission.sqlalchemy.service import (
 
 class SQLAlchemyAuthority(Authority):
 
-    _engine: Engine
     _session_maker: sessionmaker
 
     def __init__(self, *, nodes: type[PermissionNode] | None = None, engine: Engine) -> None:
@@ -104,7 +104,7 @@ class SQLAlchemyAuthority(Authority):
 
         _close_db_session(db, session)
 
-    def subject_add_permission(
+    def subject_add_node(
         self,
         *,
         sid: EntityID,
@@ -124,7 +124,7 @@ class SQLAlchemyAuthority(Authority):
 
         _close_db_session(db, session)
 
-    def group_add_permission(
+    def group_add_node(
         self,
         *,
         gid: EntityID,
@@ -285,7 +285,7 @@ class SQLAlchemyAuthority(Authority):
         *,
         sid: EntityID,
         session: Session | None = None,
-    ) -> PermissionNodeMap:
+    ) -> NodeMap:
         """Get a copy of all permissions from a subject."""
         serial_sid = entity_id_serializer(sid)
         db = self._setup_db_session(session)
@@ -303,7 +303,7 @@ class SQLAlchemyAuthority(Authority):
         *,
         gid: EntityID,
         session: Session | None = None,
-    ) -> PermissionNodeMap:
+    ) -> NodeMap:
         """Get a copy of all permissions from a group."""
         serial_gid = entity_id_serializer(gid)
         db = self._setup_db_session(session)
@@ -338,7 +338,7 @@ class SQLAlchemyAuthority(Authority):
 
         _close_db_session(db, session)
 
-    def subject_rm_permission(
+    def subject_rm_node(
         self,
         *,
         sid: EntityID,
@@ -358,7 +358,7 @@ class SQLAlchemyAuthority(Authority):
 
         _close_db_session(db, session)
 
-    def group_rm_permission(
+    def group_rm_node(
         self,
         *,
         gid: EntityID,
@@ -410,17 +410,15 @@ class SQLAlchemyAuthority(Authority):
     ### Private
     ################################################################################################
 
-    def _setup_db_session(self, db: Session | None) -> Session:
-        if db is None:
+    def _setup_db_session(self, session: Session | None) -> Session:
+        if session is None:
             return self._session_maker()
-        if isinstance(db, Session):
-            return db
+        if isinstance(session, Session):
+            return session
         raise AttributeError("Attribute 'db' must be of type 'sqlalchemy.orm.Session'!")
 
-    def _build_permission_node_map(
-        self, *, perm_entries: list[PermissionPayloadMixin]
-    ) -> PermissionNodeMap:
-        node_map: PermissionNodeMap = {}
+    def _build_permission_node_map(self, *, perm_entries: list[PermissionPayloadMixin]) -> NodeMap:
+        node_map: NodeMap = {}
         for entry in perm_entries:
             permission = self._get_permission(node=entry.node)  # TODO handle unknown permissions
             if permission.node in node_map:
@@ -456,7 +454,7 @@ def _close_db_session(db: Session, session: Session | None):
 
 
 def _has_permission(
-    perm_entries: list[PermissionPayloadMixin],
+    perm_entries: Sequence[PermissionPayloadMixin],
     permission: Permission,
     payload: str | None,
 ) -> bool:
@@ -478,7 +476,7 @@ def _recursive_group_has_permission(
     if _has_permission(perm_entries=perm_entries, permission=permission, payload=payload):
         return True
 
-    parent_entries: list[GroupEntry] = group_entry.parent_entries
+    parent_entries: Sequence[GroupEntry] = group_entry.parent_entries
     for entry in parent_entries:
         if _recursive_group_has_permission(
             group_entry=entry, permission=permission, payload=payload

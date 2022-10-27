@@ -31,6 +31,7 @@ REQUIRE_TEST = [
     "pytest-cov==4.0.0",
     "coverage==6.5.0",
     "deepdiff==6.2.1",
+    "sqlalchemy==1.4.42",
 ]
 
 REQUIRE_LINT = [
@@ -38,6 +39,7 @@ REQUIRE_LINT = [
     "bandit==1.7.4",
     "pylint==2.14.5",
     "pydocstyle==6.1.1",
+    "sqlalchemy==1.4.42",
     # below typing stubs
     "types-PyYAML>=6.0.12",
 ] + DEP_NUMPY_DOC
