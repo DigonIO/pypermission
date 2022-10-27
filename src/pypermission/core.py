@@ -96,6 +96,38 @@ class Permission:
 
 PermissionMap = dict[Permission, set[str]]
 PermissionNodeMap = dict[PermissionNode, set[str]]
+EntityID = int | str
+
+
+def entity_id_serializer(eid: EntityID, max_lenght: int | None = None) -> str:
+    if isinstance(eid, int):
+        serial_type = "int"
+        serial_eid = str(eid)
+    elif isinstance(eid, str):
+        serial_type = "str"
+        serial_eid = eid
+    else:
+        raise ValueError  # TODO
+
+    if max_lenght and (len(serial_eid) > max_lenght):
+        raise ValueError  # TODO
+
+    return f"{serial_eid}:{serial_type}"
+
+
+def entity_id_deserializer(serial_eid: str, max_lenght: int | None = None) -> EntityID:
+    if max_lenght and (len(serial_eid) > max_lenght):
+        raise ValueError  # TODO
+
+    serial_type = serial_eid[-3:]
+    serial_eid = serial_eid[:-4]
+
+    if serial_type == "int":
+        return int(serial_eid)
+    elif serial_type == "str":
+        return serial_eid
+    else:
+        raise ValueError  # TODO
 
 class CustomPermission(Permission):
     """Internal permission class for custom permission nodes. Have to be registered externally."""
