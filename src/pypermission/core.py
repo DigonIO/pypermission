@@ -285,15 +285,15 @@ def entity_id_serializer(eid: EntityID, max_lenght: int | None = None) -> str:
     if max_lenght and (len(serial_eid) > max_lenght):
         raise ValueError  # TODO
 
-    return f"{serial_eid}:{serial_type}"
+    return f"{serial_type}:{serial_eid}"
 
 
 def entity_id_deserializer(serial_eid: str, max_lenght: int | None = None) -> EntityID:
     if max_lenght and (len(serial_eid) > max_lenght):
         raise ValueError  # TODO
 
-    serial_type = serial_eid[-3:]
-    serial_eid = serial_eid[:-4]
+    serial_type = serial_eid[:3]
+    serial_eid = serial_eid[4:]
 
     if serial_type == "int":
         return int(serial_eid)

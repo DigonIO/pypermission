@@ -1,6 +1,6 @@
 import json
 from pathlib import Path
-from typing import Any, Literal, TypedDict, cast, TypeVar
+from typing import TypedDict, TypeVar, Generic
 
 from pypermission.core import Authority as _Authority
 from pypermission.core import (
@@ -11,6 +11,8 @@ from pypermission.core import (
     validate_payload_status,
     EntityID,
     assertEntityIDType,
+    entity_id_serializer,
+    entity_id_deserializer,
 )
 from pypermission.error import (
     EntityIDError,
@@ -20,13 +22,21 @@ from pypermission.error import (
 )
 
 ####################################################################################################
-### Const
+### Types
 ####################################################################################################
 
+T = TypeVar("T")
 
-class GroupStore(TypedDict):
+
+class GroupStoreYAML(TypedDict):
     member_subjects: list[EntityID]
     member_groups: list[EntityID]
+    permission_nodes: list[str]
+
+
+class GroupStoreJSON(TypedDict):
+    member_subjects: list[str]
+    member_groups: list[str]
     permission_nodes: list[str]
 
 
@@ -34,8 +44,13 @@ class SubjectStore(TypedDict):
     permission_nodes: list[str]
 
 
-class DataStore(TypedDict):
-    groups: dict[EntityID, GroupStore]
+class DataStoreYAML(TypedDict):
+    groups: dict[EntityID, GroupStoreYAML]
+    subjects: dict[EntityID, SubjectStore]
+
+
+class DataStoreJSON(TypedDict):
+    groups: dict[EntityID, GroupStoreJSON]
     subjects: dict[EntityID, SubjectStore]
 
 
@@ -174,7 +189,7 @@ class SerialAuthority(_Authority):
             )
 
     def dump_JSON(self) -> str:
-        return json.dumps(self._write_data_store())
+        return json.dumps(self._write_data_store_json())
 
     def dump_YAML(self) -> str:
         # TODO: try/except
@@ -185,11 +200,11 @@ class SerialAuthority(_Authority):
                 "Dumping to YAML requires the installation of the optional dependency PyYAML."
                 "To install PyYAML, use your preferred python package manager."
             )
-        return yaml.safe_dump(self._write_data_store())
+        return yaml.safe_dump(self._write_data_store_yaml())
 
     def load_JSON(self, *, serial_data: str) -> None:
         data = json.loads(serial_data)
-        self._load_data_store(data=data)
+        self._load_data_store_json(data=data)
 
     def load_YAML(self, *, serial_data: str) -> None:
         # TODO: try/except
@@ -202,14 +217,17 @@ class SerialAuthority(_Authority):
             )
 
         data = yaml.safe_load(serial_data)
-        self._load_data_store(data=data)
+        self._load_data_store_yaml(data=data)
 
-    def _write_data_store(self) -> DataStore:
+    def _write_data_store_json(self) -> DataStoreJSON:
+        ...
+
+    def _write_data_store_yaml(self) -> DataStoreYAML:
         """Save the current state to string formatted as JSON."""
-        groups: dict[EntityID, GroupStore] = {}
+        groups: dict[EntityID, GroupStoreYAML] = {}
 
         for gid, group in self._groups.items():
-            groups[gid] = GroupStore(
+            groups[gid] = GroupStoreYAML(
                 member_groups=list(group.child_ids),
                 member_subjects=list(group.sids),
                 permission_nodes=self._generate_permission_node_list(group),
@@ -222,14 +240,80 @@ class SerialAuthority(_Authority):
                 permission_nodes=self._generate_permission_node_list(subject),
             )
 
-        data = DataStore(
+        data = DataStoreYAML(
             groups=groups,
             subjects=subjects,
         )
         return data
 
-    def _load_data_store(self, *, data: DataStore) -> None:
+    def _load_data_store_json(self, *, data: DataStoreJSON) -> None:
         """Load state from DataStore dictionary."""
+
+        # populate subjects
+        for serial_sid, sdefs in _dict_get_or_default(data, "subjects", {}).items():
+            sid = entity_id_deserializer(serial_sid)
+            sdefs = {} if sdefs is None else sdefs
+            # TODO sid sanity check
+            subject = Subject(id=sid)
+            self._subjects[sid] = subject
+
+            # add permissions to a subject
+            for node_str in _dict_get_or_default(sdefs, "permission_nodes", {}):
+                # "chat.room.<Alice>" => payload = Alice
+
+                permission, payload = self._deserialize_permission_node(node_str=node_str)
+                # either permission leaf with or without payload
+                # or permission parent without payload
+
+                permission_map = subject.permission_map
+                if payload:
+                    payload_set = permission_map.get(permission, set())
+                    if not payload_set:
+                        permission_map[permission] = payload_set
+                    payload_set.add(payload)
+                else:
+                    permission_map[permission] = set()
+
+        # populate groups
+        for serial_gid, gdefs in _dict_get_or_default(data, "groups", {}).items():
+            gid = entity_id_deserializer(serial_gid)
+            gdefs = {} if gdefs is None else gdefs
+            # TODO giud sanity check
+            group = Group(id=gid)
+            self._groups[gid] = group
+
+            # add permissions to a group
+            for node_str in _dict_get_or_default(gdefs, "permission_nodes", []):
+                permission, payload = self._deserialize_permission_node(node_str=node_str)
+                permission_map = group.permission_map
+                if payload:
+                    payload_set = permission_map.get(permission, set())
+                    if not payload_set:
+                        permission_map[permission] = payload_set
+                    payload_set.add(payload)
+                else:
+                    permission_map[permission] = set()
+
+            # add group ids to subjects of a group and vice versa
+            for serial_sid in _dict_get_or_default(gdefs, "member_subjects", []):
+                # TODO sanity checks
+                sid = entity_id_deserializer(serial_sid)
+                group.sids.add(sid)
+                self._subjects[sid].gids.add(gid)
+
+        # sub group loop
+        for serial_gid, gdefs in _dict_get_or_default(data, "groups", {}).items():
+            gid = entity_id_deserializer(serial_gid)
+            gdefs = {} if gdefs is None else gdefs
+            group = self._groups[gid]
+            for serial_member_gid in _dict_get_or_default(gdefs, "member_groups", []):
+                member_gid = entity_id_deserializer(serial_member_gid)
+                if member_gid not in self._groups:
+                    raise ParsingError(f"Member group `{member_gid}` was never defined!")
+                self.group_add_member_group(gid=gid, member_gid=member_gid)
+
+    def _load_data_store_yaml(self, *, data: DataStoreYAML) -> None:
+        """Load state from DataStoreYAML dictionary."""
 
         # populate subjects
         for sid, sdefs in _dict_get_or_default(data, "subjects", {}).items():
@@ -590,8 +674,6 @@ class SerialAuthority(_Authority):
 ####################################################################################################
 ### Util
 ####################################################################################################
-
-T = TypeVar("T")
 
 
 def _dict_get_or_default(d: dict[str, T], key: str, default: T) -> T:
