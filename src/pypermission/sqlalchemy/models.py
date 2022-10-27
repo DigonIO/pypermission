@@ -11,7 +11,7 @@ from sqlalchemy.orm import declarative_base, relationship
 
 DeclarativeMeta: type = declarative_base()
 
-TABLE_PREFIX = "PyPermission_"
+PREFIX = "pp_"
 # The table prefix allows to distinguish between your own tables and PyPermission tables
 # if they are used in the same database.
 
@@ -65,7 +65,7 @@ class PermissionPayloadMixin(TimeStampMixin):
 
 
 class SubjectEntry(DeclarativeMeta, PermissionableEntityMixin):
-    __tablename__ = TABLE_PREFIX + "subject_table"
+    __tablename__ = PREFIX + "subject_table"
     __table_args__ = {"extend_existing": EXTEND_EXISTING}
 
     permission_entries = relationship("SubjectPermissionEntry", cascade="all,delete")
@@ -80,7 +80,7 @@ class SubjectEntry(DeclarativeMeta, PermissionableEntityMixin):
 
 
 class GroupEntry(DeclarativeMeta, PermissionableEntityMixin):
-    __tablename__ = TABLE_PREFIX + "group_table"
+    __tablename__ = PREFIX + "group_table"
     __table_args__ = {"extend_existing": EXTEND_EXISTING}
 
     permission_entries = relationship("GroupPermissionEntry", cascade="all,delete")
@@ -123,29 +123,29 @@ class GroupEntry(DeclarativeMeta, PermissionableEntityMixin):
 
 
 class SubjectPermissionEntry(DeclarativeMeta, PermissionPayloadMixin):
-    __tablename__ = TABLE_PREFIX + "subject_permission_table"
+    __tablename__ = PREFIX + "subject_permission_table"
     __table_args__ = {"extend_existing": EXTEND_EXISTING}
     entity_db_id = Column(
-        Integer, ForeignKey(TABLE_PREFIX + "subject_table.entity_db_id"), primary_key=True
+        Integer, ForeignKey(PREFIX + "subject_table.entity_db_id"), primary_key=True
     )
 
 
 class GroupPermissionEntry(DeclarativeMeta, PermissionPayloadMixin):
-    __tablename__ = TABLE_PREFIX + "group_permission_table"
+    __tablename__ = PREFIX + "group_permission_table"
     __table_args__ = {"extend_existing": EXTEND_EXISTING}
     entity_db_id = Column(
-        Integer, ForeignKey(TABLE_PREFIX + "group_table.entity_db_id"), primary_key=True
+        Integer, ForeignKey(PREFIX + "group_table.entity_db_id"), primary_key=True
     )
 
 
 class MembershipEntry(DeclarativeMeta, TimeStampMixin):
-    __tablename__ = TABLE_PREFIX + "membership_table"
+    __tablename__ = PREFIX + "membership_table"
     __table_args__ = {"extend_existing": EXTEND_EXISTING}
     subject_db_id = Column(
-        Integer, ForeignKey(TABLE_PREFIX + "subject_table.entity_db_id"), primary_key=True
+        Integer, ForeignKey(PREFIX + "subject_table.entity_db_id"), primary_key=True
     )
     group_db_id = Column(
-        Integer, ForeignKey(TABLE_PREFIX + "group_table.entity_db_id"), primary_key=True
+        Integer, ForeignKey(PREFIX + "group_table.entity_db_id"), primary_key=True
     )
 
     subject_entry = relationship("SubjectEntry", back_populates="_membership_entries")
@@ -153,14 +153,14 @@ class MembershipEntry(DeclarativeMeta, TimeStampMixin):
 
 
 class RelationshipEntry(DeclarativeMeta, TimeStampMixin):
-    __tablename__ = TABLE_PREFIX + "relationship_table"
+    __tablename__ = PREFIX + "relationship_table"
     __table_args__ = {"extend_existing": EXTEND_EXISTING}
 
     parent_db_id = Column(
-        Integer, ForeignKey(TABLE_PREFIX + "group_table.entity_db_id"), primary_key=True
+        Integer, ForeignKey(PREFIX + "group_table.entity_db_id"), primary_key=True
     )
     child_db_id = Column(
-        Integer, ForeignKey(TABLE_PREFIX + "group_table.entity_db_id"), primary_key=True
+        Integer, ForeignKey(PREFIX + "group_table.entity_db_id"), primary_key=True
     )
 
     parent_entry = relationship(
