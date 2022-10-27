@@ -17,6 +17,7 @@ from pypermission.error import (
     UnknownPermissionNodeError,
     UnusedPayloadError,
 )
+from pypermission.error import EntityIDError
 
 
 # NOTE in 3.11 there will be a StrEnum class, that enforces the enum values type as str
@@ -99,36 +100,6 @@ PermissionNodeMap = dict[PermissionNode, set[str]]
 EntityID = int | str
 
 
-def entity_id_serializer(eid: EntityID, max_lenght: int | None = None) -> str:
-    if isinstance(eid, int):
-        serial_type = "int"
-        serial_eid = str(eid)
-    elif isinstance(eid, str):
-        serial_type = "str"
-        serial_eid = eid
-    else:
-        raise ValueError  # TODO
-
-    if max_lenght and (len(serial_eid) > max_lenght):
-        raise ValueError  # TODO
-
-    return f"{serial_eid}:{serial_type}"
-
-
-def entity_id_deserializer(serial_eid: str, max_lenght: int | None = None) -> EntityID:
-    if max_lenght and (len(serial_eid) > max_lenght):
-        raise ValueError  # TODO
-
-    serial_type = serial_eid[-3:]
-    serial_eid = serial_eid[:-4]
-
-    if serial_type == "int":
-        return int(serial_eid)
-    elif serial_type == "str":
-        return serial_eid
-    else:
-        raise ValueError  # TODO
-
 class CustomPermission(Permission):
     """Internal permission class for custom permission nodes. Have to be registered externally."""
 
@@ -194,6 +165,10 @@ class Authority(ABC):
         A subject or a group with the root permission has access to all permissions.
         """
         return RootPermissionNode.ROOT_
+
+    ################################################################################################
+    ### Private
+    ################################################################################################
 
     @staticmethod
     def _serialize_permission_node(permission: Permission, payload: str | None) -> str:
@@ -281,6 +256,11 @@ class Authority(ABC):
             raise UnknownPermissionNodeError
 
 
+####################################################################################################
+### Util
+####################################################################################################
+
+
 def validate_payload_status(*, permission: Permission, payload: str | None):
     """Check the permission payload combinatorics."""
     if permission.has_payload and payload is None:
@@ -290,3 +270,41 @@ def validate_payload_status(*, permission: Permission, payload: str | None):
         raise UnusedPayloadError
 
     # TODO raise if not str
+
+
+def entity_id_serializer(eid: EntityID, max_lenght: int | None = None) -> str:
+    assertEntityIDType(eid=eid)
+
+    if isinstance(eid, int):
+        serial_type = "int"
+        serial_eid = str(eid)
+    elif isinstance(eid, str):
+        serial_type = "str"
+        serial_eid = eid
+
+    if max_lenght and (len(serial_eid) > max_lenght):
+        raise ValueError  # TODO
+
+    return f"{serial_eid}:{serial_type}"
+
+
+def entity_id_deserializer(serial_eid: str, max_lenght: int | None = None) -> EntityID:
+    if max_lenght and (len(serial_eid) > max_lenght):
+        raise ValueError  # TODO
+
+    serial_type = serial_eid[-3:]
+    serial_eid = serial_eid[:-4]
+
+    if serial_type == "int":
+        return int(serial_eid)
+    elif serial_type == "str":
+        return serial_eid
+    else:
+        raise ValueError  # TODO
+
+
+def assertEntityIDType(eid: EntityID) -> None:
+    if not isinstance(eid, EntityID):
+        raise EntityIDError(
+            f"Subject and group IDs have to be of type int or string! Got type `{type(eid)}` for `{eid}`."
+        )

@@ -10,19 +10,6 @@ from pypermission.serial import SerialAuthority
 from ..helpers import TownyPermissionNode as TPN
 from ..helpers import assert_loaded_authority
 
-EGG = "egg"
-SPAM = "spam"
-HAM = "ham"
-
-ORANGE = "orange"
-APPLE = "apple"
-PEAR = "pear"
-BANANA = "banana"
-
-FOOD = "food"
-ANIMAL_BASED = "animal_based"
-PLANT_BASED = "plant_based"
-
 path = pathlib.Path(__file__).parent.absolute()
 
 

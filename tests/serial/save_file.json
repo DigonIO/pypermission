@@ -1,19 +1,19 @@
 {
     "groups": {
-        "food": {
+        "str:food": {
             "member_groups": [
-                "animal_based",
-                "plant_based"
+                "str:animal_based",
+                "str:plant_based"
             ],
             "permission_nodes": [
                 "towny.chat.global"
             ]
         },
-        "animal_based": {
+        "str:animal_based": {
             "member_subjects": [
-                "egg",
-                "spam",
-                "ham"
+                "str:egg",
+                "str:spam",
+                "str:ham"
             ],
             "permission_nodes": [
                 "towny.chat.town",
@@ -21,12 +21,12 @@
                 "towny.wild.build.<gold>"
             ]
         },
-        "plant_based": {
+        "str:plant_based": {
             "member_subjects": [
-                "orange",
-                "apple",
-                "pear",
-                "banana"
+                "str:orange",
+                "str:apple",
+                "str:pear",
+                "str:banana"
             ],
             "permission_nodes": [
                 "towny.chat.nation",
@@ -36,16 +36,16 @@
         }
     },
     "subjects": {
-        "egg": {},
-        "spam": {},
-        "ham": {
+        "str:egg": {},
+        "str:spam": {},
+        "str:ham": {
             "permission_nodes": [
                 "towny.wild.*"
             ]
         },
-        "orange": {},
-        "apple": {},
-        "pear": {},
-        "banana": {}
+        "str:orange": {},
+        "str:apple": {},
+        "str:pear": {},
+        "str:banana": {}
     }
 }
