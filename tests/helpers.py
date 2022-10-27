@@ -15,6 +15,14 @@ FOOD = "food"
 ANIMAL_BASED = "animal_based"
 PLANT_BASED = "plant_based"
 
+ID_ALL_STR = "all"
+ID_100_STR = "100"
+ID_100_INT = 100
+ID_1_STR = "1"
+ID_1_INT = 1
+ID_TWO_STR = "two"
+ID_2_INT = 2
+
 
 class TownyPermissionNode(PermissionNode):
     # Permission nodes for testing inspired be the towny permission nodes

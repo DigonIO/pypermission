@@ -38,7 +38,7 @@ def test_write_file_yaml(serial_authority):
         content = handle.read()
         save_data = yaml.safe_load(content)
 
-    assert DeepDiff(save_data, SAVE_DATA, ignore_order=True) == {}
+    assert DeepDiff(save_data, SAVE_DATA_YAML, ignore_order=True) == {}
 
 
 def test_write_file_json(serial_authority):
@@ -50,11 +50,11 @@ def test_write_file_json(serial_authority):
         content = handle.read()
         save_data = json.loads(content)
 
-    assert DeepDiff(save_data, SAVE_DATA, ignore_order=True) == {}
+    assert DeepDiff(save_data, SAVE_DATA_JSON, ignore_order=True) == {}
 
 
 # Fulfil the properties of the fixture `serial_authority`
-SAVE_DATA = {
+SAVE_DATA_YAML = {
     "groups": {
         "animal_based": {
             "member_groups": [],
@@ -88,5 +88,42 @@ SAVE_DATA = {
         "orange": {"permission_nodes": []},
         "pear": {"permission_nodes": []},
         "spam": {"permission_nodes": []},
+    },
+}
+
+SAVE_DATA_JSON = {
+    "groups": {
+        "str:animal_based": {
+            "member_groups": [],
+            "member_subjects": ["str:spam", "str:ham", "str:egg"],
+            "permission_nodes": [
+                "towny.chat.town",
+                "towny.wild.build.<dirt>",
+                "towny.wild.build.<gold>",
+            ],
+        },
+        "str:food": {
+            "member_groups": ["str:plant_based", "str:animal_based"],
+            "member_subjects": [],
+            "permission_nodes": ["towny.chat.global"],
+        },
+        "str:plant_based": {
+            "member_groups": [],
+            "member_subjects": ["str:apple", "str:orange", "str:banana", "str:pear"],
+            "permission_nodes": [
+                "towny.chat.nation",
+                "towny.wild.destroy.<dirt>",
+                "towny.wild.destroy.<gold>",
+            ],
+        },
+    },
+    "subjects": {
+        "str:apple": {"permission_nodes": []},
+        "str:banana": {"permission_nodes": []},
+        "str:egg": {"permission_nodes": []},
+        "str:ham": {"permission_nodes": ["towny.wild.*"]},
+        "str:orange": {"permission_nodes": []},
+        "str:pear": {"permission_nodes": []},
+        "str:spam": {"permission_nodes": []},
     },
 }

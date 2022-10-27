@@ -16,6 +16,13 @@ from .helpers import (
     PLANT_BASED,
     SPAM,
     TPN,
+    ID_ALL_STR,
+    ID_100_STR,
+    ID_100_INT,
+    ID_1_STR,
+    ID_1_INT,
+    ID_TWO_STR,
+    ID_2_INT,
 )
 
 URL_SQLITE = "sqlite:///pp_test.db"
@@ -87,3 +94,30 @@ def init_auth(auth: SerialAuthority | SQLAlchemyAuthority):
     auth.group_add_permission(gid=PLANT_BASED, node=TPN.TOWNY_WILD_DESTROY_X, payload="gold")
 
     auth.subject_add_permission(sid=HAM, node=TPN.TOWNY_WILD_)
+
+
+@pytest.fixture
+def serial_authority_typed() -> SerialAuthority:
+    auth = SerialAuthority()
+
+    for group in [ID_ALL_STR, ID_100_INT, ID_100_STR]:
+        auth.add_group(gid=group)
+
+    for subject in [
+        ID_1_STR,
+        ID_1_INT,
+        ID_TWO_STR,
+        ID_2_INT,
+    ]:
+        auth.add_subject(sid=subject)
+
+    auth.group_add_member_group(gid=ID_ALL_STR, member_gid=ID_100_STR)
+    auth.group_add_member_group(gid=ID_ALL_STR, member_gid=ID_100_INT)
+
+    auth.group_add_member_subject(gid=ID_100_INT, member_sid=ID_1_INT)
+    auth.group_add_member_subject(gid=ID_100_INT, member_sid=ID_1_STR)
+
+    auth.group_add_member_subject(gid=ID_100_STR, member_sid=ID_2_INT)
+    auth.group_add_member_subject(gid=ID_100_STR, member_sid=ID_TWO_STR)
+
+    return auth

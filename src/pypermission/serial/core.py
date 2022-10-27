@@ -220,7 +220,30 @@ class SerialAuthority(_Authority):
         self._load_data_store_yaml(data=data)
 
     def _write_data_store_json(self) -> DataStoreJSON:
-        ...
+        """Save the current state to string formatted as YAML."""
+        groups: dict[EntityID, GroupStoreJSON] = {}
+
+        for gid, group in self._groups.items():
+            serial_gid = entity_id_serializer(gid)
+            groups[serial_gid] = GroupStoreJSON(
+                member_groups=[entity_id_serializer(eid) for eid in group.child_ids],
+                member_subjects=[entity_id_serializer(eid) for eid in group.sids],
+                permission_nodes=self._generate_permission_node_list(group),
+            )
+
+        subjects: dict[EntityID, SubjectStore] = {}
+
+        for sid, subject in self._subjects.items():
+            serial_sid = entity_id_serializer(sid)
+            subjects[serial_sid] = SubjectStore(
+                permission_nodes=self._generate_permission_node_list(subject),
+            )
+
+        data = DataStoreJSON(
+            groups=groups,
+            subjects=subjects,
+        )
+        return data
 
     def _write_data_store_yaml(self) -> DataStoreYAML:
         """Save the current state to string formatted as JSON."""

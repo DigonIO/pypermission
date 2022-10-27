@@ -7,13 +7,15 @@ from deepdiff import DeepDiff
 
 from pypermission.serial import SerialAuthority
 
-ID_ALL_STR = "all"
-ID_100_STR = "100"
-ID_100_INT = 100
-ID_1_STR = "1"
-ID_1_INT = 1
-ID_TWO_STR = "two"
-ID_2_INT = 2
+from ..helpers import (
+    ID_ALL_STR,
+    ID_100_STR,
+    ID_100_INT,
+    ID_1_STR,
+    ID_1_INT,
+    ID_TWO_STR,
+    ID_2_INT,
+)
 
 PATH = pathlib.Path(__file__).parent.absolute()
 
@@ -49,3 +51,98 @@ def assert_loaded_authority(auth: SerialAuthority):
 
     assert auth.group_get_member_subjects(gid=ID_100_INT) == {ID_1_INT, ID_1_STR}
     assert auth.group_get_member_subjects(gid=ID_100_STR) == {ID_2_INT, ID_TWO_STR}
+
+
+def test_write_file_yaml_typed(serial_authority_typed):
+    auth: SerialAuthority = serial_authority_typed
+
+    with tempfile.NamedTemporaryFile(suffix=".yaml") as handle:
+        auth.save_file(path=handle.name)
+
+        content = handle.read()
+        save_data = yaml.safe_load(content)
+
+    assert DeepDiff(save_data, SAVE_DATA_YAML, ignore_order=True) == {}
+
+
+def test_write_file_json_typed(serial_authority_typed):
+    auth: SerialAuthority = serial_authority_typed
+
+    with tempfile.NamedTemporaryFile(suffix=".json") as handle:
+        auth.save_file(path=handle.name)
+
+        content = handle.read()
+        save_data = json.loads(content)
+
+    assert DeepDiff(save_data, SAVE_DATA_JSON, ignore_order=True) == {}
+
+
+SAVE_DATA_YAML = {
+    "groups": {
+        "all": {
+            "member_groups": [
+                100,
+                "100",
+            ],
+            "member_subjects": [],
+            "permission_nodes": [],
+        },
+        100: {
+            "member_groups": [],
+            "member_subjects": [
+                1,
+                "1",
+            ],
+            "permission_nodes": [],
+        },
+        "100": {
+            "member_groups": [],
+            "member_subjects": [
+                2,
+                "two",
+            ],
+            "permission_nodes": [],
+        },
+    },
+    "subjects": {
+        1: {"permission_nodes": []},
+        "1": {"permission_nodes": []},
+        2: {"permission_nodes": []},
+        "two": {"permission_nodes": []},
+    },
+}
+
+SAVE_DATA_JSON = {
+    "groups": {
+        "str:all": {
+            "member_groups": [
+                "int:100",
+                "str:100",
+            ],
+            "member_subjects": [],
+            "permission_nodes": [],
+        },
+        "int:100": {
+            "member_groups": [],
+            "member_subjects": [
+                "int:1",
+                "str:1",
+            ],
+            "permission_nodes": [],
+        },
+        "str:100": {
+            "member_groups": [],
+            "member_subjects": [
+                "int:2",
+                "str:two",
+            ],
+            "permission_nodes": [],
+        },
+    },
+    "subjects": {
+        "int:1": {"permission_nodes": []},
+        "str:1": {"permission_nodes": []},
+        "int:2": {"permission_nodes": []},
+        "str:two": {"permission_nodes": []},
+    },
+}
