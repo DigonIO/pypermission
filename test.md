@@ -21,19 +21,19 @@ groups:
     member_groups:
       - child_group
     permission_nodes:
-      - towny.chat.*
-      - towny.wild.*
+      towny.chat.*: Null
+      towny.wild.*: Null
   child_group:
     member_subjects:
       - user
     permission_nodes:
-      - towny.chat.town
-      - towny.wild.build.<iron>
-      - towny.wild.build.iron
+      towny.chat.town: Null
+      towny.wild.build.<x>: ["iron"]
+      towny.wild.build.iron: Null
 subjects:
   user:
     permission_nodes:
-      - towny.build.*
+      towny.build.*: Null
 permission_nodes:
   towny.chat.*:
     towny.chat.town: Null
