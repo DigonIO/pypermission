@@ -23,6 +23,10 @@ from .helpers import (
     ID_1_INT,
     ID_TWO_STR,
     ID_2_INT,
+    CHILD_GROUP,
+    PARENT_GROUP,
+    USER,
+    IRON,
 )
 
 URL_SQLITE = "sqlite:///pp_test.db"
@@ -46,7 +50,7 @@ def db_engine(request):
 
 
 @pytest.fixture
-def sqlalchemy_authority(db_engine):
+def sqlalchemy_authority(db_engine) -> SQLAlchemyAuthority:
     auth = SQLAlchemyAuthority(nodes=TPN, engine=db_engine)
     init_auth(auth)
     return auth
@@ -93,7 +97,7 @@ def init_auth(auth: SerialAuthority | SQLAlchemyAuthority):
     auth.group_add_node(gid=PLANT_BASED, node=TPN.TOWNY_WILD_DESTROY_X, payload="dirt")
     auth.group_add_node(gid=PLANT_BASED, node=TPN.TOWNY_WILD_DESTROY_X, payload="gold")
 
-    auth.subject_add_node(sid=HAM, node=TPN.TOWNY_WILD_)
+    auth.subject_add_node(sid=HAM, node=TPN.TOWNY_WILD_)  # < diese wars
 
 
 @pytest.fixture
@@ -120,4 +124,37 @@ def serial_authority_typed() -> SerialAuthority:
     auth.group_add_member_subject(gid=ID_100_STR, member_sid=ID_2_INT)
     auth.group_add_member_subject(gid=ID_100_STR, member_sid=ID_TWO_STR)
 
+    return auth
+
+
+def init_auth_for_get_permissions(auth: SerialAuthority | SQLAlchemyAuthority):
+    for group in [PARENT_GROUP, CHILD_GROUP]:
+        auth.add_group(gid=group)
+    auth.add_subject(sid=USER)
+
+    auth.group_add_member_group(gid=PARENT_GROUP, member_gid=CHILD_GROUP)
+
+    auth.group_add_member_subject(gid=CHILD_GROUP, member_sid=USER)
+
+    auth.group_add_node(gid=PARENT_GROUP, node=TPN.TOWNY_CHAT_)
+    auth.group_add_node(gid=PARENT_GROUP, node=TPN.TOWNY_WILD_)
+
+    auth.group_add_node(gid=CHILD_GROUP, node=TPN.TOWNY_CHAT_TOWN)
+    auth.group_add_node(gid=CHILD_GROUP, node=TPN.TOWNY_WILD_BUILD_X, payload=IRON)
+    auth.group_add_node(gid=CHILD_GROUP, node=TPN.TOWNY_WILD_BUILD_IRON)
+
+    auth.subject_add_node(sid=USER, node=TPN.TOWNY_WILD_BUILD_)
+
+
+@pytest.fixture
+def serial_authority_get_permissions() -> SerialAuthority:
+    auth = SerialAuthority(nodes=TPN)
+    init_auth_for_get_permissions(auth)
+    return auth
+
+
+@pytest.fixture
+def sql_authority_get_permissions(db_engine) -> SQLAlchemyAuthority:
+    auth = SQLAlchemyAuthority(nodes=TPN, engine=db_engine)
+    init_auth_for_get_permissions(auth)
     return auth
