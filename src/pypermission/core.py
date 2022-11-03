@@ -107,13 +107,13 @@ class CustomPermission(Permission):
     def __init__(
         self, *, node: PermissionNode, parent: Permission, has_payload: bool, is_leaf: bool
     ) -> None:
-        self._node = node
-        self._parent = parent
+        self._node: PermissionNode = node
+        self._parent: Permission = parent
         self._ancestors = tuple()
         self._children = set()
         self._sub_graph = {}
         self._has_payload = has_payload
-        self._is_leaf = is_leaf
+        self._is_leaf: bool = is_leaf
 
     def _update_ancestors(self) -> None:
         self._ancestors = (*self._parent.ancestors, self._parent)

@@ -1,4 +1,4 @@
-from typing import Type
+from typing import Type, cast
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
@@ -95,11 +95,11 @@ def create_parent_child_relationship(*, serial_pid: str, serial_cid: str, db: Se
         child_entry=child_entry,
     )
 
-    parent_entry = RelationshipEntry(
+    rs_entry = RelationshipEntry(
         parent_db_id=parent_entry.entity_db_id, child_db_id=child_entry.entity_db_id
     )
 
-    db.add(parent_entry)
+    db.add(rs_entry)
     try:
         db.commit()
     except IntegrityError as err:
@@ -119,14 +119,15 @@ def read_subject(*, serial_sid: str, db: Session) -> SubjectEntry:
         )
     except ValueError:
         raise EntityIDError(f"Unknown subject ID `{serial_sid}`!")
-    return subject_entry
+    return cast(SubjectEntry, subject_entry)
 
 
 def read_group(*, serial_gid: str, db: Session) -> GroupEntry:
-    group_entries = db.query(GroupEntry).filter(GroupEntry.serial_eid == serial_gid).all()
-    if group_entries:
-        return group_entries[0]
-    raise EntityIDError(f"Unknown group ID `{serial_gid}`!")
+    try:
+        group_entry, *_ = db.query(GroupEntry).filter(GroupEntry.serial_eid == serial_gid).all()
+    except ValueError:
+        raise EntityIDError(f"Unknown group ID `{serial_gid}`!")
+    return cast(GroupEntry, group_entry)
 
 
 ####################################################################################################
@@ -149,7 +150,7 @@ def delete_group(*, serial_gid: str, db: Session) -> None:
 def delete_subject_permission(
     *, serial_sid: str, permission: Permission, payload: str | None, db: Session
 ) -> None:
-    subject_entry: SubjectPermissionEntry = read_subject(serial_sid=serial_sid, db=db)
+    subject_entry: SubjectEntry = read_subject(serial_sid=serial_sid, db=db)
     _delete_permission_entry(
         table=SubjectPermissionEntry,
         entity_db_id=subject_entry.entity_db_id,
