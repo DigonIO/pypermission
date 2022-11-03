@@ -156,18 +156,20 @@ def delete_subject_permission(
         entity_db_id=subject_entry.entity_db_id,
         permission=permission,
         payload=payload,
+        db=db,
     )
 
 
 def delete_group_permission(
     *, serial_gid: str, permission: Permission, payload: str | None, db: Session
 ) -> None:
-    group_entry: GroupPermissionEntry = read_subject(serial_gid=serial_gid, db=db)
+    group_entry: GroupEntry = read_group(serial_gid=serial_gid, db=db)
     _delete_permission_entry(
         table=GroupPermissionEntry,
         entity_db_id=group_entry.entity_db_id,
         permission=permission,
         payload=payload,
+        db=db,
     )
 
 
@@ -192,10 +194,6 @@ def delete_membership(*, serial_sid: str, serial_gid: str, db: Session) -> None:
 def delete_parent_child_relationship(*, serial_pid: str, serial_cid: str, db: Session) -> None:
     parent_entry = read_group(serial_gid=serial_pid, db=db)
     child_entry = read_group(serial_gid=serial_cid, db=db)
-
-    parent_entry = RelationshipEntry(
-        parent_db_id=parent_entry.entity_db_id, child_db_id=child_entry.entity_db_id
-    )
 
     entries = (
         db.query(RelationshipEntry)

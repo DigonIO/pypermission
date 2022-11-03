@@ -71,7 +71,7 @@ class SubjectEntry(DeclarativeMeta, PermissionableEntityMixin):
     __tablename__ = PREFIX + "subject_table"
     __table_args__ = {"extend_existing": EXTEND_EXISTING}
 
-    permission_entries: Mapped[SubjectPermissionEntry] = relationship(
+    permission_entries: Mapped[list[SubjectPermissionEntry]] = relationship(
         "SubjectPermissionEntry", cascade="all,delete"
     )
 
@@ -88,7 +88,7 @@ class GroupEntry(DeclarativeMeta, PermissionableEntityMixin):
     __tablename__ = PREFIX + "group_table"
     __table_args__ = {"extend_existing": EXTEND_EXISTING}
 
-    permission_entries: Mapped[GroupPermissionEntry] = relationship(
+    permission_entries: Mapped[list[GroupPermissionEntry]] = relationship(
         "GroupPermissionEntry", cascade="all,delete"
     )
 

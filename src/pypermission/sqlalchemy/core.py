@@ -44,9 +44,6 @@ from pypermission.sqlalchemy.service import (
 
 
 class SQLAlchemyAuthority(Authority):
-
-    _session_maker: sessionmaker
-
     def __init__(self, *, nodes: type[PermissionNode] | None = None, engine: Engine) -> None:
         super().__init__(nodes=nodes)
 
@@ -154,7 +151,11 @@ class SQLAlchemyAuthority(Authority):
 
         subject_entries: list[PermissionableEntityMixin] = db.query(SubjectEntry).all()
 
-        result = set(entity_id_deserializer(entry.serial_eid) for entry in subject_entries)
+        result = set(
+            entity_id_deserializer(entry.serial_eid)
+            for entry in subject_entries
+            if entry.serial_eid
+        )
 
         _close_db_session(db, session)
         return result
@@ -164,7 +165,9 @@ class SQLAlchemyAuthority(Authority):
         db = self._setup_db_session(session)
 
         group_entries: list[PermissionableEntityMixin] = db.query(GroupEntry).all()
-        result = set(entity_id_deserializer(entry.serial_eid) for entry in group_entries)
+        result = set(
+            entity_id_deserializer(entry.serial_eid) for entry in group_entries if entry.serial_eid
+        )
 
         _close_db_session(db, session)
         return result
@@ -176,7 +179,9 @@ class SQLAlchemyAuthority(Authority):
 
         subject_entry = read_subject(serial_sid=serial_sid, db=db)
         result = set(
-            entity_id_deserializer(entry.serial_eid) for entry in subject_entry.group_entries
+            entity_id_deserializer(entry.serial_eid)
+            for entry in subject_entry.group_entries
+            if entry.serial_eid
         )
 
         _close_db_session(db, session)
@@ -191,7 +196,9 @@ class SQLAlchemyAuthority(Authority):
 
         group_entry = read_group(serial_gid=serial_gid, db=db)
         result = set(
-            entity_id_deserializer(entry.serial_eid) for entry in group_entry.subject_entries
+            entity_id_deserializer(entry.serial_eid)
+            for entry in group_entry.subject_entries
+            if entry.serial_eid
         )
 
         _close_db_session(db, session)
@@ -205,8 +212,10 @@ class SQLAlchemyAuthority(Authority):
         db = self._setup_db_session(session)
 
         group_entry = read_group(serial_gid=serial_gid, db=db)
-        child_entries: list[GroupEntry] = group_entry.child_entries
-        result = set(entity_id_deserializer(entry.serial_eid) for entry in child_entries)
+        child_entries = group_entry.child_entries
+        result = set(
+            entity_id_deserializer(entry.serial_eid) for entry in child_entries if entry.serial_eid
+        )
 
         _close_db_session(db, session)
         return result
@@ -219,8 +228,10 @@ class SQLAlchemyAuthority(Authority):
         db = self._setup_db_session(session)
 
         group_entry = read_group(serial_gid=serial_gid, db=db)
-        parent_entries: list[GroupEntry] = group_entry.parent_entries
-        result = set(entity_id_deserializer(entry.serial_eid) for entry in parent_entries)
+        parent_entries = group_entry.parent_entries
+        result = set(
+            entity_id_deserializer(entry.serial_eid) for entry in parent_entries if entry.serial_eid
+        )
 
         _close_db_session(db, session)
         return result
@@ -241,12 +252,12 @@ class SQLAlchemyAuthority(Authority):
 
         subject_entry = read_subject(serial_sid=serial_sid, db=db)
 
-        perm_entries: list[SubjectPermissionEntry] = subject_entry.permission_entries
+        perm_entries = subject_entry.permission_entries
         if _has_permission(perm_entries=perm_entries, permission=permission, payload=payload):
             _close_db_session(db, session)
             return True
 
-        group_entries: list[GroupEntry] = subject_entry.group_entries
+        group_entries = subject_entry.group_entries
         for entry in group_entries:
             if _recursive_group_has_permission(
                 group_entry=entry, permission=permission, payload=payload
@@ -291,7 +302,7 @@ class SQLAlchemyAuthority(Authority):
         db = self._setup_db_session(session)
 
         subject_entry = read_subject(serial_sid=serial_sid, db=db)
-        perm_entries: list[SubjectPermissionEntry] = subject_entry.permission_entries
+        perm_entries = subject_entry.permission_entries
 
         result = self._build_permission_node_map(perm_entries=perm_entries)
 
@@ -309,7 +320,7 @@ class SQLAlchemyAuthority(Authority):
         db = self._setup_db_session(session)
 
         group_entry = read_group(serial_gid=serial_gid, db=db)
-        perm_entries: list[GroupPermissionEntry] = group_entry.permission_entries
+        perm_entries = group_entry.permission_entries
 
         result = self._build_permission_node_map(perm_entries=perm_entries)
 

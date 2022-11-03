@@ -249,10 +249,14 @@ class Authority(ABC):
         self._node_str_permission_map[node_str] = new_perm
         return new_perm
 
-    def _get_permission(self, *, node: PermissionNode) -> Permission:
+    def _get_permission(self, *, node: PermissionNode | str) -> Permission:
         """Just a simple wrapper to avoid some boilerplate code while getting a node."""
+
         try:
-            return self._node_permission_map[node]
+            if isinstance(node, PermissionNode):
+                return self._node_permission_map[node]
+            else:
+                return self._node_str_permission_map[node]
         except KeyError:
             raise UnknownPermissionNodeError
 

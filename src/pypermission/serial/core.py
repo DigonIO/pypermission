@@ -30,30 +30,30 @@ K = TypeVar("K")
 T = TypeVar("T")
 
 
-class GroupStoreYAML(TypedDict):
+class GroupStoreYAML(TypedDict, total=False):
     member_subjects: list[EntityID]
     member_groups: list[EntityID]
     permission_nodes: list[str]
 
 
-class GroupStoreJSON(TypedDict):
+class GroupStoreJSON(TypedDict, total=False):
     member_subjects: list[str]
     member_groups: list[str]
     permission_nodes: list[str]
 
 
-class SubjectStore(TypedDict):
+class SubjectStore(TypedDict, total=False):
     permission_nodes: list[str]
 
 
-class DataStoreYAML(TypedDict):
+class DataStoreYAML(TypedDict, total=False):
     groups: dict[EntityID, GroupStoreYAML]
     subjects: dict[EntityID, SubjectStore]
 
 
-class DataStoreJSON(TypedDict):
-    groups: dict[EntityID, GroupStoreJSON]
-    subjects: dict[EntityID, SubjectStore]
+class DataStoreJSON(TypedDict, total=False):
+    groups: dict[str, GroupStoreJSON]
+    subjects: dict[str, SubjectStore]
 
 
 ####################################################################################################
@@ -191,7 +191,7 @@ class SerialAuthority(_Authority):
             )
 
     def dump_JSON(self) -> str:
-        return json.dumps(self._write_data_store_json())
+        return json.dumps(self._dump_data_store_json())
 
     def dump_YAML(self) -> str:
         # TODO: try/except
@@ -202,7 +202,11 @@ class SerialAuthority(_Authority):
                 "Dumping to YAML requires the installation of the optional dependency PyYAML."
                 "To install PyYAML, use your preferred python package manager."
             )
-        return yaml.safe_dump(self._write_data_store_yaml())
+        yaml_content = yaml.safe_dump(self._dump_data_store_yaml(), encoding=None)
+        if isinstance(yaml_content, str):
+            return yaml_content
+        else:
+            raise TypeError("This should never happen, please report!")
 
     def load_JSON(self, *, serial_data: str) -> None:
         data = json.loads(serial_data)
@@ -221,55 +225,51 @@ class SerialAuthority(_Authority):
         data = yaml.safe_load(serial_data)
         self._load_data_store_yaml(data=data)
 
-    def _write_data_store_json(self) -> DataStoreJSON:
+    def _dump_data_store_json(self) -> DataStoreJSON:
         """Save the current state to string formatted as YAML."""
-        groups: dict[EntityID, GroupStoreJSON] = {}
-
-        for gid, group in self._groups.items():
-            serial_gid = entity_id_serializer(gid)
-            groups[serial_gid] = GroupStoreJSON(
+        groups = {
+            entity_id_serializer(gid): GroupStoreJSON(
                 member_groups=[entity_id_serializer(eid) for eid in group.child_ids],
                 member_subjects=[entity_id_serializer(eid) for eid in group.sids],
                 permission_nodes=self._generate_permission_node_list(group),
             )
+            for gid, group in self._groups.items()
+        }
 
-        subjects: dict[EntityID, SubjectStore] = {}
-
-        for sid, subject in self._subjects.items():
-            serial_sid = entity_id_serializer(sid)
-            subjects[serial_sid] = SubjectStore(
+        subjects = {
+            entity_id_serializer(sid): SubjectStore(
                 permission_nodes=self._generate_permission_node_list(subject),
             )
+            for sid, subject in self._subjects.items()
+        }
 
-        data = DataStoreJSON(
+        return DataStoreJSON(
             groups=groups,
             subjects=subjects,
         )
-        return data
 
-    def _write_data_store_yaml(self) -> DataStoreYAML:
-        """Save the current state to string formatted as JSON."""
-        groups: dict[EntityID, GroupStoreYAML] = {}
-
-        for gid, group in self._groups.items():
-            groups[gid] = GroupStoreYAML(
+    def _dump_data_store_yaml(self) -> DataStoreYAML:
+        """Save the current state to string formatted as YAML."""
+        groups = {
+            gid: GroupStoreYAML(
                 member_groups=list(group.child_ids),
                 member_subjects=list(group.sids),
                 permission_nodes=self._generate_permission_node_list(group),
             )
+            for gid, group in self._groups.items()
+        }
 
-        subjects: dict[EntityID, SubjectStore] = {}
-
-        for sid, subject in self._subjects.items():
-            subjects[sid] = SubjectStore(
+        subjects = {
+            sid: SubjectStore(
                 permission_nodes=self._generate_permission_node_list(subject),
             )
+            for sid, subject in self._subjects.items()
+        }
 
-        data = DataStoreYAML(
+        return DataStoreYAML(
             groups=groups,
             subjects=subjects,
         )
-        return data
 
     def _load_data_store_json(self, *, data: DataStoreJSON) -> None:
         """Load state from DataStore dictionary."""
@@ -277,7 +277,7 @@ class SerialAuthority(_Authority):
         # populate subjects
         for serial_sid, sdefs in (data.get("subjects") or {}).items():
             sid = entity_id_deserializer(serial_sid)
-            sdefs = {} if sdefs is None else sdefs
+            sdefs = SubjectStore() if sdefs is None else sdefs
             # TODO sid sanity check
             subject = Subject(id=sid)
             self._subjects[sid] = subject
