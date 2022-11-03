@@ -9,7 +9,7 @@ from __future__ import annotations
 
 from abc import ABC
 from enum import Enum
-from typing import cast
+from typing import cast, Type
 
 from pypermission.error import (
     MissingPayloadError,
@@ -115,7 +115,7 @@ class CustomPermission(Permission):
         self._has_payload = has_payload
         self._is_leaf = is_leaf
 
-    def _update_ancestors(self):
+    def _update_ancestors(self) -> None:
         self._ancestors = (*self._parent.ancestors, self._parent)
 
 
@@ -196,7 +196,7 @@ class Authority(ABC):
         except KeyError as err:
             raise ParsingError("Unknown permission node!", node_str) from err
 
-    def _register_permission(self, *, node: PermissionNode):
+    def _register_permission(self, *, node: PermissionNode) -> CustomPermission:
         "Register a permission node."
 
         node_str = node.value
@@ -262,7 +262,7 @@ class Authority(ABC):
 ####################################################################################################
 
 
-def validate_payload_status(*, permission: Permission, payload: str | None):
+def validate_payload_status(*, permission: Permission, payload: str | None) -> None:
     """Check the permission payload combinatorics."""
     if permission.has_payload and payload is None:
         raise MissingPayloadError
@@ -305,7 +305,7 @@ def entity_id_deserializer(serial_eid: str, max_lenght: int | None = None) -> En
 
 
 def assertEntityIDType(eid: EntityID) -> None:
-    if not isinstance(eid, EntityID):
+    if not isinstance(eid, int | str):
         raise EntityIDError(
             f"Subject and group IDs have to be of type int or string! Got type `{type(eid)}` for `{eid}`."
         )

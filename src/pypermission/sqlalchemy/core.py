@@ -111,7 +111,7 @@ class SQLAlchemyAuthority(Authority):
         node: PermissionNode,
         payload: str | None = None,
         session: Session | None = None,
-    ):
+    ) -> None:
         """Add a permission to a subject."""
         serial_sid = entity_id_serializer(sid)
         db = self._setup_db_session(session)
@@ -131,7 +131,7 @@ class SQLAlchemyAuthority(Authority):
         node: PermissionNode,
         payload: str | None = None,
         session: Session | None = None,
-    ):
+    ) -> None:
         """Add a permission to a group."""
         serial_gid = entity_id_serializer(gid)
         db = self._setup_db_session(session)
@@ -345,7 +345,7 @@ class SQLAlchemyAuthority(Authority):
         node: PermissionNode,
         payload: str | None = None,
         session: Session | None = None,
-    ):
+    ) -> None:
         """Remove a permission to a subject."""
         serial_sid = entity_id_serializer(sid)
         db = self._setup_db_session(session)
@@ -365,7 +365,7 @@ class SQLAlchemyAuthority(Authority):
         node: PermissionNode,
         payload: str | None = None,
         session: Session | None = None,
-    ):
+    ) -> None:
         """Remove a permission to a group."""
         serial_gid = entity_id_serializer(gid)
         db = self._setup_db_session(session)
@@ -438,17 +438,17 @@ class SQLAlchemyAuthority(Authority):
 
 def entity_id_serializer(
     eid: EntityID,
-):
+) -> str:
     return _entity_id_serializer(eid=eid, max_lenght=ENTITY_ID_MAX_LENGHT)
 
 
 def entity_id_deserializer(
     serial_eid: str,
-):
+) -> EntityID:
     return _entity_id_deserializer(serial_eid=serial_eid, max_lenght=SERIAL_ENTITY_ID_LENGHT)
 
 
-def _close_db_session(db: Session, session: Session | None):
+def _close_db_session(db: Session, session: Session | None) -> None:
     if session is None:
         db.close()
 

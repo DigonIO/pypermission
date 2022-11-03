@@ -1,6 +1,6 @@
 import json
 from pathlib import Path
-from typing import TypedDict, TypeVar, Any, Mapping
+from typing import TypedDict, TypeVar, Any, Mapping, Sequence
 
 from pypermission.core import Authority as _Authority
 from pypermission.core import (
@@ -155,7 +155,7 @@ class SerialAuthority(_Authority):
     ### IO
     ################################################################################################
 
-    def save_file(self, *, path: Path | str):
+    def save_file(self, *, path: Path | str) -> None:
         """Save the current state to file formatted as JSON or YAML."""
         path = Path(path)
         ftype = path.suffix[1:]
@@ -300,7 +300,7 @@ class SerialAuthority(_Authority):
                     permission_map[permission] = set()
 
         # populate groups
-        for serial_gid, gdefs in _map_get_or_default(data, "groups", {}).items():
+        for serial_gid, gdefs in (data.get("groups") or {}).items():
             gid = entity_id_deserializer(serial_gid)
             gdefs = {} if gdefs is None else gdefs
             # TODO giud sanity check
@@ -308,7 +308,7 @@ class SerialAuthority(_Authority):
             self._groups[gid] = group
 
             # add permissions to a group
-            for node_str in _map_get_or_default(gdefs, "permission_nodes", []):
+            for node_str in gdefs.get("permission_nodes") or []:
                 permission, payload = self._deserialize_permission_node(node_str=node_str)
                 permission_map = group.permission_map
                 if payload:
@@ -320,18 +320,18 @@ class SerialAuthority(_Authority):
                     permission_map[permission] = set()
 
             # add group ids to subjects of a group and vice versa
-            for serial_sid in _map_get_or_default(gdefs, "member_subjects", []):
+            for serial_sid in gdefs.get("member_subjects") or []:
                 # TODO sanity checks
                 sid = entity_id_deserializer(serial_sid)
                 group.sids.add(sid)
                 self._subjects[sid].gids.add(gid)
 
         # sub group loop
-        for serial_gid, gdefs in _map_get_or_default(data, "groups", {}).items():
+        for serial_gid, gdefs in (data.get("groups") or {}).items():
             gid = entity_id_deserializer(serial_gid)
             gdefs = {} if gdefs is None else gdefs
             group = self._groups[gid]
-            for serial_member_gid in _map_get_or_default(gdefs, "member_groups", []):
+            for serial_member_gid in gdefs.get("member_groups") or []:
                 member_gid = entity_id_deserializer(serial_member_gid)
                 if member_gid not in self._groups:
                     raise ParsingError(f"Member group `{member_gid}` was never defined!")
@@ -341,14 +341,14 @@ class SerialAuthority(_Authority):
         """Load state from DataStoreYAML dictionary."""
 
         # populate subjects
-        for sid, sdefs in _map_get_or_default(data, "subjects", {}).items():
+        for sid, sdefs in (data.get("subjects") or {}).items():
             sdefs = {} if sdefs is None else sdefs
             # TODO sid sanity check
             subject = Subject(id=sid)
             self._subjects[sid] = subject
 
             # add permissions to a subject
-            for node_str in _map_get_or_default(sdefs, "permission_nodes", {}):
+            for node_str in sdefs.get("permission_nodes") or {}:
                 # "chat.room.<Alice>" => payload = Alice
 
                 permission, payload = self._deserialize_permission_node(node_str=node_str)
@@ -365,14 +365,14 @@ class SerialAuthority(_Authority):
                     permission_map[permission] = set()
 
         # populate groups
-        for gid, gdefs in _map_get_or_default(data, "groups", {}).items():
+        for gid, gdefs in (data.get("groups") or {}).items():
             gdefs = {} if gdefs is None else gdefs
             # TODO giud sanity check
             group = Group(id=gid)
             self._groups[gid] = group
 
             # add permissions to a group
-            for node_str in _map_get_or_default(gdefs, "permission_nodes", []):
+            for node_str in gdefs.get("permission_nodes") or []:
                 permission, payload = self._deserialize_permission_node(node_str=node_str)
                 permission_map = group.permission_map
                 if payload:
@@ -384,16 +384,16 @@ class SerialAuthority(_Authority):
                     permission_map[permission] = set()
 
             # add group ids to subjects of a group and vice versa
-            for sid in _map_get_or_default(gdefs, "member_subjects", []):
+            for sid in gdefs.get("member_subjects") or []:
                 # TODO sanity checks
                 group.sids.add(sid)
                 self._subjects[sid].gids.add(gid)
 
         # sub group loop
-        for gid, gdefs in _map_get_or_default(data, "groups", {}).items():
+        for gid, gdefs in (data.get("groups") or {}).items():
             gdefs = {} if gdefs is None else gdefs
             group = self._groups[gid]
-            for member_gid in _map_get_or_default(gdefs, "member_groups", []):
+            for member_gid in gdefs.get("member_groups") or []:
                 if member_gid not in self._groups:
                     raise ParsingError(f"Member group `{member_gid}` was never defined!")
                 self.group_add_member_group(gid=gid, member_gid=member_gid)
@@ -446,7 +446,9 @@ class SerialAuthority(_Authority):
         group.child_ids.add(member_gid)
         member.parent_ids.add(gid)
 
-    def subject_add_node(self, *, sid: EntityID, node: PermissionNode, payload: str | None = None):
+    def subject_add_node(
+        self, *, sid: EntityID, node: PermissionNode, payload: str | None = None
+    ) -> None:
         """Add a permission to a subject."""
         assertEntityIDType(eid=sid)
         permission = self._get_permission(node=node)
@@ -457,7 +459,9 @@ class SerialAuthority(_Authority):
             permission_map=permission_map, permission=permission, payload=payload
         )
 
-    def group_add_node(self, *, gid: EntityID, node: PermissionNode, payload: str | None = None):
+    def group_add_node(
+        self, *, gid: EntityID, node: PermissionNode, payload: str | None = None
+    ) -> None:
         """Add a permission to a group."""
         assertEntityIDType(eid=gid)
         permission = self._get_permission(node=node)
@@ -584,7 +588,9 @@ class SerialAuthority(_Authority):
         for child_id in group.child_ids:
             self._groups[child_id].parent_ids.remove(gid)
 
-    def subject_rm_node(self, *, sid: EntityID, node: PermissionNode, payload: str | None = None):
+    def subject_rm_node(
+        self, *, sid: EntityID, node: PermissionNode, payload: str | None = None
+    ) -> None:
         """Remove a permission from a subject."""
         assertEntityIDType(eid=sid)
         permission = self._get_permission(node=node)
@@ -595,7 +601,9 @@ class SerialAuthority(_Authority):
             permission_map=permission_map, permission=permission, payload=payload
         )
 
-    def group_rm_node(self, *, gid: EntityID, node: PermissionNode, payload: str | None = None):
+    def group_rm_node(
+        self, *, gid: EntityID, node: PermissionNode, payload: str | None = None
+    ) -> None:
         """Remove a permission from a group."""
         assertEntityIDType(eid=gid)
         permission = self._get_permission(node=node)
@@ -647,7 +655,7 @@ class SerialAuthority(_Authority):
             raise EntityIDError(f"Can not find group `{gid}`!")
 
     # TODO: build graph/subgraph ordering instead
-    def _detect_group_cycle(self, group: Group, member_gid: EntityID):
+    def _detect_group_cycle(self, group: Group, member_gid: EntityID) -> None:
         """Detect a cycle in nested group tree."""
         if member_gid in group.parent_ids:
             raise GroupCycleError(
@@ -691,11 +699,6 @@ class SerialAuthority(_Authority):
 ####################################################################################################
 ### Util
 ####################################################################################################
-
-
-def _map_get_or_default(d: Mapping[K, V], key: K, default: V) -> V:
-    # if value for key is falsy, returns default as well
-    return d.get(key, default) or default
 
 
 def _build_permission_node_map(*, perm_map: PermissionMap) -> NodeMap:

@@ -3,7 +3,7 @@ from datetime import datetime
 from typing import cast
 
 from sqlalchemy import Column, DateTime, ForeignKey, Integer, String, event
-from sqlalchemy.orm import declarative_base, relationship
+from sqlalchemy.orm import declarative_base, relationship, Mapped
 
 ####################################################################################################
 ### Const
@@ -36,26 +36,28 @@ class TimeStampMixin(object):
     updated_at._creation_order = 9999
 
     @staticmethod
-    def _updated_at(mapper, connection, target):
+    def _updated_at(mapper, connection, target) -> None:
         target.updated_at = datetime.utcnow()
 
     @classmethod
-    def __declare_last__(cls):
+    def __declare_last__(cls) -> None:
         event.listen(cls, "before_update", cls._updated_at)
 
 
 class PermissionableEntityMixin(TimeStampMixin):
     """Permissionable entity mixin."""
 
-    entity_db_id = Column(Integer, primary_key=True)
-    serial_eid = Column(String(length=SERIAL_ENTITY_ID_LENGHT), unique=True)  # Entity ID
+    entity_db_id: Mapped[int] = Column(Integer, primary_key=True)
+    serial_eid: Mapped[str | None] = Column(
+        String(length=SERIAL_ENTITY_ID_LENGHT), unique=True
+    )  # Entity ID
 
 
 class PermissionPayloadMixin(TimeStampMixin):
     """Permission and payload mixin."""
 
-    node = Column(String(length=PERMISSION_NODE_LENGTH), primary_key=True)
-    payload = Column(String(length=PERMISSION_PAYLOAD_LENGTH), primary_key=True)
+    node: Mapped[str] = Column(String(length=PERMISSION_NODE_LENGTH), primary_key=True)
+    payload: Mapped[str] = Column(String(length=PERMISSION_PAYLOAD_LENGTH), primary_key=True)
     node._creation_order = 9988
     payload._creation_order = 9989
 
@@ -108,7 +110,7 @@ class GroupEntry(DeclarativeMeta, PermissionableEntityMixin):
     )
 
     @property
-    def subject_entries(self) -> list[GroupEntry]:
+    def subject_entries(self) -> list[SubjectEntry]:
         return [membership.subject_entry for membership in self._membership_entries]
 
     @property

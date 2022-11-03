@@ -1,3 +1,4 @@
+from typing import Type
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
@@ -112,10 +113,13 @@ def create_parent_child_relationship(*, serial_pid: str, serial_cid: str, db: Se
 
 
 def read_subject(*, serial_sid: str, db: Session) -> SubjectEntry:
-    subject_entries = db.query(SubjectEntry).filter(SubjectEntry.serial_eid == serial_sid).all()
-    if subject_entries:
-        return subject_entries[0]
-    raise EntityIDError(f"Unknown subject ID `{serial_sid}`!")
+    try:
+        subject_entry, *_ = (
+            db.query(SubjectEntry).filter(SubjectEntry.serial_eid == serial_sid).all()
+        )
+    except ValueError:
+        raise EntityIDError(f"Unknown subject ID `{serial_sid}`!")
+    return subject_entry
 
 
 def read_group(*, serial_gid: str, db: Session) -> GroupEntry:
@@ -166,7 +170,7 @@ def delete_group_permission(
     )
 
 
-def delete_membership(*, serial_sid: str, serial_gid: str, db: Session):
+def delete_membership(*, serial_sid: str, serial_gid: str, db: Session) -> None:
     subject_entry = read_subject(serial_sid=serial_sid, db=db)
     group_entry = read_group(serial_gid=serial_gid, db=db)
 
@@ -211,13 +215,13 @@ def delete_parent_child_relationship(*, serial_pid: str, serial_cid: str, db: Se
 ####################################################################################################
 
 
-def serialize_payload(payload: str | None):
+def serialize_payload(payload: str | None) -> str:
     return "None" if payload is None else payload
 
 
 def _create_permission_entry(
     *,
-    table: SubjectPermissionEntry | GroupPermissionEntry,
+    table: Type[SubjectPermissionEntry] | Type[GroupPermissionEntry],
     entity_db_id: int,
     permission: Permission,
     payload: str | None,
@@ -240,7 +244,7 @@ def _create_permission_entry(
 
 def _delete_permission_entry(
     *,
-    table: SubjectPermissionEntry | GroupPermissionEntry,
+    table: Type[SubjectPermissionEntry] | Type[GroupPermissionEntry],
     entity_db_id: int,
     permission: Permission,
     payload: str | None,
@@ -262,7 +266,7 @@ def _delete_permission_entry(
     db.commit()
 
 
-def _detect_group_cycle(*, parent_entry: GroupEntry, child_entry: GroupEntry):
+def _detect_group_cycle(*, parent_entry: GroupEntry, child_entry: GroupEntry) -> None:
     if parent_entry == child_entry:
         raise GroupCycleError  # TODO single node, single edge graph error message
 
