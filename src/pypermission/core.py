@@ -308,8 +308,40 @@ class Authority(ABC):
         except KeyError:
             raise UnknownPermissionNodeError
 
-    def _build_permission_subtree(self, *, permission: Permission) -> dict:
-        ...
+    def _populate_permission_tree(
+        self, *, permission_tree, permission_map: PermissionMap, serialize_nodes: str
+    ):  # TODO typing
+        for perm, payload_set in permission_map.items():
+            key = str(perm.node.value) if serialize_nodes else perm.node
+            if key in permission_tree:
+                continue
+
+            if perm.is_leaf:
+                if perm.has_payload:
+                    branch = [payload for payload in payload_set]
+                else:
+                    branch = None
+            else:
+                branch = self._build_permission_subtree(
+                    permission=perm, serialize_nodes=serialize_nodes
+                )
+            permission_tree[key] = branch
+
+    def _build_permission_subtree(
+        self, *, permission: Permission, serialize_nodes: bool
+    ) -> dict | list[None] | None:  # TODO typing
+        if permission.is_leaf:
+            if permission.has_payload:
+                return []
+            return None
+        return {
+            str(child.node.value)
+            if serialize_nodes
+            else child.node: self._build_permission_subtree(
+                permission=child, serialize_nodes=serialize_nodes
+            )
+            for child in permission.children
+        }
 
 
 ####################################################################################################

@@ -598,8 +598,15 @@ class SerialAuthority(_Authority):
                 permission_map=subject.permission_map, serialize_nodes=serialize_nodes
             ),
             entity_id=entity_id_serializer(sid) if serialize_eid else sid,
-            groups=list(parents),
+            groups=[
+                entity_id_serializer(grp_id) if serialize_eid else grp_id for grp_id in subject.gids
+            ],
         )
+
+        if not subject_entity_dict["groups"]:  # NOTE ugly but working solution, rm empty objects
+            subject_entity_dict.pop("groups")
+        if not subject_entity_dict["permission_nodes"]:
+            subject_entity_dict.pop("permission_nodes")
 
         ancestors: list[Group] = self._topo_sort_parents(parents)
 
@@ -618,9 +625,29 @@ class SerialAuthority(_Authority):
             for grp in ancestors
         }
 
-        # raise NotImplementedError()
+        for _, grp_dct in groups.items():  # NOTE ugly but working solution, rm empty objects
+            if not grp_dct["parents"]:
+                grp_dct.pop("parents")
+            if not grp_dct["permission_nodes"]:
+                grp_dct.pop("permission_nodes")
+
+        permission_tree = {}
+
+        self._populate_permission_tree(
+            permission_tree=permission_tree,
+            permission_map=subject.permission_map,
+            serialize_nodes=serialize_nodes,
+        )
+
+        for grp in ancestors:
+            self._populate_permission_tree(
+                permission_tree=permission_tree,
+                permission_map=grp.permission_map,
+                serialize_nodes=serialize_nodes,
+            )
+
         return SubjectPermissionDict(
-            groups=groups, subject=subject_entity_dict, permission_tree=...
+            groups=groups, subject=subject_entity_dict, permission_tree=permission_tree
         )
 
     def subject_get_nodes(self, *, sid: EntityID) -> NodeMap:
@@ -852,6 +879,7 @@ def _build_entity_permission_nodes(
         else None
         for perm, payload in permission_map.items()
     }
+
 
 def _add_permission_map_entry(
     *, permission_map: PermissionMap, permission: Permission, payload: str | None
