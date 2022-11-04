@@ -1,5 +1,7 @@
 import pytest
 from deepdiff import DeepDiff
+from pypermission.sqlalchemy import SQLAlchemyAuthority
+from pypermission.serial import SerialAuthority
 
 from .helpers import SUBJECT_PERMISSIONS_ENUM, SUBJECT_PERMISSIONS_STR, USER
 from .conftest import URL_SQLITE, URL_MARIADB
@@ -15,7 +17,7 @@ from .conftest import URL_SQLITE, URL_MARIADB
 def test_subject_get_permissions_serial(
     expected_permissions, to_str, serial_authority_get_permissions
 ):
-    auth = serial_authority_get_permissions
+    auth: SerialAuthority = serial_authority_get_permissions
     result = auth.subject_get_permissions(sid=USER, to_str=to_str)
     assert DeepDiff(result, expected_permissions, ignore_order=True) == {}
 
@@ -36,6 +38,6 @@ def test_subject_get_permissions_serial(
     ],
 )
 def test_subject_get_permissions_sql(expected_permissions, to_str, sql_authority_get_permissions):
-    auth = sql_authority_get_permissions
+    auth: SQLAlchemyAuthority = sql_authority_get_permissions
     result = auth.subject_get_permissions(sid=USER, to_str=to_str)
     assert DeepDiff(result, expected_permissions, ignore_order=True) == {}

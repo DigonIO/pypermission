@@ -546,6 +546,9 @@ class SerialAuthority(_Authority):
             group=group, permission=permission, payload=payload
         )
 
+    def subject_get_permissions(self, *, sid: str, to_str: bool = False):
+        raise NotImplementedError()
+
     def subject_get_nodes(self, *, sid: EntityID) -> NodeMap:
         """Get a copy of all permissions from a subject."""
         assertEntityIDType(eid=sid)

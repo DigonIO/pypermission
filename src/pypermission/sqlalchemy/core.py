@@ -292,6 +292,11 @@ class SQLAlchemyAuthority(Authority):
         return result
 
     def subject_get_permissions(
+        self, *, sid: str, to_str: bool = False, session: Session | None = None
+    ):
+        raise NotImplementedError()
+
+    def subject_get_nodes(
         self,
         *,
         sid: EntityID,
@@ -309,7 +314,7 @@ class SQLAlchemyAuthority(Authority):
         _close_db_session(db, session)
         return result
 
-    def group_get_permissions(
+    def group_get_nodes(
         self,
         *,
         gid: EntityID,
