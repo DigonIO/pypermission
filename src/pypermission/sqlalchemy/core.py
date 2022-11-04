@@ -11,6 +11,7 @@ from pypermission.core import (
     validate_payload_status,
     EntityID,
     SubjectPermissionDict,
+    SubjectPermissions,
 )
 from pypermission.core import entity_id_serializer as _entity_id_serializer
 from pypermission.core import entity_id_deserializer as _entity_id_deserializer
@@ -20,7 +21,6 @@ from pypermission.sqlalchemy.models import (
     DeclarativeMeta,
     GroupEntry,
     SubjectEntry,
-    SubjectPermissionEntry,
     GroupPermissionEntry,
     PermissionableEntityMixin,
     PermissionPayloadMixin,
@@ -295,25 +295,62 @@ class SQLAlchemyAuthority(Authority):
     # https://mypy.readthedocs.io/en/stable/literal_types.html
     @overload
     def subject_get_permissions(
-        self, *, sid: str, to_str: Literal[True], session: Session | None = None
-    ) -> SubjectPermissionDict[str]:
+        self,
+        *,
+        sid: str,
+        serialize_nodes: Literal[False],
+        serialize_eid: Literal[False],
+        session: Session | None,
+    ) -> SubjectPermissionDict[PermissionNode, EntityID]:
         ...
 
     @overload
     def subject_get_permissions(
-        self, *, sid: str, to_str: Literal[False] = False, session: Session | None = None
-    ) -> SubjectPermissionDict[PermissionNode]:
+        self,
+        *,
+        sid: str,
+        serialize_nodes: Literal[True],
+        serialize_eid: Literal[False],
+        session: Session | None,
+    ) -> SubjectPermissionDict[str, EntityID]:
         ...
 
     @overload
     def subject_get_permissions(
-        self, *, sid: str, to_str: bool = False, session: Session | None = None
-    ) -> SubjectPermissionDict[str] | SubjectPermissionDict[PermissionNode]:
+        self,
+        *,
+        sid: str,
+        serialize_nodes: Literal[False],
+        serialize_eid: Literal[True],
+        session: Session | None,
+    ) -> SubjectPermissionDict[PermissionNode, str]:
+        ...
+
+    @overload
+    def subject_get_permissions(
+        self,
+        *,
+        sid: str,
+        serialize_nodes: Literal[True],
+        serialize_eid: Literal[True],
+        session: Session | None,
+    ) -> SubjectPermissionDict[str, str]:
+        ...
+
+    @overload
+    def subject_get_permissions(
+        self, *, sid: str, serialize_nodes: bool, serialize_eid: bool
+    ) -> SubjectPermissions:
         ...
 
     def subject_get_permissions(
-        self, *, sid: str, to_str: bool = False, session: Session | None = None
-    ) -> SubjectPermissionDict[str] | SubjectPermissionDict[PermissionNode]:
+        self,
+        *,
+        sid: str,
+        serialize_nodes: bool = False,
+        serialize_eid: bool = False,
+        session: Session | None = None,
+    ) -> SubjectPermissions:
         raise NotImplementedError()
 
     def subject_get_nodes(

@@ -1,6 +1,9 @@
 import json
 from pathlib import Path
-from typing import TypedDict, Generic, TypeVar, Literal, overload
+from typing import Generic, TypeVar, Literal, overload, Union
+
+# typing_extensions for generic TypedDict support:
+from typing_extensions import TypedDict
 
 from pypermission.core import Authority as _Authority
 from pypermission.core import (
@@ -14,6 +17,7 @@ from pypermission.core import (
     entity_id_serializer,
     entity_id_deserializer,
     SubjectPermissionDict,
+    SubjectPermissions,
 )
 from pypermission.error import (
     EntityIDError,
@@ -547,27 +551,44 @@ class SerialAuthority(_Authority):
         )
 
     # https://mypy.readthedocs.io/en/stable/literal_types.html
+
     @overload
     def subject_get_permissions(
-        self, *, sid: str, to_str: Literal[True]
-    ) -> SubjectPermissionDict[str]:
+        self, *, sid: str, serialize_nodes: Literal[False], serialize_eid: Literal[False]
+    ) -> SubjectPermissionDict[PermissionNode, EntityID]:
         ...
 
     @overload
     def subject_get_permissions(
-        self, *, sid: str, to_str: Literal[False] = False
-    ) -> SubjectPermissionDict[PermissionNode]:
+        self, *, sid: str, serialize_nodes: Literal[True], serialize_eid: Literal[False]
+    ) -> SubjectPermissionDict[str, EntityID]:
         ...
 
     @overload
     def subject_get_permissions(
-        self, *, sid: str, to_str: bool = False
-    ) -> SubjectPermissionDict[str] | SubjectPermissionDict[PermissionNode]:
+        self, *, sid: str, serialize_nodes: Literal[False], serialize_eid: Literal[True]
+    ) -> SubjectPermissionDict[PermissionNode, str]:
+        ...
+
+    @overload
+    def subject_get_permissions(
+        self, *, sid: str, serialize_nodes: Literal[True], serialize_eid: Literal[True]
+    ) -> SubjectPermissionDict[str, str]:
+        ...
+
+    @overload
+    def subject_get_permissions(
+        self, *, sid: str, serialize_nodes: bool, serialize_eid: bool
+    ) -> SubjectPermissions:
         ...
 
     def subject_get_permissions(
-        self, *, sid: str, to_str: bool = False
-    ) -> SubjectPermissionDict[str] | SubjectPermissionDict[PermissionNode]:
+        self,
+        *,
+        sid: str,
+        serialize_nodes: bool = False,
+        serialize_eid: bool = False,
+    ) -> SubjectPermissions:
         raise NotImplementedError()
 
     def subject_get_nodes(self, *, sid: EntityID) -> NodeMap:

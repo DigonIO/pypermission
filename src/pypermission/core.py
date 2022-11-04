@@ -9,7 +9,10 @@ from __future__ import annotations
 
 from abc import ABC
 from enum import Enum
-from typing import cast, TypedDict, Generic, TypeVar, Union
+from typing import cast, Generic, TypeVar, Union
+
+# typing_extensions for generic TypedDict support:
+from typing_extensions import TypedDict
 
 from pypermission.error import (
     MissingPayloadError,
@@ -97,29 +100,50 @@ class Permission:
 
 EntityID = int | str
 PID = TypeVar("PID", str, PermissionNode)
+EID = TypeVar("EID", str, EntityID)
 
 PERMISSION_NODES = dict[PID, None | list[str]]
 PERMISSION_TREE = dict[PID, Union[None, list[str], "PERMISSION_TREE[PID]"]]
 
 
-class EntityNodeDict(TypedDict, Generic[PID]):
+class PermissionableEntityDict(TypedDict, Generic[PID]):
     permission_nodes: PERMISSION_NODES[PID]
 
 
-class SubjectNodeDict(EntityNodeDict[PID]):
-    ...
+class GroupDict(PermissionableEntityDict[PID], Generic[PID, EID]):
+    parents: list[EID]
 
 
-class GroupNodeDict(EntityNodeDict[PID]):
-    member_groups: list[EntityID]
-    member_subjects: list[EntityID]
+class EntityDict(PermissionableEntityDict[PID], Generic[PID, EID]):
+    entity_id: EID
+    groups: list[EID]
 
 
-class SubjectPermissionDict(TypedDict, Generic[PID]):
-    groups: dict[EntityID, GroupNodeDict[PID]]
-    subjects: dict[EntityID, SubjectNodeDict[PID]]
+class SubjectPermissionDict(TypedDict, Generic[PID, EID]):
+    groups: dict[EID, GroupDict[PID, EID]]
+    subject: EntityDict[PID, EID]
     permission_tree: PERMISSION_TREE[PID]
 
+
+class GroupPermissionDict(TypedDict, Generic[PID, EID]):
+    groups: dict[EID, GroupDict[PID, EID]]
+    group: EntityDict[PID, EID]
+    permission_tree: PERMISSION_TREE[PID]
+
+
+SubjectPermissions = (
+    SubjectPermissionDict[PermissionNode, EntityID]
+    | SubjectPermissionDict[str, EntityID]
+    | SubjectPermissionDict[PermissionNode, str]
+    | SubjectPermissionDict[str, str]
+)
+
+GroupPermissions = (
+    GroupPermissionDict[PermissionNode, EntityID]
+    | GroupPermissionDict[str, EntityID]
+    | GroupPermissionDict[PermissionNode, str]
+    | GroupPermissionDict[str, str]
+)
 
 PermissionMap = dict[Permission, set[str]]
 NodeMap = dict[PermissionNode, set[str]]
