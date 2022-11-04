@@ -1,6 +1,6 @@
 import json
 from pathlib import Path
-from typing import TypedDict, TypeVar, Any, Mapping, Sequence
+from typing import TypedDict, Generic, TypeVar, Literal, overload
 
 from pypermission.core import Authority as _Authority
 from pypermission.core import (
@@ -13,6 +13,7 @@ from pypermission.core import (
     assertEntityIDType,
     entity_id_serializer,
     entity_id_deserializer,
+    SubjectPermissionDict,
 )
 from pypermission.error import (
     EntityIDError,
@@ -25,36 +26,35 @@ from pypermission.error import (
 ### Types
 ####################################################################################################
 
-V = TypeVar("V")
-K = TypeVar("K")
-T = TypeVar("T")
-
-
-class GroupStoreYAML(TypedDict, total=False):
-    member_subjects: list[EntityID]
-    member_groups: list[EntityID]
-    permission_nodes: list[str]
-
-
-class GroupStoreJSON(TypedDict, total=False):
-    member_subjects: list[str]
-    member_groups: list[str]
-    permission_nodes: list[str]
-
 
 class SubjectStore(TypedDict, total=False):
     permission_nodes: list[str]
 
 
-class DataStoreYAML(TypedDict, total=False):
-    groups: dict[EntityID, GroupStoreYAML]
-    subjects: dict[EntityID, SubjectStore]
+T = TypeVar("T")
 
 
-class DataStoreJSON(TypedDict, total=False):
-    groups: dict[str, GroupStoreJSON]
-    subjects: dict[str, SubjectStore]
+class GroupStore(
+    TypedDict,
+    Generic[T],
+    total=False,
+):
+    member_subjects: list[T]
+    member_groups: list[T]
+    permission_nodes: list[str]
 
+
+GroupStoreYAML = GroupStore[EntityID]
+GroupStoreJSON = GroupStore[str]
+
+
+class DataStore(TypedDict, Generic[T], total=False):
+    groups: dict[T, GroupStore[T]]
+    subjects: dict[T, SubjectStore]
+
+
+DataStoreYAML = DataStore[EntityID]
+DataStoreJSON = DataStore[str]
 
 ####################################################################################################
 ### Permissionable entities
@@ -546,7 +546,28 @@ class SerialAuthority(_Authority):
             group=group, permission=permission, payload=payload
         )
 
-    def subject_get_permissions(self, *, sid: str, to_str: bool = False):
+    # https://mypy.readthedocs.io/en/stable/literal_types.html
+    @overload
+    def subject_get_permissions(
+        self, *, sid: str, to_str: Literal[True]
+    ) -> SubjectPermissionDict[str]:
+        ...
+
+    @overload
+    def subject_get_permissions(
+        self, *, sid: str, to_str: Literal[False] = False
+    ) -> SubjectPermissionDict[PermissionNode]:
+        ...
+
+    @overload
+    def subject_get_permissions(
+        self, *, sid: str, to_str: bool = False
+    ) -> SubjectPermissionDict[str] | SubjectPermissionDict[PermissionNode]:
+        ...
+
+    def subject_get_permissions(
+        self, *, sid: str, to_str: bool = False
+    ) -> SubjectPermissionDict[str] | SubjectPermissionDict[PermissionNode]:
         raise NotImplementedError()
 
     def subject_get_nodes(self, *, sid: EntityID) -> NodeMap:

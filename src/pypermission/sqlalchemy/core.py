@@ -1,4 +1,4 @@
-from typing import Sequence
+from typing import Sequence, overload, Literal
 from sqlalchemy.engine.base import Engine
 from sqlalchemy.orm import Session
 from sqlalchemy.orm.session import sessionmaker
@@ -10,6 +10,7 @@ from pypermission.core import (
     PermissionNode,
     validate_payload_status,
     EntityID,
+    SubjectPermissionDict,
 )
 from pypermission.core import entity_id_serializer as _entity_id_serializer
 from pypermission.core import entity_id_deserializer as _entity_id_deserializer
@@ -291,9 +292,28 @@ class SQLAlchemyAuthority(Authority):
         _close_db_session(db, session)
         return result
 
+    # https://mypy.readthedocs.io/en/stable/literal_types.html
+    @overload
+    def subject_get_permissions(
+        self, *, sid: str, to_str: Literal[True], session: Session | None = None
+    ) -> SubjectPermissionDict[str]:
+        ...
+
+    @overload
+    def subject_get_permissions(
+        self, *, sid: str, to_str: Literal[False] = False, session: Session | None = None
+    ) -> SubjectPermissionDict[PermissionNode]:
+        ...
+
+    @overload
     def subject_get_permissions(
         self, *, sid: str, to_str: bool = False, session: Session | None = None
-    ):
+    ) -> SubjectPermissionDict[str] | SubjectPermissionDict[PermissionNode]:
+        ...
+
+    def subject_get_permissions(
+        self, *, sid: str, to_str: bool = False, session: Session | None = None
+    ) -> SubjectPermissionDict[str] | SubjectPermissionDict[PermissionNode]:
         raise NotImplementedError()
 
     def subject_get_nodes(

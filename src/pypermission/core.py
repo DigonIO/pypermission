@@ -9,7 +9,7 @@ from __future__ import annotations
 
 from abc import ABC
 from enum import Enum
-from typing import cast, Type
+from typing import cast, TypedDict, Generic, TypeVar, Union
 
 from pypermission.error import (
     MissingPayloadError,
@@ -95,10 +95,34 @@ class Permission:
         return cast(str, val)  # NOTE would be nice without casting
 
 
+EntityID = int | str
+PID = TypeVar("PID", str, PermissionNode)
+
+PERMISSION_NODES = dict[PID, None | list[str]]
+PERMISSION_TREE = dict[PID, Union[None, list[str], "PERMISSION_TREE[PID]"]]
+
+
+class EntityNodeDict(TypedDict, Generic[PID]):
+    permission_nodes: PERMISSION_NODES[PID]
+
+
+class SubjectNodeDict(EntityNodeDict[PID]):
+    ...
+
+
+class GroupNodeDict(EntityNodeDict[PID]):
+    member_groups: list[EntityID]
+    member_subjects: list[EntityID]
+
+
+class SubjectPermissionDict(TypedDict, Generic[PID]):
+    groups: dict[EntityID, GroupNodeDict[PID]]
+    subjects: dict[EntityID, SubjectNodeDict[PID]]
+    permission_tree: PERMISSION_TREE[PID]
+
+
 PermissionMap = dict[Permission, set[str]]
 NodeMap = dict[PermissionNode, set[str]]
-
-EntityID = int | str
 
 
 class CustomPermission(Permission):

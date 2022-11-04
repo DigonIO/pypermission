@@ -34,7 +34,7 @@ subjects:
   user:
     permission_nodes:
       towny.build.*: Null
-permission_nodes:
+permission_tree:
   towny.chat.*:
     towny.chat.town: Null
     towny.chat.global: Null

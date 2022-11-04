@@ -135,7 +135,7 @@ SUBJECT_PERMISSIONS_STR = {
         },
     },
     "subjects": {USER: {"permission_nodes": {"towny.wild.build.*": None}}},
-    "permission_nodes": {
+    "permission_tree": {
         "towny.chat.*": {
             "towny.chat.global": None,
             "towny.chat.nation": None,
@@ -167,7 +167,7 @@ SUBJECT_PERMISSIONS_ENUM = {
         },
     },
     "subjects": {USER: {"permission_nodes": {TPN.TOWNY_WILD_BUILD_: None}}},
-    "permission_nodes": {
+    "permission_tree": {
         TPN.TOWNY_CHAT_: {
             TPN.TOWNY_CHAT_GLOBAL: None,
             TPN.TOWNY_CHAT_NATION: None,
