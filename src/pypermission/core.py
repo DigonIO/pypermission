@@ -26,7 +26,7 @@ from pypermission.error import EntityIDError
 # NOTE in 3.11 there will be a StrEnum class, that enforces the enum values type as str
 # We just have to wait until 3.11 ist the last supported version :)
 # Currently we have to check if the permission node enum has only string values
-class PermissionNode(Enum):
+class PermissionNode(str, Enum):
     """Abstract permission node definition. Inherit from this to define custom permission nodes."""
 
     ...
@@ -307,6 +307,9 @@ class Authority(ABC):
                 return self._node_str_permission_map[node]
         except KeyError:
             raise UnknownPermissionNodeError
+
+    def _build_permission_subtree(self, *, permission: Permission) -> dict:
+        ...
 
 
 ####################################################################################################

@@ -18,6 +18,9 @@ from pypermission.core import (
     entity_id_deserializer,
     SubjectPermissionDict,
     SubjectPermissions,
+    EntityDict,
+    GroupDict,
+    PERMISSION_NODES,
 )
 from pypermission.error import (
     EntityIDError,
@@ -81,9 +84,6 @@ class PermissionableEntity:
     @property
     def permission_map(self) -> PermissionMap:
         return self._permission_map
-
-    def set_permission_map(self, *, new_permission_map: PermissionMap) -> None:
-        self._permission_map = new_permission_map
 
     def has_permission(self, *, permission: Permission, payload: str | None = None) -> bool:
         for ancestor in permission.ancestors:
@@ -585,11 +585,43 @@ class SerialAuthority(_Authority):
     def subject_get_permissions(
         self,
         *,
-        sid: str,
+        sid: EntityID,
         serialize_nodes: bool = False,
         serialize_eid: bool = False,
     ) -> SubjectPermissions:
-        raise NotImplementedError()
+        assertEntityIDType(eid=sid)
+        subject: Subject = self._get_subject(sid=sid)
+
+        parents: set[Group] = {self._groups[gid] for gid in subject.gids}
+        subject_entity_dict = EntityDict(
+            permission_nodes=_build_entity_permission_nodes(
+                permission_map=subject.permission_map, serialize_nodes=serialize_nodes
+            ),
+            entity_id=entity_id_serializer(sid) if serialize_eid else sid,
+            groups=list(parents),
+        )
+
+        ancestors: list[Group] = self._topo_sort_parents(parents)
+
+        groups = {
+            entity_id_serializer(grp.id)
+            if serialize_eid
+            else grp.id: GroupDict(
+                permission_nodes=_build_entity_permission_nodes(
+                    permission_map=grp.permission_map, serialize_nodes=serialize_nodes
+                ),
+                parents=[
+                    entity_id_serializer(parent_id) if serialize_eid else parent_id
+                    for parent_id in grp.parent_ids
+                ],
+            )
+            for grp in ancestors
+        }
+
+        # raise NotImplementedError()
+        return SubjectPermissionDict(
+            groups=groups, subject=subject_entity_dict, permission_tree=...
+        )
 
     def subject_get_nodes(self, *, sid: EntityID) -> NodeMap:
         """Get a copy of all permissions from a subject."""
@@ -726,6 +758,41 @@ class SerialAuthority(_Authority):
 
         return False
 
+    def _visit_group(
+        self, group: Group, l: list[Group], perm: set[Group], temp: set[Group]
+    ) -> None:
+        if group in perm:
+            return
+        if group in temp:
+            raise GroupCycleError()  # TODO msg
+
+        temp.add(group)
+
+        for parent_id in group.parent_ids:
+            parent = self._groups[parent_id]
+            self._visit_group(group=parent, l=l, perm=perm, temp=temp)
+
+        temp.remove(group)
+        perm.add(group)
+        l.append(group)
+
+    def _topo_sort_groups(self) -> list[Group]:
+        l: list[Group] = []
+        perm: set[Group] = set()
+        temp: set[Group] = set()
+        groups = set(self._groups.values())
+        while unmarked := groups - perm:
+            self._visit_group(group=unmarked.pop(), l=l, perm=perm, temp=temp)
+        return l
+
+    def _topo_sort_parents(self, parents: set[Group]) -> list[Group]:
+        l: list[Group] = []
+        perm: set[Group] = set()
+        temp: set[Group] = set()
+        while unmarked := parents - perm:
+            self._visit_group(group=unmarked.pop(), l=l, perm=perm, temp=temp)
+        return l
+
     def _generate_permission_node_list(self, entity: PermissionableEntity) -> list[str]:
         permission_nodes: list[str] = []
         for permission, payload_set in entity.permission_map.items():
@@ -752,6 +819,39 @@ def _build_permission_node_map(*, perm_map: PermissionMap) -> NodeMap:
         node_map[perm.node] = payload_set.copy()
     return node_map
 
+
+@overload
+def _build_entity_permission_nodes(
+    *, permission_map: PermissionMap, serialize_nodes: Literal[True]
+) -> PERMISSION_NODES[str]:
+    ...
+
+
+@overload
+def _build_entity_permission_nodes(
+    *, permission_map: PermissionMap, serialize_nodes: Literal[False]
+) -> PERMISSION_NODES[PermissionNode]:
+    ...
+
+
+@overload
+def _build_entity_permission_nodes(
+    *, permission_map: PermissionMap, serialize_nodes: bool
+) -> PERMISSION_NODES[str] | PERMISSION_NODES[PermissionNode]:
+    ...
+
+
+def _build_entity_permission_nodes(
+    *, permission_map: PermissionMap, serialize_nodes: bool = False
+) -> PERMISSION_NODES[str] | PERMISSION_NODES[PermissionNode]:
+    return {
+        str(perm.node.value)
+        if serialize_nodes
+        else perm.node: [val for val in payload]
+        if payload
+        else None
+        for perm, payload in permission_map.items()
+    }
 
 def _add_permission_map_entry(
     *, permission_map: PermissionMap, permission: Permission, payload: str | None
