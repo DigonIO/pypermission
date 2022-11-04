@@ -406,7 +406,7 @@ class SerialAuthority(_Authority):
     ### Add
     ################################################################################################
 
-    def add_subject(self, *, sid: EntityID) -> None:
+    def new_subject(self, *, sid: EntityID) -> None:
         """Create a new subject for a given ID."""
         assertEntityIDType(eid=sid)
 
@@ -416,7 +416,7 @@ class SerialAuthority(_Authority):
         subject = Subject(id=sid)
         self._subjects[sid] = subject
 
-    def add_group(self, *, gid: EntityID) -> None:
+    def new_group(self, *, gid: EntityID) -> None:
         """Create a new group for a given ID."""
         assertEntityIDType(eid=gid)
 

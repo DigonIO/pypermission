@@ -143,9 +143,9 @@ def test_rm_member_subject(serial_authority: SerialAuthority):
 def test_unknown_perm_node():
     auth = SerialAuthority()
 
-    auth.add_subject(sid=APPLE)
+    auth.new_subject(sid=APPLE)
 
-    auth.add_group(gid=FOOD)
+    auth.new_group(gid=FOOD)
 
     with pytest.raises(UnknownPermissionNodeError):
         auth.subject_add_node(sid=APPLE, node=TownyPermissionNode.TOWNY_CHAT_)

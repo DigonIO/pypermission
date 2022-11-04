@@ -61,7 +61,7 @@ def init_auth(auth: SerialAuthority | SQLAlchemyAuthority):
     # `./serial/save_file.yaml` and `./serial/save_file.json`
 
     for group in [FOOD, ANIMAL_BASED, PLANT_BASED]:
-        auth.add_group(gid=group)
+        auth.new_group(gid=group)
     for subject in [
         EGG,
         SPAM,
@@ -71,7 +71,7 @@ def init_auth(auth: SerialAuthority | SQLAlchemyAuthority):
         PEAR,
         BANANA,
     ]:
-        auth.add_subject(sid=subject)
+        auth.new_subject(sid=subject)
 
     auth.group_add_member_group(gid=FOOD, member_gid=ANIMAL_BASED)
     auth.group_add_member_group(gid=FOOD, member_gid=PLANT_BASED)
@@ -105,7 +105,7 @@ def serial_authority_typed() -> SerialAuthority:
     auth = SerialAuthority()
 
     for group in [ID_ALL_STR, ID_100_INT, ID_100_STR]:
-        auth.add_group(gid=group)
+        auth.new_group(gid=group)
 
     for subject in [
         ID_1_STR,
@@ -113,7 +113,7 @@ def serial_authority_typed() -> SerialAuthority:
         ID_TWO_STR,
         ID_2_INT,
     ]:
-        auth.add_subject(sid=subject)
+        auth.new_subject(sid=subject)
 
     auth.group_add_member_group(gid=ID_ALL_STR, member_gid=ID_100_STR)
     auth.group_add_member_group(gid=ID_ALL_STR, member_gid=ID_100_INT)
@@ -129,8 +129,8 @@ def serial_authority_typed() -> SerialAuthority:
 
 def init_auth_for_get_permissions(auth: SerialAuthority | SQLAlchemyAuthority):
     for group in [PARENT_GROUP, CHILD_GROUP]:
-        auth.add_group(gid=group)
-    auth.add_subject(sid=USER)
+        auth.new_group(gid=group)
+    auth.new_subject(sid=USER)
 
     auth.group_add_member_group(gid=PARENT_GROUP, member_gid=CHILD_GROUP)
 

@@ -88,7 +88,7 @@ class User:
         self._auth = auth
         self._accounts = {}
 
-        auth.add_subject(sid=username)
+        auth.new_subject(sid=username)
 
     @property
     def username(self) -> str:
@@ -174,9 +174,9 @@ class BankAPI:
         raise NoPermissionError
 
     def prepare_rbac_setup(self):
-        self._auth.add_group(gid=GROUP_ADMIN)
-        self._auth.add_group(gid=GROUP_BANKER)
-        self._auth.add_group(gid=GROUP_CUSTOMER)
+        self._auth.new_group(gid=GROUP_ADMIN)
+        self._auth.new_group(gid=GROUP_BANKER)
+        self._auth.new_group(gid=GROUP_CUSTOMER)
 
         self._auth.group_add_node(gid=GROUP_ADMIN, node=self._auth.root_node())
 

@@ -60,7 +60,7 @@ class SQLAlchemyAuthority(Authority):
     ### Add
     ################################################################################################
 
-    def add_subject(self, sid: EntityID, session: Session | None = None) -> None:
+    def new_subject(self, sid: EntityID, session: Session | None = None) -> None:
         """Create a new subject for a given ID."""
         serial_sid = entity_id_serializer(sid)
         db = self._setup_db_session(session)
@@ -69,7 +69,7 @@ class SQLAlchemyAuthority(Authority):
 
         _close_db_session(db, session)
 
-    def add_group(self, gid: EntityID, session: Session | None = None) -> None:
+    def new_group(self, gid: EntityID, session: Session | None = None) -> None:
         """Create a new group for a given ID."""
         serial_gid = entity_id_serializer(gid)
         db = self._setup_db_session(session)
