@@ -81,7 +81,7 @@ def create_membership(*, serial_sid: str, serial_gid: str, db: Session) -> None:
     db.add(ms_entry)
     try:
         db.commit()
-    except IntegrityError as err:
+    except IntegrityError:
         # don't raise here, desired state already exists
         ...
 
@@ -102,7 +102,7 @@ def create_parent_child_relationship(*, serial_pid: str, serial_cid: str, db: Se
     db.add(rs_entry)
     try:
         db.commit()
-    except IntegrityError as err:
+    except IntegrityError:
         # don't raise here, desired state already exists
         ...
 
@@ -114,18 +114,18 @@ def create_parent_child_relationship(*, serial_pid: str, serial_cid: str, db: Se
 
 def read_subject(*, serial_sid: str, db: Session) -> SubjectEntry:
     try:
-        subject_entry, *_ = (
-            db.query(SubjectEntry).filter(SubjectEntry.serial_eid == serial_sid).all()
+        subject_entry = (
+            db.query(SubjectEntry).filter(SubjectEntry.serial_eid == serial_sid).all()[0]
         )
-    except ValueError:
+    except IndexError:
         raise EntityIDError(f"Unknown subject ID `{serial_sid}`!")
     return cast(SubjectEntry, subject_entry)
 
 
 def read_group(*, serial_gid: str, db: Session) -> GroupEntry:
     try:
-        group_entry, *_ = db.query(GroupEntry).filter(GroupEntry.serial_eid == serial_gid).all()
-    except ValueError:
+        group_entry = db.query(GroupEntry).filter(GroupEntry.serial_eid == serial_gid).all()[0]
+    except IndexError:
         raise EntityIDError(f"Unknown group ID `{serial_gid}`!")
     return cast(GroupEntry, group_entry)
 
@@ -236,7 +236,7 @@ def _create_permission_entry(
     db.add(perm_entry)
     try:
         db.commit()
-    except IntegrityError as err:
+    except IntegrityError:
         # don't raise here, desired state already exists
         ...
 
