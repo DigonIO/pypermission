@@ -9,7 +9,7 @@ from __future__ import annotations
 
 from abc import ABC
 from enum import Enum
-from typing import cast, Generic, TypeVar, Union
+from typing import cast, overload, Generic, TypeVar, Union, Literal
 
 # typing_extensions for generic TypedDict support:
 from typing_extensions import TypedDict
@@ -396,3 +396,37 @@ def assertEntityIDType(eid: EntityID) -> None:
         raise EntityIDError(
             f"Subject and group IDs have to be of type int or string! Got type `{type(eid)}` for `{eid}`."
         )
+
+
+@overload
+def build_entity_permission_nodes(
+    *, permission_map: PermissionMap, serialize_nodes: Literal[True]
+) -> PERMISSION_NODES[str]:
+    ...
+
+
+@overload
+def build_entity_permission_nodes(
+    *, permission_map: PermissionMap, serialize_nodes: Literal[False]
+) -> PERMISSION_NODES[PermissionNode]:
+    ...
+
+
+@overload
+def build_entity_permission_nodes(
+    *, permission_map: PermissionMap, serialize_nodes: bool
+) -> PERMISSION_NODES[str] | PERMISSION_NODES[PermissionNode]:
+    ...
+
+
+def build_entity_permission_nodes(
+    *, permission_map: PermissionMap, serialize_nodes: bool = False
+) -> PERMISSION_NODES[str] | PERMISSION_NODES[PermissionNode]:
+    return {
+        str(perm.node.value)
+        if serialize_nodes
+        else perm.node: [val for val in payload]
+        if payload
+        else None
+        for perm, payload in permission_map.items()
+    }

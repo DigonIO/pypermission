@@ -20,7 +20,7 @@ from pypermission.core import (
     SubjectPermissions,
     EntityDict,
     GroupDict,
-    PERMISSION_NODES,
+    build_entity_permission_nodes,
 )
 from pypermission.error import (
     EntityIDError,
@@ -594,7 +594,7 @@ class SerialAuthority(_Authority):
 
         parents: set[Group] = {self._groups[gid] for gid in subject.gids}
         subject_entity_dict = EntityDict(
-            permission_nodes=_build_entity_permission_nodes(
+            permission_nodes=build_entity_permission_nodes(
                 permission_map=subject.permission_map, serialize_nodes=serialize_nodes
             ),
             entity_id=entity_id_serializer(sid) if serialize_eid else sid,
@@ -614,7 +614,7 @@ class SerialAuthority(_Authority):
             entity_id_serializer(grp.id)
             if serialize_eid
             else grp.id: GroupDict(
-                permission_nodes=_build_entity_permission_nodes(
+                permission_nodes=build_entity_permission_nodes(
                     permission_map=grp.permission_map, serialize_nodes=serialize_nodes
                 ),
                 parents=[
@@ -845,40 +845,6 @@ def _build_permission_node_map(*, perm_map: PermissionMap) -> NodeMap:
     for perm, payload_set in perm_map.items():
         node_map[perm.node] = payload_set.copy()
     return node_map
-
-
-@overload
-def _build_entity_permission_nodes(
-    *, permission_map: PermissionMap, serialize_nodes: Literal[True]
-) -> PERMISSION_NODES[str]:
-    ...
-
-
-@overload
-def _build_entity_permission_nodes(
-    *, permission_map: PermissionMap, serialize_nodes: Literal[False]
-) -> PERMISSION_NODES[PermissionNode]:
-    ...
-
-
-@overload
-def _build_entity_permission_nodes(
-    *, permission_map: PermissionMap, serialize_nodes: bool
-) -> PERMISSION_NODES[str] | PERMISSION_NODES[PermissionNode]:
-    ...
-
-
-def _build_entity_permission_nodes(
-    *, permission_map: PermissionMap, serialize_nodes: bool = False
-) -> PERMISSION_NODES[str] | PERMISSION_NODES[PermissionNode]:
-    return {
-        str(perm.node.value)
-        if serialize_nodes
-        else perm.node: [val for val in payload]
-        if payload
-        else None
-        for perm, payload in permission_map.items()
-    }
 
 
 def _add_permission_map_entry(

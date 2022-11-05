@@ -10,8 +10,11 @@ from pypermission.core import (
     PermissionNode,
     validate_payload_status,
     EntityID,
+    EntityDict,
     SubjectPermissionDict,
     SubjectPermissions,
+    build_entity_permission_nodes,
+    PermissionMap,
 )
 from pypermission.core import entity_id_serializer as _entity_id_serializer
 from pypermission.core import entity_id_deserializer as _entity_id_deserializer
@@ -351,7 +354,35 @@ class SQLAlchemyAuthority(Authority):
         serialize_eid: bool = False,
         session: Session | None = None,
     ) -> SubjectPermissions:
-        raise NotImplementedError()
+        serial_sid = entity_id_serializer(sid)
+        db = self._setup_db_session(session)
+
+        subject_entry = read_subject(serial_sid=serial_sid, db=db)
+
+        parents_entries = subject_entry.group_entries
+
+        subject_entity_dict = EntityDict(
+            permission_nodes=build_entity_permission_nodes(
+                permission_map=self._build_permission_map(
+                    perm_entries=subject_entry.permission_entries
+                ),
+                serialize_nodes=serialize_nodes,
+            ),
+            entity_id=entity_id_serializer(sid) if serialize_eid else sid,
+            groups=[
+                entry.serial_eid if serialize_eid else entity_id_deserializer(entry.serial_eid)
+                for entry in parents_entries
+            ],
+        )
+
+        if not subject_entity_dict["groups"]:  # NOTE ugly but working solution, rm empty objects
+            subject_entity_dict.pop("groups")
+        if not subject_entity_dict["permission_nodes"]:
+            subject_entity_dict.pop("permission_nodes")
+
+        # ancestors: list[Group] = self._topo_sort_parents(parents) # TODO WIP
+
+        raise NotImplementedError
 
     def subject_get_nodes(
         self,
@@ -366,7 +397,7 @@ class SQLAlchemyAuthority(Authority):
         subject_entry = read_subject(serial_sid=serial_sid, db=db)
         perm_entries = subject_entry.permission_entries
 
-        result = self._build_permission_node_map(perm_entries=perm_entries)
+        result = self._build_node_map(perm_entries=perm_entries)
 
         _close_db_session(db, session)
         return result
@@ -384,7 +415,7 @@ class SQLAlchemyAuthority(Authority):
         group_entry = read_group(serial_gid=serial_gid, db=db)
         perm_entries = group_entry.permission_entries
 
-        result = self._build_permission_node_map(perm_entries=perm_entries)
+        result = self._build_node_map(perm_entries=perm_entries)
 
         _close_db_session(db, session)
         return result
@@ -490,7 +521,7 @@ class SQLAlchemyAuthority(Authority):
             return session
         raise AttributeError("Attribute 'db' must be of type 'sqlalchemy.orm.Session'!")
 
-    def _build_permission_node_map(self, *, perm_entries: list[PermissionPayloadMixin]) -> NodeMap:
+    def _build_node_map(self, *, perm_entries: list[PermissionPayloadMixin]) -> NodeMap:
         node_map: NodeMap = {}
         for entry in perm_entries:
             permission = self._get_permission(node=entry.node)  # TODO handle unknown permissions
@@ -502,6 +533,18 @@ class SQLAlchemyAuthority(Authority):
                 payload_set.add(entry.payload)
             node_map[permission.node] = payload_set
         return node_map
+
+    def _build_permission_map(self, *, perm_entries: list[PermissionPayloadMixin]) -> PermissionMap:
+        perm_map: PermissionMap = {}
+        for entry in perm_entries:
+            permission = self._get_permission(node=entry.node)  # TODO handle unknown permissions
+            if permission in perm_map:
+                payload_set = perm_map[permission]
+            else:
+                payload_set = set()
+            if permission.has_payload:
+                payload_set.add(entry.payload)
+            perm_map[permission.node] = payload_set
 
 
 ####################################################################################################
