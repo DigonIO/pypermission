@@ -301,8 +301,7 @@ class SQLAlchemyAuthority(Authority):
         self,
         *,
         sid: str,
-        serialize_nodes: Literal[False],
-        serialize_eid: Literal[False],
+        serialize: Literal[False],
         session: Session | None,
     ) -> SubjectPermissionDict[PermissionNode, EntityID]:
         ...
@@ -312,37 +311,18 @@ class SQLAlchemyAuthority(Authority):
         self,
         *,
         sid: str,
-        serialize_nodes: Literal[True],
-        serialize_eid: Literal[False],
-        session: Session | None,
-    ) -> SubjectPermissionDict[str, EntityID]:
-        ...
-
-    @overload
-    def subject_get_permissions(
-        self,
-        *,
-        sid: str,
-        serialize_nodes: Literal[False],
-        serialize_eid: Literal[True],
-        session: Session | None,
-    ) -> SubjectPermissionDict[PermissionNode, str]:
-        ...
-
-    @overload
-    def subject_get_permissions(
-        self,
-        *,
-        sid: str,
-        serialize_nodes: Literal[True],
-        serialize_eid: Literal[True],
+        serialize: Literal[True],
         session: Session | None,
     ) -> SubjectPermissionDict[str, str]:
         ...
 
     @overload
     def subject_get_permissions(
-        self, *, sid: str, serialize_nodes: bool, serialize_eid: bool
+        self,
+        *,
+        sid: str,
+        serialize: bool,
+        session: Session | None,
     ) -> SubjectPermissions:
         ...
 
@@ -350,8 +330,7 @@ class SQLAlchemyAuthority(Authority):
         self,
         *,
         sid: str,
-        serialize_nodes: bool = False,
-        serialize_eid: bool = False,
+        serialize: bool = False,
         session: Session | None = None,
     ) -> SubjectPermissions:
         serial_sid = entity_id_serializer(sid)

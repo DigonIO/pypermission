@@ -5,8 +5,6 @@ from pypermission.serial import SerialAuthority
 
 from .helpers import (
     SUBJECT_PERMISSIONS_NODES_EID,
-    SUBJECT_PERMISSIONS_STR_EID,
-    SUBJECT_PERMISSIONS_NODES_STR,
     SUBJECT_PERMISSIONS_STR_STR,
     USER,
 )
@@ -28,6 +26,7 @@ def test_subject_get_permissions_serial(
     assert DeepDiff(result, expected_permissions, ignore_order=True) == {}
 
 
+@pytest.mark.skip()
 @pytest.mark.parametrize(
     "sql_authority_get_permissions",
     (
