@@ -21,6 +21,8 @@ from pypermission.core import (
     EntityDict,
     GroupDict,
     build_entity_permission_nodes,
+    PID,
+    EID,
 )
 from pypermission.error import (
     EntityIDError,
@@ -588,6 +590,18 @@ class SerialAuthority(_Authority):
         sid: EntityID,
         serialize_nodes: bool = False,
         serialize_eid: bool = False,
+    ) -> SubjectPermissions:
+        node_type = str if serialize_nodes else PermissionNode
+        eid_type = str if serialize_eid else EntityID
+
+        return self._subject_get_permissions(sid=sid, node_type=node_type, eid_type=eid_type)
+
+    def _subject_get_permissions(
+        self,
+        *,
+        sid: EntityID,
+        node_type: PID,
+        eid_type: EID,
     ) -> SubjectPermissions:
         assertEntityIDType(eid=sid)
         subject: Subject = self._get_subject(sid=sid)

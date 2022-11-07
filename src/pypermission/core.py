@@ -355,7 +355,7 @@ class Authority(ABC):
                     branch = None
             else:
                 branch = self._build_permission_subtree(
-                    permission=perm, serialize_nodes=serialize_nodes
+                    permission=perm, serialize_nodes=serialize_nodes, node_type=str
                 )
 
             if tree__serialize[1] == True:  # str
@@ -366,26 +366,8 @@ class Authority(ABC):
                     tree__serialize[0][key] = branch
             # permission_tree[key] = branch
 
-    @overload
     def _build_permission_subtree(
-        self, *, permission: Permission, serialize_nodes: Literal[False]
-    ) -> PERMISSION_TREE[PermissionNode] | list[str] | None:
-        ...
-
-    @overload
-    def _build_permission_subtree(
-        self, *, permission: Permission, serialize_nodes: Literal[True]
-    ) -> PERMISSION_TREE[str] | list[str] | None:
-        ...
-
-    @overload
-    def _build_permission_subtree(
-        self, *, permission: Permission, serialize_nodes: bool
-    ) -> PERMISSION_TREE[PID] | list[str] | None:
-        ...
-
-    def _build_permission_subtree(
-        self, *, permission: Permission, serialize_nodes: bool = False
+        self, *, permission: Permission, serialize_nodes: bool = False, node_type: type[PID]
     ) -> PERMISSION_TREE[PID] | list[str] | None:
         if permission.is_leaf:
             if permission.has_payload:
@@ -455,35 +437,35 @@ def assertEntityIDType(eid: EntityID) -> None:
         )
 
 
-@overload
-def build_entity_permission_nodes(
-    *, permission_map: PermissionMap, serialize_nodes: Literal[True]
-) -> PERMISSION_NODES[str]:
-    ...
-
-
-@overload
-def build_entity_permission_nodes(
-    *, permission_map: PermissionMap, serialize_nodes: Literal[False]
-) -> PERMISSION_NODES[PermissionNode]:
-    ...
-
-
-@overload
-def build_entity_permission_nodes(
-    *, permission_map: PermissionMap, serialize_nodes: bool
-) -> PERMISSION_NODES[str] | PERMISSION_NODES[PermissionNode]:
-    ...
+def istype(node_type: type[PID], target: type[_PID]) -> TypeGuard[type[_PID]]:
+    return node_type is target
 
 
 def build_entity_permission_nodes(
-    *, permission_map: PermissionMap, serialize_nodes: bool = False
-) -> PERMISSION_NODES[str] | PERMISSION_NODES[PermissionNode]:
-    return {
-        str(perm.node.value)
-        if serialize_nodes
-        else perm.node: [val for val in payload]
-        if payload
-        else None
-        for perm, payload in permission_map.items()
-    }
+    *, permission_map: PermissionMap, node_type: type[PID]
+) -> PERMISSION_NODES[PID]:
+    if istype(node_type, PermissionNode):
+        node_type
+        result_PE: PERMISSION_NODES[PermissionNode] = {
+            perm.node: [val for val in payload] if payload else None
+            for perm, payload in permission_map.items()
+        }
+        return result_PE
+    if istype(node_type, str):
+        result_ST: PERMISSION_NODES[str] = {
+            str(perm.node.value): [val for val in payload] if payload else None
+            for perm, payload in permission_map.items()
+        }
+        return result_ST
+    raise ValueError
+
+def build_entity_permission_nodes(
+    *, permission_map: PermissionMap, node_type: type[PID]
+) -> PERMISSION_NODES[PID]:
+    if istype(node_type, PermissionNode):
+        node_type
+        return 2
+    if istype(node_type, str):
+        node_type
+        return 1
+    raise ValueError
