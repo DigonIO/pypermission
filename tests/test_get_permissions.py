@@ -14,21 +14,17 @@ from .conftest import URL_SQLITE, URL_MARIADB
 
 
 @pytest.mark.parametrize(
-    "expected_permissions, serialize_nodes, serialize_eid",
+    "expected_permissions, serialize",
     [
-        (SUBJECT_PERMISSIONS_NODES_EID, False, False),
-        (SUBJECT_PERMISSIONS_STR_EID, True, False),
-        (SUBJECT_PERMISSIONS_NODES_STR, False, True),
-        (SUBJECT_PERMISSIONS_STR_STR, True, True),
+        (SUBJECT_PERMISSIONS_NODES_EID, False),
+        (SUBJECT_PERMISSIONS_STR_STR, True),
     ],
 )
 def test_subject_get_permissions_serial(
-    expected_permissions, serialize_nodes, serialize_eid, serial_authority_get_permissions
+    expected_permissions, serialize, serial_authority_get_permissions
 ):
     auth: SerialAuthority = serial_authority_get_permissions
-    result = auth.subject_get_permissions(
-        sid=USER, serialize_nodes=serialize_nodes, serialize_eid=serialize_eid
-    )
+    result = auth.subject_get_permissions(sid=USER, serialize=serialize)
     assert DeepDiff(result, expected_permissions, ignore_order=True) == {}
 
 
@@ -41,19 +37,15 @@ def test_subject_get_permissions_serial(
     indirect=["sql_authority_get_permissions"],
 )
 @pytest.mark.parametrize(
-    "expected_permissions, serialize_nodes, serialize_eid",
+    "expected_permissions, serialize",
     [
-        (SUBJECT_PERMISSIONS_NODES_EID, False, False),
-        (SUBJECT_PERMISSIONS_STR_EID, True, False),
-        (SUBJECT_PERMISSIONS_NODES_STR, False, True),
-        (SUBJECT_PERMISSIONS_STR_STR, True, True),
+        (SUBJECT_PERMISSIONS_NODES_EID, False),
+        (SUBJECT_PERMISSIONS_STR_STR, True),
     ],
 )
 def test_subject_get_permissions_sql(
-    expected_permissions, serialize_nodes, serialize_eid, sql_authority_get_permissions
+    expected_permissions, serialize, sql_authority_get_permissions
 ):
     auth: SQLAlchemyAuthority = sql_authority_get_permissions
-    result = auth.subject_get_permissions(
-        sid=USER, serialize_nodes=serialize_nodes, serialize_eid=serialize_eid
-    )
+    result = auth.subject_get_permissions(sid=USER, serialize=serialize)
     assert DeepDiff(result, expected_permissions, ignore_order=True) == {}
