@@ -586,7 +586,10 @@ class SerialAuthority(_Authority):
             )
         else:  # serialize == False:
             return self._subject_get_permissions(
-                sid=sid, subject=subject, node_type=PermissionNode, entity_id_type=EntityID
+                sid=sid,
+                subject=subject,
+                node_type=PermissionNode,
+                entity_id_type=EntityID,  # type:ignore
             )
 
     def _subject_get_permissions(
@@ -598,7 +601,7 @@ class SerialAuthority(_Authority):
         )
         entity_id = cast(EID, entity_id_serializer(sid) if entity_id_type is str else sid)
         member_groups = [
-            cast(EID, entity_id_serializer(grp_id) if entity_id_type else grp_id)
+            cast(EID, entity_id_serializer(grp_id) if entity_id_type is str else grp_id)
             for grp_id in subject.gids
         ]
 
@@ -620,7 +623,7 @@ class SerialAuthority(_Authority):
                 cast(
                     EID,
                     entity_id_serializer(grand_ancestor_id)
-                    if entity_id_type
+                    if entity_id_type is str
                     else grand_ancestor_id,
                 )
                 for grand_ancestor_id in ancestor.parent_ids
@@ -632,7 +635,9 @@ class SerialAuthority(_Authority):
             if grand_ancestors:
                 group_dict["parents"] = grand_ancestors
 
-            key = cast(EID, entity_id_serializer(ancestor.id) if entity_id_type else ancestor.id)
+            key = cast(
+                EID, entity_id_serializer(ancestor.id) if entity_id_type is str else ancestor.id
+            )
             groups[key] = group_dict
 
         permission_tree: PERMISSION_TREE[PID] = {}

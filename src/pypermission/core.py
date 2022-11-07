@@ -100,10 +100,13 @@ class Permission:
         return val
 
 
-EntityID = int | str
+EntityID = int | str  # NOTE: this leads to a lot of type ignores
+
 PID = TypeVar("PID", str, PermissionNode)
 _PID = TypeVar("_PID", str, PermissionNode)
-EID = TypeVar("EID", str, EntityID)
+EID = TypeVar("EID", str, EntityID)  # NOTE: thats illegal
+# WARNING: EntityID is an instance not a type
+# type(int | str) == types.UnionType
 
 PERMISSION_NODES = dict[PID, None | list[str]]
 PERMISSION_TREE = dict[PID, Union[None, list[str], "PERMISSION_TREE[PID]"]]
