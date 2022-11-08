@@ -605,11 +605,11 @@ class SerialAuthority(_Authority):
             for grp_id in subject.gids
         ]
 
-        subject_entity_dict: EntityDict[PID, EID] = {"entity_id": entity_id}
-        if permission_nodes:
-            subject_entity_dict["permission_nodes"] = permission_nodes
-        if member_groups:
-            subject_entity_dict["groups"] = member_groups
+        subject_entity_dict: EntityDict[PID, EID] = {
+            "entity_id": entity_id,
+            "permission_nodes": permission_nodes,
+            "groups": member_groups,
+        }
 
         parents: set[Group] = {self._groups[gid] for gid in subject.gids}
         ancestors: list[Group] = self._topo_sort_parents(parents)
@@ -629,11 +629,7 @@ class SerialAuthority(_Authority):
                 for grand_ancestor_id in ancestor.parent_ids
             ]
 
-            group_dict: GroupDict[PID, EID] = {}
-            if permission_nodes:
-                group_dict["permission_nodes"] = permission_nodes
-            if grand_ancestors:
-                group_dict["parents"] = grand_ancestors
+            group_dict: GroupDict[PID, EID] = {"permission_nodes": permission_nodes, "parents": grand_ancestors}
 
             key = cast(
                 EID, entity_id_serializer(ancestor.id) if entity_id_type is str else ancestor.id
