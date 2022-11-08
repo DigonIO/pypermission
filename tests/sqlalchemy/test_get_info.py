@@ -34,7 +34,6 @@ def test_subject_get_info_sql(expected_permissions, serialize, sql_authority_get
     assert DeepDiff(result, expected_permissions, ignore_order=True) == {}
 
 
-@pytest.mark.xfail(reason="Not Implemented")
 @pytest.mark.parametrize(
     "sql_authority_get_info_group",
     (
