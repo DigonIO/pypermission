@@ -119,7 +119,7 @@ PARENT_GROUP = "parent_group"
 USER = "user"
 IRON = "iron"
 
-SUBJECT_PERMISSIONS_NODES_EID = {
+SUBJECT_INFO_NODES_EID = {
     "groups": {
         CHILD_GROUP: {
             "parents": [PARENT_GROUP],
@@ -156,7 +156,7 @@ SUBJECT_PERMISSIONS_NODES_EID = {
 }
 
 
-SUBJECT_PERMISSIONS_STR_STR = {
+SUBJECT_INFO_STR_STR = {
     "groups": {
         "str:child_group": {
             "parents": ["str:parent_group"],

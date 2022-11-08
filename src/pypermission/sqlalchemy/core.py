@@ -12,7 +12,7 @@ from pypermission.core import (
     EntityID,
     EntityDict,
     SubjectPermissionDict,
-    SubjectPermissions,
+    SubjectInfo,
     build_entity_permission_nodes,
     PermissionMap,
 )
@@ -297,7 +297,7 @@ class SQLAlchemyAuthority(Authority):
 
     # https://mypy.readthedocs.io/en/stable/literal_types.html
     @overload
-    def subject_get_permissions(
+    def subject_get_info(
         self,
         *,
         sid: str,
@@ -307,7 +307,7 @@ class SQLAlchemyAuthority(Authority):
         ...
 
     @overload
-    def subject_get_permissions(
+    def subject_get_info(
         self,
         *,
         sid: str,
@@ -317,22 +317,22 @@ class SQLAlchemyAuthority(Authority):
         ...
 
     @overload
-    def subject_get_permissions(
+    def subject_get_info(
         self,
         *,
         sid: str,
         serialize: bool,
         session: Session | None,
-    ) -> SubjectPermissions:
+    ) -> SubjectInfo:
         ...
 
-    def subject_get_permissions(
+    def subject_get_info(
         self,
         *,
         sid: str,
         serialize: bool = False,
         session: Session | None = None,
-    ) -> SubjectPermissions:
+    ) -> SubjectInfo:
         serial_sid = entity_id_serializer(sid)
         db = self._setup_db_session(session)
 

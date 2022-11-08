@@ -146,7 +146,7 @@ class GroupPermissionDict(TypedDict, Generic[PID, EID]):
     permission_tree: PERMISSION_TREE[PID]
 
 
-SubjectPermissions = (
+SubjectInfo = (
     SubjectPermissionDict[PermissionNode, EntityID]
     | SubjectPermissionDict[str, EntityID]
     | SubjectPermissionDict[PermissionNode, str]

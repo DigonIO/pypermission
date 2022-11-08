@@ -4,8 +4,8 @@ from pypermission.sqlalchemy import SQLAlchemyAuthority
 from pypermission.serial import SerialAuthority
 
 from .helpers import (
-    SUBJECT_PERMISSIONS_NODES_EID,
-    SUBJECT_PERMISSIONS_STR_STR,
+    SUBJECT_INFO_NODES_EID,
+    SUBJECT_INFO_STR_STR,
     USER,
 )
 from .conftest import URL_SQLITE, URL_MARIADB
@@ -14,15 +14,13 @@ from .conftest import URL_SQLITE, URL_MARIADB
 @pytest.mark.parametrize(
     "expected_permissions, serialize",
     [
-        (SUBJECT_PERMISSIONS_NODES_EID, False),
-        (SUBJECT_PERMISSIONS_STR_STR, True),
+        (SUBJECT_INFO_NODES_EID, False),
+        (SUBJECT_INFO_STR_STR, True),
     ],
 )
-def test_subject_get_permissions_serial(
-    expected_permissions, serialize, serial_authority_get_permissions
-):
+def test_subject_get_info_serial(expected_permissions, serialize, serial_authority_get_permissions):
     auth: SerialAuthority = serial_authority_get_permissions
-    result = auth.subject_get_permissions(sid=USER, serialize=serialize)
+    result = auth.subject_get_info(sid=USER, serialize=serialize)
     assert DeepDiff(result, expected_permissions, ignore_order=True) == {}
 
 
@@ -38,13 +36,11 @@ def test_subject_get_permissions_serial(
 @pytest.mark.parametrize(
     "expected_permissions, serialize",
     [
-        (SUBJECT_PERMISSIONS_NODES_EID, False),
-        (SUBJECT_PERMISSIONS_STR_STR, True),
+        (SUBJECT_INFO_NODES_EID, False),
+        (SUBJECT_INFO_STR_STR, True),
     ],
 )
-def test_subject_get_permissions_sql(
-    expected_permissions, serialize, sql_authority_get_permissions
-):
+def test_subject_get_info_sql(expected_permissions, serialize, sql_authority_get_permissions):
     auth: SQLAlchemyAuthority = sql_authority_get_permissions
-    result = auth.subject_get_permissions(sid=USER, serialize=serialize)
+    result = auth.subject_get_info(sid=USER, serialize=serialize)
     assert DeepDiff(result, expected_permissions, ignore_order=True) == {}

@@ -17,7 +17,7 @@ from pypermission.core import (
     entity_id_serializer,
     entity_id_deserializer,
     SubjectPermissionDict,
-    SubjectPermissions,
+    SubjectInfo,
     EntityDict,
     GroupDict,
     build_entity_permission_nodes,
@@ -556,45 +556,45 @@ class SerialAuthority(_Authority):
     # https://mypy.readthedocs.io/en/stable/literal_types.html
 
     @overload
-    def subject_get_permissions(
+    def subject_get_info(
         self, *, sid: str, serialize: Literal[False]
     ) -> SubjectPermissionDict[PermissionNode, EntityID]:
         ...
 
     @overload
-    def subject_get_permissions(
+    def subject_get_info(
         self, *, sid: str, serialize: Literal[True]
     ) -> SubjectPermissionDict[str, str]:
         ...
 
     @overload
-    def subject_get_permissions(self, *, sid: str, serialize: bool) -> SubjectPermissions:
+    def subject_get_info(self, *, sid: str, serialize: bool) -> SubjectInfo:
         ...
 
-    def subject_get_permissions(
+    def subject_get_info(
         self,
         *,
         sid: EntityID,
         serialize: bool,
-    ) -> SubjectPermissions:
+    ) -> SubjectInfo:
         assertEntityIDType(eid=sid)
         subject: Subject = self._get_subject(sid=sid)
 
         if serialize is True:
-            return self._subject_get_permissions(
+            return self._subject_get_info(
                 sid=sid, subject=subject, node_type=str, entity_id_type=str
             )
         else:  # serialize == False:
-            return self._subject_get_permissions(
+            return self._subject_get_info(
                 sid=sid,
                 subject=subject,
                 node_type=PermissionNode,
                 entity_id_type=EntityID,  # type:ignore
             )
 
-    def _subject_get_permissions(
+    def _subject_get_info(
         self, *, sid: EntityID, subject: Subject, node_type: type[PID], entity_id_type: type[EID]
-    ) -> SubjectPermissions:  # TODO generic typing
+    ) -> SubjectInfo:  # TODO generic typing
 
         permission_nodes = build_entity_permission_nodes(
             permission_map=subject.permission_map, node_type=node_type
