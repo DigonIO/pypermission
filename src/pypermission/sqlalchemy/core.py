@@ -17,7 +17,10 @@ from pypermission.core import (
     PermissionMap,
     PID,
     EID,
+    GroupDict,
+    PERMISSION_TREE,
 )
+from pypermission.error import GroupCycleError
 from pypermission.core import entity_id_serializer as _entity_id_serializer
 from pypermission.core import entity_id_deserializer as _entity_id_deserializer
 from pypermission.sqlalchemy.models import (
@@ -339,7 +342,7 @@ class SQLAlchemyAuthority(Authority):
         db = self._setup_db_session(session)
 
         if serialize is True:
-            return self._subject_get_info(
+            result = self._subject_get_info(
                 sid=sid,
                 serial_sid=serial_sid,
                 node_type=str,
@@ -347,13 +350,15 @@ class SQLAlchemyAuthority(Authority):
                 db=db,
             )
         else:  # serialize == False:
-            return self._subject_get_info(
+            result = self._subject_get_info(
                 sid=sid,
                 serial_sid=serial_sid,
                 node_type=PermissionNode,
                 entity_id_type=EntityID,  # type:ignore
                 db=db,
             )
+        _close_db_session(db, session)
+        return result
 
     def _subject_get_info(
         self,
@@ -376,7 +381,12 @@ class SQLAlchemyAuthority(Authority):
 
         parents_entries = subject_entry.group_entries
         member_groups = [
-            entry.serial_eid if entity_id_type is str else entity_id_deserializer(entry.serial_eid)
+            cast(
+                EID,
+                entry.serial_eid
+                if entity_id_type is str
+                else entity_id_deserializer(entry.serial_eid),
+            )
             for entry in parents_entries
         ]
 
@@ -386,9 +396,63 @@ class SQLAlchemyAuthority(Authority):
             "groups": member_groups,
         }
 
-        # ancestors: list[Group] = self._topo_sort_parents(parents) # TODO WIP
+        parents: set[GroupEntry] = set(subject_entry.group_entries)
+        ancestors: list[GroupEntry] = _topo_sort_parents(parents)
 
-        raise NotImplementedError
+        groups: dict[EID, GroupDict[PID, EID]] = {}
+        ancestor_permission_maps: dict[GroupEntry, PermissionMap] = {}
+        for ancestor in ancestors:
+            ancestor_permission_map = self._build_permission_map(
+                perm_entries=ancestor.permission_entries
+            )
+
+            # NOTE: Stored for later usage
+            ancestor_permission_maps[ancestor] = ancestor_permission_map
+
+            permission_nodes = build_entity_permission_nodes(
+                permission_map=ancestor_permission_map, node_type=node_type
+            )
+            grand_ancestors = [
+                cast(
+                    EID,
+                    grand_ancestor.serial_eid
+                    if entity_id_type is str
+                    else entity_id_deserializer(grand_ancestor.serial_eid),
+                )
+                for grand_ancestor in ancestor.parent_entries
+            ]
+
+            group_dict: GroupDict[PID, EID] = {
+                "permission_nodes": permission_nodes,
+                "parents": grand_ancestors,
+            }
+
+            key = cast(
+                EID,
+                ancestor.serial_eid
+                if entity_id_type is str
+                else entity_id_deserializer(ancestor.serial_eid),
+            )
+            groups[key] = group_dict
+
+        permission_tree: PERMISSION_TREE[PID] = {}
+
+        self._populate_permission_tree(
+            permission_tree=permission_tree,
+            permission_map=permission_map,
+            node_type=node_type,
+        )
+
+        for grp in ancestors:
+            self._populate_permission_tree(
+                permission_tree=permission_tree,
+                permission_map=ancestor_permission_maps[grp],
+                node_type=node_type,
+            )
+
+        return SubjectInfoDict[PID, EID](
+            groups=groups, subject=subject_entity_dict, permission_tree=permission_tree
+        )
 
     def subject_get_nodes(
         self,
@@ -607,3 +671,30 @@ def _recursive_group_has_permission(
             return True
 
     return False
+
+
+def _visit_group(
+    group_entry: GroupEntry, l: list[GroupEntry], perm: set[GroupEntry], temp: set[GroupEntry]
+) -> None:
+    if group_entry in perm:
+        return
+    if group_entry in temp:
+        raise GroupCycleError()  # TODO msg
+
+    temp.add(group_entry)
+
+    for parent_entry in group_entry.parent_entries:
+        _visit_group(group_entry=parent_entry, l=l, perm=perm, temp=temp)
+
+    temp.remove(group_entry)
+    perm.add(group_entry)
+    l.append(group_entry)
+
+
+def _topo_sort_parents(parents: set[GroupEntry]) -> list[GroupEntry]:
+    l: list[GroupEntry] = []
+    perm: set[GroupEntry] = set()
+    temp: set[GroupEntry] = set()
+    while unmarked := parents - perm:
+        _visit_group(group_entry=unmarked.pop(), l=l, perm=perm, temp=temp)
+    return l

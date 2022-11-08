@@ -912,6 +912,7 @@ class SerialAuthority(_Authority):
         perm.add(group)
         l.append(group)
 
+    # NOTE: not using for now, keep - might still be useful, e.g. to find cycles
     def _topo_sort_groups(self) -> list[Group]:
         l: list[Group] = []
         perm: set[Group] = set()

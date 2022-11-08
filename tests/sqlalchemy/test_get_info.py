@@ -13,7 +13,6 @@ from ..helpers import (
 from ..conftest import URL_SQLITE, URL_MARIADB
 
 
-@pytest.mark.skip()
 @pytest.mark.parametrize(
     "sql_authority_get_info_subject",
     (
