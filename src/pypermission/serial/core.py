@@ -575,7 +575,7 @@ class SerialAuthority(_Authority):
         self,
         *,
         sid: EntityID,
-        serialize: bool,
+        serialize: bool = False,
     ) -> SubjectInfo:
         assertEntityIDType(eid=sid)
         subject: Subject = self._get_subject(sid=sid)
@@ -596,13 +596,15 @@ class SerialAuthority(_Authority):
         self, *, sid: EntityID, subject: Subject, node_type: type[PID], entity_id_type: type[EID]
     ) -> SubjectInfo:  # TODO generic typing
 
+        entity_id = cast(EID, entity_id_serializer(sid) if entity_id_type is str else sid)
         permission_nodes = build_entity_permission_nodes(
             permission_map=subject.permission_map, node_type=node_type
         )
-        entity_id = cast(EID, entity_id_serializer(sid) if entity_id_type is str else sid)
+
+        parent_ids = subject.gids
         member_groups = [
             cast(EID, entity_id_serializer(grp_id) if entity_id_type is str else grp_id)
-            for grp_id in subject.gids
+            for grp_id in parent_ids
         ]
 
         subject_entity_dict: EntityDict[PID, EID] = {
@@ -611,7 +613,7 @@ class SerialAuthority(_Authority):
             "groups": member_groups,
         }
 
-        parents: set[Group] = {self._groups[gid] for gid in subject.gids}
+        parents: set[Group] = {self._groups[gid] for gid in parent_ids}
         ancestors: list[Group] = self._topo_sort_parents(parents)
 
         groups: dict[EID, GroupDict[PID, EID]] = {}
@@ -676,7 +678,7 @@ class SerialAuthority(_Authority):
         self,
         *,
         gid: EntityID,
-        serialize: bool,
+        serialize: bool = False,
     ) -> GroupInfo:
         assertEntityIDType(eid=gid)
         group: Group = self._get_group(gid=gid)

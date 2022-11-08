@@ -1,4 +1,4 @@
-from typing import Sequence, overload, Literal
+from typing import Sequence, overload, Literal, cast
 from sqlalchemy.engine.base import Engine
 from sqlalchemy.orm import Session
 from sqlalchemy.orm.session import sessionmaker
@@ -15,6 +15,8 @@ from pypermission.core import (
     SubjectInfo,
     build_entity_permission_nodes,
     PermissionMap,
+    PID,
+    EID,
 )
 from pypermission.core import entity_id_serializer as _entity_id_serializer
 from pypermission.core import entity_id_deserializer as _entity_id_deserializer
@@ -300,7 +302,7 @@ class SQLAlchemyAuthority(Authority):
     def subject_get_info(
         self,
         *,
-        sid: str,
+        sid: EntityID,
         serialize: Literal[False],
         session: Session | None,
     ) -> SubjectInfoDict[PermissionNode, EntityID]:
@@ -310,7 +312,7 @@ class SQLAlchemyAuthority(Authority):
     def subject_get_info(
         self,
         *,
-        sid: str,
+        sid: EntityID,
         serialize: Literal[True],
         session: Session | None,
     ) -> SubjectInfoDict[str, str]:
@@ -320,7 +322,7 @@ class SQLAlchemyAuthority(Authority):
     def subject_get_info(
         self,
         *,
-        sid: str,
+        sid: EntityID,
         serialize: bool,
         session: Session | None,
     ) -> SubjectInfo:
@@ -329,35 +331,60 @@ class SQLAlchemyAuthority(Authority):
     def subject_get_info(
         self,
         *,
-        sid: str,
+        sid: EntityID,
         serialize: bool = False,
         session: Session | None = None,
     ) -> SubjectInfo:
         serial_sid = entity_id_serializer(sid)
         db = self._setup_db_session(session)
 
+        if serialize is True:
+            return self._subject_get_info(
+                sid=sid,
+                serial_sid=serial_sid,
+                node_type=str,
+                entity_id_type=str,
+                db=db,
+            )
+        else:  # serialize == False:
+            return self._subject_get_info(
+                sid=sid,
+                serial_sid=serial_sid,
+                node_type=PermissionNode,
+                entity_id_type=EntityID,  # type:ignore
+                db=db,
+            )
+
+    def _subject_get_info(
+        self,
+        *,
+        sid: EntityID,
+        serial_sid: str,
+        node_type: type[PID],
+        entity_id_type: type[EID],
+        db: Session,
+    ) -> SubjectInfo:  # TODO generic typing
+
         subject_entry = read_subject(serial_sid=serial_sid, db=db)
 
-        parents_entries = subject_entry.group_entries
+        entity_id = cast(EID, serial_sid if entity_id_type is str else sid)
 
-        subject_entity_dict = EntityDict(
-            permission_nodes=build_entity_permission_nodes(
-                permission_map=self._build_permission_map(
-                    perm_entries=subject_entry.permission_entries
-                ),
-                serialize_nodes=serialize_nodes,
-            ),
-            entity_id=entity_id_serializer(sid) if serialize_eid else sid,
-            groups=[
-                entry.serial_eid if serialize_eid else entity_id_deserializer(entry.serial_eid)
-                for entry in parents_entries
-            ],
+        permission_map = self._build_permission_map(perm_entries=subject_entry.permission_entries)
+        permission_nodes = build_entity_permission_nodes(
+            permission_map=permission_map, node_type=node_type
         )
 
-        if not subject_entity_dict["groups"]:  # NOTE ugly but working solution, rm empty objects
-            subject_entity_dict.pop("groups")
-        if not subject_entity_dict["permission_nodes"]:
-            subject_entity_dict.pop("permission_nodes")
+        parents_entries = subject_entry.group_entries
+        member_groups = [
+            entry.serial_eid if entity_id_type is str else entity_id_deserializer(entry.serial_eid)
+            for entry in parents_entries
+        ]
+
+        subject_entity_dict: EntityDict[PID, EID] = {
+            "entity_id": entity_id,
+            "permission_nodes": permission_nodes,
+            "groups": member_groups,
+        }
 
         # ancestors: list[Group] = self._topo_sort_parents(parents) # TODO WIP
 
@@ -523,7 +550,8 @@ class SQLAlchemyAuthority(Authority):
                 payload_set = set()
             if permission.has_payload:
                 payload_set.add(entry.payload)
-            perm_map[permission.node] = payload_set
+            perm_map[permission] = payload_set
+        return perm_map
 
 
 ####################################################################################################
