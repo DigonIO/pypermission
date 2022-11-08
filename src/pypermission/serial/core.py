@@ -1,38 +1,31 @@
 import json
 from pathlib import Path
-from typing import Generic, TypeVar, Literal, overload, Union, cast
+from typing import Generic, Literal, TypeVar, Union, cast, overload
 
 # typing_extensions for generic TypedDict support:
-from typing_extensions import TypedDict, NotRequired
+from typing_extensions import NotRequired, TypedDict
 
+from pypermission.core import EID, PERMISSION_TREE, PID
 from pypermission.core import Authority as _Authority
 from pypermission.core import (
+    EntityDict,
+    EntityID,
+    GroupDict,
+    GroupInfo,
+    GroupInfoDict,
+    NodeMap,
     Permission,
     PermissionMap,
-    NodeMap,
     PermissionNode,
-    validate_payload_status,
-    EntityID,
-    assertEntityIDType,
-    entity_id_serializer,
-    entity_id_deserializer,
-    SubjectInfoDict,
-    GroupInfoDict,
     SubjectInfo,
-    GroupInfo,
-    EntityDict,
-    GroupDict,
+    SubjectInfoDict,
+    assertEntityIDType,
     build_entity_permission_nodes,
-    PID,
-    EID,
-    PERMISSION_TREE,
+    entity_id_deserializer,
+    entity_id_serializer,
+    validate_payload_status,
 )
-from pypermission.error import (
-    EntityIDError,
-    GroupCycleError,
-    PathError,
-    ParsingError,
-)
+from pypermission.error import EntityIDError, GroupCycleError, ParsingError, PathError
 
 ####################################################################################################
 ### Types

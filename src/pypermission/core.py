@@ -9,18 +9,18 @@ from __future__ import annotations
 
 from abc import ABC
 from enum import Enum
-from typing import cast, overload, Generic, TypeVar, Union, Literal, TypeGuard, Type
+from typing import Generic, Literal, Type, TypeGuard, TypeVar, Union, cast, overload
 
 # typing_extensions for generic TypedDict support:
-from typing_extensions import TypedDict, NotRequired
+from typing_extensions import NotRequired, TypedDict
 
 from pypermission.error import (
+    EntityIDError,
     MissingPayloadError,
     ParsingError,
     UnknownPermissionNodeError,
     UnusedPayloadError,
 )
-from pypermission.error import EntityIDError
 
 
 # NOTE in 3.11 there will be a StrEnum class, that enforces the enum values type as str
@@ -295,7 +295,7 @@ class Authority(ABC):
                 ) from err
 
         if parent.is_leaf:
-            raise ParsingError("The desired parent permission is a leave permission!", parent.node)
+            raise ParsingError("The desired parent permission is a leaf permission!", parent.node)
 
         new_perm = CustomPermission(
             node=node, parent=parent, has_payload=has_payload, is_leaf=is_leaf
