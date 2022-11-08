@@ -134,30 +134,30 @@ class EntityDict(PermissionableEntityDict[PID], Generic[PID, EID]):
     groups: NotRequired[list[EID]]
 
 
-class SubjectPermissionDict(TypedDict, Generic[PID, EID]):
+class SubjectInfoDict(TypedDict, Generic[PID, EID]):
     groups: dict[EID, GroupDict[PID, EID]]
     subject: EntityDict[PID, EID]
     permission_tree: PERMISSION_TREE[PID]
 
 
-class GroupPermissionDict(TypedDict, Generic[PID, EID]):
+class GroupInfoDict(TypedDict, Generic[PID, EID]):
     groups: dict[EID, GroupDict[PID, EID]]
     group: EntityDict[PID, EID]
     permission_tree: PERMISSION_TREE[PID]
 
 
 SubjectInfo = (
-    SubjectPermissionDict[PermissionNode, EntityID]
-    | SubjectPermissionDict[str, EntityID]
-    | SubjectPermissionDict[PermissionNode, str]
-    | SubjectPermissionDict[str, str]
+    SubjectInfoDict[PermissionNode, EntityID]
+    | SubjectInfoDict[str, EntityID]
+    | SubjectInfoDict[PermissionNode, str]
+    | SubjectInfoDict[str, str]
 )
 
-GroupPermissions = (
-    GroupPermissionDict[PermissionNode, EntityID]
-    | GroupPermissionDict[str, EntityID]
-    | GroupPermissionDict[PermissionNode, str]
-    | GroupPermissionDict[str, str]
+GroupInfo = (
+    GroupInfoDict[PermissionNode, EntityID]
+    | GroupInfoDict[str, EntityID]
+    | GroupInfoDict[PermissionNode, str]
+    | GroupInfoDict[str, str]
 )
 
 PermissionMap = dict[Permission, set[str]]

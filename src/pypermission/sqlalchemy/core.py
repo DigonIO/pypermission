@@ -11,7 +11,7 @@ from pypermission.core import (
     validate_payload_status,
     EntityID,
     EntityDict,
-    SubjectPermissionDict,
+    SubjectInfoDict,
     SubjectInfo,
     build_entity_permission_nodes,
     PermissionMap,
@@ -303,7 +303,7 @@ class SQLAlchemyAuthority(Authority):
         sid: str,
         serialize: Literal[False],
         session: Session | None,
-    ) -> SubjectPermissionDict[PermissionNode, EntityID]:
+    ) -> SubjectInfoDict[PermissionNode, EntityID]:
         ...
 
     @overload
@@ -313,7 +313,7 @@ class SQLAlchemyAuthority(Authority):
         sid: str,
         serialize: Literal[True],
         session: Session | None,
-    ) -> SubjectPermissionDict[str, str]:
+    ) -> SubjectInfoDict[str, str]:
         ...
 
     @overload

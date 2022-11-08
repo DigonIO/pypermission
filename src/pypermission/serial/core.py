@@ -16,8 +16,10 @@ from pypermission.core import (
     assertEntityIDType,
     entity_id_serializer,
     entity_id_deserializer,
-    SubjectPermissionDict,
+    SubjectInfoDict,
+    GroupInfoDict,
     SubjectInfo,
+    GroupInfo,
     EntityDict,
     GroupDict,
     build_entity_permission_nodes,
@@ -558,13 +560,11 @@ class SerialAuthority(_Authority):
     @overload
     def subject_get_info(
         self, *, sid: str, serialize: Literal[False]
-    ) -> SubjectPermissionDict[PermissionNode, EntityID]:
+    ) -> SubjectInfoDict[PermissionNode, EntityID]:
         ...
 
     @overload
-    def subject_get_info(
-        self, *, sid: str, serialize: Literal[True]
-    ) -> SubjectPermissionDict[str, str]:
+    def subject_get_info(self, *, sid: str, serialize: Literal[True]) -> SubjectInfoDict[str, str]:
         ...
 
     @overload
@@ -614,7 +614,7 @@ class SerialAuthority(_Authority):
         parents: set[Group] = {self._groups[gid] for gid in subject.gids}
         ancestors: list[Group] = self._topo_sort_parents(parents)
 
-        groups = {}
+        groups: dict[EID, GroupDict[PID, EID]] = {}
         for ancestor in ancestors:
             permission_nodes = build_entity_permission_nodes(
                 permission_map=ancestor.permission_map, node_type=node_type
@@ -629,7 +629,10 @@ class SerialAuthority(_Authority):
                 for grand_ancestor_id in ancestor.parent_ids
             ]
 
-            group_dict: GroupDict[PID, EID] = {"permission_nodes": permission_nodes, "parents": grand_ancestors}
+            group_dict: GroupDict[PID, EID] = {
+                "permission_nodes": permission_nodes,
+                "parents": grand_ancestors,
+            }
 
             key = cast(
                 EID, entity_id_serializer(ancestor.id) if entity_id_type is str else ancestor.id
@@ -651,8 +654,107 @@ class SerialAuthority(_Authority):
                 node_type=node_type,
             )
 
-        return SubjectPermissionDict(
+        return SubjectInfoDict[PID, EID](
             groups=groups, subject=subject_entity_dict, permission_tree=permission_tree
+        )
+
+    @overload
+    def group_get_info(
+        self, *, gid: str, serialize: Literal[False]
+    ) -> GroupInfoDict[PermissionNode, EntityID]:
+        ...
+
+    @overload
+    def group_get_info(self, *, gid: str, serialize: Literal[True]) -> GroupInfoDict[str, str]:
+        ...
+
+    @overload
+    def group_get_info(self, *, gid: str, serialize: bool) -> GroupInfo:
+        ...
+
+    def group_get_info(
+        self,
+        *,
+        gid: EntityID,
+        serialize: bool,
+    ) -> GroupInfo:
+        assertEntityIDType(eid=gid)
+        group: Group = self._get_group(gid=gid)
+
+        if serialize is True:
+            return self._group_get_info(gid=gid, group=group, node_type=str, entity_id_type=str)
+        else:  # serialize == False:
+            return self._group_get_info(
+                gid=gid,
+                group=group,
+                node_type=PermissionNode,
+                entity_id_type=EntityID,  # type:ignore
+            )
+
+    def _group_get_info(
+        self, *, gid: EntityID, group: Group, node_type: type[PID], entity_id_type: type[EID]
+    ) -> GroupInfo:  # TODO generic typing
+
+        permission_nodes = build_entity_permission_nodes(
+            permission_map=group.permission_map, node_type=node_type
+        )
+        entity_id = cast(EID, entity_id_serializer(gid) if entity_id_type is str else gid)
+        member_groups = [
+            cast(EID, entity_id_serializer(grp_id) if entity_id_type is str else grp_id)
+            for grp_id in group.parent_ids
+        ]
+
+        group_entity_dict: EntityDict[PID, EID] = {
+            "entity_id": entity_id,
+            "permission_nodes": permission_nodes,
+            "groups": member_groups,
+        }
+
+        parents: set[Group] = {self._groups[gid] for gid in group.parent_ids}
+        ancestors: list[Group] = self._topo_sort_parents(parents)
+
+        groups = {}
+        for ancestor in ancestors:
+            permission_nodes = build_entity_permission_nodes(
+                permission_map=ancestor.permission_map, node_type=node_type
+            )
+            grand_ancestors = [
+                cast(
+                    EID,
+                    entity_id_serializer(grand_ancestor_id)
+                    if entity_id_type is str
+                    else grand_ancestor_id,
+                )
+                for grand_ancestor_id in ancestor.parent_ids
+            ]
+
+            group_dict: GroupDict[PID, EID] = {
+                "permission_nodes": permission_nodes,
+                "parents": grand_ancestors,
+            }
+
+            key = cast(
+                EID, entity_id_serializer(ancestor.id) if entity_id_type is str else ancestor.id
+            )
+            groups[key] = group_dict
+
+        permission_tree: PERMISSION_TREE[PID] = {}
+
+        self._populate_permission_tree(
+            permission_tree=permission_tree,
+            permission_map=group.permission_map,
+            node_type=node_type,
+        )
+
+        for grp in ancestors:
+            self._populate_permission_tree(
+                permission_tree=permission_tree,
+                permission_map=grp.permission_map,
+                node_type=node_type,
+            )
+
+        return GroupInfoDict(
+            groups=groups, group=group_entity_dict, permission_tree=permission_tree
         )
 
     def subject_get_nodes(self, *, sid: EntityID) -> NodeMap:

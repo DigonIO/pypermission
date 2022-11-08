@@ -213,7 +213,7 @@ GROUP_INFO_NODES_EID = {
     "group": {
         "entity_id": USER_GROUP,
         "permission_nodes": {TPN.TOWNY_WILD_BUILD_: None},
-        "groups": [PARENT_GROUP],
+        "groups": [CHILD_GROUP],
     },
     "permission_tree": {
         TPN.TOWNY_CHAT_: {
