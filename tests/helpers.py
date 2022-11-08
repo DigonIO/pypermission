@@ -116,6 +116,7 @@ def assert_loaded_authority(auth: SerialAuthority | SQLAlchemyAuthority):
 
 CHILD_GROUP = "child_group"
 PARENT_GROUP = "parent_group"
+USER_GROUP = "user_group"
 USER = "user"
 IRON = "iron"
 
@@ -130,6 +131,7 @@ SUBJECT_INFO_NODES_EID = {
             },
         },
         PARENT_GROUP: {
+            "parents": [],
             "permission_nodes": {TPN.TOWNY_CHAT_: None, TPN.TOWNY_WILD_: None},
         },
     },
@@ -167,11 +169,86 @@ SUBJECT_INFO_STR_STR = {
             },
         },
         "str:parent_group": {
+            "parents": [],
             "permission_nodes": {"towny.chat.*": None, "towny.wild.*": None},
         },
     },
     "subject": {
         "entity_id": "str:user",
+        "permission_nodes": {"towny.wild.build.*": None},
+        "groups": ["str:child_group"],
+    },
+    "permission_tree": {
+        "towny.chat.*": {
+            "towny.chat.global": None,
+            "towny.chat.nation": None,
+            "towny.chat.town": None,
+        },
+        "towny.chat.town": None,
+        "towny.wild.*": {
+            "towny.wild.build.*": {"towny.wild.build.<x>": [], "towny.wild.build.iron": None},
+            "towny.wild.destroy.*": {"towny.wild.destroy.<x>": []},
+        },
+        "towny.wild.build.<x>": [IRON],
+        "towny.wild.build.iron": None,
+        "towny.wild.build.*": {"towny.wild.build.<x>": [], "towny.wild.build.iron": None},
+    },
+}
+
+GROUP_INFO_NODES_EID = {
+    "groups": {
+        CHILD_GROUP: {
+            "parents": [PARENT_GROUP],
+            "permission_nodes": {
+                TPN.TOWNY_CHAT_TOWN: None,
+                TPN.TOWNY_WILD_BUILD_X: [IRON],
+                TPN.TOWNY_WILD_BUILD_IRON: None,
+            },
+        },
+        PARENT_GROUP: {
+            "parents": [],
+            "permission_nodes": {TPN.TOWNY_CHAT_: None, TPN.TOWNY_WILD_: None},
+        },
+    },
+    "group": {
+        "entity_id": USER_GROUP,
+        "permission_nodes": {TPN.TOWNY_WILD_BUILD_: None},
+        "groups": [PARENT_GROUP],
+    },
+    "permission_tree": {
+        TPN.TOWNY_CHAT_: {
+            TPN.TOWNY_CHAT_GLOBAL: None,
+            TPN.TOWNY_CHAT_NATION: None,
+            TPN.TOWNY_CHAT_TOWN: None,
+        },
+        TPN.TOWNY_CHAT_TOWN: None,
+        TPN.TOWNY_WILD_: {
+            TPN.TOWNY_WILD_BUILD_: {TPN.TOWNY_WILD_BUILD_X: [], TPN.TOWNY_WILD_BUILD_IRON: None},
+            TPN.TOWNY_WILD_DESTROY_: {TPN.TOWNY_WILD_DESTROY_X: []},
+        },
+        TPN.TOWNY_WILD_BUILD_X: [IRON],
+        TPN.TOWNY_WILD_BUILD_IRON: None,
+        TPN.TOWNY_WILD_BUILD_: {TPN.TOWNY_WILD_BUILD_X: [], TPN.TOWNY_WILD_BUILD_IRON: None},
+    },
+}
+
+GROUP_INFO_STR_STR = {
+    "groups": {
+        "str:child_group": {
+            "parents": ["str:parent_group"],
+            "permission_nodes": {
+                "towny.chat.town": None,
+                "towny.wild.build.<x>": [IRON],
+                "towny.wild.build.iron": None,
+            },
+        },
+        "str:parent_group": {
+            "parents": [],
+            "permission_nodes": {"towny.chat.*": None, "towny.wild.*": None},
+        },
+    },
+    "group": {
+        "entity_id": "str:user_group",
         "permission_nodes": {"towny.wild.build.*": None},
         "groups": ["str:child_group"],
     },
