@@ -1,3 +1,4 @@
+import os
 import pytest
 from sqlalchemy import create_engine
 
@@ -30,8 +31,10 @@ from .helpers import (
     IRON,
 )
 
+MARIADB_URL = "mariadb" if os.environ.get("MARIADB_ROOT_PASSWORD") else "127.0.0.1"
+
 URL_SQLITE = "sqlite:///pp_test.db"
-URL_MARIADB = "mariadb+mariadbconnector://pp_test:pp_test@127.0.0.1:3306/pp_test"
+URL_MARIADB = f"mariadb+mariadbconnector://pp_user:pp_pw@{MARIADB_URL}:3306/pp_db"
 
 
 @pytest.fixture

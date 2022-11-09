@@ -1,12 +1,15 @@
-before_script:
-  - python --version
-  - python ci/secrets.py
-
 stages:
   - analysis
   - documentation
   - testing
   - release
+
+variables:
+  MARIADB_ROOT_PASSWORD: ${MARIADB_ROOT_PASSWORD}
+
+before_script:
+  - python --version
+  - python ci/secrets.py
 
 #### analysis ####
 pylint_3_10_7:
@@ -55,8 +58,13 @@ pytest_3_10_7:
   image: "python:3.10.7-alpine3.16"
   coverage: '/(?i)total.*? (100(?:\.0+)?\%|[1-9]?\d(?:\.\d+)?\%)$/'
   script:
+    - pip install mariadb
+    - python ci/init_test_db.py
     - pip install -e .[test]
     - pytest --cov=src/ tests/
+  services:
+    - name: mariadb:10.10.1-rc-jammy
+
 
 pydoctest_3_10_7:
   stage: testing
