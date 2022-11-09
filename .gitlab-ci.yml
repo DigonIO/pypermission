@@ -58,8 +58,9 @@ pytest_3_10_7:
   image: "python:3.10.7-alpine3.16"
   coverage: '/(?i)total.*? (100(?:\.0+)?\%|[1-9]?\d(?:\.\d+)?\%)$/'
   script:
-    - pip install -e .[test]
+    - pip install mariadb
     - python ci/init_test_db.py
+    - pip install -e .[test]
     - pytest --cov=src/ tests/
   services:
     - name: mariadb:10.10.1-rc-jammy
