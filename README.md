@@ -2,7 +2,7 @@
   <img alt="PyPermission" src="./docs/_assets/logo_name.svg" width="60%">
 </h1>
 
-<p >
+<p>
     A node based permission engine for python.
     Inspired by the permission system used in the Bukkit Minecraft server mod project.
 </p>
@@ -165,6 +165,12 @@ Testing is done using [pytest](https://pypi.org/project/pytest/). With
 ```bash
 pytest --cov=src/ tests/
 coverage html
+```
+
+To test the examples in the documentation run:
+
+```bash
+pytest --doctest-modules docs/pages/*/*.rst
 ```
 
 ## License

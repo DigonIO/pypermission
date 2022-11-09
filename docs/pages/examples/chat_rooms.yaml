@@ -1,0 +1,26 @@
+groups:
+  user:
+    permission_nodes:
+      - chat.message.joined
+      - chat.join.invited
+      - chat.leave
+    member_groups:
+      - moderator
+  moderator:
+    permission_nodes:
+      - chat.create.own
+      - chat.close.own
+      - chat.invite
+      - chat.kick.other
+      - chat.join.*
+    member_subjects:
+      - Bob
+    member_groups:
+      - moderator
+subjects:
+  Alice:
+    permission_nodes:
+      - chat.room.<Alice>
+  Bob:
+    permission_nodes:
+      - chat.room.<Bob>

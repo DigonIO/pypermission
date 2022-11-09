@@ -1,8 +1,14 @@
 from typing import Literal, Sequence, cast, overload
 
-from sqlalchemy.engine.base import Engine
-from sqlalchemy.orm import Session
-from sqlalchemy.orm.session import sessionmaker
+try:
+    from sqlalchemy.engine.base import Engine
+    from sqlalchemy.orm import Session
+    from sqlalchemy.orm.session import sessionmaker
+except ModuleNotFoundError:
+    raise ModuleNotFoundError(
+        "The SQLAlchemyAuthority requires the installation of the optional dependency sqlalchemy."
+        "To install sqlalchemy, use your preferred python package manager."
+    )
 
 from pypermission.core import (
     EID,
