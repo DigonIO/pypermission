@@ -9,7 +9,7 @@
 ```
 
 ```sql
-CREATE DATABASE pp_test;
-CREATE USER 'pp_test'@'localhost' IDENTIFIED BY 'pp_test';
-GRANT ALL PRIVILEGES ON pp_test.* TO 'pp_test'@'localhost';
+CREATE DATABASE pp_db;
+CREATE USER 'pp_user'@'localhost' IDENTIFIED BY 'pp_pw';
+GRANT ALL PRIVILEGES ON pp_db.* TO 'pp_user'@'localhost';
 ```
