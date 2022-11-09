@@ -1,9 +1,10 @@
 from __future__ import annotations
+
 from datetime import datetime
 from typing import cast
 
 from sqlalchemy import Column, DateTime, ForeignKey, Integer, String, event
-from sqlalchemy.orm import declarative_base, relationship, Mapped
+from sqlalchemy.orm import Mapped, declarative_base, relationship
 
 ####################################################################################################
 ### Const
@@ -48,7 +49,7 @@ class PermissionableEntityMixin(TimeStampMixin):
     """Permissionable entity mixin."""
 
     entity_db_id: Mapped[int] = Column(Integer, primary_key=True)
-    serial_eid: Mapped[str | None] = Column(
+    serial_eid: Mapped[str] = Column(
         String(length=SERIAL_ENTITY_ID_LENGHT), unique=True
     )  # Entity ID
 

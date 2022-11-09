@@ -1,12 +1,10 @@
 from typing import Type, cast
+
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from pypermission.core import Permission
-from pypermission.error import (
-    EntityIDError,
-    GroupCycleError,
-)
+from pypermission.error import EntityIDError, GroupCycleError
 from pypermission.sqlalchemy.models import (
     GroupEntry,
     GroupPermissionEntry,

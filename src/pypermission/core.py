@@ -9,18 +9,18 @@ from __future__ import annotations
 
 from abc import ABC
 from enum import Enum
-from typing import cast, overload, Generic, TypeVar, Union, Literal, TypeGuard, Type
+from typing import Generic, Literal, Type, TypeGuard, TypeVar, Union, cast, overload
 
 # typing_extensions for generic TypedDict support:
-from typing_extensions import TypedDict
+from typing_extensions import NotRequired, TypedDict
 
 from pypermission.error import (
+    EntityIDError,
     MissingPayloadError,
     ParsingError,
     UnknownPermissionNodeError,
     UnusedPayloadError,
 )
-from pypermission.error import EntityIDError
 
 
 # NOTE in 3.11 there will be a StrEnum class, that enforces the enum values type as str
@@ -29,7 +29,9 @@ from pypermission.error import EntityIDError
 class PermissionNode(str, Enum):
     """Abstract permission node definition. Inherit from this to define custom permission nodes."""
 
-    ...
+    @property
+    def value(self) -> str:
+        return cast(str, self._value_)
 
 
 class RootPermissionNode(PermissionNode):
@@ -95,13 +97,16 @@ class Permission:
 
     def __str__(self) -> str:
         val = self._node.value
-        return cast(str, val)  # NOTE would be nice without casting
+        return val
 
 
-EntityID = int | str
+EntityID = int | str  # NOTE: this leads to a lot of type ignores
+
 PID = TypeVar("PID", str, PermissionNode)
 _PID = TypeVar("_PID", str, PermissionNode)
-EID = TypeVar("EID", str, EntityID)
+EID = TypeVar("EID", str, EntityID)  # NOTE: thats illegal
+# WARNING: EntityID is an instance not a type
+# type(int | str) == types.UnionType
 
 PERMISSION_NODES = dict[PID, None | list[str]]
 PERMISSION_TREE = dict[PID, Union[None, list[str], "PERMISSION_TREE[PID]"]]
@@ -123,35 +128,36 @@ class GroupDict(PermissionableEntityDict[PID], Generic[PID, EID]):
     parents: list[EID]
 
 
+# NOTE: technically entity_id should not be ommitted
 class EntityDict(PermissionableEntityDict[PID], Generic[PID, EID]):
     entity_id: EID
-    groups: list[EID]
+    groups: NotRequired[list[EID]]
 
 
-class SubjectPermissionDict(TypedDict, Generic[PID, EID]):
+class SubjectInfoDict(TypedDict, Generic[PID, EID]):
     groups: dict[EID, GroupDict[PID, EID]]
     subject: EntityDict[PID, EID]
     permission_tree: PERMISSION_TREE[PID]
 
 
-class GroupPermissionDict(TypedDict, Generic[PID, EID]):
+class GroupInfoDict(TypedDict, Generic[PID, EID]):
     groups: dict[EID, GroupDict[PID, EID]]
     group: EntityDict[PID, EID]
     permission_tree: PERMISSION_TREE[PID]
 
 
-SubjectPermissions = (
-    SubjectPermissionDict[PermissionNode, EntityID]
-    | SubjectPermissionDict[str, EntityID]
-    | SubjectPermissionDict[PermissionNode, str]
-    | SubjectPermissionDict[str, str]
+SubjectInfo = (
+    SubjectInfoDict[PermissionNode, EntityID]
+    | SubjectInfoDict[str, EntityID]
+    | SubjectInfoDict[PermissionNode, str]
+    | SubjectInfoDict[str, str]
 )
 
-GroupPermissions = (
-    GroupPermissionDict[PermissionNode, EntityID]
-    | GroupPermissionDict[str, EntityID]
-    | GroupPermissionDict[PermissionNode, str]
-    | GroupPermissionDict[str, str]
+GroupInfo = (
+    GroupInfoDict[PermissionNode, EntityID]
+    | GroupInfoDict[str, EntityID]
+    | GroupInfoDict[PermissionNode, str]
+    | GroupInfoDict[str, str]
 )
 
 PermissionMap = dict[Permission, set[str]]
@@ -289,7 +295,7 @@ class Authority(ABC):
                 ) from err
 
         if parent.is_leaf:
-            raise ParsingError("The desired parent permission is a leave permission!", parent.node)
+            raise ParsingError("The desired parent permission is a leaf permission!", parent.node)
 
         new_perm = CustomPermission(
             node=node, parent=parent, has_payload=has_payload, is_leaf=is_leaf
@@ -322,29 +328,12 @@ class Authority(ABC):
         *,
         permission_tree: PERMISSION_TREE[PID],
         permission_map: PermissionMap,
-        serialize_nodes: bool = False,
+        node_type: type[PID],
     ) -> None:
         branch: Union[None, list[str], "PERMISSION_TREE[PID]"]
-        permission_tree
-        key_type = str if serialize_nodes else PermissionNode
-        tree__serialize: tuple[PERMISSION_TREE[str], Literal[True]] | tuple[
-            PERMISSION_TREE[PermissionNode], Literal[False]
-        ]
-        if perm_tree_matches_key_type(permission_tree, str):
-            if key_type is str:
-                tree__serialize = permission_tree, True
-            else:
-                raise ValueError
-        elif perm_tree_matches_key_type(permission_tree, PermissionNode):
-            if key_type is PermissionNode:
-                tree__serialize = permission_tree, False
-            else:
-                raise ValueError
-        else:
-            raise ValueError
 
         for perm, payload_set in permission_map.items():
-            key = str(perm.node.value) if serialize_nodes else perm.node
+            key: PID = perm.node.value if node_type is str else perm.node  # type:ignore
             if key in permission_tree:
                 continue
 
@@ -354,30 +343,25 @@ class Authority(ABC):
                 else:
                     branch = None
             else:
-                branch = self._build_permission_subtree(
-                    permission=perm, serialize_nodes=serialize_nodes, node_type=str
-                )
+                branch = self._build_permission_subtree(permission=perm, node_type=node_type)
 
-            if tree__serialize[1] == True:  # str
-                if isinstance(key, str):
-                    tree__serialize[0][key] = branch
-            else:  # PermissionNode
-                if isinstance(key, PermissionNode):
-                    tree__serialize[0][key] = branch
-            # permission_tree[key] = branch
+            permission_tree[key] = branch
 
     def _build_permission_subtree(
-        self, *, permission: Permission, serialize_nodes: bool = False, node_type: type[PID]
+        self,
+        *,
+        permission: Permission,
+        node_type: type[PID],
     ) -> PERMISSION_TREE[PID] | list[str] | None:
         if permission.is_leaf:
             if permission.has_payload:
                 return []
             return None
         return {
-            str(child.node.value)
-            if serialize_nodes
-            else child.node: self._build_permission_subtree(
-                permission=child, serialize_nodes=serialize_nodes
+            child.node.value
+            if node_type is str
+            else child.node: self._build_permission_subtree(  # type:ignore
+                permission=child, node_type=node_type
             )
             for child in permission.children
         }
@@ -437,35 +421,14 @@ def assertEntityIDType(eid: EntityID) -> None:
         )
 
 
-def istype(node_type: type[PID], target: type[_PID]) -> TypeGuard[type[_PID]]:
-    return node_type is target
-
-
 def build_entity_permission_nodes(
     *, permission_map: PermissionMap, node_type: type[PID]
 ) -> PERMISSION_NODES[PID]:
-    if istype(node_type, PermissionNode):
-        node_type
-        result_PE: PERMISSION_NODES[PermissionNode] = {
-            perm.node: [val for val in payload] if payload else None
-            for perm, payload in permission_map.items()
-        }
-        return result_PE
-    if istype(node_type, str):
-        result_ST: PERMISSION_NODES[str] = {
-            str(perm.node.value): [val for val in payload] if payload else None
-            for perm, payload in permission_map.items()
-        }
-        return result_ST
-    raise ValueError
-
-def build_entity_permission_nodes(
-    *, permission_map: PermissionMap, node_type: type[PID]
-) -> PERMISSION_NODES[PID]:
-    if istype(node_type, PermissionNode):
-        node_type
-        return 2
-    if istype(node_type, str):
-        node_type
-        return 1
-    raise ValueError
+    return {
+        perm.node.value
+        if node_type is str  # type:ignore
+        else perm.node: [val for val in payload]
+        if payload
+        else None
+        for perm, payload in permission_map.items()
+    }

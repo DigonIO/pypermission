@@ -27,6 +27,7 @@ from .helpers import (
     CHILD_GROUP,
     PARENT_GROUP,
     USER,
+    USER_GROUP,
     IRON,
 )
 
@@ -130,7 +131,7 @@ def serial_authority_typed() -> SerialAuthority:
     return auth
 
 
-def init_auth_for_get_permissions(auth: SerialAuthority | SQLAlchemyAuthority):
+def init_auth_for_get_info_subject(auth: SerialAuthority | SQLAlchemyAuthority):
     for group in [PARENT_GROUP, CHILD_GROUP]:
         auth.new_group(gid=group)
     auth.new_subject(sid=USER)
@@ -149,15 +150,47 @@ def init_auth_for_get_permissions(auth: SerialAuthority | SQLAlchemyAuthority):
     auth.subject_add_node(sid=USER, node=TPN.TOWNY_WILD_BUILD_)
 
 
+def init_auth_for_get_info_group(auth: SerialAuthority | SQLAlchemyAuthority):
+    for group in [PARENT_GROUP, CHILD_GROUP, USER_GROUP]:
+        auth.new_group(gid=group)
+
+    auth.group_add_member_group(gid=PARENT_GROUP, member_gid=CHILD_GROUP)
+
+    auth.group_add_member_group(gid=CHILD_GROUP, member_gid=USER_GROUP)
+
+    auth.group_add_node(gid=PARENT_GROUP, node=TPN.TOWNY_CHAT_)
+    auth.group_add_node(gid=PARENT_GROUP, node=TPN.TOWNY_WILD_)
+
+    auth.group_add_node(gid=CHILD_GROUP, node=TPN.TOWNY_CHAT_TOWN)
+    auth.group_add_node(gid=CHILD_GROUP, node=TPN.TOWNY_WILD_BUILD_X, payload=IRON)
+    auth.group_add_node(gid=CHILD_GROUP, node=TPN.TOWNY_WILD_BUILD_IRON)
+
+    auth.group_add_node(gid=USER_GROUP, node=TPN.TOWNY_WILD_BUILD_)
+
+
 @pytest.fixture
-def serial_authority_get_permissions() -> SerialAuthority:
+def serial_authority_get_info_subject() -> SerialAuthority:
     auth = SerialAuthority(nodes=TPN)
-    init_auth_for_get_permissions(auth)
+    init_auth_for_get_info_subject(auth)
     return auth
 
 
 @pytest.fixture
-def sql_authority_get_permissions(db_engine) -> SQLAlchemyAuthority:
+def sql_authority_get_info_subject(db_engine) -> SQLAlchemyAuthority:
     auth = SQLAlchemyAuthority(nodes=TPN, engine=db_engine)
-    init_auth_for_get_permissions(auth)
+    init_auth_for_get_info_subject(auth)
+    return auth
+
+
+@pytest.fixture
+def serial_authority_get_info_group() -> SerialAuthority:
+    auth = SerialAuthority(nodes=TPN)
+    init_auth_for_get_info_group(auth)
+    return auth
+
+
+@pytest.fixture
+def sql_authority_get_info_group(db_engine) -> SQLAlchemyAuthority:
+    auth = SQLAlchemyAuthority(nodes=TPN, engine=db_engine)
+    init_auth_for_get_info_group(auth)
     return auth
