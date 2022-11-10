@@ -1,11 +1,9 @@
 groups:
-  user:
+  admin:
     permission_nodes:
-      - chat.message.joined
-      - chat.join.invited
-      - chat.leave
-    member_groups:
-      - moderator
+      - "*"
+    member_subjects:
+      - Alice
   moderator:
     permission_nodes:
       - chat.create.own
@@ -15,12 +13,17 @@ groups:
       - chat.join.*
     member_subjects:
       - Bob
-    member_groups:
-      - moderator
+  user:
+    permission_nodes:
+      - chat.message.joined
+      - chat.join.invited
+      - chat.leave
+    member_subjects:
+      - Alice
+      - Bob
+      - John
 subjects:
-  Alice:
-    permission_nodes:
-      - chat.room.<Alice>
-  Bob:
-    permission_nodes:
-      - chat.room.<Bob>
+  Alice: {}
+  Bob: {}
+  John: {}
+
