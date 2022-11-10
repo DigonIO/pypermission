@@ -217,7 +217,7 @@ class Authority(ABC):
         nodes : type[PermissionNode]
             The permission nodes to be registered.
         """
-        # TODO check that all enum values are strings
+        # TODO check that all enum values are strings, and have a valid pattern
         for node in nodes:
             self._register_permission(node=node)
 
@@ -253,7 +253,11 @@ class Authority(ABC):
             payload = last_section[1:-1]
             last_section = "<x>"
 
-        node_str = ".".join(node_str_sections[:-1]) + "." + last_section
+        if len(node_str_sections) > 1:
+            node_str = ".".join(node_str_sections[:-1]) + "." + last_section
+        else:
+            node_str = last_section
+
         try:
             return self._node_str_permission_map[node_str], payload
         except KeyError as err:
@@ -289,12 +293,14 @@ class Authority(ABC):
             try:
                 parent = parent.sub_graph[section]
             except KeyError as err:
+                # TODO: improve message
                 raise ParsingError(
                     "A nested permission requires a parent permission!",
                     potential_parent_node[1:] + ".*",
                 ) from err
 
         if parent.is_leaf:
+            # TODO: improve message
             raise ParsingError("The desired parent permission is a leaf permission!", parent.node)
 
         new_perm = CustomPermission(
