@@ -32,6 +32,7 @@ REQUIRE_TEST = [
     "coverage==6.5.0",
     "deepdiff==6.2.1",
     "sqlalchemy==1.4.42",
+    "sybil=3.0.1",
 ]
 
 REQUIRE_LINT = [

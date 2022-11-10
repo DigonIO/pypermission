@@ -22,7 +22,7 @@ def test_readme_code_example():
 
     auth = SerialAuthority(nodes=Nodes)
 
-    auth.load_file(path=path / "save_file.yaml")
+    auth.load_file(path=path / "test_readme.yaml")
 
     assert auth.subject_has_permission(sid="Bob", node=Nodes.TICKET_OPEN) == True
     assert auth.subject_has_permission(sid="Alice", node=Nodes.TICKET_CLOSE_ALL) == True

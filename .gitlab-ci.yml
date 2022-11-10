@@ -55,7 +55,7 @@ doc_3_10_7:
 #### testing ####
 pytest_3_10_7:
   stage: testing
-  image: "python:3.10.7-alpine3.16"
+  image: "registry.gitlab.com/digonio/pypermission-images:pp_testing-py_3_10_8-6a0138fe"
   coverage: '/(?i)total.*? (100(?:\.0+)?\%|[1-9]?\d(?:\.\d+)?\%)$/'
   script:
     - pip install mariadb
@@ -72,7 +72,7 @@ pydoctest_3_10_7:
   script:
     - pip install -e .[test]
     - pip list
-    - pytest --doctest-modules docs/pages/*/*.rst
+    - pytest docs/
 
 #### release ####
 pypi:

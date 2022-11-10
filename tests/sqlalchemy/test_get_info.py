@@ -9,8 +9,9 @@ from ..helpers import (
     GROUP_INFO_STR_STR,
     USER,
     USER_GROUP,
+    URL_SQLITE,
+    URL_MARIADB,
 )
-from ..conftest import URL_SQLITE, URL_MARIADB
 
 
 @pytest.mark.parametrize(

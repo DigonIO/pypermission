@@ -1,6 +1,16 @@
+import os
+
 from pypermission.serial import SerialAuthority
 from pypermission.sqlalchemy import SQLAlchemyAuthority
 from pypermission.core import PermissionNode
+
+# The gitlab-ci provides access to the db under the `mariadb` hostname for the `pytest_3_10_7` job
+# as specified under https://docs.gitlab.com/ee/ci/services/#accessing-the-services
+# Set the `MARIADB_ROOT_PASSWORD` variable in the gitlab ci for this to be used.
+MARIADB_URL = "mariadb" if os.environ.get("MARIADB_ROOT_PASSWORD") else "127.0.0.1"
+
+URL_SQLITE = "sqlite:///pp_test.db"
+URL_MARIADB = f"mariadb+mariadbconnector://pp_user:pp_pw@{MARIADB_URL}:3306/pp_db"
 
 EGG = "egg"
 SPAM = "spam"

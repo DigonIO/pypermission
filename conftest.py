@@ -1,11 +1,10 @@
-import os
 import pytest
 from sqlalchemy import create_engine
 
 from pypermission.serial import SerialAuthority
 from pypermission.sqlalchemy import SQLAlchemyAuthority
 from pypermission.sqlalchemy.models import DeclarativeMeta
-from .helpers import (
+from tests.helpers import (
     ANIMAL_BASED,
     APPLE,
     BANANA,
@@ -30,11 +29,6 @@ from .helpers import (
     USER_GROUP,
     IRON,
 )
-
-MARIADB_URL = "mariadb" if os.environ.get("MARIADB_ROOT_PASSWORD") else "127.0.0.1"
-
-URL_SQLITE = "sqlite:///pp_test.db"
-URL_MARIADB = f"mariadb+mariadbconnector://pp_user:pp_pw@{MARIADB_URL}:3306/pp_db"
 
 
 @pytest.fixture

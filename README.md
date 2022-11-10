@@ -170,7 +170,7 @@ coverage html
 To test the examples in the documentation run:
 
 ```bash
-pytest --doctest-modules docs/pages/*/*.rst
+pytest docs/
 ```
 
 ## License
