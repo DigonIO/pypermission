@@ -58,10 +58,8 @@ pytest_3_10_7:
   image: "registry.gitlab.com/digonio/pypermission-images:pp_testing-py_3_10_8-6a0138fe"
   coverage: '/(?i)total.*? (100(?:\.0+)?\%|[1-9]?\d(?:\.\d+)?\%)$/'
   script:
-    - pip install mariadb
-    # - sleep 10
-    - python ci/init_test_db.py
     - pip install -e .[test]
+    - python ci/init_test_db.py
     - pytest --cov=src/ tests/
   services:
     - name: mariadb:10.10.1-rc-jammy
@@ -71,10 +69,8 @@ pydoctest_3_10_7:
   stage: testing
   image: "registry.gitlab.com/digonio/pypermission-images:pp_testing-py_3_10_8-6a0138fe"
   script:
-    - pip install mariadb
-    # - sleep 10
-    - python ci/init_test_db.py
     - pip install -e .[test]
+    - python ci/init_test_db.py
     - pytest docs/
   services:
     - name: mariadb:10.10.1-rc-jammy

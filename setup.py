@@ -34,6 +34,7 @@ class Dependecy(str, Enum):
     TYPING_EXTENSIONS = "typing-extensions==4.4.0"
     MYPY_EXTENSIONS = "mypy-extensions==0.4.3"
     SQLALCHEMY2_STUBS = "sqlalchemy2-stubs==0.0.2a29"
+    SCHEDULER = "scheduler==0.8.0"
 
 
 Dep = Dependecy
@@ -60,6 +61,7 @@ REQ_TEST = REQ_LINT | {
     Dep.COVERAGE,
     Dep.DEEPDIFF,
     Dep.SYBIL,
+    Dep.SCHEDULER,
     Dep.MARIADB,
 }
 REQ_DEV = REQ_DOC | REQ_TEST
