@@ -6,16 +6,14 @@ groups:
       - Alice
   moderator:
     permission_nodes:
-      - chat.create.own
-      - chat.close.own
       - chat.invite
-      - chat.kick.other
+      - chat.ban.user
       - chat.join.*
+      - chat.message.<org-moderators>
     member_subjects:
       - Bob
   user:
     permission_nodes:
-      - chat.message.joined
       - chat.join.invited
       - chat.leave
     member_subjects:
@@ -23,7 +21,14 @@ groups:
       - Bob
       - John
 subjects:
-  Alice: {}
-  Bob: {}
-  John: {}
-
+  Alice:
+    permission_nodes:
+      - chat.message.<room-12>
+      - chat.message.<room-212>
+  Bob:
+    permission_nodes:
+      - chat.message.<room-12>
+      - chat.message.<room-501>
+  John:
+    permission_nodes:
+      - chat.message.<room-501>

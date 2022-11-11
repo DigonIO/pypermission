@@ -10,4 +10,3 @@
 
     readme
     examples
-    guides

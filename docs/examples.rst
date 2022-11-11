@@ -5,7 +5,8 @@ Examples
     :maxdepth: 2
     :caption: Table of Contents
 
-    pages/examples/quick_start
-    pages/examples/subject_api
-    pages/examples/group_api
-    pages/examples/persistency
+    pages/quick_start
+    pages/subject_api
+    pages/group_api
+    pages/persistency
+    pages/rbac_rest_api_json

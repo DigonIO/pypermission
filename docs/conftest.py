@@ -11,7 +11,7 @@ pytest_collect_file = Sybil(
         PythonCodeBlockParser(),
         skip,
     ],
-    patterns=["pages/examples/quick_start.rst"],
+    patterns=["pages/quick_start.rst"],
     # patterns=["pages/*/*.rst"],
     fixtures=["serial_authority_typed"],
 ).pytest()
