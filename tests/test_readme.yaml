@@ -1,4 +1,4 @@
-groups:
+roles:
   moderator:
     permission_nodes:
       - chat.global
@@ -12,7 +12,7 @@ groups:
       - ticket.close.own
     member_subjects:
       - Bob
-    member_groups:
+    member_roles:
       - moderator
 subjects:
   Alice:

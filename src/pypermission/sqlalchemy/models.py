@@ -81,16 +81,16 @@ class SubjectEntry(DeclarativeMeta, PermissionableEntityMixin):
     )
 
     @property
-    def group_entries(self) -> list[GroupEntry]:
-        return [membership.group_entry for membership in self._membership_entries]
+    def role_entries(self) -> list[RoleEntry]:
+        return [membership.role_entry for membership in self._membership_entries]
 
 
-class GroupEntry(DeclarativeMeta, PermissionableEntityMixin):
-    __tablename__ = PREFIX + "group_table"
+class RoleEntry(DeclarativeMeta, PermissionableEntityMixin):
+    __tablename__ = PREFIX + "role_table"
     __table_args__ = {"extend_existing": EXTEND_EXISTING}
 
-    permission_entries: Mapped[list[GroupPermissionEntry]] = relationship(
-        "GroupPermissionEntry", cascade="all,delete"
+    permission_entries: Mapped[list[RolePermissionEntry]] = relationship(
+        "RolePermissionEntry", cascade="all,delete"
     )
 
     _membership_entries: Mapped[list[MembershipEntry]] = relationship(
@@ -100,13 +100,13 @@ class GroupEntry(DeclarativeMeta, PermissionableEntityMixin):
     _parent_relationship_entries: Mapped[list[RelationshipEntry]] = relationship(
         "RelationshipEntry",
         cascade="all,delete",
-        primaryjoin="and_(RelationshipEntry.child_db_id==GroupEntry.entity_db_id)",
+        primaryjoin="and_(RelationshipEntry.child_db_id==RoleEntry.entity_db_id)",
         # do not use viewonly=True, instead use backpopulate in the linked table to allow cascade
     )
     _child_relationship_entries: Mapped[list[RelationshipEntry]] = relationship(
         "RelationshipEntry",
         cascade="all,delete",
-        primaryjoin="and_(RelationshipEntry.parent_db_id==GroupEntry.entity_db_id)",
+        primaryjoin="and_(RelationshipEntry.parent_db_id==RoleEntry.entity_db_id)",
         # do not use viewonly=True, instead use backpopulate in the linked table to allow cascade
     )
 
@@ -115,11 +115,11 @@ class GroupEntry(DeclarativeMeta, PermissionableEntityMixin):
         return [membership.subject_entry for membership in self._membership_entries]
 
     @property
-    def parent_entries(self) -> list[GroupEntry]:
+    def parent_entries(self) -> list[RoleEntry]:
         return [relation.parent_entry for relation in self._parent_relationship_entries]
 
     @property
-    def child_entries(self) -> list[GroupEntry]:
+    def child_entries(self) -> list[RoleEntry]:
         return [relation.child_entry for relation in self._child_relationship_entries]
 
 
@@ -131,11 +131,11 @@ class SubjectPermissionEntry(DeclarativeMeta, PermissionPayloadMixin):
     )
 
 
-class GroupPermissionEntry(DeclarativeMeta, PermissionPayloadMixin):
-    __tablename__ = PREFIX + "group_permission_table"
+class RolePermissionEntry(DeclarativeMeta, PermissionPayloadMixin):
+    __tablename__ = PREFIX + "role_permission_table"
     __table_args__ = {"extend_existing": EXTEND_EXISTING}
     entity_db_id: Mapped[int] = Column(
-        Integer, ForeignKey(PREFIX + "group_table.entity_db_id"), primary_key=True
+        Integer, ForeignKey(PREFIX + "role_table.entity_db_id"), primary_key=True
     )
 
 
@@ -145,16 +145,14 @@ class MembershipEntry(DeclarativeMeta, TimeStampMixin):
     subject_db_id: Mapped[int] = Column(
         Integer, ForeignKey(PREFIX + "subject_table.entity_db_id"), primary_key=True
     )
-    group_db_id: Mapped[int] = Column(
-        Integer, ForeignKey(PREFIX + "group_table.entity_db_id"), primary_key=True
+    role_db_id: Mapped[int] = Column(
+        Integer, ForeignKey(PREFIX + "role_table.entity_db_id"), primary_key=True
     )
 
     subject_entry: Mapped[SubjectEntry] = relationship(
         "SubjectEntry", back_populates="_membership_entries"
     )
-    group_entry: Mapped[GroupEntry] = relationship(
-        "GroupEntry", back_populates="_membership_entries"
-    )
+    role_entry: Mapped[RoleEntry] = relationship("RoleEntry", back_populates="_membership_entries")
 
 
 class RelationshipEntry(DeclarativeMeta, TimeStampMixin):
@@ -162,13 +160,13 @@ class RelationshipEntry(DeclarativeMeta, TimeStampMixin):
     __table_args__ = {"extend_existing": EXTEND_EXISTING}
 
     parent_db_id: Mapped[int] = Column(
-        Integer, ForeignKey(PREFIX + "group_table.entity_db_id"), primary_key=True
+        Integer, ForeignKey(PREFIX + "role_table.entity_db_id"), primary_key=True
     )
-    child_db_id = Column(Integer, ForeignKey(PREFIX + "group_table.entity_db_id"), primary_key=True)
+    child_db_id = Column(Integer, ForeignKey(PREFIX + "role_table.entity_db_id"), primary_key=True)
 
-    parent_entry: GroupEntry = relationship(
-        "GroupEntry", foreign_keys=[parent_db_id], back_populates="_child_relationship_entries"
+    parent_entry: RoleEntry = relationship(
+        "RoleEntry", foreign_keys=[parent_db_id], back_populates="_child_relationship_entries"
     )
-    child_entry: GroupEntry = relationship(
-        "GroupEntry", foreign_keys=[child_db_id], back_populates="_parent_relationship_entries"
+    child_entry: RoleEntry = relationship(
+        "RoleEntry", foreign_keys=[child_db_id], back_populates="_parent_relationship_entries"
     )

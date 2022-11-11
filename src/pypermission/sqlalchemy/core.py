@@ -17,9 +17,9 @@ from pypermission.core import (
     Authority,
     EntityDict,
     EntityID,
-    GroupDict,
-    GroupInfo,
-    GroupInfoDict,
+    RoleDict,
+    RoleInfo,
+    RoleInfoDict,
     NodeMap,
     Permission,
     PermissionMap,
@@ -31,31 +31,31 @@ from pypermission.core import (
 from pypermission.core import entity_id_deserializer as _entity_id_deserializer
 from pypermission.core import entity_id_serializer as _entity_id_serializer
 from pypermission.core import validate_payload_status
-from pypermission.error import GroupCycleError
+from pypermission.error import RoleCycleError
 from pypermission.sqlalchemy.models import (
     ENTITY_ID_MAX_LENGHT,
     SERIAL_ENTITY_ID_LENGHT,
     DeclarativeMeta,
-    GroupEntry,
-    GroupPermissionEntry,
+    RoleEntry,
+    RolePermissionEntry,
     PermissionableEntityMixin,
     PermissionPayloadMixin,
     SubjectEntry,
 )
 from pypermission.sqlalchemy.service import (
-    create_group,
-    create_group_permission,
+    create_role,
+    create_role_permission,
     create_membership,
     create_parent_child_relationship,
     create_subject,
     create_subject_permission,
-    delete_group,
-    delete_group_permission,
+    delete_role,
+    delete_role_permission,
     delete_membership,
     delete_parent_child_relationship,
     delete_subject,
     delete_subject_permission,
-    read_group,
+    read_role,
     read_subject,
     serialize_payload,
 )
@@ -86,36 +86,36 @@ class SQLAlchemyAuthority(Authority):
 
         _close_db_session(db, session)
 
-    def new_group(self, gid: EntityID, session: Session | None = None) -> None:
-        """Create a new group for a given ID."""
-        serial_gid = entity_id_serializer(gid)
+    def new_role(self, rid: EntityID, session: Session | None = None) -> None:
+        """Create a new role for a given ID."""
+        serial_rid = entity_id_serializer(rid)
         db = self._setup_db_session(session)
 
-        create_group(serial_gid=serial_gid, db=db)
+        create_role(serial_rid=serial_rid, db=db)
 
         _close_db_session(db, session)
 
-    def group_add_member_subject(
-        self, *, gid: EntityID, member_sid: EntityID, session: Session | None = None
+    def role_add_member_subject(
+        self, *, rid: EntityID, member_sid: EntityID, session: Session | None = None
     ) -> None:
-        """Add a subject to a group to inherit all its permissions."""
-        serial_gid = entity_id_serializer(gid)
+        """Add a subject to a role to inherit all its permissions."""
+        serial_rid = entity_id_serializer(rid)
         serial_member_sid = entity_id_serializer(member_sid)
         db = self._setup_db_session(session)
 
-        create_membership(serial_sid=serial_member_sid, serial_gid=serial_gid, db=db)
+        create_membership(serial_sid=serial_member_sid, serial_rid=serial_rid, db=db)
 
         _close_db_session(db, session)
 
-    def group_add_member_group(
-        self, *, gid: EntityID, member_gid: EntityID, session: Session | None = None
+    def role_add_member_role(
+        self, *, rid: EntityID, member_rid: EntityID, session: Session | None = None
     ) -> None:
-        """Add a group to a parent group to inherit all its permissions."""
-        serial_gid = entity_id_serializer(gid)
-        serial_member_gid = entity_id_serializer(member_gid)
+        """Add a role to a parent role to inherit all its permissions."""
+        serial_rid = entity_id_serializer(rid)
+        serial_member_rid = entity_id_serializer(member_rid)
         db = self._setup_db_session(session)
 
-        create_parent_child_relationship(serial_pid=serial_gid, serial_cid=serial_member_gid, db=db)
+        create_parent_child_relationship(serial_pid=serial_rid, serial_cid=serial_member_rid, db=db)
 
         _close_db_session(db, session)
 
@@ -139,23 +139,21 @@ class SQLAlchemyAuthority(Authority):
 
         _close_db_session(db, session)
 
-    def group_add_node(
+    def role_add_node(
         self,
         *,
-        gid: EntityID,
+        rid: EntityID,
         node: PermissionNode,
         payload: str | None = None,
         session: Session | None = None,
     ) -> None:
-        """Add a permission to a group."""
-        serial_gid = entity_id_serializer(gid)
+        """Add a permission to a role."""
+        serial_rid = entity_id_serializer(rid)
         db = self._setup_db_session(session)
         permission = self._get_permission(node=node)
         validate_payload_status(permission=permission, payload=payload)
 
-        create_group_permission(
-            serial_gid=serial_gid, permission=permission, payload=payload, db=db
-        )
+        create_role_permission(serial_rid=serial_rid, permission=permission, payload=payload, db=db)
 
         _close_db_session(db, session)
 
@@ -178,59 +176,59 @@ class SQLAlchemyAuthority(Authority):
         _close_db_session(db, session)
         return result
 
-    def get_groups(self, session: Session | None = None) -> set[EntityID]:
-        """Get the IDs for all known groups."""
+    def get_roles(self, session: Session | None = None) -> set[EntityID]:
+        """Get the IDs for all known roles."""
         db = self._setup_db_session(session)
 
-        group_entries: list[PermissionableEntityMixin] = db.query(GroupEntry).all()
+        role_entries: list[PermissionableEntityMixin] = db.query(RoleEntry).all()
         result = set(
-            entity_id_deserializer(entry.serial_eid) for entry in group_entries if entry.serial_eid
+            entity_id_deserializer(entry.serial_eid) for entry in role_entries if entry.serial_eid
         )
 
         _close_db_session(db, session)
         return result
 
-    def subject_get_groups(self, sid: EntityID, session: Session | None = None) -> set[EntityID]:
-        """Get a set of a group IDs of a groups a subject is member of."""
+    def subject_get_roles(self, sid: EntityID, session: Session | None = None) -> set[EntityID]:
+        """Get a set of a role IDs of a roles a subject is member of."""
         serial_sid = entity_id_serializer(sid)
         db = self._setup_db_session(session)
 
         subject_entry = read_subject(serial_sid=serial_sid, db=db)
         result = set(
             entity_id_deserializer(entry.serial_eid)
-            for entry in subject_entry.group_entries
+            for entry in subject_entry.role_entries
             if entry.serial_eid
         )
 
         _close_db_session(db, session)
         return result
 
-    def group_get_member_subjects(
-        self, gid: EntityID, session: Session | None = None
+    def role_get_member_subjects(
+        self, rid: EntityID, session: Session | None = None
     ) -> set[EntityID]:
-        """Get a set of all subject IDs from a group."""
-        serial_gid = entity_id_serializer(gid)
+        """Get a set of all subject IDs from a role."""
+        serial_rid = entity_id_serializer(rid)
         db = self._setup_db_session(session)
 
-        group_entry = read_group(serial_gid=serial_gid, db=db)
+        role_entry = read_role(serial_rid=serial_rid, db=db)
         result = set(
             entity_id_deserializer(entry.serial_eid)
-            for entry in group_entry.subject_entries
+            for entry in role_entry.subject_entries
             if entry.serial_eid
         )
 
         _close_db_session(db, session)
         return result
 
-    def group_get_member_groups(
-        self, *, gid: EntityID, session: Session | None = None
+    def role_get_member_roles(
+        self, *, rid: EntityID, session: Session | None = None
     ) -> set[EntityID]:
-        """Get a set of all child group IDs of a group."""
-        serial_gid = entity_id_serializer(gid)
+        """Get a set of all child role IDs of a role."""
+        serial_rid = entity_id_serializer(rid)
         db = self._setup_db_session(session)
 
-        group_entry = read_group(serial_gid=serial_gid, db=db)
-        child_entries = group_entry.child_entries
+        role_entry = read_role(serial_rid=serial_rid, db=db)
+        child_entries = role_entry.child_entries
         result = set(
             entity_id_deserializer(entry.serial_eid) for entry in child_entries if entry.serial_eid
         )
@@ -238,15 +236,15 @@ class SQLAlchemyAuthority(Authority):
         _close_db_session(db, session)
         return result
 
-    def group_get_parent_groups(
-        self, *, gid: EntityID, session: Session | None = None
+    def role_get_parent_roles(
+        self, *, rid: EntityID, session: Session | None = None
     ) -> set[EntityID]:
-        """Get a set of all parent group IDs of a group."""
-        serial_gid = entity_id_serializer(gid)
+        """Get a set of all parent role IDs of a role."""
+        serial_rid = entity_id_serializer(rid)
         db = self._setup_db_session(session)
 
-        group_entry = read_group(serial_gid=serial_gid, db=db)
-        parent_entries = group_entry.parent_entries
+        role_entry = read_role(serial_rid=serial_rid, db=db)
+        parent_entries = role_entry.parent_entries
         result = set(
             entity_id_deserializer(entry.serial_eid) for entry in parent_entries if entry.serial_eid
         )
@@ -275,10 +273,10 @@ class SQLAlchemyAuthority(Authority):
             _close_db_session(db, session)
             return True
 
-        group_entries = subject_entry.group_entries
-        for entry in group_entries:
-            if _recursive_group_has_permission(
-                group_entry=entry, permission=permission, payload=payload
+        role_entries = subject_entry.role_entries
+        for entry in role_entries:
+            if _recursive_role_has_permission(
+                role_entry=entry, permission=permission, payload=payload
             ):
                 _close_db_session(db, session)
                 return True
@@ -286,24 +284,24 @@ class SQLAlchemyAuthority(Authority):
         _close_db_session(db, session)
         return False
 
-    def group_has_permission(
+    def role_has_permission(
         self,
         *,
-        gid: EntityID,
+        rid: EntityID,
         node: PermissionNode,
         payload: str | None = None,
         session: Session | None = None,
     ) -> bool:
-        """Check if a group has a wanted permission."""
-        serial_gid = entity_id_serializer(gid)
+        """Check if a role has a wanted permission."""
+        serial_rid = entity_id_serializer(rid)
         db = self._setup_db_session(session)
         permission = self._get_permission(node=node)
         validate_payload_status(permission=permission, payload=payload)
 
-        group_entry = read_group(serial_gid=serial_gid, db=db)
+        role_entry = read_role(serial_rid=serial_rid, db=db)
 
-        result = _recursive_group_has_permission(
-            group_entry=group_entry, permission=permission, payload=payload
+        result = _recursive_role_has_permission(
+            role_entry=role_entry, permission=permission, payload=payload
         )
 
         _close_db_session(db, session)
@@ -388,8 +386,8 @@ class SQLAlchemyAuthority(Authority):
             permission_map=permission_map, node_type=node_type
         )
 
-        parents_entries = subject_entry.group_entries
-        member_groups = [
+        parents_entries = subject_entry.role_entries
+        member_roles = [
             cast(
                 EID,
                 entry.serial_eid
@@ -402,14 +400,14 @@ class SQLAlchemyAuthority(Authority):
         subject_entity_dict: EntityDict[PID, EID] = {
             "entity_id": entity_id,
             "permission_nodes": permission_nodes,
-            "groups": member_groups,
+            "roles": member_roles,
         }
 
-        parents: set[GroupEntry] = set(subject_entry.group_entries)
-        ancestors: list[GroupEntry] = _topo_sort_parents(parents)
+        parents: set[RoleEntry] = set(subject_entry.role_entries)
+        ancestors: list[RoleEntry] = _topo_sort_parents(parents)
 
-        groups: dict[EID, GroupDict[PID, EID]] = {}
-        ancestor_permission_maps: dict[GroupEntry, PermissionMap] = {}
+        roles: dict[EID, RoleDict[PID, EID]] = {}
+        ancestor_permission_maps: dict[RoleEntry, PermissionMap] = {}
         for ancestor in ancestors:
             ancestor_permission_map = self._build_permission_map(
                 perm_entries=ancestor.permission_entries
@@ -431,7 +429,7 @@ class SQLAlchemyAuthority(Authority):
                 for grand_ancestor in ancestor.parent_entries
             ]
 
-            group_dict: GroupDict[PID, EID] = {
+            role_dict: RoleDict[PID, EID] = {
                 "permission_nodes": permission_nodes,
                 "parents": grand_ancestors,
             }
@@ -442,7 +440,7 @@ class SQLAlchemyAuthority(Authority):
                 if entity_id_type is str
                 else entity_id_deserializer(ancestor.serial_eid),
             )
-            groups[key] = group_dict
+            roles[key] = role_dict
 
         permission_tree: PERMISSION_TREE[PID] = {}
 
@@ -460,61 +458,61 @@ class SQLAlchemyAuthority(Authority):
             )
 
         return SubjectInfoDict[PID, EID](
-            groups=groups, subject=subject_entity_dict, permission_tree=permission_tree
+            roles=roles, subject=subject_entity_dict, permission_tree=permission_tree
         )
 
     @overload
-    def group_get_info(
+    def role_get_info(
         self,
         *,
-        gid: EntityID,
+        rid: EntityID,
         serialize: Literal[False],
         session: Session | None,
-    ) -> GroupInfoDict[PermissionNode, EntityID]:
+    ) -> RoleInfoDict[PermissionNode, EntityID]:
         ...
 
     @overload
-    def group_get_info(
+    def role_get_info(
         self,
         *,
-        gid: EntityID,
+        rid: EntityID,
         serialize: Literal[True],
         session: Session | None,
-    ) -> GroupInfoDict[str, str]:
+    ) -> RoleInfoDict[str, str]:
         ...
 
     @overload
-    def group_get_info(
+    def role_get_info(
         self,
         *,
-        gid: EntityID,
+        rid: EntityID,
         serialize: bool,
         session: Session | None,
-    ) -> GroupInfo:
+    ) -> RoleInfo:
         ...
 
-    def group_get_info(
+    def role_get_info(
         self,
         *,
-        gid: EntityID,
+        rid: EntityID,
         serialize: bool = False,
         session: Session | None = None,
-    ) -> GroupInfo:
-        serial_gid = entity_id_serializer(gid)
+    ) -> RoleInfo:
+        serial_rid = entity_id_serializer(rid)
         db = self._setup_db_session(session)
 
         if serialize is True:
-            result = self._group_get_info(
-                gid=gid,
-                serial_gid=serial_gid,
+            result = self._role_get_info(
+                rid=rid,
+                serial_rid=serial_rid,
                 node_type=str,
                 entity_id_type=str,
                 db=db,
             )
         else:  # serialize == False:
-            result = self._group_get_info(
-                gid=gid,
-                serial_gid=serial_gid,
+            result = self._role_get_info(
+                rid=rid,
+                serial_rid=serial_rid,
                 node_type=PermissionNode,
                 entity_id_type=EntityID,  # type:ignore
                 db=db,
@@ -522,27 +520,27 @@ class SQLAlchemyAuthority(Authority):
         _close_db_session(db, session)
         return result
 
-    def _group_get_info(
+    def _role_get_info(
         self,
         *,
-        gid: EntityID,
-        serial_gid: str,
+        rid: EntityID,
+        serial_rid: str,
         node_type: type[PID],
         entity_id_type: type[EID],
         db: Session,
-    ) -> GroupInfo:  # TODO generic typing
+    ) -> RoleInfo:  # TODO generic typing
 
-        group_entry: GroupEntry = read_group(serial_gid=serial_gid, db=db)
+        role_entry: RoleEntry = read_role(serial_rid=serial_rid, db=db)
 
-        entity_id = cast(EID, serial_gid if entity_id_type is str else gid)
+        entity_id = cast(EID, serial_rid if entity_id_type is str else rid)
 
-        permission_map = self._build_permission_map(perm_entries=group_entry.permission_entries)
+        permission_map = self._build_permission_map(perm_entries=role_entry.permission_entries)
         permission_nodes = build_entity_permission_nodes(
             permission_map=permission_map, node_type=node_type
         )
 
-        parents_entries = group_entry.parent_entries
-        member_groups = [
+        parents_entries = role_entry.parent_entries
+        member_roles = [
             cast(
                 EID,
                 entry.serial_eid
@@ -552,17 +550,17 @@ class SQLAlchemyAuthority(Authority):
             for entry in parents_entries
         ]
 
-        group_entity_dict: EntityDict[PID, EID] = {
+        role_entity_dict: EntityDict[PID, EID] = {
             "entity_id": entity_id,
             "permission_nodes": permission_nodes,
-            "groups": member_groups,
+            "roles": member_roles,
         }
 
-        parents: set[GroupEntry] = set(group_entry.parent_entries)
-        ancestors: list[GroupEntry] = _topo_sort_parents(parents)
+        parents: set[RoleEntry] = set(role_entry.parent_entries)
+        ancestors: list[RoleEntry] = _topo_sort_parents(parents)
 
-        groups: dict[EID, GroupDict[PID, EID]] = {}
-        ancestor_permission_maps: dict[GroupEntry, PermissionMap] = {}
+        roles: dict[EID, RoleDict[PID, EID]] = {}
+        ancestor_permission_maps: dict[RoleEntry, PermissionMap] = {}
         for ancestor in ancestors:
             ancestor_permission_map = self._build_permission_map(
                 perm_entries=ancestor.permission_entries
@@ -584,7 +582,7 @@ class SQLAlchemyAuthority(Authority):
                 for grand_ancestor in ancestor.parent_entries
             ]
 
-            group_dict: GroupDict[PID, EID] = {
+            role_dict: RoleDict[PID, EID] = {
                 "permission_nodes": permission_nodes,
                 "parents": grand_ancestors,
             }
@@ -595,7 +593,7 @@ class SQLAlchemyAuthority(Authority):
                 if entity_id_type is str
                 else entity_id_deserializer(ancestor.serial_eid),
             )
-            groups[key] = group_dict
+            roles[key] = role_dict
 
         permission_tree: PERMISSION_TREE[PID] = {}
 
@@ -612,8 +610,8 @@ class SQLAlchemyAuthority(Authority):
                 node_type=node_type,
             )
 
-        return GroupInfoDict[PID, EID](
-            groups=groups, group=group_entity_dict, permission_tree=permission_tree
+        return RoleInfoDict[PID, EID](
+            roles=roles, role=role_entity_dict, permission_tree=permission_tree
         )
 
     def subject_get_nodes(
@@ -634,18 +632,18 @@ class SQLAlchemyAuthority(Authority):
         _close_db_session(db, session)
         return result
 
-    def group_get_nodes(
+    def role_get_nodes(
         self,
         *,
-        gid: EntityID,
+        rid: EntityID,
         session: Session | None = None,
     ) -> NodeMap:
-        """Get a copy of all permissions from a group."""
-        serial_gid = entity_id_serializer(gid)
+        """Get a copy of all permissions from a role."""
+        serial_rid = entity_id_serializer(rid)
         db = self._setup_db_session(session)
 
-        group_entry = read_group(serial_gid=serial_gid, db=db)
-        perm_entries = group_entry.permission_entries
+        role_entry = read_role(serial_rid=serial_rid, db=db)
+        perm_entries = role_entry.permission_entries
 
         result = self._build_node_map(perm_entries=perm_entries)
 
@@ -665,12 +663,12 @@ class SQLAlchemyAuthority(Authority):
 
         _close_db_session(db, session)
 
-    def rm_group(self, gid: EntityID, session: Session | None = None) -> None:
-        """Remove a group for a given ID."""
-        serial_gid = entity_id_serializer(gid)
+    def rm_role(self, rid: EntityID, session: Session | None = None) -> None:
+        """Remove a role for a given ID."""
+        serial_rid = entity_id_serializer(rid)
         db = self._setup_db_session(session)
 
-        delete_group(serial_gid=serial_gid, db=db)
+        delete_role(serial_rid=serial_rid, db=db)
 
         _close_db_session(db, session)
 
@@ -694,51 +692,49 @@ class SQLAlchemyAuthority(Authority):
 
         _close_db_session(db, session)
 
-    def group_rm_node(
+    def role_rm_node(
         self,
         *,
-        gid: EntityID,
+        rid: EntityID,
         node: PermissionNode,
         payload: str | None = None,
         session: Session | None = None,
     ) -> None:
-        """Remove a permission to a group."""
-        serial_gid = entity_id_serializer(gid)
+        """Remove a permission to a role."""
+        serial_rid = entity_id_serializer(rid)
         db = self._setup_db_session(session)
         permission = self._get_permission(node=node)
         validate_payload_status(permission=permission, payload=payload)
 
-        delete_group_permission(
-            serial_gid=serial_gid, permission=permission, payload=payload, db=db
-        )
+        delete_role_permission(serial_rid=serial_rid, permission=permission, payload=payload, db=db)
 
         _close_db_session(db, session)
 
-    def group_rm_member_subject(
+    def role_rm_member_subject(
         self,
         *,
-        gid: EntityID,
+        rid: EntityID,
         member_sid: EntityID,
         session: Session | None = None,
     ) -> None:
-        """Remove a subject from a group."""
-        serial_gid = entity_id_serializer(gid)
+        """Remove a subject from a role."""
+        serial_rid = entity_id_serializer(rid)
         serial_member_sid = entity_id_serializer(member_sid)
         db = self._setup_db_session(session)
 
-        delete_membership(serial_sid=serial_member_sid, serial_gid=serial_gid, db=db)
+        delete_membership(serial_sid=serial_member_sid, serial_rid=serial_rid, db=db)
 
         _close_db_session(db, session)
 
-    def group_rm_member_group(
-        self, *, gid: EntityID, member_gid: EntityID, session: Session | None = None
+    def role_rm_member_role(
+        self, *, rid: EntityID, member_rid: EntityID, session: Session | None = None
     ) -> None:
-        """Remove a group from a group."""
-        serial_gid = entity_id_serializer(gid)
-        serial_member_gid = entity_id_serializer(member_gid)
+        """Remove a role from a role."""
+        serial_rid = entity_id_serializer(rid)
+        serial_member_rid = entity_id_serializer(member_rid)
         db = self._setup_db_session(session)
 
-        delete_parent_child_relationship(serial_pid=serial_gid, serial_cid=serial_member_gid, db=db)
+        delete_parent_child_relationship(serial_pid=serial_rid, serial_cid=serial_member_rid, db=db)
 
         _close_db_session(db, session)
 
@@ -817,46 +813,44 @@ def _has_permission(
     return False
 
 
-def _recursive_group_has_permission(
-    group_entry: GroupEntry, permission: Permission, payload: str | None
+def _recursive_role_has_permission(
+    role_entry: RoleEntry, permission: Permission, payload: str | None
 ) -> bool:
-    """Recursively check whether the group or one of its parents has the perm searched for."""
-    perm_entries: list[GroupPermissionEntry] = group_entry.permission_entries
+    """Recursively check whether the role or one of its parents has the perm searched for."""
+    perm_entries: list[RolePermissionEntry] = role_entry.permission_entries
     if _has_permission(perm_entries=perm_entries, permission=permission, payload=payload):
         return True
 
-    parent_entries: Sequence[GroupEntry] = group_entry.parent_entries
+    parent_entries: Sequence[RoleEntry] = role_entry.parent_entries
     for entry in parent_entries:
-        if _recursive_group_has_permission(
-            group_entry=entry, permission=permission, payload=payload
-        ):
+        if _recursive_role_has_permission(role_entry=entry, permission=permission, payload=payload):
             return True
 
     return False
 
 
-def _visit_group(
-    group_entry: GroupEntry, l: list[GroupEntry], perm: set[GroupEntry], temp: set[GroupEntry]
+def _visit_role(
+    role_entry: RoleEntry, l: list[RoleEntry], perm: set[RoleEntry], temp: set[RoleEntry]
 ) -> None:
-    if group_entry in perm:
+    if role_entry in perm:
         return
-    if group_entry in temp:
-        raise GroupCycleError()  # TODO msg
+    if role_entry in temp:
+        raise RoleCycleError()  # TODO msg
 
-    temp.add(group_entry)
+    temp.add(role_entry)
 
-    for parent_entry in group_entry.parent_entries:
-        _visit_group(group_entry=parent_entry, l=l, perm=perm, temp=temp)
+    for parent_entry in role_entry.parent_entries:
+        _visit_role(role_entry=parent_entry, l=l, perm=perm, temp=temp)
 
-    temp.remove(group_entry)
-    perm.add(group_entry)
-    l.append(group_entry)
+    temp.remove(role_entry)
+    perm.add(role_entry)
+    l.append(role_entry)
 
 
-def _topo_sort_parents(parents: set[GroupEntry]) -> list[GroupEntry]:
-    l: list[GroupEntry] = []
-    perm: set[GroupEntry] = set()
-    temp: set[GroupEntry] = set()
+def _topo_sort_parents(parents: set[RoleEntry]) -> list[RoleEntry]:
+    l: list[RoleEntry] = []
+    perm: set[RoleEntry] = set()
+    temp: set[RoleEntry] = set()
     while unmarked := parents - perm:
-        _visit_group(group_entry=unmarked.pop(), l=l, perm=perm, temp=temp)
+        _visit_role(role_entry=unmarked.pop(), l=l, perm=perm, temp=temp)
     return l

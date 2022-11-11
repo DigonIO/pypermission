@@ -55,9 +55,9 @@ def test_write_file_json(serial_authority):
 
 # Fulfil the properties of the fixture `serial_authority`
 SAVE_DATA_YAML = {
-    "groups": {
+    "roles": {
         "animal_based": {
-            "member_groups": [],
+            "member_roles": [],
             "member_subjects": ["spam", "ham", "egg"],
             "permission_nodes": [
                 "towny.chat.town",
@@ -66,12 +66,12 @@ SAVE_DATA_YAML = {
             ],
         },
         "food": {
-            "member_groups": ["plant_based", "animal_based"],
+            "member_roles": ["plant_based", "animal_based"],
             "member_subjects": [],
             "permission_nodes": ["towny.chat.global"],
         },
         "plant_based": {
-            "member_groups": [],
+            "member_roles": [],
             "member_subjects": ["apple", "orange", "banana", "pear"],
             "permission_nodes": [
                 "towny.chat.nation",
@@ -92,9 +92,9 @@ SAVE_DATA_YAML = {
 }
 
 SAVE_DATA_JSON = {
-    "groups": {
+    "roles": {
         "str:animal_based": {
-            "member_groups": [],
+            "member_roles": [],
             "member_subjects": ["str:spam", "str:ham", "str:egg"],
             "permission_nodes": [
                 "towny.chat.town",
@@ -103,12 +103,12 @@ SAVE_DATA_JSON = {
             ],
         },
         "str:food": {
-            "member_groups": ["str:plant_based", "str:animal_based"],
+            "member_roles": ["str:plant_based", "str:animal_based"],
             "member_subjects": [],
             "permission_nodes": ["towny.chat.global"],
         },
         "str:plant_based": {
-            "member_groups": [],
+            "member_roles": [],
             "member_subjects": ["str:apple", "str:orange", "str:banana", "str:pear"],
             "permission_nodes": [
                 "towny.chat.nation",

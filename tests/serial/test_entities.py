@@ -1,6 +1,6 @@
 import pytest
 
-from pypermission.error import GroupCycleError, UnknownPermissionNodeError
+from pypermission.error import RoleCycleError, UnknownPermissionNodeError
 from pypermission.serial import SerialAuthority
 
 from ..helpers import TownyPermissionNode
@@ -28,9 +28,9 @@ def test_basic_integration(serial_authority: SerialAuthority):
 def test_rm_permission(serial_authority: SerialAuthority):
     auth = serial_authority
 
-    assert auth.group_has_permission(gid=FOOD, node=TPN.TOWNY_CHAT_GLOBAL) == True
-    auth.group_rm_node(gid=FOOD, node=TPN.TOWNY_CHAT_GLOBAL)
-    assert auth.group_has_permission(gid=FOOD, node=TPN.TOWNY_CHAT_GLOBAL) == False
+    assert auth.role_has_permission(rid=FOOD, node=TPN.TOWNY_CHAT_GLOBAL) == True
+    auth.role_rm_node(rid=FOOD, node=TPN.TOWNY_CHAT_GLOBAL)
+    assert auth.role_has_permission(rid=FOOD, node=TPN.TOWNY_CHAT_GLOBAL) == False
 
     assert auth.subject_has_permission(sid=HAM, node=TPN.TOWNY_WILD_) == True
     auth.subject_rm_node(sid=HAM, node=TPN.TOWNY_WILD_)
@@ -44,11 +44,11 @@ def test_subject_get_permissions(serial_authority: SerialAuthority):
     assert auth.subject_get_nodes(sid=HAM) == {TPN.TOWNY_WILD_: set()}
 
 
-def test_group_get_permissions(serial_authority: SerialAuthority):
+def test_role_get_permissions(serial_authority: SerialAuthority):
     auth = serial_authority
 
-    assert auth.group_get_nodes(gid=FOOD) == {TPN.TOWNY_CHAT_GLOBAL: set()}
-    assert auth.group_get_nodes(gid=ANIMAL_BASED) == {
+    assert auth.role_get_nodes(rid=FOOD) == {TPN.TOWNY_CHAT_GLOBAL: set()}
+    assert auth.role_get_nodes(rid=ANIMAL_BASED) == {
         TPN.TOWNY_CHAT_TOWN: set(),
         TPN.TOWNY_WILD_BUILD_X: {"dirt", "gold"},
     }
@@ -66,7 +66,7 @@ def test_rm_subject(serial_authority: SerialAuthority):
         PEAR,
         BANANA,
     }
-    assert auth.group_get_member_subjects(gid=PLANT_BASED) == {
+    assert auth.role_get_member_subjects(rid=PLANT_BASED) == {
         ORANGE,
         APPLE,
         PEAR,
@@ -83,61 +83,61 @@ def test_rm_subject(serial_authority: SerialAuthority):
         PEAR,
         BANANA,
     }
-    assert auth.group_get_member_subjects(gid=PLANT_BASED) == {
+    assert auth.role_get_member_subjects(rid=PLANT_BASED) == {
         APPLE,
         PEAR,
         BANANA,
     }
 
 
-def test_rm_parent_group(serial_authority: SerialAuthority):
+def test_rm_parent_role(serial_authority: SerialAuthority):
     auth = serial_authority
 
-    assert auth.get_groups() == {FOOD, ANIMAL_BASED, PLANT_BASED}
-    assert auth.group_get_parent_groups(gid=ANIMAL_BASED) == {FOOD}
+    assert auth.get_roles() == {FOOD, ANIMAL_BASED, PLANT_BASED}
+    assert auth.role_get_parent_roles(rid=ANIMAL_BASED) == {FOOD}
 
-    auth.rm_group(gid=FOOD)
+    auth.rm_role(rid=FOOD)
 
-    assert auth.get_groups() == {ANIMAL_BASED, PLANT_BASED}
-    assert auth.group_get_parent_groups(gid=ANIMAL_BASED) == set()
+    assert auth.get_roles() == {ANIMAL_BASED, PLANT_BASED}
+    assert auth.role_get_parent_roles(rid=ANIMAL_BASED) == set()
 
 
-def test_rm_child_group(serial_authority: SerialAuthority):
+def test_rm_child_role(serial_authority: SerialAuthority):
     auth = serial_authority
 
-    assert auth.get_groups() == {FOOD, ANIMAL_BASED, PLANT_BASED}
-    assert auth.group_get_member_groups(gid=FOOD) == {ANIMAL_BASED, PLANT_BASED}
-    assert auth.subject_get_groups(sid=EGG) == {ANIMAL_BASED}
+    assert auth.get_roles() == {FOOD, ANIMAL_BASED, PLANT_BASED}
+    assert auth.role_get_member_roles(rid=FOOD) == {ANIMAL_BASED, PLANT_BASED}
+    assert auth.subject_get_roles(sid=EGG) == {ANIMAL_BASED}
 
-    auth.rm_group(gid=ANIMAL_BASED)
+    auth.rm_role(rid=ANIMAL_BASED)
 
-    assert auth.get_groups() == {FOOD, PLANT_BASED}
-    assert auth.group_get_member_groups(gid=FOOD) == {PLANT_BASED}
-    assert auth.subject_get_groups(sid=EGG) == set()
+    assert auth.get_roles() == {FOOD, PLANT_BASED}
+    assert auth.role_get_member_roles(rid=FOOD) == {PLANT_BASED}
+    assert auth.subject_get_roles(sid=EGG) == set()
 
 
-def test_rm_member_group(serial_authority: SerialAuthority):
+def test_rm_member_role(serial_authority: SerialAuthority):
     auth = serial_authority
 
-    assert auth.group_get_member_groups(gid=FOOD) == {ANIMAL_BASED, PLANT_BASED}
-    assert auth.group_get_parent_groups(gid=ANIMAL_BASED) == {FOOD}
+    assert auth.role_get_member_roles(rid=FOOD) == {ANIMAL_BASED, PLANT_BASED}
+    assert auth.role_get_parent_roles(rid=ANIMAL_BASED) == {FOOD}
 
-    auth.group_rm_member_group(gid=FOOD, member_gid=ANIMAL_BASED)
+    auth.role_rm_member_role(rid=FOOD, member_rid=ANIMAL_BASED)
 
-    assert auth.group_get_member_groups(gid=FOOD) == {PLANT_BASED}
-    assert auth.group_get_parent_groups(gid=ANIMAL_BASED) == set()
+    assert auth.role_get_member_roles(rid=FOOD) == {PLANT_BASED}
+    assert auth.role_get_parent_roles(rid=ANIMAL_BASED) == set()
 
 
 def test_rm_member_subject(serial_authority: SerialAuthority):
     auth = serial_authority
 
-    assert auth.group_get_member_subjects(gid=ANIMAL_BASED) == {EGG, SPAM, HAM}
-    assert auth.subject_get_groups(sid=EGG) == {ANIMAL_BASED}
+    assert auth.role_get_member_subjects(rid=ANIMAL_BASED) == {EGG, SPAM, HAM}
+    assert auth.subject_get_roles(sid=EGG) == {ANIMAL_BASED}
 
-    auth.group_rm_member_subject(gid=ANIMAL_BASED, member_sid=EGG)
+    auth.role_rm_member_subject(rid=ANIMAL_BASED, member_sid=EGG)
 
-    assert auth.group_get_member_subjects(gid=ANIMAL_BASED) == {SPAM, HAM}
-    assert auth.subject_get_groups(sid=EGG) == set()
+    assert auth.role_get_member_subjects(rid=ANIMAL_BASED) == {SPAM, HAM}
+    assert auth.subject_get_roles(sid=EGG) == set()
 
 
 def test_unknown_perm_node():
@@ -145,10 +145,10 @@ def test_unknown_perm_node():
 
     auth.new_subject(sid=APPLE)
 
-    auth.new_group(gid=FOOD)
+    auth.new_role(rid=FOOD)
 
     with pytest.raises(UnknownPermissionNodeError):
         auth.subject_add_node(sid=APPLE, node=TownyPermissionNode.TOWNY_CHAT_)
 
     with pytest.raises(UnknownPermissionNodeError):
-        auth.group_add_node(gid=FOOD, node=TownyPermissionNode.TOWNY_CHAT_)
+        auth.role_add_node(rid=FOOD, node=TownyPermissionNode.TOWNY_CHAT_)

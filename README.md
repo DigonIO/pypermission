@@ -97,10 +97,10 @@ auth = SerialAuthority(nodes=Nodes)
 ```
 
 The following file `save_file.yaml` defines a mixed access control setup (RBAC & UBAC). Alice is
-a member of the moderator group, while Bob is given only permissions of the user group:
+a member of the moderator role, while Bob is given only permissions of the user role:
 
 ```yaml
-groups:
+roles:
   moderator:
     permission_nodes:
       - chat.global
@@ -114,7 +114,7 @@ groups:
       - ticket.close.own
     member_subjects:
       - Bob
-    member_groups:
+    member_roles:
       - moderator
 subjects:
   Alice:

@@ -58,8 +58,8 @@ def init_auth(auth: SerialAuthority | SQLAlchemyAuthority):
     # The authority created here should fulfil the properties of the two save files
     # `./serial/save_file.yaml` and `./serial/save_file.json`
 
-    for group in [FOOD, ANIMAL_BASED, PLANT_BASED]:
-        auth.new_group(gid=group)
+    for role in [FOOD, ANIMAL_BASED, PLANT_BASED]:
+        auth.new_role(rid=role)
     for subject in [
         EGG,
         SPAM,
@@ -71,29 +71,29 @@ def init_auth(auth: SerialAuthority | SQLAlchemyAuthority):
     ]:
         auth.new_subject(sid=subject)
 
-    auth.group_add_member_group(gid=FOOD, member_gid=ANIMAL_BASED)
-    auth.group_add_member_group(gid=FOOD, member_gid=PLANT_BASED)
+    auth.role_add_member_role(rid=FOOD, member_rid=ANIMAL_BASED)
+    auth.role_add_member_role(rid=FOOD, member_rid=PLANT_BASED)
 
-    auth.group_add_member_subject(gid=ANIMAL_BASED, member_sid=EGG)
-    auth.group_add_member_subject(gid=ANIMAL_BASED, member_sid=SPAM)
-    auth.group_add_member_subject(gid=ANIMAL_BASED, member_sid=HAM)
+    auth.role_add_member_subject(rid=ANIMAL_BASED, member_sid=EGG)
+    auth.role_add_member_subject(rid=ANIMAL_BASED, member_sid=SPAM)
+    auth.role_add_member_subject(rid=ANIMAL_BASED, member_sid=HAM)
 
-    auth.group_add_member_subject(gid=PLANT_BASED, member_sid=ORANGE)
-    auth.group_add_member_subject(gid=PLANT_BASED, member_sid=APPLE)
-    auth.group_add_member_subject(gid=PLANT_BASED, member_sid=PEAR)
-    auth.group_add_member_subject(gid=PLANT_BASED, member_sid=BANANA)
+    auth.role_add_member_subject(rid=PLANT_BASED, member_sid=ORANGE)
+    auth.role_add_member_subject(rid=PLANT_BASED, member_sid=APPLE)
+    auth.role_add_member_subject(rid=PLANT_BASED, member_sid=PEAR)
+    auth.role_add_member_subject(rid=PLANT_BASED, member_sid=BANANA)
 
-    auth.group_add_node(gid=FOOD, node=TPN.TOWNY_CHAT_GLOBAL)
+    auth.role_add_node(rid=FOOD, node=TPN.TOWNY_CHAT_GLOBAL)
 
-    auth.group_add_node(gid=ANIMAL_BASED, node=TPN.TOWNY_CHAT_TOWN)
+    auth.role_add_node(rid=ANIMAL_BASED, node=TPN.TOWNY_CHAT_TOWN)
 
-    auth.group_add_node(gid=PLANT_BASED, node=TPN.TOWNY_CHAT_NATION)
+    auth.role_add_node(rid=PLANT_BASED, node=TPN.TOWNY_CHAT_NATION)
 
-    auth.group_add_node(gid=ANIMAL_BASED, node=TPN.TOWNY_WILD_BUILD_X, payload="dirt")
-    auth.group_add_node(gid=ANIMAL_BASED, node=TPN.TOWNY_WILD_BUILD_X, payload="gold")
+    auth.role_add_node(rid=ANIMAL_BASED, node=TPN.TOWNY_WILD_BUILD_X, payload="dirt")
+    auth.role_add_node(rid=ANIMAL_BASED, node=TPN.TOWNY_WILD_BUILD_X, payload="gold")
 
-    auth.group_add_node(gid=PLANT_BASED, node=TPN.TOWNY_WILD_DESTROY_X, payload="dirt")
-    auth.group_add_node(gid=PLANT_BASED, node=TPN.TOWNY_WILD_DESTROY_X, payload="gold")
+    auth.role_add_node(rid=PLANT_BASED, node=TPN.TOWNY_WILD_DESTROY_X, payload="dirt")
+    auth.role_add_node(rid=PLANT_BASED, node=TPN.TOWNY_WILD_DESTROY_X, payload="gold")
 
     auth.subject_add_node(sid=HAM, node=TPN.TOWNY_WILD_)  # < diese wars
 
@@ -102,8 +102,8 @@ def init_auth(auth: SerialAuthority | SQLAlchemyAuthority):
 def serial_authority_typed() -> SerialAuthority:
     auth = SerialAuthority()
 
-    for group in [ID_ALL_STR, ID_100_INT, ID_100_STR]:
-        auth.new_group(gid=group)
+    for role in [ID_ALL_STR, ID_100_INT, ID_100_STR]:
+        auth.new_role(rid=role)
 
     for subject in [
         ID_1_STR,
@@ -113,53 +113,53 @@ def serial_authority_typed() -> SerialAuthority:
     ]:
         auth.new_subject(sid=subject)
 
-    auth.group_add_member_group(gid=ID_ALL_STR, member_gid=ID_100_STR)
-    auth.group_add_member_group(gid=ID_ALL_STR, member_gid=ID_100_INT)
+    auth.role_add_member_role(rid=ID_ALL_STR, member_rid=ID_100_STR)
+    auth.role_add_member_role(rid=ID_ALL_STR, member_rid=ID_100_INT)
 
-    auth.group_add_member_subject(gid=ID_100_INT, member_sid=ID_1_INT)
-    auth.group_add_member_subject(gid=ID_100_INT, member_sid=ID_1_STR)
+    auth.role_add_member_subject(rid=ID_100_INT, member_sid=ID_1_INT)
+    auth.role_add_member_subject(rid=ID_100_INT, member_sid=ID_1_STR)
 
-    auth.group_add_member_subject(gid=ID_100_STR, member_sid=ID_2_INT)
-    auth.group_add_member_subject(gid=ID_100_STR, member_sid=ID_TWO_STR)
+    auth.role_add_member_subject(rid=ID_100_STR, member_sid=ID_2_INT)
+    auth.role_add_member_subject(rid=ID_100_STR, member_sid=ID_TWO_STR)
 
     return auth
 
 
 def init_auth_for_get_info_subject(auth: SerialAuthority | SQLAlchemyAuthority):
-    for group in [PARENT_GROUP, CHILD_GROUP]:
-        auth.new_group(gid=group)
+    for role in [PARENT_GROUP, CHILD_GROUP]:
+        auth.new_role(rid=role)
     auth.new_subject(sid=USER)
 
-    auth.group_add_member_group(gid=PARENT_GROUP, member_gid=CHILD_GROUP)
+    auth.role_add_member_role(rid=PARENT_GROUP, member_rid=CHILD_GROUP)
 
-    auth.group_add_member_subject(gid=CHILD_GROUP, member_sid=USER)
+    auth.role_add_member_subject(rid=CHILD_GROUP, member_sid=USER)
 
-    auth.group_add_node(gid=PARENT_GROUP, node=TPN.TOWNY_CHAT_)
-    auth.group_add_node(gid=PARENT_GROUP, node=TPN.TOWNY_WILD_)
+    auth.role_add_node(rid=PARENT_GROUP, node=TPN.TOWNY_CHAT_)
+    auth.role_add_node(rid=PARENT_GROUP, node=TPN.TOWNY_WILD_)
 
-    auth.group_add_node(gid=CHILD_GROUP, node=TPN.TOWNY_CHAT_TOWN)
-    auth.group_add_node(gid=CHILD_GROUP, node=TPN.TOWNY_WILD_BUILD_X, payload=IRON)
-    auth.group_add_node(gid=CHILD_GROUP, node=TPN.TOWNY_WILD_BUILD_IRON)
+    auth.role_add_node(rid=CHILD_GROUP, node=TPN.TOWNY_CHAT_TOWN)
+    auth.role_add_node(rid=CHILD_GROUP, node=TPN.TOWNY_WILD_BUILD_X, payload=IRON)
+    auth.role_add_node(rid=CHILD_GROUP, node=TPN.TOWNY_WILD_BUILD_IRON)
 
     auth.subject_add_node(sid=USER, node=TPN.TOWNY_WILD_BUILD_)
 
 
-def init_auth_for_get_info_group(auth: SerialAuthority | SQLAlchemyAuthority):
-    for group in [PARENT_GROUP, CHILD_GROUP, USER_GROUP]:
-        auth.new_group(gid=group)
+def init_auth_for_get_info_role(auth: SerialAuthority | SQLAlchemyAuthority):
+    for role in [PARENT_GROUP, CHILD_GROUP, USER_GROUP]:
+        auth.new_role(rid=role)
 
-    auth.group_add_member_group(gid=PARENT_GROUP, member_gid=CHILD_GROUP)
+    auth.role_add_member_role(rid=PARENT_GROUP, member_rid=CHILD_GROUP)
 
-    auth.group_add_member_group(gid=CHILD_GROUP, member_gid=USER_GROUP)
+    auth.role_add_member_role(rid=CHILD_GROUP, member_rid=USER_GROUP)
 
-    auth.group_add_node(gid=PARENT_GROUP, node=TPN.TOWNY_CHAT_)
-    auth.group_add_node(gid=PARENT_GROUP, node=TPN.TOWNY_WILD_)
+    auth.role_add_node(rid=PARENT_GROUP, node=TPN.TOWNY_CHAT_)
+    auth.role_add_node(rid=PARENT_GROUP, node=TPN.TOWNY_WILD_)
 
-    auth.group_add_node(gid=CHILD_GROUP, node=TPN.TOWNY_CHAT_TOWN)
-    auth.group_add_node(gid=CHILD_GROUP, node=TPN.TOWNY_WILD_BUILD_X, payload=IRON)
-    auth.group_add_node(gid=CHILD_GROUP, node=TPN.TOWNY_WILD_BUILD_IRON)
+    auth.role_add_node(rid=CHILD_GROUP, node=TPN.TOWNY_CHAT_TOWN)
+    auth.role_add_node(rid=CHILD_GROUP, node=TPN.TOWNY_WILD_BUILD_X, payload=IRON)
+    auth.role_add_node(rid=CHILD_GROUP, node=TPN.TOWNY_WILD_BUILD_IRON)
 
-    auth.group_add_node(gid=USER_GROUP, node=TPN.TOWNY_WILD_BUILD_)
+    auth.role_add_node(rid=USER_GROUP, node=TPN.TOWNY_WILD_BUILD_)
 
 
 @pytest.fixture
@@ -177,14 +177,14 @@ def sql_authority_get_info_subject(db_engine) -> SQLAlchemyAuthority:
 
 
 @pytest.fixture
-def serial_authority_get_info_group() -> SerialAuthority:
+def serial_authority_get_info_role() -> SerialAuthority:
     auth = SerialAuthority(nodes=TPN)
-    init_auth_for_get_info_group(auth)
+    init_auth_for_get_info_role(auth)
     return auth
 
 
 @pytest.fixture
-def sql_authority_get_info_group(db_engine) -> SQLAlchemyAuthority:
+def sql_authority_get_info_role(db_engine) -> SQLAlchemyAuthority:
     auth = SQLAlchemyAuthority(nodes=TPN, engine=db_engine)
-    init_auth_for_get_info_group(auth)
+    init_auth_for_get_info_role(auth)
     return auth

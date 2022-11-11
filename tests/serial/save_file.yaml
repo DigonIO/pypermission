@@ -1,6 +1,6 @@
-groups:
+roles:
   food:
-    member_groups:
+    member_roles:
       - animal_based
       - plant_based
     permission_nodes:

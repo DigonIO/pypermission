@@ -124,25 +124,25 @@ class PermissionableEntityDict(TypedDict, Generic[PID]):
     permission_nodes: PERMISSION_NODES[PID]
 
 
-class GroupDict(PermissionableEntityDict[PID], Generic[PID, EID]):
+class RoleDict(PermissionableEntityDict[PID], Generic[PID, EID]):
     parents: list[EID]
 
 
 # NOTE: technically entity_id should not be ommitted
 class EntityDict(PermissionableEntityDict[PID], Generic[PID, EID]):
     entity_id: EID
-    groups: NotRequired[list[EID]]
+    roles: NotRequired[list[EID]]
 
 
 class SubjectInfoDict(TypedDict, Generic[PID, EID]):
-    groups: dict[EID, GroupDict[PID, EID]]
+    roles: dict[EID, RoleDict[PID, EID]]
     subject: EntityDict[PID, EID]
     permission_tree: PERMISSION_TREE[PID]
 
 
-class GroupInfoDict(TypedDict, Generic[PID, EID]):
-    groups: dict[EID, GroupDict[PID, EID]]
-    group: EntityDict[PID, EID]
+class RoleInfoDict(TypedDict, Generic[PID, EID]):
+    roles: dict[EID, RoleDict[PID, EID]]
+    role: EntityDict[PID, EID]
     permission_tree: PERMISSION_TREE[PID]
 
 
@@ -153,11 +153,11 @@ SubjectInfo = (
     | SubjectInfoDict[str, str]
 )
 
-GroupInfo = (
-    GroupInfoDict[PermissionNode, EntityID]
-    | GroupInfoDict[str, EntityID]
-    | GroupInfoDict[PermissionNode, str]
-    | GroupInfoDict[str, str]
+RoleInfo = (
+    RoleInfoDict[PermissionNode, EntityID]
+    | RoleInfoDict[str, EntityID]
+    | RoleInfoDict[PermissionNode, str]
+    | RoleInfoDict[str, str]
 )
 
 PermissionMap = dict[Permission, set[str]]
@@ -226,7 +226,7 @@ class Authority(ABC):
         """
         Get the root permission node of the root permission.
 
-        A subject or a group with the root permission has access to all permissions.
+        A subject or a role with the root permission has access to all permissions.
         """
         return RootPermissionNode.ROOT_
 
@@ -423,7 +423,7 @@ def entity_id_deserializer(serial_eid: str, max_lenght: int | None = None) -> En
 def assertEntityIDType(eid: EntityID) -> None:
     if not isinstance(eid, int | str):
         raise EntityIDError(
-            f"Subject and group IDs have to be of type int or string! Got type `{type(eid)}` for `{eid}`."
+            f"Subject and role IDs have to be of type int or string! Got type `{type(eid)}` for `{eid}`."
         )
 
 

@@ -38,7 +38,7 @@ def test_load_typed_file_json():
 
 def assert_loaded_authority(auth: SerialAuthority):
 
-    assert auth.get_groups() == {ID_ALL_STR, ID_100_STR, ID_100_INT}
+    assert auth.get_roles() == {ID_ALL_STR, ID_100_STR, ID_100_INT}
 
     assert auth.get_subjects() == {
         ID_1_STR,
@@ -47,10 +47,10 @@ def assert_loaded_authority(auth: SerialAuthority):
         ID_2_INT,
     }
 
-    assert auth.group_get_member_groups(gid=ID_ALL_STR) == {ID_100_STR, ID_100_INT}
+    assert auth.role_get_member_roles(rid=ID_ALL_STR) == {ID_100_STR, ID_100_INT}
 
-    assert auth.group_get_member_subjects(gid=ID_100_INT) == {ID_1_INT, ID_1_STR}
-    assert auth.group_get_member_subjects(gid=ID_100_STR) == {ID_2_INT, ID_TWO_STR}
+    assert auth.role_get_member_subjects(rid=ID_100_INT) == {ID_1_INT, ID_1_STR}
+    assert auth.role_get_member_subjects(rid=ID_100_STR) == {ID_2_INT, ID_TWO_STR}
 
 
 def test_write_file_yaml_typed(serial_authority_typed):
@@ -78,9 +78,9 @@ def test_write_file_json_typed(serial_authority_typed):
 
 
 SAVE_DATA_YAML = {
-    "groups": {
+    "roles": {
         "all": {
-            "member_groups": [
+            "member_roles": [
                 100,
                 "100",
             ],
@@ -88,7 +88,7 @@ SAVE_DATA_YAML = {
             "permission_nodes": [],
         },
         100: {
-            "member_groups": [],
+            "member_roles": [],
             "member_subjects": [
                 1,
                 "1",
@@ -96,7 +96,7 @@ SAVE_DATA_YAML = {
             "permission_nodes": [],
         },
         "100": {
-            "member_groups": [],
+            "member_roles": [],
             "member_subjects": [
                 2,
                 "two",
@@ -113,9 +113,9 @@ SAVE_DATA_YAML = {
 }
 
 SAVE_DATA_JSON = {
-    "groups": {
+    "roles": {
         "str:all": {
-            "member_groups": [
+            "member_roles": [
                 "int:100",
                 "str:100",
             ],
@@ -123,7 +123,7 @@ SAVE_DATA_JSON = {
             "permission_nodes": [],
         },
         "int:100": {
-            "member_groups": [],
+            "member_roles": [],
             "member_subjects": [
                 "int:1",
                 "str:1",
@@ -131,7 +131,7 @@ SAVE_DATA_JSON = {
             "permission_nodes": [],
         },
         "str:100": {
-            "member_groups": [],
+            "member_roles": [],
             "member_subjects": [
                 "int:2",
                 "str:two",

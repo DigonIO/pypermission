@@ -1,7 +1,7 @@
 {
-    "groups": {
+    "roles": {
         "str:food": {
-            "member_groups": [
+            "member_roles": [
                 "str:animal_based",
                 "str:plant_based"
             ],

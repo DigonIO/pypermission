@@ -1,7 +1,7 @@
 {
-  "groups": {
+  "roles": {
     "str:all": {
-      "member_groups": [
+      "member_roles": [
         "int:100",
         "str:100"
       ]

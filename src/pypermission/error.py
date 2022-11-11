@@ -6,8 +6,8 @@ class PathError(PyPermissionError):
     """Raised if no file path is defined while saving to or reading from a file."""
 
 
-class GroupCycleError(PyPermissionError):
-    """Raised to prevent a group cycle."""
+class RoleCycleError(PyPermissionError):
+    """Raised to prevent a role cycle."""
 
 
 class ParsingError(PyPermissionError):

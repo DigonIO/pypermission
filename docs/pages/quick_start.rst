@@ -3,7 +3,7 @@ Quick Start (RBAC)
 ==================
 
 To get started, assume we are writing a RBAC permission system for a chat based online
-support service. The permission system provides three group type for accounts, normal `user`, `moderator` and `admin`.
+support service. The permission system provides three role type for accounts, normal `user`, `moderator` and `admin`.
 
 User accounts should be able to:
 
@@ -47,7 +47,7 @@ to a ``PermissionNode``\ s object and instantiate an ``Authority`` with the give
 
     auth = SerialAuthority(nodes=CNs)
 
-Next the different groups with their respective permissions have to be registered
+Next the different roles with their respective permissions have to be registered
 to the authority. The following file defines the relations mentioned above:
 
 .. literalinclude:: chat_rooms.yaml
@@ -55,9 +55,9 @@ to the authority. The following file defines the relations mentioned above:
 
 Additionally the file already defines a couple of accounts:
 
-* `Alice` is a member of the `admin` and `user` groups
-* `Bob` is a member of the `moderator` and `user` groups
-* `John` is a member of the `user` group only
+* `Alice` is a member of the `admin` and `user` roles
+* `Bob` is a member of the `moderator` and `user` roles
+* `John` is a member of the `user` role only
 
 From the file we can infer, that currently the following chat `rooms`\ s exist:
 

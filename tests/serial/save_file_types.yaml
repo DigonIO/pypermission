@@ -1,6 +1,6 @@
-groups:
+roles:
   "all":
-    member_groups:
+    member_roles:
       - 100
       - "100"
   100:

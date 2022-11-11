@@ -34,7 +34,7 @@ def test_subject_get_info_serial(
         (GROUP_INFO_STR_STR, True),
     ],
 )
-def test_group_get_info_serial(expected_permissions, serialize, serial_authority_get_info_group):
-    auth: SerialAuthority = serial_authority_get_info_group
-    result = auth.group_get_info(gid=USER_GROUP, serialize=serialize)
+def test_role_get_info_serial(expected_permissions, serialize, serial_authority_get_info_role):
+    auth: SerialAuthority = serial_authority_get_info_role
+    result = auth.role_get_info(rid=USER_GROUP, serialize=serialize)
     assert DeepDiff(result, expected_permissions, ignore_order=True) == {}

@@ -10,9 +10,9 @@ from pypermission.core import Authority as _Authority
 from pypermission.core import (
     EntityDict,
     EntityID,
-    GroupDict,
-    GroupInfo,
-    GroupInfoDict,
+    RoleDict,
+    RoleInfo,
+    RoleInfoDict,
     NodeMap,
     Permission,
     PermissionMap,
@@ -25,7 +25,7 @@ from pypermission.core import (
     entity_id_serializer,
     validate_payload_status,
 )
-from pypermission.error import EntityIDError, GroupCycleError, ParsingError, PathError
+from pypermission.error import EntityIDError, RoleCycleError, ParsingError, PathError
 
 ####################################################################################################
 ### Types
@@ -39,22 +39,22 @@ class SubjectStore(TypedDict, total=False):
 T = TypeVar("T")
 
 
-class GroupStore(
+class RoleStore(
     TypedDict,
     Generic[T],
     total=False,
 ):
     member_subjects: list[T]
-    member_groups: list[T]
+    member_roles: list[T]
     permission_nodes: list[str]
 
 
-GroupStoreYAML = GroupStore[EntityID]
-GroupStoreJSON = GroupStore[str]
+RoleStoreYAML = RoleStore[EntityID]
+RoleStoreJSON = RoleStore[str]
 
 
 class DataStore(TypedDict, Generic[T], total=False):
-    groups: dict[T, GroupStore[T]]
+    roles: dict[T, RoleStore[T]]
     subjects: dict[T, SubjectStore]
 
 
@@ -101,22 +101,22 @@ class PermissionableEntity:
 
 class Subject(PermissionableEntity):
 
-    _gids: set[EntityID]  # group IDs
+    _rids: set[EntityID]  # role IDs
 
     def __init__(self, *, id: EntityID) -> None:
         super().__init__(id=id)
-        self._gids = set()
+        self._rids = set()
 
     @property
-    def gids(self) -> set[EntityID]:
-        return self._gids
+    def rids(self) -> set[EntityID]:
+        return self._rids
 
 
-class Group(PermissionableEntity):
+class Role(PermissionableEntity):
 
     _sids: set[EntityID]  # subject member IDs
-    _parent_ids: set[EntityID]  # parent group IDs
-    _child_ids: set[EntityID]  # child group IDs
+    _parent_ids: set[EntityID]  # parent role IDs
+    _child_ids: set[EntityID]  # child role IDs
 
     def __init__(self, *, id: EntityID) -> None:
         super().__init__(id=id)
@@ -145,13 +145,13 @@ class Group(PermissionableEntity):
 class SerialAuthority(_Authority):
 
     _subjects: dict[EntityID, Subject]
-    _groups: dict[EntityID, Group]
+    _roles: dict[EntityID, Role]
 
     def __init__(self, *, nodes: type[PermissionNode] | None = None) -> None:
         super().__init__(nodes=nodes)
 
         self._subjects = {}
-        self._groups = {}
+        self._roles = {}
 
     ################################################################################################
     ### IO
@@ -229,13 +229,13 @@ class SerialAuthority(_Authority):
 
     def _dump_data_store_json(self) -> DataStoreJSON:
         """Save the current state to string formatted as YAML."""
-        groups = {
-            entity_id_serializer(gid): GroupStoreJSON(
-                member_groups=[entity_id_serializer(eid) for eid in group.child_ids],
-                member_subjects=[entity_id_serializer(eid) for eid in group.sids],
-                permission_nodes=self._generate_permission_node_list(group),
+        roles = {
+            entity_id_serializer(rid): RoleStoreJSON(
+                member_roles=[entity_id_serializer(eid) for eid in role.child_ids],
+                member_subjects=[entity_id_serializer(eid) for eid in role.sids],
+                permission_nodes=self._generate_permission_node_list(role),
             )
-            for gid, group in self._groups.items()
+            for rid, role in self._roles.items()
         }
 
         subjects = {
@@ -246,19 +246,19 @@ class SerialAuthority(_Authority):
         }
 
         return DataStoreJSON(
-            groups=groups,
+            roles=roles,
             subjects=subjects,
         )
 
     def _dump_data_store_yaml(self) -> DataStoreYAML:
         """Save the current state to string formatted as YAML."""
-        groups = {
-            gid: GroupStoreYAML(
-                member_groups=list(group.child_ids),
-                member_subjects=list(group.sids),
-                permission_nodes=self._generate_permission_node_list(group),
+        roles = {
+            rid: RoleStoreYAML(
+                member_roles=list(role.child_ids),
+                member_subjects=list(role.sids),
+                permission_nodes=self._generate_permission_node_list(role),
             )
-            for gid, group in self._groups.items()
+            for rid, role in self._roles.items()
         }
 
         subjects = {
@@ -269,7 +269,7 @@ class SerialAuthority(_Authority):
         }
 
         return DataStoreYAML(
-            groups=groups,
+            roles=roles,
             subjects=subjects,
         )
 
@@ -301,18 +301,18 @@ class SerialAuthority(_Authority):
                 else:
                     permission_map[permission] = set()
 
-        # populate groups
-        for serial_gid, gdefs in (data.get("groups") or {}).items():
-            gid = entity_id_deserializer(serial_gid)
+        # populate roles
+        for serial_rid, gdefs in (data.get("roles") or {}).items():
+            rid = entity_id_deserializer(serial_rid)
             gdefs = {} if gdefs is None else gdefs
             # TODO giud sanity check
-            group = Group(id=gid)
-            self._groups[gid] = group
+            role = Role(id=rid)
+            self._roles[rid] = role
 
-            # add permissions to a group
+            # add permissions to a role
             for node_str in gdefs.get("permission_nodes") or []:
                 permission, payload = self._deserialize_permission_node(node_str=node_str)
-                permission_map = group.permission_map
+                permission_map = role.permission_map
                 if payload:
                     payload_set = permission_map.get(permission, set())
                     if not payload_set:
@@ -321,23 +321,23 @@ class SerialAuthority(_Authority):
                 else:
                     permission_map[permission] = set()
 
-            # add group ids to subjects of a group and vice versa
+            # add role ids to subjects of a role and vice versa
             for serial_sid in gdefs.get("member_subjects") or []:
                 # TODO sanity checks
                 sid = entity_id_deserializer(serial_sid)
-                group.sids.add(sid)
-                self._subjects[sid].gids.add(gid)
+                role.sids.add(sid)
+                self._subjects[sid].rids.add(rid)
 
-        # sub group loop
-        for serial_gid, gdefs in (data.get("groups") or {}).items():
-            gid = entity_id_deserializer(serial_gid)
+        # sub role loop
+        for serial_rid, gdefs in (data.get("roles") or {}).items():
+            rid = entity_id_deserializer(serial_rid)
             gdefs = {} if gdefs is None else gdefs
-            group = self._groups[gid]
-            for serial_member_gid in gdefs.get("member_groups") or []:
-                member_gid = entity_id_deserializer(serial_member_gid)
-                if member_gid not in self._groups:
-                    raise ParsingError(f"Member group `{member_gid}` was never defined!")
-                self.group_add_member_group(gid=gid, member_gid=member_gid)
+            role = self._roles[rid]
+            for serial_member_rid in gdefs.get("member_roles") or []:
+                member_rid = entity_id_deserializer(serial_member_rid)
+                if member_rid not in self._roles:
+                    raise ParsingError(f"Member role `{member_rid}` was never defined!")
+                self.role_add_member_role(rid=rid, member_rid=member_rid)
 
     def _load_data_store_yaml(self, *, data: DataStoreYAML) -> None:
         """Load state from DataStoreYAML dictionary."""
@@ -366,17 +366,17 @@ class SerialAuthority(_Authority):
                 else:
                     permission_map[permission] = set()
 
-        # populate groups
-        for gid, gdefs in (data.get("groups") or {}).items():
+        # populate roles
+        for rid, gdefs in (data.get("roles") or {}).items():
             gdefs = {} if gdefs is None else gdefs
             # TODO giud sanity check
-            group = Group(id=gid)
-            self._groups[gid] = group
+            role = Role(id=rid)
+            self._roles[rid] = role
 
-            # add permissions to a group
+            # add permissions to a role
             for node_str in gdefs.get("permission_nodes") or []:
                 permission, payload = self._deserialize_permission_node(node_str=node_str)
-                permission_map = group.permission_map
+                permission_map = role.permission_map
                 if payload:
                     payload_set = permission_map.get(permission, set())
                     if not payload_set:
@@ -385,20 +385,20 @@ class SerialAuthority(_Authority):
                 else:
                     permission_map[permission] = set()
 
-            # add group ids to subjects of a group and vice versa
+            # add role ids to subjects of a role and vice versa
             for sid in gdefs.get("member_subjects") or []:
                 # TODO sanity checks
-                group.sids.add(sid)
-                self._subjects[sid].gids.add(gid)
+                role.sids.add(sid)
+                self._subjects[sid].rids.add(rid)
 
-        # sub group loop
-        for gid, gdefs in (data.get("groups") or {}).items():
+        # sub role loop
+        for rid, gdefs in (data.get("roles") or {}).items():
             gdefs = {} if gdefs is None else gdefs
-            group = self._groups[gid]
-            for member_gid in gdefs.get("member_groups") or []:
-                if member_gid not in self._groups:
-                    raise ParsingError(f"Member group `{member_gid}` was never defined!")
-                self.group_add_member_group(gid=gid, member_gid=member_gid)
+            role = self._roles[rid]
+            for member_rid in gdefs.get("member_roles") or []:
+                if member_rid not in self._roles:
+                    raise ParsingError(f"Member role `{member_rid}` was never defined!")
+                self.role_add_member_role(rid=rid, member_rid=member_rid)
 
     ################################################################################################
     ### Add
@@ -414,39 +414,39 @@ class SerialAuthority(_Authority):
         subject = Subject(id=sid)
         self._subjects[sid] = subject
 
-    def new_group(self, *, gid: EntityID) -> None:
-        """Create a new group for a given ID."""
-        assertEntityIDType(eid=gid)
+    def new_role(self, *, rid: EntityID) -> None:
+        """Create a new role for a given ID."""
+        assertEntityIDType(eid=rid)
 
-        if gid in self._subjects:
-            raise EntityIDError(f"Group ID `{gid}` is in use!")
+        if rid in self._subjects:
+            raise EntityIDError(f"Role ID `{rid}` is in use!")
 
-        group = Group(id=gid)
-        self._groups[gid] = group
+        role = Role(id=rid)
+        self._roles[rid] = role
 
-    def group_add_member_subject(self, *, gid: EntityID, member_sid: EntityID) -> None:
-        """Add a subject to a group to inherit all its permissions."""
-        assertEntityIDType(eid=gid)
+    def role_add_member_subject(self, *, rid: EntityID, member_sid: EntityID) -> None:
+        """Add a subject to a role to inherit all its permissions."""
+        assertEntityIDType(eid=rid)
         assertEntityIDType(eid=member_sid)
 
-        group = self._get_group(gid=gid)
+        role = self._get_role(rid=rid)
         subject = self._get_subject(sid=member_sid)
 
-        group.sids.add(member_sid)
-        subject.gids.add(gid)
+        role.sids.add(member_sid)
+        subject.rids.add(rid)
 
-    def group_add_member_group(self, *, gid: EntityID, member_gid: EntityID) -> None:
-        """Add a group to a parent group to inherit all its permissions."""
-        assertEntityIDType(eid=gid)
-        assertEntityIDType(eid=member_gid)
+    def role_add_member_role(self, *, rid: EntityID, member_rid: EntityID) -> None:
+        """Add a role to a parent role to inherit all its permissions."""
+        assertEntityIDType(eid=rid)
+        assertEntityIDType(eid=member_rid)
 
-        group = self._get_group(gid=gid)
-        member = self._get_group(gid=member_gid)
+        role = self._get_role(rid=rid)
+        member = self._get_role(rid=member_rid)
 
-        self._detect_group_cycle(group=group, member_gid=member_gid)
+        self._detect_role_cycle(role=role, member_rid=member_rid)
 
-        group.child_ids.add(member_gid)
-        member.parent_ids.add(gid)
+        role.child_ids.add(member_rid)
+        member.parent_ids.add(rid)
 
     def subject_add_node(
         self, *, sid: EntityID, node: PermissionNode, payload: str | None = None
@@ -461,14 +461,14 @@ class SerialAuthority(_Authority):
             permission_map=permission_map, permission=permission, payload=payload
         )
 
-    def group_add_node(
-        self, *, gid: EntityID, node: PermissionNode, payload: str | None = None
+    def role_add_node(
+        self, *, rid: EntityID, node: PermissionNode, payload: str | None = None
     ) -> None:
-        """Add a permission to a group."""
-        assertEntityIDType(eid=gid)
+        """Add a permission to a role."""
+        assertEntityIDType(eid=rid)
         permission = self._get_permission(node=node)
         validate_payload_status(permission=permission, payload=payload)
-        permission_map = self._get_group(gid=gid).permission_map
+        permission_map = self._get_role(rid=rid).permission_map
 
         _add_permission_map_entry(
             permission_map=permission_map, permission=permission, payload=payload
@@ -482,37 +482,37 @@ class SerialAuthority(_Authority):
         """Get the IDs for all known subjects."""
         return set(self._subjects.keys())
 
-    def get_groups(self) -> set[EntityID]:
-        """Get the IDs for all known groups."""
-        return set(self._groups.keys())
+    def get_roles(self) -> set[EntityID]:
+        """Get the IDs for all known roles."""
+        return set(self._roles.keys())
 
-    def subject_get_groups(self, *, sid: EntityID) -> set[EntityID]:
-        """Get a set of a group IDs of a groups a subject is member of."""
+    def subject_get_roles(self, *, sid: EntityID) -> set[EntityID]:
+        """Get a set of a role IDs of a roles a subject is member of."""
         assertEntityIDType(eid=sid)
 
         subject = self._get_subject(sid=sid)
-        return subject.gids.copy()
+        return subject.rids.copy()
 
-    def group_get_member_subjects(self, *, gid: EntityID) -> set[EntityID]:
-        """Get a set of all subject IDs from a group."""
-        assertEntityIDType(eid=gid)
+    def role_get_member_subjects(self, *, rid: EntityID) -> set[EntityID]:
+        """Get a set of all subject IDs from a role."""
+        assertEntityIDType(eid=rid)
 
-        group = self._get_group(gid=gid)
-        return group.sids.copy()
+        role = self._get_role(rid=rid)
+        return role.sids.copy()
 
-    def group_get_member_groups(self, *, gid: EntityID) -> set[EntityID]:
-        """Get a set of all child group IDs of a group."""
-        assertEntityIDType(eid=gid)
+    def role_get_member_roles(self, *, rid: EntityID) -> set[EntityID]:
+        """Get a set of all child role IDs of a role."""
+        assertEntityIDType(eid=rid)
 
-        group = self._get_group(gid=gid)
-        return group.child_ids.copy()
+        role = self._get_role(rid=rid)
+        return role.child_ids.copy()
 
-    def group_get_parent_groups(self, *, gid: EntityID) -> set[EntityID]:
-        """Get a set of all parent group IDs of a group."""
-        assertEntityIDType(eid=gid)
+    def role_get_parent_roles(self, *, rid: EntityID) -> set[EntityID]:
+        """Get a set of all parent role IDs of a role."""
+        assertEntityIDType(eid=rid)
 
-        group = self._get_group(gid=gid)
-        return group.parent_ids.copy()
+        role = self._get_role(rid=rid)
+        return role.parent_ids.copy()
 
     def subject_has_permission(
         self, *, sid: EntityID, node: PermissionNode, payload: str | None = None
@@ -526,26 +526,26 @@ class SerialAuthority(_Authority):
         if subject.has_permission(permission=permission, payload=payload):
             return True
 
-        for gid in subject.gids:
-            group = self._groups[gid]
-            if self._recursive_group_has_permission(
-                group=group, permission=permission, payload=payload
+        for rid in subject.rids:
+            role = self._roles[rid]
+            if self._recursive_role_has_permission(
+                role=role, permission=permission, payload=payload
             ):
                 return True
 
         return False
 
-    def group_has_permission(
-        self, *, gid: EntityID, node: PermissionNode, payload: str | None = None
+    def role_has_permission(
+        self, *, rid: EntityID, node: PermissionNode, payload: str | None = None
     ) -> bool:
-        """Check if a group has a wanted permission."""
-        assertEntityIDType(eid=gid)
+        """Check if a role has a wanted permission."""
+        assertEntityIDType(eid=rid)
         permission = self._get_permission(node=node)
         validate_payload_status(permission=permission, payload=payload)
-        group = self._get_group(gid=gid)
+        role = self._get_role(rid=rid)
 
-        return self._recursive_group_has_permission(
-            group=group, permission=permission, payload=payload
+        return self._recursive_role_has_permission(
+            role=role, permission=permission, payload=payload
         )
 
     # https://mypy.readthedocs.io/en/stable/literal_types.html
@@ -594,8 +594,8 @@ class SerialAuthority(_Authority):
             permission_map=subject.permission_map, node_type=node_type
         )
 
-        parent_ids = subject.gids
-        member_groups = [
+        parent_ids = subject.rids
+        member_roles = [
             cast(EID, entity_id_serializer(grp_id) if entity_id_type is str else grp_id)
             for grp_id in parent_ids
         ]
@@ -603,13 +603,13 @@ class SerialAuthority(_Authority):
         subject_entity_dict: EntityDict[PID, EID] = {
             "entity_id": entity_id,
             "permission_nodes": permission_nodes,
-            "groups": member_groups,
+            "roles": member_roles,
         }
 
-        parents: set[Group] = {self._groups[gid] for gid in parent_ids}
-        ancestors: list[Group] = self._topo_sort_parents(parents)
+        parents: set[Role] = {self._roles[rid] for rid in parent_ids}
+        ancestors: list[Role] = self._topo_sort_parents(parents)
 
-        groups: dict[EID, GroupDict[PID, EID]] = {}
+        roles: dict[EID, RoleDict[PID, EID]] = {}
         for ancestor in ancestors:
             permission_nodes = build_entity_permission_nodes(
                 permission_map=ancestor.permission_map, node_type=node_type
@@ -624,7 +624,7 @@ class SerialAuthority(_Authority):
                 for grand_ancestor_id in ancestor.parent_ids
             ]
 
-            group_dict: GroupDict[PID, EID] = {
+            role_dict: RoleDict[PID, EID] = {
                 "permission_nodes": permission_nodes,
                 "parents": grand_ancestors,
             }
@@ -632,7 +632,7 @@ class SerialAuthority(_Authority):
             key = cast(
                 EID, entity_id_serializer(ancestor.id) if entity_id_type is str else ancestor.id
             )
-            groups[key] = group_dict
+            roles[key] = role_dict
 
         permission_tree: PERMISSION_TREE[PID] = {}
 
@@ -650,65 +650,65 @@ class SerialAuthority(_Authority):
             )
 
         return SubjectInfoDict[PID, EID](
-            groups=groups, subject=subject_entity_dict, permission_tree=permission_tree
+            roles=roles, subject=subject_entity_dict, permission_tree=permission_tree
         )
 
     @overload
-    def group_get_info(
-        self, *, gid: str, serialize: Literal[False]
-    ) -> GroupInfoDict[PermissionNode, EntityID]:
+    def role_get_info(
+        self, *, rid: str, serialize: Literal[False]
+    ) -> RoleInfoDict[PermissionNode, EntityID]:
         ...
 
     @overload
-    def group_get_info(self, *, gid: str, serialize: Literal[True]) -> GroupInfoDict[str, str]:
+    def role_get_info(self, *, rid: str, serialize: Literal[True]) -> RoleInfoDict[str, str]:
         ...
 
     @overload
-    def group_get_info(self, *, gid: str, serialize: bool) -> GroupInfo:
+    def role_get_info(self, *, rid: str, serialize: bool) -> RoleInfo:
         ...
 
-    def group_get_info(
+    def role_get_info(
         self,
         *,
-        gid: EntityID,
+        rid: EntityID,
         serialize: bool = False,
-    ) -> GroupInfo:
-        assertEntityIDType(eid=gid)
-        group: Group = self._get_group(gid=gid)
+    ) -> RoleInfo:
+        assertEntityIDType(eid=rid)
+        role: Role = self._get_role(rid=rid)
 
         if serialize is True:
-            return self._group_get_info(gid=gid, group=group, node_type=str, entity_id_type=str)
+            return self._role_get_info(rid=rid, role=role, node_type=str, entity_id_type=str)
         else:  # serialize == False:
-            return self._group_get_info(
-                gid=gid,
-                group=group,
+            return self._role_get_info(
+                rid=rid,
+                role=role,
                 node_type=PermissionNode,
                 entity_id_type=EntityID,  # type:ignore
             )
 
-    def _group_get_info(
-        self, *, gid: EntityID, group: Group, node_type: type[PID], entity_id_type: type[EID]
-    ) -> GroupInfo:  # TODO generic typing
+    def _role_get_info(
+        self, *, rid: EntityID, role: Role, node_type: type[PID], entity_id_type: type[EID]
+    ) -> RoleInfo:  # TODO generic typing
 
         permission_nodes = build_entity_permission_nodes(
-            permission_map=group.permission_map, node_type=node_type
+            permission_map=role.permission_map, node_type=node_type
         )
-        entity_id = cast(EID, entity_id_serializer(gid) if entity_id_type is str else gid)
-        member_groups = [
+        entity_id = cast(EID, entity_id_serializer(rid) if entity_id_type is str else rid)
+        member_roles = [
             cast(EID, entity_id_serializer(grp_id) if entity_id_type is str else grp_id)
-            for grp_id in group.parent_ids
+            for grp_id in role.parent_ids
         ]
 
-        group_entity_dict: EntityDict[PID, EID] = {
+        role_entity_dict: EntityDict[PID, EID] = {
             "entity_id": entity_id,
             "permission_nodes": permission_nodes,
-            "groups": member_groups,
+            "roles": member_roles,
         }
 
-        parents: set[Group] = {self._groups[gid] for gid in group.parent_ids}
-        ancestors: list[Group] = self._topo_sort_parents(parents)
+        parents: set[Role] = {self._roles[rid] for rid in role.parent_ids}
+        ancestors: list[Role] = self._topo_sort_parents(parents)
 
-        groups = {}
+        roles = {}
         for ancestor in ancestors:
             permission_nodes = build_entity_permission_nodes(
                 permission_map=ancestor.permission_map, node_type=node_type
@@ -723,7 +723,7 @@ class SerialAuthority(_Authority):
                 for grand_ancestor_id in ancestor.parent_ids
             ]
 
-            group_dict: GroupDict[PID, EID] = {
+            role_dict: RoleDict[PID, EID] = {
                 "permission_nodes": permission_nodes,
                 "parents": grand_ancestors,
             }
@@ -731,13 +731,13 @@ class SerialAuthority(_Authority):
             key = cast(
                 EID, entity_id_serializer(ancestor.id) if entity_id_type is str else ancestor.id
             )
-            groups[key] = group_dict
+            roles[key] = role_dict
 
         permission_tree: PERMISSION_TREE[PID] = {}
 
         self._populate_permission_tree(
             permission_tree=permission_tree,
-            permission_map=group.permission_map,
+            permission_map=role.permission_map,
             node_type=node_type,
         )
 
@@ -748,9 +748,7 @@ class SerialAuthority(_Authority):
                 node_type=node_type,
             )
 
-        return GroupInfoDict(
-            groups=groups, group=group_entity_dict, permission_tree=permission_tree
-        )
+        return RoleInfoDict(roles=roles, role=role_entity_dict, permission_tree=permission_tree)
 
     def subject_get_nodes(self, *, sid: EntityID) -> NodeMap:
         """Get a copy of all permissions from a subject."""
@@ -759,11 +757,11 @@ class SerialAuthority(_Authority):
         perm_map = self._get_subject(sid=sid).permission_map
         return _build_permission_node_map(perm_map=perm_map)
 
-    def group_get_nodes(self, *, gid: EntityID) -> NodeMap:
-        """Get a copy of all permissions from a group."""
-        assertEntityIDType(eid=gid)
+    def role_get_nodes(self, *, rid: EntityID) -> NodeMap:
+        """Get a copy of all permissions from a role."""
+        assertEntityIDType(eid=rid)
 
-        perm_map = self._get_group(gid=gid).permission_map
+        perm_map = self._get_role(rid=rid).permission_map
         return _build_permission_node_map(perm_map=perm_map)
 
     ################################################################################################
@@ -777,22 +775,22 @@ class SerialAuthority(_Authority):
         subject = self._subjects.pop(sid)
         if subject is None:
             raise EntityIDError(f"Can not remove non existing subject `{sid}`!")
-        for gid in subject.gids:
-            self._groups[gid].sids.remove(sid)
+        for rid in subject.rids:
+            self._roles[rid].sids.remove(sid)
 
-    def rm_group(self, gid: EntityID) -> None:
-        """Remove a group for a given ID."""
-        assertEntityIDType(eid=gid)
+    def rm_role(self, rid: EntityID) -> None:
+        """Remove a role for a given ID."""
+        assertEntityIDType(eid=rid)
 
-        group = self._groups.pop(gid)
-        if group is None:
-            raise EntityIDError(f"Can not remove non existing group `{gid}`!")
-        for sid in group.sids:
-            self._subjects[sid].gids.remove(gid)
-        for parent_id in group.parent_ids:
-            self._groups[parent_id].child_ids.remove(gid)
-        for child_id in group.child_ids:
-            self._groups[child_id].parent_ids.remove(gid)
+        role = self._roles.pop(rid)
+        if role is None:
+            raise EntityIDError(f"Can not remove non existing role `{rid}`!")
+        for sid in role.sids:
+            self._subjects[sid].rids.remove(rid)
+        for parent_id in role.parent_ids:
+            self._roles[parent_id].child_ids.remove(rid)
+        for child_id in role.child_ids:
+            self._roles[child_id].parent_ids.remove(rid)
 
     def subject_rm_node(
         self, *, sid: EntityID, node: PermissionNode, payload: str | None = None
@@ -807,40 +805,40 @@ class SerialAuthority(_Authority):
             permission_map=permission_map, permission=permission, payload=payload
         )
 
-    def group_rm_node(
-        self, *, gid: EntityID, node: PermissionNode, payload: str | None = None
+    def role_rm_node(
+        self, *, rid: EntityID, node: PermissionNode, payload: str | None = None
     ) -> None:
-        """Remove a permission from a group."""
-        assertEntityIDType(eid=gid)
+        """Remove a permission from a role."""
+        assertEntityIDType(eid=rid)
         permission = self._get_permission(node=node)
         validate_payload_status(permission=permission, payload=payload)
-        permission_map = self._get_group(gid=gid).permission_map
+        permission_map = self._get_role(rid=rid).permission_map
 
         _rm_permission_map_entry(
             permission_map=permission_map, permission=permission, payload=payload
         )
 
-    def group_rm_member_subject(self, *, gid: EntityID, member_sid: EntityID) -> None:
-        """Remove a subject from a group."""
-        assertEntityIDType(eid=gid)
+    def role_rm_member_subject(self, *, rid: EntityID, member_sid: EntityID) -> None:
+        """Remove a subject from a role."""
+        assertEntityIDType(eid=rid)
         assertEntityIDType(eid=member_sid)
 
-        group = self._get_group(gid=gid)
+        role = self._get_role(rid=rid)
         subject = self._get_subject(sid=member_sid)
 
-        group.sids.remove(member_sid)
-        subject.gids.remove(gid)
+        role.sids.remove(member_sid)
+        subject.rids.remove(rid)
 
-    def group_rm_member_group(self, *, gid: EntityID, member_gid: EntityID) -> None:
-        """Remove a group from a group."""
-        assertEntityIDType(eid=gid)
-        assertEntityIDType(eid=member_gid)
+    def role_rm_member_role(self, *, rid: EntityID, member_rid: EntityID) -> None:
+        """Remove a role from a role."""
+        assertEntityIDType(eid=rid)
+        assertEntityIDType(eid=member_rid)
 
-        parent = self._get_group(gid=gid)
-        child = self._get_group(gid=member_gid)
+        parent = self._get_role(rid=rid)
+        child = self._get_role(rid=member_rid)
 
-        parent.child_ids.remove(member_gid)
-        child.parent_ids.remove(gid)
+        parent.child_ids.remove(member_rid)
+        child.parent_ids.remove(rid)
 
     ################################################################################################
     ### Private
@@ -853,74 +851,72 @@ class SerialAuthority(_Authority):
         except KeyError:
             raise EntityIDError(f"Can not find subject `{sid}`!")
 
-    def _get_group(self, *, gid: EntityID) -> Group:
-        """Just a simple wrapper to avoid some boilerplate code while getting a group."""
+    def _get_role(self, *, rid: EntityID) -> Role:
+        """Just a simple wrapper to avoid some boilerplate code while getting a role."""
         try:
-            return self._groups[gid]
+            return self._roles[rid]
         except KeyError:
-            raise EntityIDError(f"Can not find group `{gid}`!")
+            raise EntityIDError(f"Can not find role `{rid}`!")
 
     # TODO: build graph/subgraph ordering instead
-    def _detect_group_cycle(self, group: Group, member_gid: EntityID) -> None:
-        """Detect a cycle in nested group tree."""
-        if member_gid in group.parent_ids:
-            raise GroupCycleError(
-                f"Cyclic dependencies detected between groups `{group.id}` and `{member_gid}`!"
+    def _detect_role_cycle(self, role: Role, member_rid: EntityID) -> None:
+        """Detect a cycle in nested role tree."""
+        if member_rid in role.parent_ids:
+            raise RoleCycleError(
+                f"Cyclic dependencies detected between roles `{role.id}` and `{member_rid}`!"
             )
-        for parent_parent_id in group.parent_ids:
-            parent_parent = self._groups[parent_parent_id]
-            self._detect_group_cycle(group=parent_parent, member_gid=member_gid)
+        for parent_parent_id in role.parent_ids:
+            parent_parent = self._roles[parent_parent_id]
+            self._detect_role_cycle(role=parent_parent, member_rid=member_rid)
 
-    def _recursive_group_has_permission(
-        self, group: Group, permission: Permission, payload: str | None
+    def _recursive_role_has_permission(
+        self, role: Role, permission: Permission, payload: str | None
     ) -> bool:
-        """Recursively check whether the group or one of its parents has the perm searched for."""
-        if group.has_permission(permission=permission, payload=payload):
+        """Recursively check whether the role or one of its parents has the perm searched for."""
+        if role.has_permission(permission=permission, payload=payload):
             return True
 
-        for parent_id in group.parent_ids:
-            parent = self._groups[parent_id]
-            if self._recursive_group_has_permission(
-                group=parent, permission=permission, payload=payload
+        for parent_id in role.parent_ids:
+            parent = self._roles[parent_id]
+            if self._recursive_role_has_permission(
+                role=parent, permission=permission, payload=payload
             ):
                 return True
 
         return False
 
-    def _visit_group(
-        self, group: Group, l: list[Group], perm: set[Group], temp: set[Group]
-    ) -> None:
-        if group in perm:
+    def _visit_role(self, role: Role, l: list[Role], perm: set[Role], temp: set[Role]) -> None:
+        if role in perm:
             return
-        if group in temp:
-            raise GroupCycleError()  # TODO msg
+        if role in temp:
+            raise RoleCycleError()  # TODO msg
 
-        temp.add(group)
+        temp.add(role)
 
-        for parent_id in group.parent_ids:
-            parent = self._groups[parent_id]
-            self._visit_group(group=parent, l=l, perm=perm, temp=temp)
+        for parent_id in role.parent_ids:
+            parent = self._roles[parent_id]
+            self._visit_role(role=parent, l=l, perm=perm, temp=temp)
 
-        temp.remove(group)
-        perm.add(group)
-        l.append(group)
+        temp.remove(role)
+        perm.add(role)
+        l.append(role)
 
     # NOTE: not using for now, keep - might still be useful, e.g. to find cycles
-    def _topo_sort_groups(self) -> list[Group]:
-        l: list[Group] = []
-        perm: set[Group] = set()
-        temp: set[Group] = set()
-        groups = set(self._groups.values())
-        while unmarked := groups - perm:
-            self._visit_group(group=unmarked.pop(), l=l, perm=perm, temp=temp)
+    def _topo_sort_roles(self) -> list[Role]:
+        l: list[Role] = []
+        perm: set[Role] = set()
+        temp: set[Role] = set()
+        roles = set(self._roles.values())
+        while unmarked := roles - perm:
+            self._visit_role(role=unmarked.pop(), l=l, perm=perm, temp=temp)
         return l
 
-    def _topo_sort_parents(self, parents: set[Group]) -> list[Group]:
-        l: list[Group] = []
-        perm: set[Group] = set()
-        temp: set[Group] = set()
+    def _topo_sort_parents(self, parents: set[Role]) -> list[Role]:
+        l: list[Role] = []
+        perm: set[Role] = set()
+        temp: set[Role] = set()
         while unmarked := parents - perm:
-            self._visit_group(group=unmarked.pop(), l=l, perm=perm, temp=temp)
+            self._visit_role(role=unmarked.pop(), l=l, perm=perm, temp=temp)
         return l
 
     def _generate_permission_node_list(self, entity: PermissionableEntity) -> list[str]:

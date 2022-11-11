@@ -4,10 +4,10 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from pypermission.core import Permission
-from pypermission.error import EntityIDError, GroupCycleError
+from pypermission.error import EntityIDError, RoleCycleError
 from pypermission.sqlalchemy.models import (
-    GroupEntry,
-    GroupPermissionEntry,
+    RoleEntry,
+    RolePermissionEntry,
     MembershipEntry,
     RelationshipEntry,
     SubjectEntry,
@@ -31,14 +31,14 @@ def create_subject(*, serial_sid: str, db: Session) -> None:
         # Skips a SQLAlchemy ID if raised
 
 
-def create_group(*, serial_gid: str, db: Session) -> None:
-    group_entry = GroupEntry(serial_eid=serial_gid)
-    db.add(group_entry)
+def create_role(*, serial_rid: str, db: Session) -> None:
+    role_entry = RoleEntry(serial_eid=serial_rid)
+    db.add(role_entry)
     try:
         db.commit()
     except IntegrityError as err:
         raise EntityIDError(
-            "ID collision: Group with ID `{serial_gid}` already exists in database!"
+            "ID collision: Role with ID `{serial_rid}` already exists in database!"
         ) from err
         # Skips a SQLAlchemy ID if raised
 
@@ -56,25 +56,25 @@ def create_subject_permission(
     )
 
 
-def create_group_permission(
-    *, serial_gid: str, permission: Permission, payload: str | None, db: Session
+def create_role_permission(
+    *, serial_rid: str, permission: Permission, payload: str | None, db: Session
 ) -> None:
-    group_entry = read_group(serial_gid=serial_gid, db=db)
+    role_entry = read_role(serial_rid=serial_rid, db=db)
     _create_permission_entry(
-        table=GroupPermissionEntry,
-        entity_db_id=group_entry.entity_db_id,
+        table=RolePermissionEntry,
+        entity_db_id=role_entry.entity_db_id,
         permission=permission,
         payload=payload,
         db=db,
     )
 
 
-def create_membership(*, serial_sid: str, serial_gid: str, db: Session) -> None:
+def create_membership(*, serial_sid: str, serial_rid: str, db: Session) -> None:
     subject_entry = read_subject(serial_sid=serial_sid, db=db)
-    group_entry = read_group(serial_gid=serial_gid, db=db)
+    role_entry = read_role(serial_rid=serial_rid, db=db)
 
     ms_entry = MembershipEntry(
-        subject_db_id=subject_entry.entity_db_id, group_db_id=group_entry.entity_db_id
+        subject_db_id=subject_entry.entity_db_id, role_db_id=role_entry.entity_db_id
     )
     db.add(ms_entry)
     try:
@@ -85,10 +85,10 @@ def create_membership(*, serial_sid: str, serial_gid: str, db: Session) -> None:
 
 
 def create_parent_child_relationship(*, serial_pid: str, serial_cid: str, db: Session) -> None:
-    parent_entry = read_group(serial_gid=serial_pid, db=db)
-    child_entry = read_group(serial_gid=serial_cid, db=db)
+    parent_entry = read_role(serial_rid=serial_pid, db=db)
+    child_entry = read_role(serial_rid=serial_cid, db=db)
 
-    _detect_group_cycle(
+    _detect_role_cycle(
         parent_entry=parent_entry,
         child_entry=child_entry,
     )
@@ -120,12 +120,12 @@ def read_subject(*, serial_sid: str, db: Session) -> SubjectEntry:
     return cast(SubjectEntry, subject_entry)
 
 
-def read_group(*, serial_gid: str, db: Session) -> GroupEntry:
+def read_role(*, serial_rid: str, db: Session) -> RoleEntry:
     try:
-        group_entry = db.query(GroupEntry).filter(GroupEntry.serial_eid == serial_gid).all()[0]
+        role_entry = db.query(RoleEntry).filter(RoleEntry.serial_eid == serial_rid).all()[0]
     except IndexError:
-        raise EntityIDError(f"Unknown group ID `{serial_gid}`!")
-    return cast(GroupEntry, group_entry)
+        raise EntityIDError(f"Unknown role ID `{serial_rid}`!")
+    return cast(RoleEntry, role_entry)
 
 
 ####################################################################################################
@@ -139,9 +139,9 @@ def delete_subject(*, serial_sid: str, db: Session) -> None:
     db.commit()
 
 
-def delete_group(*, serial_gid: str, db: Session) -> None:
-    group_entry = read_group(serial_gid=serial_gid, db=db)
-    db.delete(group_entry)
+def delete_role(*, serial_rid: str, db: Session) -> None:
+    role_entry = read_role(serial_rid=serial_rid, db=db)
+    db.delete(role_entry)
     db.commit()
 
 
@@ -158,28 +158,28 @@ def delete_subject_permission(
     )
 
 
-def delete_group_permission(
-    *, serial_gid: str, permission: Permission, payload: str | None, db: Session
+def delete_role_permission(
+    *, serial_rid: str, permission: Permission, payload: str | None, db: Session
 ) -> None:
-    group_entry: GroupEntry = read_group(serial_gid=serial_gid, db=db)
+    role_entry: RoleEntry = read_role(serial_rid=serial_rid, db=db)
     _delete_permission_entry(
-        table=GroupPermissionEntry,
-        entity_db_id=group_entry.entity_db_id,
+        table=RolePermissionEntry,
+        entity_db_id=role_entry.entity_db_id,
         permission=permission,
         payload=payload,
         db=db,
     )
 
 
-def delete_membership(*, serial_sid: str, serial_gid: str, db: Session) -> None:
+def delete_membership(*, serial_sid: str, serial_rid: str, db: Session) -> None:
     subject_entry = read_subject(serial_sid=serial_sid, db=db)
-    group_entry = read_group(serial_gid=serial_gid, db=db)
+    role_entry = read_role(serial_rid=serial_rid, db=db)
 
     entries = (
         db.query(MembershipEntry)
         .filter(
             MembershipEntry.subject_db_id == subject_entry.entity_db_id,
-            MembershipEntry.group_db_id == group_entry.entity_db_id,
+            MembershipEntry.role_db_id == role_entry.entity_db_id,
         )
         .all()  # Should only have one entry
     )
@@ -190,8 +190,8 @@ def delete_membership(*, serial_sid: str, serial_gid: str, db: Session) -> None:
 
 
 def delete_parent_child_relationship(*, serial_pid: str, serial_cid: str, db: Session) -> None:
-    parent_entry = read_group(serial_gid=serial_pid, db=db)
-    child_entry = read_group(serial_gid=serial_cid, db=db)
+    parent_entry = read_role(serial_rid=serial_pid, db=db)
+    child_entry = read_role(serial_rid=serial_cid, db=db)
 
     entries = (
         db.query(RelationshipEntry)
@@ -218,7 +218,7 @@ def serialize_payload(payload: str | None) -> str:
 
 def _create_permission_entry(
     *,
-    table: Type[SubjectPermissionEntry] | Type[GroupPermissionEntry],
+    table: Type[SubjectPermissionEntry] | Type[RolePermissionEntry],
     entity_db_id: int,
     permission: Permission,
     payload: str | None,
@@ -241,7 +241,7 @@ def _create_permission_entry(
 
 def _delete_permission_entry(
     *,
-    table: Type[SubjectPermissionEntry] | Type[GroupPermissionEntry],
+    table: Type[SubjectPermissionEntry] | Type[RolePermissionEntry],
     entity_db_id: int,
     permission: Permission,
     payload: str | None,
@@ -263,15 +263,15 @@ def _delete_permission_entry(
     db.commit()
 
 
-def _detect_group_cycle(*, parent_entry: GroupEntry, child_entry: GroupEntry) -> None:
+def _detect_role_cycle(*, parent_entry: RoleEntry, child_entry: RoleEntry) -> None:
     if parent_entry == child_entry:
-        raise GroupCycleError  # TODO single node, single edge graph error message
+        raise RoleCycleError  # TODO single node, single edge graph error message
 
-    parent_entries = parent_entry.parent_entries  # parents of this "parent" group
+    parent_entries = parent_entry.parent_entries  # parents of this "parent" role
 
     if child_entry in parent_entries:
-        raise GroupCycleError(
-            f"Cyclic dependencies detected between groups `{parent_entry.serial_eid}` and `{child_entry.serial_eid}`!"
+        raise RoleCycleError(
+            f"Cyclic dependencies detected between roles `{parent_entry.serial_eid}` and `{child_entry.serial_eid}`!"
         )
     for entry in parent_entries:
-        _detect_group_cycle(parent_entry=entry, child_entry=child_entry)
+        _detect_role_cycle(parent_entry=entry, child_entry=child_entry)

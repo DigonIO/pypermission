@@ -1,69 +1,69 @@
 import pytest
 
-from pypermission.error import GroupCycleError
+from pypermission.error import RoleCycleError
 from pypermission.serial import SerialAuthority
 
 ACYCLIC_YAML = """
-groups:
+roles:
   A:
-    member_groups:
+    member_roles:
       - B
       - C
   B:
-    member_groups:
+    member_roles:
       - F
   C:
-    member_groups:
+    member_roles:
       - D
       - E
   D:
-    member_groups:
+    member_roles:
       - F
   E:
   F:
 """
 
 CYCLIC_A_YAML = """
-groups:
+roles:
   A:
-    member_groups:
+    member_roles:
       - B
       - C
   B:
-    member_groups:
+    member_roles:
       - F
   C:
-    member_groups:
+    member_roles:
       - D
       - E
   D:
-    member_groups:
+    member_roles:
       - F
   E:
-    member_groups:
+    member_roles:
       - A
   F:
 """
 
 CYCLIC_B_YAML = """
-groups:
+roles:
   A:
-    member_groups:
+    member_roles:
       - B
       - C
   B:
-    member_groups:
+    member_roles:
       - F
   C:
-    member_groups:
+    member_roles:
       - D
       - E
   D:
-    member_groups:
+    member_roles:
       - F
   E:
   F:
-    member_groups:
+    member_roles:
       - A
 """
 
@@ -84,8 +84,8 @@ class TestCycleDetection:
     """
 
     # TODO: exception handling
-    def test_acyclic_groups(self):
-        # No permission nodes needed for testing group hierarchy
+    def test_acyclic_roles(self):
+        # No permission nodes needed for testing role hierarchy
         auth = SerialAuthority(nodes=None)
         auth.load_YAML(serial_data=ACYCLIC_YAML)
 
@@ -94,31 +94,31 @@ class TestCycleDetection:
         (
             [
                 CYCLIC_A_YAML,
-                "Cyclic dependencies detected between groups `C` and `A`!",
+                "Cyclic dependencies detected between roles `C` and `A`!",
             ],
             [
                 CYCLIC_B_YAML,
-                "Cyclic dependencies detected between groups `[CB]` and `A`!",
+                "Cyclic dependencies detected between roles `[CB]` and `A`!",
             ],
         ),
     )
-    def test_cyclic_groups(self, yaml_str, err_msg):
-        # No permission nodes needed for testing group hierarchy
+    def test_cyclic_roles(self, yaml_str, err_msg):
+        # No permission nodes needed for testing role hierarchy
         auth = SerialAuthority(nodes=None)
-        with pytest.raises(GroupCycleError, match=err_msg):
+        with pytest.raises(RoleCycleError, match=err_msg):
             auth.load_YAML(serial_data=yaml_str)
 
     @pytest.mark.parametrize(
-        "gid, err_msg",
+        "rid, err_msg",
         (
-            ["E", "Cyclic dependencies detected between groups `C` and `A`!"],
-            ["F", "Cyclic dependencies detected between groups `[CB]` and `A`!"],
+            ["E", "Cyclic dependencies detected between roles `C` and `A`!"],
+            ["F", "Cyclic dependencies detected between roles `[CB]` and `A`!"],
         ),
     )
-    def test_cyclic_groups_inserts(self, gid, err_msg):
-        # No permission nodes needed for testing group hierarchy
+    def test_cyclic_roles_inserts(self, rid, err_msg):
+        # No permission nodes needed for testing role hierarchy
         auth = SerialAuthority(nodes=None)
         auth.load_YAML(serial_data=ACYCLIC_YAML)
 
-        with pytest.raises(GroupCycleError, match=err_msg):
-            auth.group_add_member_group(gid=gid, member_gid="A")
+        with pytest.raises(RoleCycleError, match=err_msg):
+            auth.role_add_member_role(rid=rid, member_rid="A")

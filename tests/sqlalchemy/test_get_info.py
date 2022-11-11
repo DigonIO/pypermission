@@ -36,12 +36,12 @@ def test_subject_get_info_sql(expected_permissions, serialize, sql_authority_get
 
 
 @pytest.mark.parametrize(
-    "sql_authority_get_info_group",
+    "sql_authority_get_info_role",
     (
         URL_SQLITE,
         URL_MARIADB,
     ),
-    indirect=["sql_authority_get_info_group"],
+    indirect=["sql_authority_get_info_role"],
 )
 @pytest.mark.parametrize(
     "expected_permissions, serialize",
@@ -50,7 +50,7 @@ def test_subject_get_info_sql(expected_permissions, serialize, sql_authority_get
         (GROUP_INFO_STR_STR, True),
     ],
 )
-def test_group_get_info_sql(expected_permissions, serialize, sql_authority_get_info_group):
-    auth: SQLAlchemyAuthority = sql_authority_get_info_group
-    result = auth.group_get_info(gid=USER_GROUP, serialize=serialize)
+def test_role_get_info_sql(expected_permissions, serialize, sql_authority_get_info_role):
+    auth: SQLAlchemyAuthority = sql_authority_get_info_role
+    result = auth.role_get_info(rid=USER_GROUP, serialize=serialize)
     assert DeepDiff(result, expected_permissions, ignore_order=True) == {}

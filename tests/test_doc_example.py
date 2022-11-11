@@ -37,9 +37,9 @@ USER_ADMIN = "Georg Schmied"
 USER_BANKER = "Johann Muller"
 USER_CUSTOMER = "Heinrich Bauer"
 
-GROUP_ADMIN = "group_admin"
-GROUP_BANKER = "group_banker"
-GROUP_CUSTOMER = "group_customer"
+GROUP_ADMIN = "role_admin"
+GROUP_BANKER = "role_banker"
+GROUP_CUSTOMER = "role_customer"
 
 
 class Account:
@@ -174,19 +174,19 @@ class BankAPI:
         raise NoPermissionError
 
     def prepare_rbac_setup(self):
-        self._auth.new_group(gid=GROUP_ADMIN)
-        self._auth.new_group(gid=GROUP_BANKER)
-        self._auth.new_group(gid=GROUP_CUSTOMER)
+        self._auth.new_role(rid=GROUP_ADMIN)
+        self._auth.new_role(rid=GROUP_BANKER)
+        self._auth.new_role(rid=GROUP_CUSTOMER)
 
-        self._auth.group_add_node(gid=GROUP_ADMIN, node=self._auth.root_node())
+        self._auth.role_add_node(rid=GROUP_ADMIN, node=self._auth.root_node())
 
-        self._auth.group_add_node(gid=GROUP_BANKER, node=NODE.ACCOUNT_CREATE)
-        self._auth.group_add_node(gid=GROUP_BANKER, node=NODE.ACCOUNT_GET_)
-        self._auth.group_add_node(gid=GROUP_BANKER, node=NODE.ACCOUNT_LIST_)
-        self._auth.group_add_node(gid=GROUP_BANKER, node=NODE.ACCOUNT_DELETE)
+        self._auth.role_add_node(rid=GROUP_BANKER, node=NODE.ACCOUNT_CREATE)
+        self._auth.role_add_node(rid=GROUP_BANKER, node=NODE.ACCOUNT_GET_)
+        self._auth.role_add_node(rid=GROUP_BANKER, node=NODE.ACCOUNT_LIST_)
+        self._auth.role_add_node(rid=GROUP_BANKER, node=NODE.ACCOUNT_DELETE)
 
-        self._auth.group_add_node(gid=GROUP_CUSTOMER, node=NODE.ACCOUNT_GET_OWN)
-        self._auth.group_add_node(gid=GROUP_CUSTOMER, node=NODE.ACCOUNT_LIST_OWN)
+        self._auth.role_add_node(rid=GROUP_CUSTOMER, node=NODE.ACCOUNT_GET_OWN)
+        self._auth.role_add_node(rid=GROUP_CUSTOMER, node=NODE.ACCOUNT_LIST_OWN)
 
         user_admin = User(username=USER_ADMIN, auth=self._auth)
         user_banker = User(username=USER_BANKER, auth=self._auth)
@@ -196,9 +196,9 @@ class BankAPI:
         self._users[user_banker.username] = user_banker
         self._users[user_customer.username] = user_customer
 
-        self._auth.group_add_member_subject(gid=GROUP_ADMIN, sid=user_admin.username)
-        self._auth.group_add_member_subject(gid=GROUP_BANKER, sid=user_banker.username)
-        self._auth.group_add_member_subject(gid=GROUP_CUSTOMER, sid=user_customer.username)
+        self._auth.role_add_member_subject(rid=GROUP_ADMIN, sid=user_admin.username)
+        self._auth.role_add_member_subject(rid=GROUP_BANKER, sid=user_banker.username)
+        self._auth.role_add_member_subject(rid=GROUP_CUSTOMER, sid=user_customer.username)
 
 
 bank_api = BankAPI()

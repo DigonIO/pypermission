@@ -57,7 +57,7 @@ def assert_loaded_authority(auth: SerialAuthority | SQLAlchemyAuthority):
     # The authority tested here should fulfil the properties of the two save files
     # `./serial/save_file.yaml` and `./serial/save_file.json`
 
-    assert auth.get_groups() == {FOOD, ANIMAL_BASED, PLANT_BASED}
+    assert auth.get_roles() == {FOOD, ANIMAL_BASED, PLANT_BASED}
 
     assert auth.get_subjects() == {
         EGG,
@@ -69,15 +69,15 @@ def assert_loaded_authority(auth: SerialAuthority | SQLAlchemyAuthority):
         BANANA,
     }
 
-    assert auth.group_get_member_groups(gid=FOOD) == {ANIMAL_BASED, PLANT_BASED}
-    assert auth.group_get_parent_groups(gid=ANIMAL_BASED) == {FOOD}
-    assert auth.group_get_parent_groups(gid=PLANT_BASED) == {FOOD}
+    assert auth.role_get_member_roles(rid=FOOD) == {ANIMAL_BASED, PLANT_BASED}
+    assert auth.role_get_parent_roles(rid=ANIMAL_BASED) == {FOOD}
+    assert auth.role_get_parent_roles(rid=PLANT_BASED) == {FOOD}
 
-    assert auth.group_get_member_subjects(gid=ANIMAL_BASED) == {EGG, SPAM, HAM}
-    assert auth.subject_get_groups(sid=EGG) == {ANIMAL_BASED}
+    assert auth.role_get_member_subjects(rid=ANIMAL_BASED) == {EGG, SPAM, HAM}
+    assert auth.subject_get_roles(sid=EGG) == {ANIMAL_BASED}
 
-    assert auth.group_get_member_subjects(gid=PLANT_BASED) == {ORANGE, APPLE, PEAR, BANANA}
-    assert auth.subject_get_groups(sid=ORANGE) == {PLANT_BASED}
+    assert auth.role_get_member_subjects(rid=PLANT_BASED) == {ORANGE, APPLE, PEAR, BANANA}
+    assert auth.subject_get_roles(sid=ORANGE) == {PLANT_BASED}
 
     assert auth.subject_has_permission(sid=EGG, node=TPN.TOWNY_CHAT_GLOBAL) == True
     assert auth.subject_has_permission(sid=PEAR, node=TPN.TOWNY_CHAT_GLOBAL) == True
@@ -124,14 +124,14 @@ def assert_loaded_authority(auth: SerialAuthority | SQLAlchemyAuthority):
     )
 
 
-CHILD_GROUP = "child_group"
-PARENT_GROUP = "parent_group"
-USER_GROUP = "user_group"
+CHILD_GROUP = "child_role"
+PARENT_GROUP = "parent_role"
+USER_GROUP = "user_role"
 USER = "user"
 IRON = "iron"
 
 SUBJECT_INFO_NODES_EID = {
-    "groups": {
+    "roles": {
         CHILD_GROUP: {
             "parents": [PARENT_GROUP],
             "permission_nodes": {
@@ -148,7 +148,7 @@ SUBJECT_INFO_NODES_EID = {
     "subject": {
         "entity_id": USER,
         "permission_nodes": {TPN.TOWNY_WILD_BUILD_: None},
-        "groups": [CHILD_GROUP],
+        "roles": [CHILD_GROUP],
     },
     "permission_tree": {
         TPN.TOWNY_CHAT_: {
@@ -169,16 +169,16 @@ SUBJECT_INFO_NODES_EID = {
 
 
 SUBJECT_INFO_STR_STR = {
-    "groups": {
-        "str:child_group": {
-            "parents": ["str:parent_group"],
+    "roles": {
+        "str:child_role": {
+            "parents": ["str:parent_role"],
             "permission_nodes": {
                 "towny.chat.town": None,
                 "towny.wild.build.<x>": [IRON],
                 "towny.wild.build.iron": None,
             },
         },
-        "str:parent_group": {
+        "str:parent_role": {
             "parents": [],
             "permission_nodes": {"towny.chat.*": None, "towny.wild.*": None},
         },
@@ -186,7 +186,7 @@ SUBJECT_INFO_STR_STR = {
     "subject": {
         "entity_id": "str:user",
         "permission_nodes": {"towny.wild.build.*": None},
-        "groups": ["str:child_group"],
+        "roles": ["str:child_role"],
     },
     "permission_tree": {
         "towny.chat.*": {
@@ -206,7 +206,7 @@ SUBJECT_INFO_STR_STR = {
 }
 
 GROUP_INFO_NODES_EID = {
-    "groups": {
+    "roles": {
         CHILD_GROUP: {
             "parents": [PARENT_GROUP],
             "permission_nodes": {
@@ -220,10 +220,10 @@ GROUP_INFO_NODES_EID = {
             "permission_nodes": {TPN.TOWNY_CHAT_: None, TPN.TOWNY_WILD_: None},
         },
     },
-    "group": {
+    "role": {
         "entity_id": USER_GROUP,
         "permission_nodes": {TPN.TOWNY_WILD_BUILD_: None},
-        "groups": [CHILD_GROUP],
+        "roles": [CHILD_GROUP],
     },
     "permission_tree": {
         TPN.TOWNY_CHAT_: {
@@ -243,24 +243,24 @@ GROUP_INFO_NODES_EID = {
 }
 
 GROUP_INFO_STR_STR = {
-    "groups": {
-        "str:child_group": {
-            "parents": ["str:parent_group"],
+    "roles": {
+        "str:child_role": {
+            "parents": ["str:parent_role"],
             "permission_nodes": {
                 "towny.chat.town": None,
                 "towny.wild.build.<x>": [IRON],
                 "towny.wild.build.iron": None,
             },
         },
-        "str:parent_group": {
+        "str:parent_role": {
             "parents": [],
             "permission_nodes": {"towny.chat.*": None, "towny.wild.*": None},
         },
     },
-    "group": {
-        "entity_id": "str:user_group",
+    "role": {
+        "entity_id": "str:user_role",
         "permission_nodes": {"towny.wild.build.*": None},
-        "groups": ["str:child_group"],
+        "roles": ["str:child_role"],
     },
     "permission_tree": {
         "towny.chat.*": {

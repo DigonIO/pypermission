@@ -16,14 +16,14 @@ class TownyPermissionNode(PermissionNode):
 ```
 
 ```yaml
-groups:
-  parent_group:
-    member_groups:
-      - child_group
+roles:
+  parent_role:
+    member_roles:
+      - child_role
     permission_nodes:
       towny.chat.*: Null
       towny.wild.*: Null
-  child_group:
+  child_role:
     member_subjects:
       - user
     permission_nodes:
@@ -70,15 +70,15 @@ permission_nodes:
 ```
 
 ```txt
-- towny.chat.*: user->child_group->parent_group
-- towny.wild.*: user->child_group->parent_group
-- towny.wild.build.<iron>: user->child_group
+- towny.chat.*: user->child_role->parent_role
+- towny.wild.*: user->child_role->parent_role
+- towny.wild.build.<iron>: user->child_role
 - towny.build.*: user
-- towny.chat.town: user->child_group
+- towny.chat.town: user->child_role
 ```
 
 ```txt
-- towny.chat.*: parent_group
-- towny.wild.*: parent_group
+- towny.chat.*: parent_role
+- towny.wild.*: parent_role
 - towny.build.*: user
 ```

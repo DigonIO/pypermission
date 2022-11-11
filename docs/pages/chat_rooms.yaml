@@ -1,4 +1,4 @@
-groups:
+roles:
   admin:
     permission_nodes:
       - "*"
