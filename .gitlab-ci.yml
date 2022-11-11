@@ -5,52 +5,52 @@ stages:
   - release
 
 variables:
-  MARIADB_ROOT_PASSWORD: ${MARIADB_ROOT_PASSWORD}
+  MARIADB_ROOT_PASSWORD: "NOT_SECURE"
 
 before_script:
   - python --version
   - python ci/secrets.py
 
 #### analysis ####
-#pylint_3_10_7:
-#  stage: analysis
-#  image: "python:3.10.7-alpine3.16"
-#  script:
-#    - pip install .[lint]
-#    - pylint src
-#  allow_failure: true
-#
-#mypy_3_10_7:
-#  stage: analysis
-#  image: "python:3.10.7-alpine3.16"
-#  script:
-#    - pip install .[lint]
-#    - mypy src
-#  allow_failure: true
-#
-#pydocstyle_3_10_7:
-#  stage: analysis
-#  image: "python:3.10.7-alpine3.16"
-#  script:
-#    - pip install .[lint]
-#    - pydocstyle src
-#  allow_failure: true
-#
-#bandit_3_10_7:
-#  stage: analysis
-#  image: "python:3.10.7-alpine3.16"
-#  script:
-#    - pip install .[lint]
-#    - bandit -r src
-#  allow_failure: false
-#
-##### documentation ####
-#doc_3_10_7:
-#  stage: documentation
-#  image: "python:3.10.7-alpine3.16"
-#  script:
-#    - pip install .[doc]
-#    - sphinx-build -b html docs/ docs/_build/html
+pylint_3_10_7:
+  stage: analysis
+  image: "python:3.10.7-alpine3.16"
+  script:
+    - pip install .[lint]
+    - pylint src
+  allow_failure: true
+
+mypy_3_10_7:
+  stage: analysis
+  image: "python:3.10.7-alpine3.16"
+  script:
+    - pip install .[lint]
+    - mypy src
+  allow_failure: true
+
+pydocstyle_3_10_7:
+  stage: analysis
+  image: "python:3.10.7-alpine3.16"
+  script:
+    - pip install .[lint]
+    - pydocstyle src
+  allow_failure: true
+
+bandit_3_10_7:
+  stage: analysis
+  image: "python:3.10.7-alpine3.16"
+  script:
+    - pip install .[lint]
+    - bandit -r src
+  allow_failure: false
+
+#### documentation ####
+doc_3_10_7:
+  stage: documentation
+  image: "python:3.10.7-alpine3.16"
+  script:
+    - pip install .[doc]
+    - sphinx-build -b html docs/ docs/_build/html
 
 #### testing ####
 pytest_3_10_7:
@@ -59,7 +59,7 @@ pytest_3_10_7:
   coverage: '/(?i)total.*? (100(?:\.0+)?\%|[1-9]?\d(?:\.\d+)?\%)$/'
   script:
     - pip install mariadb
-    - sleep 120
+    # - sleep 10
     - python ci/init_test_db.py
     - pip install -e .[test]
     - pytest --cov=src/ tests/
@@ -67,16 +67,17 @@ pytest_3_10_7:
     - name: mariadb:10.10.1-rc-jammy
 
 
-#pydoctest_3_10_7:
-#  stage: testing
-#  image: "registry.gitlab.com/digonio/pypermission-images:pp_testing-py_3_10_8-6a0138fe"
-#  script:
-#    - pip install mariadb
-#    - python ci/init_test_db.py
-#    - pip install -e .[test]
-#    - pytest docs/
-#  services:
-#    - name: mariadb:10.10.1-rc-jammy
+pydoctest_3_10_7:
+  stage: testing
+  image: "registry.gitlab.com/digonio/pypermission-images:pp_testing-py_3_10_8-6a0138fe"
+  script:
+    - pip install mariadb
+    # - sleep 10
+    - python ci/init_test_db.py
+    - pip install -e .[test]
+    - pytest docs/
+  services:
+    - name: mariadb:10.10.1-rc-jammy
 
 #### release ####
 pypi:

@@ -19,5 +19,5 @@ except mariadb.Error as e:
 cur = conn.cursor()
 
 cur.execute("CREATE DATABASE pp_db;")
-cur.execute("CREATE USER 'pp_user'@'localhost' IDENTIFIED BY 'pp_pw';")
-cur.execute("GRANT ALL PRIVILEGES ON pp_db.* TO 'pp_user'@'localhost';")
+cur.execute("CREATE USER 'pp_user'@'127.0.0.1' IDENTIFIED BY 'pp_pw';")
+cur.execute("GRANT ALL PRIVILEGES ON pp_db.* TO 'pp_user'@'127.0.0.1';")
