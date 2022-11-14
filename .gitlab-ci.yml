@@ -1,0 +1,88 @@
+stages:
+  - analysis
+  - documentation
+  - testing
+  - release
+
+variables:
+  MARIADB_ROOT_PASSWORD: "NOT_SECURE"
+
+before_script:
+  - python --version
+  - python ci/secrets.py
+
+#### analysis ####
+pylint_3_10_7:
+  stage: analysis
+  image: "python:3.10.7-alpine3.16"
+  script:
+    - pip install .[lint]
+    - pylint src
+  allow_failure: true
+
+mypy_3_10_7:
+  stage: analysis
+  image: "python:3.10.7-alpine3.16"
+  script:
+    - pip install .[lint]
+    - mypy src
+  allow_failure: true
+
+pydocstyle_3_10_7:
+  stage: analysis
+  image: "python:3.10.7-alpine3.16"
+  script:
+    - pip install .[lint]
+    - pydocstyle src
+  allow_failure: true
+
+bandit_3_10_7:
+  stage: analysis
+  image: "python:3.10.7-alpine3.16"
+  script:
+    - pip install .[lint]
+    - bandit -r src
+  allow_failure: false
+
+#### documentation ####
+doc_3_10_7:
+  stage: documentation
+  image: "python:3.10.7-alpine3.16"
+  script:
+    - pip install .[doc]
+    - sphinx-build -b html docs/ docs/_build/html
+
+#### testing ####
+pytest_3_10_7:
+  stage: testing
+  image: "registry.gitlab.com/digonio/pypermission-images:pp_testing-py_3_10_8-6a0138fe"
+  coverage: '/(?i)total.*? (100(?:\.0+)?\%|[1-9]?\d(?:\.\d+)?\%)$/'
+  script:
+    - pip install -e .[test]
+    - python ci/init_test_db.py
+    - pytest --cov=src/ tests/
+  services:
+    - name: mariadb:10.10.1-rc-jammy
+
+
+pydoctest_3_10_7:
+  stage: testing
+  image: "registry.gitlab.com/digonio/pypermission-images:pp_testing-py_3_10_8-6a0138fe"
+  script:
+    - pip install -e .[test]
+    - python ci/init_test_db.py
+    - pytest docs/
+  services:
+    - name: mariadb:10.10.1-rc-jammy
+
+#### release ####
+pypi:
+  image: python:3.10.7-bullseye
+  stage: release
+  script:
+    - pip install .
+    - pip install twine
+    - python setup.py sdist bdist_wheel
+    - twine upload dist/*
+  rules:
+    - if: '$CI_COMMIT_TAG =~ /^\d+.\d+.\d+/'

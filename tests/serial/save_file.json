@@ -1,0 +1,51 @@
+{
+    "roles": {
+        "str:food": {
+            "member_roles": [
+                "str:animal_based",
+                "str:plant_based"
+            ],
+            "permission_nodes": [
+                "towny.chat.global"
+            ]
+        },
+        "str:animal_based": {
+            "member_subjects": [
+                "str:egg",
+                "str:spam",
+                "str:ham"
+            ],
+            "permission_nodes": [
+                "towny.chat.town",
+                "towny.wild.build.<dirt>",
+                "towny.wild.build.<gold>"
+            ]
+        },
+        "str:plant_based": {
+            "member_subjects": [
+                "str:orange",
+                "str:apple",
+                "str:pear",
+                "str:banana"
+            ],
+            "permission_nodes": [
+                "towny.chat.nation",
+                "towny.wild.destroy.<dirt>",
+                "towny.wild.destroy.<gold>"
+            ]
+        }
+    },
+    "subjects": {
+        "str:egg": {},
+        "str:spam": {},
+        "str:ham": {
+            "permission_nodes": [
+                "towny.wild.*"
+            ]
+        },
+        "str:orange": {},
+        "str:apple": {},
+        "str:pear": {},
+        "str:banana": {}
+    }
+}

@@ -1,0 +1,36 @@
+roles:
+  food:
+    member_roles:
+      - animal_based
+      - plant_based
+    permission_nodes:
+      - towny.chat.global
+  animal_based:
+    member_subjects:
+      - egg
+      - spam
+      - ham
+    permission_nodes:
+      - towny.chat.town
+      - towny.wild.build.<dirt>
+      - towny.wild.build.<gold>
+  plant_based:
+    member_subjects:
+      - orange
+      - apple
+      - pear
+      - banana
+    permission_nodes:
+      - towny.chat.nation
+      - towny.wild.destroy.<dirt>
+      - towny.wild.destroy.<gold>
+subjects:
+  egg: {}
+  spam: {}
+  ham:
+    permission_nodes:
+     - towny.wild.*
+  orange: {}
+  apple: {}
+  pear: {}
+  banana: {}

@@ -1,5 +1,6 @@
 #venv
 venv/
+tmp*.*
 
 # Byte-compiled / optimized / DLL files
 .DS_Store
@@ -33,7 +34,6 @@ var/
 *.manifest
 *.spec
 
-
 # Installer logs
 pip-log.txt
 pip-delete-this-directory.txt
@@ -61,8 +61,10 @@ docs/_build/
 # PyBuilder
 target/
 
-# PyCharm
+# Editor
 .idea/
+.vscode/
 
 # PyTest
 .pytest_cache/
+pp_test.db

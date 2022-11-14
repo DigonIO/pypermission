@@ -15,6 +15,8 @@ warn_return_any = true
 warn_unused_configs = true
 disallow_any_generics = true
 disallow_subclassing_any = true
+plugins = "sqlalchemy.ext.mypy.plugin"
+enable_recursive_aliases = true
 
 [[tool.mypy.overrides]]
 module = ['pytesseract.*', 'pdf2image.*']

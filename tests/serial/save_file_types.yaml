@@ -1,0 +1,18 @@
+roles:
+  "all":
+    member_roles:
+      - 100
+      - "100"
+  100:
+    member_subjects:
+      - 1
+      - "1"
+  "100":
+    member_subjects:
+      - 2
+      - "two"
+subjects:
+  1: {}
+  "1": {}
+  2: Null
+  "two": Null

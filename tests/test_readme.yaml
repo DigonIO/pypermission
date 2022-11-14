@@ -1,0 +1,18 @@
+roles:
+  moderator:
+    permission_nodes:
+      - chat.*
+      - ticket.*
+    member_subjects:
+      - Alice
+  user:
+    permission_nodes:
+      - chat.global
+      - ticket.open
+      - ticket.close.own
+    member_subjects:
+      - Alice
+      - Bob
+subjects:
+  Alice: {}
+  Bob: {}

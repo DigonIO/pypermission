@@ -1,0 +1,28 @@
+{
+  "roles": {
+    "str:all": {
+      "member_roles": [
+        "int:100",
+        "str:100"
+      ]
+    },
+    "int:100": {
+      "member_subjects": [
+        "int:1",
+        "str:1"
+      ]
+    },
+    "str:100": {
+      "member_subjects": [
+        "int:2",
+        "str:two"
+      ]
+    }
+  },
+  "subjects": {
+    "int:1": {},
+    "str:1": {},
+    "int:2": null,
+    "str:two": null
+  }
+}

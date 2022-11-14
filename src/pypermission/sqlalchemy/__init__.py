@@ -1,0 +1,1 @@
+from pypermission.sqlalchemy.core import SQLAlchemyAuthority

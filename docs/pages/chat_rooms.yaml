@@ -1,0 +1,34 @@
+roles:
+  admin:
+    permission_nodes:
+      - "*"
+    member_subjects:
+      - Alice
+  moderator:
+    permission_nodes:
+      - chat.invite
+      - chat.ban.user
+      - chat.join.*
+      - chat.message.<org-moderators>
+    member_subjects:
+      - Bob
+  user:
+    permission_nodes:
+      - chat.join.invited
+      - chat.leave
+    member_subjects:
+      - Alice
+      - Bob
+      - John
+subjects:
+  Alice:
+    permission_nodes:
+      - chat.message.<room-12>
+      - chat.message.<room-212>
+  Bob:
+    permission_nodes:
+      - chat.message.<room-12>
+      - chat.message.<room-501>
+  John:
+    permission_nodes:
+      - chat.message.<room-501>
