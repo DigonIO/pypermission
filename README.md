@@ -3,34 +3,41 @@
 </h1>
 
 <p>
-    A node based permission engine for python.
-    Inspired by the permission system used in the Bukkit Minecraft server mod project.
+    A role-based access control (RBAC) permission library for python.
 </p>
 
-[![repository](https://img.shields.io/badge/src-GitLab-orange)](https://gitlab.com/DigonIO/scheduler)
-[![mirror](https://img.shields.io/badge/mirror-GitHub-orange)](https://github.com/DigonIO/scheduler)
-[![license](https://img.shields.io/badge/license-LGPLv3-orange)](https://gitlab.com/DigonIO/scheduler/-/blob/master/LICENSE)
-[![pipeline status](https://gitlab.com/DigonIO/scheduler/badges/master/pipeline.svg)](https://gitlab.com/DigonIO/scheduler/-/pipelines)
-[![coverage report](https://gitlab.com/DigonIO/scheduler/badges/master/coverage.svg)](https://gitlab.com/DigonIO/scheduler/-/pipelines)
-[![Documentation Status](https://readthedocs.org/projects/python-scheduler/badge/?version=latest)](https://python-scheduler.readthedocs.io/en/latest/?badge=latest)
-[![Code style: black](https://gitlab.com/DigonIO/scheduler/-/raw/master/doc/_assets/code_style_black.svg)](https://github.com/psf/black)
+[![repository](https://img.shields.io/badge/src-GitLab-orange)](https://gitlab.com/DigonIO/pypermission)
+[![mirror](https://img.shields.io/badge/mirror-GitHub-orange)](https://github.com/DigonIO/pypermission)
+[![license](https://img.shields.io/badge/license-LGPLv3-orange)](https://gitlab.com/DigonIO/pypermission/-/blob/master/LICENSE)
+[![pipeline status](https://gitlab.com/DigonIO/pypermission/badges/master/pipeline.svg)](https://gitlab.com/DigonIO/pypermission/-/pipelines)
+[![coverage report](https://gitlab.com/DigonIO/pypermission/badges/master/coverage.svg)](https://gitlab.com/DigonIO/pypermission/-/pipelines)
+[![Documentation Status](https://readthedocs.org/projects/python-pypermission/badge/?version=latest)](https://pypermission.readthedocs.io/en/latest/?badge=latest)
+[![Code style: black](https://gitlab.com/DigonIO/pypermission/-/raw/master/doc/_assets/code_style_black.svg)](https://github.com/psf/black)
 
-[![pkgversion](https://img.shields.io/pypi/v/scheduler)](https://pypi.org/project/scheduler/)
-[![versionsupport](https://img.shields.io/pypi/pyversions/scheduler)](https://pypi.org/project/scheduler/)
-[![Downloads Week](https://pepy.tech/badge/scheduler/week)](https://pepy.tech/project/scheduler)
-[![Downloads Total](https://pepy.tech/badge/scheduler)](https://pepy.tech/project/scheduler)
+[![pkgversion](https://img.shields.io/pypi/v/pypermission)](https://pypi.org/project/pypermission/)
+[![versionsupport](https://img.shields.io/pypi/pyversions/pypermission)](https://pypi.org/project/pypermission/)
+[![Downloads Week](https://pepy.tech/badge/pypermission/week)](https://pepy.tech/project/pypermission)
+[![Downloads Total](https://pepy.tech/badge/pypermission)](https://pepy.tech/project/pypermission)
+
+## WARNING: ALPHA VERSION
+
+This is a prototype. APIs will be subjects to breaking changes! Existing APIs are not battle tested
+and might exhibit unexpected behavior!
 
 ## Features
 
-+ RBAC: Role based access control [(Guide)](https://pypermission.readthedocs.io/en/latest/pages/guides/rbac_rest_api_json.html)
-+ UBAC: User based access control
-+ Tree based permissions nodes
-  + Parent nodes
-  + Leaf nodes
-  + Leaf nodes w/ a string payload
++ NIST Model for RBAC: <https://doi.org/10.1145/344287.344301>
+  + Level 1: Flat (Missing method)
+  + Level 2a: Hierarchical
+  + Level 3a: Constrained (TODO)
+  + Level 4a: Symmetric (TODO)
++ Permissions with hierarchical ordering
++ Permissions with string payloads
 + Persistency backends
-  + JSON
-  + YAML
+  + SQLAlchemy
+  + JSON + YAML save files
++ Subject permission assignment (UBAC oriented)
++ Online Documentation (TODO, is incomplete and incorrect)
 
 ## Installation
 
@@ -44,13 +51,13 @@
 pip install PyPermission
 ```
 
-#### SQL persistency backend
+#### SQLAlchemy persistency backend
 
 ```bash
 pip install PyPermission[sqlalchemy]
 ```
 
-#### YAML persistency backend
+#### JSON + YAML persistency backend
 
 ```bash
 pip install PyPermission[yaml]
@@ -69,7 +76,7 @@ source ./venv/bin/activate # optional
 pip install -e .[dev]
 ```
 
-## Example code
+## Example: *How to RBAC*
 
 Import all required objects. Here we will choose the authority with the JSON persistency backend.
 
@@ -84,8 +91,7 @@ Define an authority with some permission nodes:
 class Nodes(PermissionNode):
     CHAT_ = "chat.*"  # parent
     CHAT_GLOBAL = "chat.global"  # leaf
-    CHAT_ROOM_ = "chat.room.*"  # parent
-    CHAT_ROOM_X = "chat.room.<x>"  # leaf w/ payload
+    CHAT_MODERATOR = "chat.moderator"  # leaf
     TICKET_ = "ticket.*"  # parent
     TICKET_OPEN = "ticket.open"  # leaf
     TICKET_CLOSE_ = "ticket.close.*"  # parent
@@ -96,33 +102,28 @@ class Nodes(PermissionNode):
 auth = SerialAuthority(nodes=Nodes)
 ```
 
-The following file `save_file.yaml` defines a mixed access control setup (RBAC & UBAC). Alice is
-a member of the moderator role, while Bob is given only permissions of the user role:
+The following file `save_file.yaml` defines a RBAC setup. Alice is
+a member of the user and moderator role, while Bob is assigned only to the user role:
 
 ```yaml
 roles:
   moderator:
     permission_nodes:
-      - chat.global
-      - chat.room.*
+      - chat.*
       - ticket.*
     member_subjects:
       - Alice
   user:
     permission_nodes:
+      - chat.global
       - ticket.open
       - ticket.close.own
     member_subjects:
+      - Alice
       - Bob
-    member_roles:
-      - moderator
 subjects:
-  Alice:
-    permission_nodes:
-      - chat.room.<Alice>
-  Bob:
-    permission_nodes:
-      - chat.room.<Bob>
+  Alice: {}
+  Bob: {}
 ```
 
 ```py
@@ -132,17 +133,17 @@ auth.load_file(path="save_file.yaml")
 Now check if a subject has a desired permission.
 
 ```pycon
+>>> auth.subject_has_permission(sid="Bob", node=Nodes.CHAT_GLOBAL)
+True
+
+>>> auth.subject_has_permission(sid="Alice", node=Nodes.CHAT_MODERATOR)
+True
+
 >>> auth.subject_has_permission(sid="Bob", node=Nodes.TICKET_OPEN)
 True
 
 >>> auth.subject_has_permission(sid="Alice", node=Nodes.TICKET_CLOSE_ALL)
 True
-
->>> auth.subject_has_permission(sid="Alice", node=Nodes.CHAT_ROOM_X, payload="Bob")
-True
-
->>> auth.subject_has_permission(sid="Bob", node=Nodes.CHAT_ROOM_X, payload="Alice")
-False
 ```
 
 ## Documentation

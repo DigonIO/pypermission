@@ -1,23 +1,18 @@
 roles:
   moderator:
     permission_nodes:
-      - chat.global
-      - chat.room.*
+      - chat.*
       - ticket.*
     member_subjects:
       - Alice
   user:
     permission_nodes:
+      - chat.global
       - ticket.open
       - ticket.close.own
     member_subjects:
+      - Alice
       - Bob
-    member_roles:
-      - moderator
 subjects:
-  Alice:
-    permission_nodes:
-      - chat.room.<Alice>
-  Bob:
-    permission_nodes:
-      - chat.room.<Bob>
+  Alice: {}
+  Bob: {}
