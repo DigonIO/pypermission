@@ -37,30 +37,21 @@ and might exhibit unexpected behavior!
   + SQLAlchemy
   + JSON + YAML save files
 + Subject permission assignment (UBAC oriented)
-+ [Online Documentation](https://pypermission.readthedocs.io/en/latest/readme.html) (TODO, is incomplete and incorrect)
++ [Online Documentation](https://pypermission.readthedocs.io/en/latest/readme.html) (incomplete and incorrect)
 
 ## Installation
 
 ### pip
 
 `PyPermission` can be installed directly from the PyPI repositories.
-
-#### JSON persistency backend
-
-```bash
-pip install PyPermission
-```
-
-#### SQLAlchemy persistency backend
+Multiple options for persistency backends are supported.
+The necessary dependencies can be selected directly during installation with pip:
 
 ```bash
-pip install PyPermission[sqlalchemy]
-```
-
-#### JSON + YAML persistency backend
-
-```bash
-pip install PyPermission[yaml]
+pip install PyPermission  # JSON (std. lib.)
+pip install PyPermission[yaml]  # PyYAML
+pip install PyPermission[sqlalchemy]  # SQLAlchemy
+pip install PyPermission[all]  # JSON + PyYAML + SQLAlchemy
 ```
 
 ### Editable installation for developers
