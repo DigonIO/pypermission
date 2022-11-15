@@ -37,7 +37,7 @@ and might exhibit unexpected behavior!
   + SQLAlchemy
   + JSON + YAML save files
 + Subject permission assignment (UBAC oriented)
-+ Online Documentation (TODO, is incomplete and incorrect)
++ [Online Documentation](https://pypermission.readthedocs.io/en/latest/readme.html) (TODO, is incomplete and incorrect)
 
 ## Installation
 
