@@ -21,8 +21,8 @@ def init_mariadb():
 
         cur = conn.cursor()
         cur.execute("CREATE DATABASE pp_db;")
-        cur.execute("CREATE USER 'pp_user'@'127.0.0.1' IDENTIFIED BY 'pp_pw';")
-        cur.execute("GRANT ALL PRIVILEGES ON pp_db.* TO 'pp_user'@'127.0.0.1';")
+        cur.execute("CREATE USER 'pp_user'@'%' IDENTIFIED BY 'pp_pw';")
+        cur.execute("GRANT ALL PRIVILEGES ON pp_db.* TO 'pp_user'@'%';")
     except mariadb.Error as e:
         print(f"Error connecting to MariaDB Platform: {e}")
         return False
