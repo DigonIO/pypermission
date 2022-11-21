@@ -27,7 +27,7 @@ and might exhibit unexpected behavior!
 ## Features
 
 + NIST Model for RBAC: <https://doi.org/10.1145/344287.344301>
-  + Level 1: Flat (Missing method)
+  + Level 1: Flat
   + Level 2a: Hierarchical
   + Level 3a: Constrained (TODO)
   + Level 4a: Symmetric (TODO)
@@ -39,9 +39,7 @@ and might exhibit unexpected behavior!
 + Subject permission assignment (UBAC oriented)
 + [Online Documentation](https://pypermission.readthedocs.io/en/latest/readme.html) (incomplete and incorrect)
 
-## Installation
-
-### pip
+## Installation via pip
 
 `PyPermission` can be installed directly from the PyPI repositories.
 Multiple options for persistency backends are supported.
@@ -52,19 +50,6 @@ pip install PyPermission  # JSON (std. lib.)
 pip install PyPermission[yaml]  # PyYAML
 pip install PyPermission[sqlalchemy]  # SQLAlchemy
 pip install PyPermission[all]  # JSON + PyYAML + SQLAlchemy
-```
-
-### Editable installation for developers
-
-Install `PyPermission` from the `git`
-[repository](https://gitlab.com/DigonIO/PyPermission) with:
-
-```bash
-git clone https://gitlab.com/DigonIO/PyPermission.git
-cd PyPermission
-python -m venv venv  # optional
-source ./venv/bin/activate # optional
-pip install -e .[dev]
 ```
 
 ## Example: *How to RBAC*
@@ -139,32 +124,11 @@ True
 
 ## Documentation
 
-The API documentation can either be viewed
-[online](https://pypermission.readthedocs.io/en/latest/readme.html)
-or generated using Sphinx with [numpydoc](https://numpydoc.readthedocs.io/en/latest/format.html)
-formatting. To build, run:
+View the API documentation online:
 
-```bash
-sphinx-build -b html docs/ docs/_build/html
-```
-
-## Testing
-
-Testing is done using [pytest](https://pypi.org/project/pytest/). With
-[pytest-cov](https://pypi.org/project/pytest-cov/) and
-[coverage](https://pypi.org/project/coverage/) a report for the test coverage can be generated:
-
-```bash
-pytest --cov=src/ tests/
-coverage html
-```
-
-To test the examples in the documentation run:
-
-```bash
-pytest docs/
-```
+<https://pypermission.readthedocs.io/en/latest/readme.html>
 
 ## License
 
-This free and open source software (FOSS) is published under the [LGPLv3 license](https://www.gnu.org/licenses/lgpl-3.0.en.html).
+This free and open source software (FOSS) is published under the
+[LGPLv3 license](https://www.gnu.org/licenses/lgpl-3.0.en.html).
