@@ -27,11 +27,9 @@ If possible include:
 * python and `PyPermission` version
 * Steps needed to reproduce the bug
 
-## Developing for this project
+## Development Setup
 
-### Setup
-
-Clone the `PyPermission` repository with git and enter the directory:
+Clone the `PyPermission` repository with `git` and enter the directory:
 
 ```bash
 git clone https://gitlab.com/DigonIO/PyPermission.git
@@ -51,7 +49,7 @@ Install the development requirements and the project:
 pip install -e .[dev]
 ```
 
-### Running tests
+## Running tests
 
 Testing is done using [pytest](https://pypi.org/project/pytest/). With
 [pytest-cov](https://pypi.org/project/pytest-cov/) and
@@ -68,7 +66,7 @@ To test the examples in the documentation run:
 pytest docs/
 ```
 
-### Building the documentation
+## Building the documentation
 
 To build the documentation locally, run:
 
@@ -79,3 +77,15 @@ sphinx-build -b html docs/ docs/_build/html
 We are using Sphinx with [numpydoc](https://numpydoc.readthedocs.io/en/latest/format.html)
 formatting. Additionally the documentation is tested with `pytest` together with the
 `sybil` extension to parse the doctests.
+
+## Pull requests
+
+1. Fork the repository and check out on the `dev` branch.
+2. Follow PEP-8 and use Use [isort](https://github.com/PyCQA/isort) and [black](https://github.com/psf/black) for formatting.
+3. Apply the the static code analysis tools
+  `pylint`, `pydocstyle`, `bandit` and `mypy` on the codebase in `src/` and check the
+  output to avoid introduction of regressions.
+4. Verify that `pytest` passes on both - the `tests/` and the `docs/` folder.
+5. Create a commit with a descriptive summary of your changes.
+6. Create a [pull request](https://gitlab.com/DigonIO/pypermission/-/merge_requests)
+   on the official repository.

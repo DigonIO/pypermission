@@ -4,6 +4,7 @@ target-version = ['py310']
 
 [tool.isort]
 py_version = 310
+profile = "black"
 
 [tool.pydocstyle]
 convention = "numpy"
@@ -17,7 +18,3 @@ disallow_any_generics = true
 disallow_subclassing_any = true
 plugins = "sqlalchemy.ext.mypy.plugin"
 enable_recursive_aliases = true
-
-[[tool.mypy.overrides]]
-module = ['pytesseract.*', 'pdf2image.*']
-ignore_missing_imports = true
