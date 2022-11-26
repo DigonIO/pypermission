@@ -13,6 +13,7 @@ Prepare a authority with example permissions.
     ...     COMMAND_ = "command.*"  # parent
     ...     COMMAND_STATS = "command.stats"  # leaf
     ...     COMMAND_RESPAWN = "command.respawn"  # leaf
+    ...
 
     >>> auth = Authority(nodes=BuildinPN)  # register buildin nodes
 
