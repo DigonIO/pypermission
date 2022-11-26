@@ -43,15 +43,19 @@ python -m venv venv
 source ./venv/bin/activate
 ```
 
-Install the development requirements and the project:
+Install the project with the development requirements and install
+[pre-commit](https://pre-commit.com/) for the repository:
 
 ```bash
 pip install -e .[dev]
+pre-commit install
 ```
 
 ## Running tests
 
-Testing is done using [pytest](https://pypi.org/project/pytest/). With
+Testing is done using [pytest](https://pypi.org/project/pytest/). Currently the
+tests require access to a running `MariaDB` database. Follow the
+[configuration steps](tests/README.md) for a working setup. With
 [pytest-cov](https://pypi.org/project/pytest-cov/) and
 [coverage](https://pypi.org/project/coverage/) a report for the test coverage can be generated:
 
@@ -81,11 +85,10 @@ formatting. Additionally the documentation is tested with `pytest` together with
 ## Pull requests
 
 1. Fork the repository and check out on the `dev` branch.
-2. Follow PEP-8 and use Use [isort](https://github.com/PyCQA/isort) and [black](https://github.com/psf/black) for formatting.
-3. Apply the the static code analysis tools
-  `pylint`, `pydocstyle`, `bandit` and `mypy` on the codebase in `src/` and check the
-  output to avoid introduction of regressions.
-4. Verify that `pytest` passes on both - the `tests/` and the `docs/` folder.
-5. Create a commit with a descriptive summary of your changes.
-6. Create a [pull request](https://gitlab.com/DigonIO/pypermission/-/merge_requests)
+2. Enable and install [pre-commit](https://pre-commit.com/) to ensure style-guides.
+3. Utilize the the static code analysis tools
+   `pylint`, `pydocstyle`, `bandit` and `mypy` on the codebase in `src/` and check the
+   output to avoid introduction of regressions.
+4. Create a commit with a descriptive summary of your changes.
+5. Create a [pull request](https://gitlab.com/DigonIO/pypermission/-/merge_requests)
    on the official repository.
