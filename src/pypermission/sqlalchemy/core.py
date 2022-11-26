@@ -95,24 +95,24 @@ class SQLAlchemyAuthority(Authority):
 
         _close_db_session(db, session)
 
-    def role_add_member_subject(
-        self, *, rid: EntityID, member_sid: EntityID, session: Session | None = None
+    def role_add_subject(
+        self, *, rid: EntityID, sid: EntityID, session: Session | None = None
     ) -> None:
         """Add a subject to a role to inherit all its permissions."""
         serial_rid = entity_id_serializer(rid)
-        serial_member_sid = entity_id_serializer(member_sid)
+        serial_member_sid = entity_id_serializer(sid)
         db = self._setup_db_session(session)
 
         create_membership(serial_sid=serial_member_sid, serial_rid=serial_rid, db=db)
 
         _close_db_session(db, session)
 
-    def role_add_member_role(
-        self, *, rid: EntityID, member_rid: EntityID, session: Session | None = None
+    def role_add_child_role(
+        self, *, rid: EntityID, child_rid: EntityID, session: Session | None = None
     ) -> None:
         """Add a role to a parent role to inherit all its permissions."""
         serial_rid = entity_id_serializer(rid)
-        serial_member_rid = entity_id_serializer(member_rid)
+        serial_member_rid = entity_id_serializer(child_rid)
         db = self._setup_db_session(session)
 
         create_parent_child_relationship(serial_pid=serial_rid, serial_cid=serial_member_rid, db=db)
@@ -203,9 +203,7 @@ class SQLAlchemyAuthority(Authority):
         _close_db_session(db, session)
         return result
 
-    def role_get_member_subjects(
-        self, rid: EntityID, session: Session | None = None
-    ) -> set[EntityID]:
+    def role_get_subjects(self, rid: EntityID, session: Session | None = None) -> set[EntityID]:
         """Get a set of all subject IDs from a role."""
         serial_rid = entity_id_serializer(rid)
         db = self._setup_db_session(session)
@@ -220,7 +218,7 @@ class SQLAlchemyAuthority(Authority):
         _close_db_session(db, session)
         return result
 
-    def role_get_member_roles(
+    def role_get_child_roles(
         self, *, rid: EntityID, session: Session | None = None
     ) -> set[EntityID]:
         """Get a set of all child role IDs of a role."""
@@ -710,28 +708,28 @@ class SQLAlchemyAuthority(Authority):
 
         _close_db_session(db, session)
 
-    def role_rm_member_subject(
+    def role_rm_subject(
         self,
         *,
         rid: EntityID,
-        member_sid: EntityID,
+        sid: EntityID,
         session: Session | None = None,
     ) -> None:
         """Remove a subject from a role."""
         serial_rid = entity_id_serializer(rid)
-        serial_member_sid = entity_id_serializer(member_sid)
+        serial_member_sid = entity_id_serializer(sid)
         db = self._setup_db_session(session)
 
         delete_membership(serial_sid=serial_member_sid, serial_rid=serial_rid, db=db)
 
         _close_db_session(db, session)
 
-    def role_rm_member_role(
-        self, *, rid: EntityID, member_rid: EntityID, session: Session | None = None
+    def role_rm_child_role(
+        self, *, rid: EntityID, child_rid: EntityID, session: Session | None = None
     ) -> None:
         """Remove a role from a role."""
         serial_rid = entity_id_serializer(rid)
-        serial_member_rid = entity_id_serializer(member_rid)
+        serial_member_rid = entity_id_serializer(child_rid)
         db = self._setup_db_session(session)
 
         delete_parent_child_relationship(serial_pid=serial_rid, serial_cid=serial_member_rid, db=db)

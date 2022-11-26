@@ -337,7 +337,7 @@ class SerialAuthority(_Authority):
                 member_rid = entity_id_deserializer(serial_member_rid)
                 if member_rid not in self._roles:
                     raise ParsingError(f"Member role `{member_rid}` was never defined!")
-                self.role_add_member_role(rid=rid, member_rid=member_rid)
+                self.role_add_child_role(rid=rid, child_rid=member_rid)
 
     def _load_data_store_yaml(self, *, data: DataStoreYAML) -> None:
         """Load state from DataStoreYAML dictionary."""
@@ -398,7 +398,7 @@ class SerialAuthority(_Authority):
             for member_rid in gdefs.get("member_roles") or []:
                 if member_rid not in self._roles:
                     raise ParsingError(f"Member role `{member_rid}` was never defined!")
-                self.role_add_member_role(rid=rid, member_rid=member_rid)
+                self.role_add_child_role(rid=rid, child_rid=member_rid)
 
     ################################################################################################
     ### Add
@@ -424,28 +424,28 @@ class SerialAuthority(_Authority):
         role = Role(id=rid)
         self._roles[rid] = role
 
-    def role_add_member_subject(self, *, rid: EntityID, member_sid: EntityID) -> None:
+    def role_add_subject(self, *, rid: EntityID, sid: EntityID) -> None:
         """Add a subject to a role to inherit all its permissions."""
         assertEntityIDType(eid=rid)
-        assertEntityIDType(eid=member_sid)
+        assertEntityIDType(eid=sid)
 
         role = self._get_role(rid=rid)
-        subject = self._get_subject(sid=member_sid)
+        subject = self._get_subject(sid=sid)
 
-        role.sids.add(member_sid)
+        role.sids.add(sid)
         subject.rids.add(rid)
 
-    def role_add_member_role(self, *, rid: EntityID, member_rid: EntityID) -> None:
+    def role_add_child_role(self, *, rid: EntityID, child_rid: EntityID) -> None:
         """Add a role to a parent role to inherit all its permissions."""
         assertEntityIDType(eid=rid)
-        assertEntityIDType(eid=member_rid)
+        assertEntityIDType(eid=child_rid)
 
         role = self._get_role(rid=rid)
-        member = self._get_role(rid=member_rid)
+        member = self._get_role(rid=child_rid)
 
-        self._detect_role_cycle(role=role, member_rid=member_rid)
+        self._detect_role_cycle(role=role, member_rid=child_rid)
 
-        role.child_ids.add(member_rid)
+        role.child_ids.add(child_rid)
         member.parent_ids.add(rid)
 
     def subject_add_node(
@@ -493,14 +493,14 @@ class SerialAuthority(_Authority):
         subject = self._get_subject(sid=sid)
         return subject.rids.copy()
 
-    def role_get_member_subjects(self, *, rid: EntityID) -> set[EntityID]:
+    def role_get_subjects(self, *, rid: EntityID) -> set[EntityID]:
         """Get a set of all subject IDs from a role."""
         assertEntityIDType(eid=rid)
 
         role = self._get_role(rid=rid)
         return role.sids.copy()
 
-    def role_get_member_roles(self, *, rid: EntityID) -> set[EntityID]:
+    def role_get_child_roles(self, *, rid: EntityID) -> set[EntityID]:
         """Get a set of all child role IDs of a role."""
         assertEntityIDType(eid=rid)
 
@@ -818,26 +818,26 @@ class SerialAuthority(_Authority):
             permission_map=permission_map, permission=permission, payload=payload
         )
 
-    def role_rm_member_subject(self, *, rid: EntityID, member_sid: EntityID) -> None:
+    def role_rm_subject(self, *, rid: EntityID, sid: EntityID) -> None:
         """Remove a subject from a role."""
         assertEntityIDType(eid=rid)
-        assertEntityIDType(eid=member_sid)
+        assertEntityIDType(eid=sid)
 
         role = self._get_role(rid=rid)
-        subject = self._get_subject(sid=member_sid)
+        subject = self._get_subject(sid=sid)
 
-        role.sids.remove(member_sid)
+        role.sids.remove(sid)
         subject.rids.remove(rid)
 
-    def role_rm_member_role(self, *, rid: EntityID, member_rid: EntityID) -> None:
+    def role_rm_child_role(self, *, rid: EntityID, child_rid: EntityID) -> None:
         """Remove a role from a role."""
         assertEntityIDType(eid=rid)
-        assertEntityIDType(eid=member_rid)
+        assertEntityIDType(eid=child_rid)
 
         parent = self._get_role(rid=rid)
-        child = self._get_role(rid=member_rid)
+        child = self._get_role(rid=child_rid)
 
-        parent.child_ids.remove(member_rid)
+        parent.child_ids.remove(child_rid)
         child.parent_ids.remove(rid)
 
     ################################################################################################

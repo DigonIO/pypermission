@@ -47,10 +47,10 @@ def assert_loaded_authority(auth: SerialAuthority):
         ID_2_INT,
     }
 
-    assert auth.role_get_member_roles(rid=ID_ALL_STR) == {ID_100_STR, ID_100_INT}
+    assert auth.role_get_child_roles(rid=ID_ALL_STR) == {ID_100_STR, ID_100_INT}
 
-    assert auth.role_get_member_subjects(rid=ID_100_INT) == {ID_1_INT, ID_1_STR}
-    assert auth.role_get_member_subjects(rid=ID_100_STR) == {ID_2_INT, ID_TWO_STR}
+    assert auth.role_get_subjects(rid=ID_100_INT) == {ID_1_INT, ID_1_STR}
+    assert auth.role_get_subjects(rid=ID_100_STR) == {ID_2_INT, ID_TWO_STR}
 
 
 def test_write_file_yaml_typed(serial_authority_typed):

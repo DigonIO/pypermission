@@ -71,17 +71,17 @@ def init_auth(auth: SerialAuthority | SQLAlchemyAuthority):
     ]:
         auth.new_subject(sid=subject)
 
-    auth.role_add_member_role(rid=FOOD, member_rid=ANIMAL_BASED)
-    auth.role_add_member_role(rid=FOOD, member_rid=PLANT_BASED)
+    auth.role_add_child_role(rid=FOOD, child_rid=ANIMAL_BASED)
+    auth.role_add_child_role(rid=FOOD, child_rid=PLANT_BASED)
 
-    auth.role_add_member_subject(rid=ANIMAL_BASED, member_sid=EGG)
-    auth.role_add_member_subject(rid=ANIMAL_BASED, member_sid=SPAM)
-    auth.role_add_member_subject(rid=ANIMAL_BASED, member_sid=HAM)
+    auth.role_add_subject(rid=ANIMAL_BASED, sid=EGG)
+    auth.role_add_subject(rid=ANIMAL_BASED, sid=SPAM)
+    auth.role_add_subject(rid=ANIMAL_BASED, sid=HAM)
 
-    auth.role_add_member_subject(rid=PLANT_BASED, member_sid=ORANGE)
-    auth.role_add_member_subject(rid=PLANT_BASED, member_sid=APPLE)
-    auth.role_add_member_subject(rid=PLANT_BASED, member_sid=PEAR)
-    auth.role_add_member_subject(rid=PLANT_BASED, member_sid=BANANA)
+    auth.role_add_subject(rid=PLANT_BASED, sid=ORANGE)
+    auth.role_add_subject(rid=PLANT_BASED, sid=APPLE)
+    auth.role_add_subject(rid=PLANT_BASED, sid=PEAR)
+    auth.role_add_subject(rid=PLANT_BASED, sid=BANANA)
 
     auth.role_add_node(rid=FOOD, node=TPN.TOWNY_CHAT_GLOBAL)
 
@@ -113,14 +113,14 @@ def serial_authority_typed() -> SerialAuthority:
     ]:
         auth.new_subject(sid=subject)
 
-    auth.role_add_member_role(rid=ID_ALL_STR, member_rid=ID_100_STR)
-    auth.role_add_member_role(rid=ID_ALL_STR, member_rid=ID_100_INT)
+    auth.role_add_child_role(rid=ID_ALL_STR, child_rid=ID_100_STR)
+    auth.role_add_child_role(rid=ID_ALL_STR, child_rid=ID_100_INT)
 
-    auth.role_add_member_subject(rid=ID_100_INT, member_sid=ID_1_INT)
-    auth.role_add_member_subject(rid=ID_100_INT, member_sid=ID_1_STR)
+    auth.role_add_subject(rid=ID_100_INT, sid=ID_1_INT)
+    auth.role_add_subject(rid=ID_100_INT, sid=ID_1_STR)
 
-    auth.role_add_member_subject(rid=ID_100_STR, member_sid=ID_2_INT)
-    auth.role_add_member_subject(rid=ID_100_STR, member_sid=ID_TWO_STR)
+    auth.role_add_subject(rid=ID_100_STR, sid=ID_2_INT)
+    auth.role_add_subject(rid=ID_100_STR, sid=ID_TWO_STR)
 
     return auth
 
@@ -130,9 +130,9 @@ def init_auth_for_get_info_subject(auth: SerialAuthority | SQLAlchemyAuthority):
         auth.new_role(rid=role)
     auth.new_subject(sid=USER)
 
-    auth.role_add_member_role(rid=PARENT_GROUP, member_rid=CHILD_GROUP)
+    auth.role_add_child_role(rid=PARENT_GROUP, child_rid=CHILD_GROUP)
 
-    auth.role_add_member_subject(rid=CHILD_GROUP, member_sid=USER)
+    auth.role_add_subject(rid=CHILD_GROUP, sid=USER)
 
     auth.role_add_node(rid=PARENT_GROUP, node=TPN.TOWNY_CHAT_)
     auth.role_add_node(rid=PARENT_GROUP, node=TPN.TOWNY_WILD_)
@@ -148,9 +148,9 @@ def init_auth_for_get_info_role(auth: SerialAuthority | SQLAlchemyAuthority):
     for role in [PARENT_GROUP, CHILD_GROUP, USER_GROUP]:
         auth.new_role(rid=role)
 
-    auth.role_add_member_role(rid=PARENT_GROUP, member_rid=CHILD_GROUP)
+    auth.role_add_child_role(rid=PARENT_GROUP, child_rid=CHILD_GROUP)
 
-    auth.role_add_member_role(rid=CHILD_GROUP, member_rid=USER_GROUP)
+    auth.role_add_child_role(rid=CHILD_GROUP, child_rid=USER_GROUP)
 
     auth.role_add_node(rid=PARENT_GROUP, node=TPN.TOWNY_CHAT_)
     auth.role_add_node(rid=PARENT_GROUP, node=TPN.TOWNY_WILD_)

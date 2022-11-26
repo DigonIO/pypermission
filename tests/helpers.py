@@ -69,14 +69,14 @@ def assert_loaded_authority(auth: SerialAuthority | SQLAlchemyAuthority):
         BANANA,
     }
 
-    assert auth.role_get_member_roles(rid=FOOD) == {ANIMAL_BASED, PLANT_BASED}
+    assert auth.role_get_child_roles(rid=FOOD) == {ANIMAL_BASED, PLANT_BASED}
     assert auth.role_get_parent_roles(rid=ANIMAL_BASED) == {FOOD}
     assert auth.role_get_parent_roles(rid=PLANT_BASED) == {FOOD}
 
-    assert auth.role_get_member_subjects(rid=ANIMAL_BASED) == {EGG, SPAM, HAM}
+    assert auth.role_get_subjects(rid=ANIMAL_BASED) == {EGG, SPAM, HAM}
     assert auth.subject_get_roles(sid=EGG) == {ANIMAL_BASED}
 
-    assert auth.role_get_member_subjects(rid=PLANT_BASED) == {ORANGE, APPLE, PEAR, BANANA}
+    assert auth.role_get_subjects(rid=PLANT_BASED) == {ORANGE, APPLE, PEAR, BANANA}
     assert auth.subject_get_roles(sid=ORANGE) == {PLANT_BASED}
 
     assert auth.subject_has_permission(sid=EGG, node=TPN.TOWNY_CHAT_GLOBAL) == True

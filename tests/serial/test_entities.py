@@ -66,7 +66,7 @@ def test_rm_subject(serial_authority: SerialAuthority):
         PEAR,
         BANANA,
     }
-    assert auth.role_get_member_subjects(rid=PLANT_BASED) == {
+    assert auth.role_get_subjects(rid=PLANT_BASED) == {
         ORANGE,
         APPLE,
         PEAR,
@@ -83,7 +83,7 @@ def test_rm_subject(serial_authority: SerialAuthority):
         PEAR,
         BANANA,
     }
-    assert auth.role_get_member_subjects(rid=PLANT_BASED) == {
+    assert auth.role_get_subjects(rid=PLANT_BASED) == {
         APPLE,
         PEAR,
         BANANA,
@@ -106,37 +106,37 @@ def test_rm_child_role(serial_authority: SerialAuthority):
     auth = serial_authority
 
     assert auth.get_roles() == {FOOD, ANIMAL_BASED, PLANT_BASED}
-    assert auth.role_get_member_roles(rid=FOOD) == {ANIMAL_BASED, PLANT_BASED}
+    assert auth.role_get_child_roles(rid=FOOD) == {ANIMAL_BASED, PLANT_BASED}
     assert auth.subject_get_roles(sid=EGG) == {ANIMAL_BASED}
 
     auth.rm_role(rid=ANIMAL_BASED)
 
     assert auth.get_roles() == {FOOD, PLANT_BASED}
-    assert auth.role_get_member_roles(rid=FOOD) == {PLANT_BASED}
+    assert auth.role_get_child_roles(rid=FOOD) == {PLANT_BASED}
     assert auth.subject_get_roles(sid=EGG) == set()
 
 
 def test_rm_member_role(serial_authority: SerialAuthority):
     auth = serial_authority
 
-    assert auth.role_get_member_roles(rid=FOOD) == {ANIMAL_BASED, PLANT_BASED}
+    assert auth.role_get_child_roles(rid=FOOD) == {ANIMAL_BASED, PLANT_BASED}
     assert auth.role_get_parent_roles(rid=ANIMAL_BASED) == {FOOD}
 
-    auth.role_rm_member_role(rid=FOOD, member_rid=ANIMAL_BASED)
+    auth.role_rm_child_role(rid=FOOD, child_rid=ANIMAL_BASED)
 
-    assert auth.role_get_member_roles(rid=FOOD) == {PLANT_BASED}
+    assert auth.role_get_child_roles(rid=FOOD) == {PLANT_BASED}
     assert auth.role_get_parent_roles(rid=ANIMAL_BASED) == set()
 
 
 def test_rm_member_subject(serial_authority: SerialAuthority):
     auth = serial_authority
 
-    assert auth.role_get_member_subjects(rid=ANIMAL_BASED) == {EGG, SPAM, HAM}
+    assert auth.role_get_subjects(rid=ANIMAL_BASED) == {EGG, SPAM, HAM}
     assert auth.subject_get_roles(sid=EGG) == {ANIMAL_BASED}
 
-    auth.role_rm_member_subject(rid=ANIMAL_BASED, member_sid=EGG)
+    auth.role_rm_subject(rid=ANIMAL_BASED, sid=EGG)
 
-    assert auth.role_get_member_subjects(rid=ANIMAL_BASED) == {SPAM, HAM}
+    assert auth.role_get_subjects(rid=ANIMAL_BASED) == {SPAM, HAM}
     assert auth.subject_get_roles(sid=EGG) == set()
 
 
