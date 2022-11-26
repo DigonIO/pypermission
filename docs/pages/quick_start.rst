@@ -30,6 +30,7 @@ to a ``PermissionNode``\ s object and instantiate an ``Authority`` with the give
     from pypermission import PermissionNode
     from pypermission.serial import SerialAuthority
 
+
     class ChatNodes(PermissionNode):
         _ = "chat.*"
         INV = "chat.invite"
@@ -42,6 +43,7 @@ to a ``PermissionNode``\ s object and instantiate an ``Authority`` with the give
         LEAVE = "chat.leave"
         MSG_ = "chat.message.*"
         MSG_X = "chat.message.<x>"
+
 
     CNs = ChatNodes
 

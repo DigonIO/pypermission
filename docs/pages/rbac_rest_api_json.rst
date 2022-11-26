@@ -62,13 +62,14 @@ for his request.
     # just a short handle to avoid boilerplate code
     NODE = BankAPIPermissionNode
 
+
     class NoPermissionError(Exception):
-    """Raised if the requesting user misses the required permission."""
+        """Raised if the requesting user misses the required permission."""
 
 Wir benötigen eine Möglichkeit um Kontonummern zu generieren.
 Dazu schreiben wir uns eine kleine Helferfunktion.
 
-In order to generate Account numbers we define a helper function: 
+In order to generate Account numbers we define a helper function:
 
 .. code-block:: python
 
@@ -139,7 +140,9 @@ therefore we define a response object.
 
 
     def response_factory(acc: Account) -> AccountResponse:
-        return AccountResponse(number=acc.number, username=acc.username, balance=acc.balance)
+        return AccountResponse(
+            number=acc.number, username=acc.username, balance=acc.balance
+        )
 
 Genau wie für das Konto, so definieren wir klasse für den User.
 Die Userklasse erleichtert uns die Zuordnung von User und Bankkonto.
@@ -174,7 +177,9 @@ Furthermore the user class contains a method which lists all permissions of a us
             return self._accounts
 
         def has_permission(self, node: PermissionNode, payload: str | None = None) -> bool:
-            self._auth.subject_has_permission(sid=self._username, node=node, payload=payload)
+            self._auth.subject_has_permission(
+                sid=self._username, node=node, payload=payload
+            )
 
         def list_account_responses(self) -> list[AccountResponse]:
             return [response_factory(acc=acc) for num, acc in self._accounts]
