@@ -1,6 +1,6 @@
 import pytest
 
-from ..helpers import assert_loaded_authority, URL_SQLITE, URL_MARIADB
+from ..helpers import URL_MARIADB, URL_SQLITE, assert_loaded_authority
 
 EGG = "egg"
 SPAM = "spam"

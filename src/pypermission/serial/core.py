@@ -10,13 +10,13 @@ from pypermission.core import Authority as _Authority
 from pypermission.core import (
     EntityDict,
     EntityID,
-    RoleDict,
-    RoleInfo,
-    RoleInfoDict,
     NodeMap,
     Permission,
     PermissionMap,
     PermissionNode,
+    RoleDict,
+    RoleInfo,
+    RoleInfoDict,
     SubjectInfo,
     SubjectInfoDict,
     assertEntityIDType,
@@ -25,7 +25,7 @@ from pypermission.core import (
     entity_id_serializer,
     validate_payload_status,
 )
-from pypermission.error import EntityIDError, RoleCycleError, ParsingError, PathError
+from pypermission.error import EntityIDError, ParsingError, PathError, RoleCycleError
 
 ####################################################################################################
 ### Types

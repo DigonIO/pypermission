@@ -1,16 +1,17 @@
 import pytest
 from deepdiff import DeepDiff
+
 from pypermission.sqlalchemy import SQLAlchemyAuthority
 
 from ..helpers import (
-    SUBJECT_INFO_NODES_EID,
-    SUBJECT_INFO_STR_STR,
     GROUP_INFO_NODES_EID,
     GROUP_INFO_STR_STR,
+    SUBJECT_INFO_NODES_EID,
+    SUBJECT_INFO_STR_STR,
+    URL_MARIADB,
+    URL_SQLITE,
     USER,
     USER_GROUP,
-    URL_SQLITE,
-    URL_MARIADB,
 )
 
 

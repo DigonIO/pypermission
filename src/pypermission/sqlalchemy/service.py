@@ -6,10 +6,10 @@ from sqlalchemy.orm import Session
 from pypermission.core import Permission
 from pypermission.error import EntityIDError, RoleCycleError
 from pypermission.sqlalchemy.models import (
-    RoleEntry,
-    RolePermissionEntry,
     MembershipEntry,
     RelationshipEntry,
+    RoleEntry,
+    RolePermissionEntry,
     SubjectEntry,
     SubjectPermissionEntry,
 )

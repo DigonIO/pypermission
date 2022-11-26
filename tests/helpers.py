@@ -1,8 +1,8 @@
 import os
 
+from pypermission.core import PermissionNode
 from pypermission.serial import SerialAuthority
 from pypermission.sqlalchemy import SQLAlchemyAuthority
-from pypermission.core import PermissionNode
 
 # The gitlab-ci provides access to the db under the `mariadb` hostname for the `pytest_3_10_7` job
 # as specified under https://docs.gitlab.com/ee/ci/services/#accessing-the-services

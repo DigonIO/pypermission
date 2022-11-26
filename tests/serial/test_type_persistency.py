@@ -8,13 +8,13 @@ from deepdiff import DeepDiff
 from pypermission.serial import SerialAuthority
 
 from ..helpers import (
-    ID_ALL_STR,
-    ID_100_STR,
-    ID_100_INT,
-    ID_1_STR,
     ID_1_INT,
-    ID_TWO_STR,
+    ID_1_STR,
     ID_2_INT,
+    ID_100_INT,
+    ID_100_STR,
+    ID_ALL_STR,
+    ID_TWO_STR,
 )
 
 PATH = pathlib.Path(__file__).parent.absolute()

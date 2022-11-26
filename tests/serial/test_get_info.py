@@ -1,12 +1,13 @@
 import pytest
 from deepdiff import DeepDiff
+
 from pypermission.serial import SerialAuthority
 
 from ..helpers import (
-    SUBJECT_INFO_NODES_EID,
-    SUBJECT_INFO_STR_STR,
     GROUP_INFO_NODES_EID,
     GROUP_INFO_STR_STR,
+    SUBJECT_INFO_NODES_EID,
+    SUBJECT_INFO_STR_STR,
     USER,
     USER_GROUP,
 )

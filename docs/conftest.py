@@ -1,5 +1,6 @@
 from doctest import ELLIPSIS
-from sybil import Sybil, Document
+
+from sybil import Document, Sybil
 from sybil.parsers.capture import parse_captures
 from sybil.parsers.codeblock import PythonCodeBlockParser
 from sybil.parsers.doctest import DocTestParser
