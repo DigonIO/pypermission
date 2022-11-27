@@ -57,8 +57,8 @@ def test_write_file_json(serial_authority):
 SAVE_DATA_YAML = {
     "roles": {
         "animal_based": {
-            "member_roles": [],
-            "member_subjects": ["spam", "ham", "egg"],
+            "child_roles": [],
+            "subjects": ["spam", "ham", "egg"],
             "permission_nodes": [
                 "towny.chat.town",
                 "towny.wild.build.<dirt>",
@@ -66,13 +66,13 @@ SAVE_DATA_YAML = {
             ],
         },
         "food": {
-            "member_roles": ["plant_based", "animal_based"],
-            "member_subjects": [],
+            "child_roles": ["plant_based", "animal_based"],
+            "subjects": [],
             "permission_nodes": ["towny.chat.global"],
         },
         "plant_based": {
-            "member_roles": [],
-            "member_subjects": ["apple", "orange", "banana", "pear"],
+            "child_roles": [],
+            "subjects": ["apple", "orange", "banana", "pear"],
             "permission_nodes": [
                 "towny.chat.nation",
                 "towny.wild.destroy.<dirt>",
@@ -94,8 +94,8 @@ SAVE_DATA_YAML = {
 SAVE_DATA_JSON = {
     "roles": {
         "str:animal_based": {
-            "member_roles": [],
-            "member_subjects": ["str:spam", "str:ham", "str:egg"],
+            "child_roles": [],
+            "subjects": ["str:spam", "str:ham", "str:egg"],
             "permission_nodes": [
                 "towny.chat.town",
                 "towny.wild.build.<dirt>",
@@ -103,13 +103,13 @@ SAVE_DATA_JSON = {
             ],
         },
         "str:food": {
-            "member_roles": ["str:plant_based", "str:animal_based"],
-            "member_subjects": [],
+            "child_roles": ["str:plant_based", "str:animal_based"],
+            "subjects": [],
             "permission_nodes": ["towny.chat.global"],
         },
         "str:plant_based": {
-            "member_roles": [],
-            "member_subjects": ["str:apple", "str:orange", "str:banana", "str:pear"],
+            "child_roles": [],
+            "subjects": ["str:apple", "str:orange", "str:banana", "str:pear"],
             "permission_nodes": [
                 "towny.chat.nation",
                 "towny.wild.destroy.<dirt>",

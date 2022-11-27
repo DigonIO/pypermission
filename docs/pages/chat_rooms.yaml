@@ -2,7 +2,7 @@ roles:
   admin:
     permission_nodes:
       - "*"
-    member_subjects:
+    subjects:
       - Alice
   moderator:
     permission_nodes:
@@ -10,13 +10,13 @@ roles:
       - chat.ban.user
       - chat.join.*
       - chat.message.<org-moderators>
-    member_subjects:
+    subjects:
       - Bob
   user:
     permission_nodes:
       - chat.join.invited
       - chat.leave
-    member_subjects:
+    subjects:
       - Alice
       - Bob
       - John

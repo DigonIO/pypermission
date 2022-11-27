@@ -18,13 +18,13 @@ class TownyPermissionNode(PermissionNode):
 ```yaml
 roles:
   parent_role:
-    member_roles:
+    child_roles:
       - child_role
     permission_nodes:
       towny.chat.*: Null
       towny.wild.*: Null
   child_role:
-    member_subjects:
+    subjects:
       - user
     permission_nodes:
       towny.chat.town: Null

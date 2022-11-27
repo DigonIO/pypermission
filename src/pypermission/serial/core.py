@@ -44,8 +44,8 @@ class RoleStore(
     Generic[T],
     total=False,
 ):
-    member_subjects: list[T]
-    member_roles: list[T]
+    subjects: list[T]
+    child_roles: list[T]
     permission_nodes: list[str]
 
 
@@ -231,8 +231,8 @@ class SerialAuthority(_Authority):
         """Save the current state to string formatted as YAML."""
         roles = {
             entity_id_serializer(rid): RoleStoreJSON(
-                member_roles=[entity_id_serializer(eid) for eid in role.child_ids],
-                member_subjects=[entity_id_serializer(eid) for eid in role.sids],
+                child_roles=[entity_id_serializer(eid) for eid in role.child_ids],
+                subjects=[entity_id_serializer(eid) for eid in role.sids],
                 permission_nodes=self._generate_permission_node_list(role),
             )
             for rid, role in self._roles.items()
@@ -254,8 +254,8 @@ class SerialAuthority(_Authority):
         """Save the current state to string formatted as YAML."""
         roles = {
             rid: RoleStoreYAML(
-                member_roles=list(role.child_ids),
-                member_subjects=list(role.sids),
+                child_roles=list(role.child_ids),
+                subjects=list(role.sids),
                 permission_nodes=self._generate_permission_node_list(role),
             )
             for rid, role in self._roles.items()
@@ -322,7 +322,7 @@ class SerialAuthority(_Authority):
                     permission_map[permission] = set()
 
             # add role ids to subjects of a role and vice versa
-            for serial_sid in gdefs.get("member_subjects") or []:
+            for serial_sid in gdefs.get("subjects") or []:
                 # TODO sanity checks
                 sid = entity_id_deserializer(serial_sid)
                 role.sids.add(sid)
@@ -333,11 +333,11 @@ class SerialAuthority(_Authority):
             rid = entity_id_deserializer(serial_rid)
             gdefs = {} if gdefs is None else gdefs
             role = self._roles[rid]
-            for serial_member_rid in gdefs.get("member_roles") or []:
-                member_rid = entity_id_deserializer(serial_member_rid)
-                if member_rid not in self._roles:
-                    raise ParsingError(f"Member role `{member_rid}` was never defined!")
-                self.role_add_child_role(rid=rid, child_rid=member_rid)
+            for serial_child_rid in gdefs.get("child_roles") or []:
+                child_rid = entity_id_deserializer(serial_child_rid)
+                if child_rid not in self._roles:
+                    raise ParsingError(f"Child role `{child_rid}` was never defined!")
+                self.role_add_child_role(rid=rid, child_rid=child_rid)
 
     def _load_data_store_yaml(self, *, data: DataStoreYAML) -> None:
         """Load state from DataStoreYAML dictionary."""
@@ -386,7 +386,7 @@ class SerialAuthority(_Authority):
                     permission_map[permission] = set()
 
             # add role ids to subjects of a role and vice versa
-            for sid in gdefs.get("member_subjects") or []:
+            for sid in gdefs.get("subjects") or []:
                 # TODO sanity checks
                 role.sids.add(sid)
                 self._subjects[sid].rids.add(rid)
@@ -395,10 +395,10 @@ class SerialAuthority(_Authority):
         for rid, gdefs in (data.get("roles") or {}).items():
             gdefs = {} if gdefs is None else gdefs
             role = self._roles[rid]
-            for member_rid in gdefs.get("member_roles") or []:
-                if member_rid not in self._roles:
-                    raise ParsingError(f"Member role `{member_rid}` was never defined!")
-                self.role_add_child_role(rid=rid, child_rid=member_rid)
+            for child_rid in gdefs.get("child_roles") or []:
+                if child_rid not in self._roles:
+                    raise ParsingError(f"Child role `{child_rid}` was never defined!")
+                self.role_add_child_role(rid=rid, child_rid=child_rid)
 
     ################################################################################################
     ### Add
@@ -441,12 +441,12 @@ class SerialAuthority(_Authority):
         assertEntityIDType(eid=child_rid)
 
         role = self._get_role(rid=rid)
-        member = self._get_role(rid=child_rid)
+        child = self._get_role(rid=child_rid)
 
-        self._detect_role_cycle(role=role, member_rid=child_rid)
+        self._detect_role_cycle(role=role, child_rid=child_rid)
 
         role.child_ids.add(child_rid)
-        member.parent_ids.add(rid)
+        child.parent_ids.add(rid)
 
     def subject_add_node(
         self, *, sid: EntityID, node: PermissionNode, payload: str | None = None
@@ -595,7 +595,7 @@ class SerialAuthority(_Authority):
         )
 
         parent_ids = subject.rids
-        member_roles = [
+        child_roles = [
             cast(EID, entity_id_serializer(grp_id) if entity_id_type is str else grp_id)
             for grp_id in parent_ids
         ]
@@ -603,7 +603,7 @@ class SerialAuthority(_Authority):
         subject_entity_dict: EntityDict[PID, EID] = {
             "entity_id": entity_id,
             "permission_nodes": permission_nodes,
-            "roles": member_roles,
+            "roles": child_roles,
         }
 
         parents: set[Role] = {self._roles[rid] for rid in parent_ids}
@@ -694,7 +694,7 @@ class SerialAuthority(_Authority):
             permission_map=role.permission_map, node_type=node_type
         )
         entity_id = cast(EID, entity_id_serializer(rid) if entity_id_type is str else rid)
-        member_roles = [
+        child_roles = [
             cast(EID, entity_id_serializer(grp_id) if entity_id_type is str else grp_id)
             for grp_id in role.parent_ids
         ]
@@ -702,7 +702,7 @@ class SerialAuthority(_Authority):
         role_entity_dict: EntityDict[PID, EID] = {
             "entity_id": entity_id,
             "permission_nodes": permission_nodes,
-            "roles": member_roles,
+            "roles": child_roles,
         }
 
         parents: set[Role] = {self._roles[rid] for rid in role.parent_ids}
@@ -859,15 +859,15 @@ class SerialAuthority(_Authority):
             raise EntityIDError(f"Can not find role `{rid}`!")
 
     # TODO: build graph/subgraph ordering instead
-    def _detect_role_cycle(self, role: Role, member_rid: EntityID) -> None:
+    def _detect_role_cycle(self, role: Role, child_rid: EntityID) -> None:
         """Detect a cycle in nested role tree."""
-        if member_rid in role.parent_ids:
+        if child_rid in role.parent_ids:
             raise RoleCycleError(
-                f"Cyclic dependencies detected between roles `{role.id}` and `{member_rid}`!"
+                f"Cyclic dependencies detected between roles `{role.id}` and `{child_rid}`!"
             )
         for parent_parent_id in role.parent_ids:
             parent_parent = self._roles[parent_parent_id]
-            self._detect_role_cycle(role=parent_parent, member_rid=member_rid)
+            self._detect_role_cycle(role=parent_parent, child_rid=child_rid)
 
     def _recursive_role_has_permission(
         self, role: Role, permission: Permission, payload: str | None

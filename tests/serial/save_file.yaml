@@ -1,12 +1,12 @@
 roles:
   food:
-    member_roles:
+    child_roles:
       - animal_based
       - plant_based
     permission_nodes:
       - towny.chat.global
   animal_based:
-    member_subjects:
+    subjects:
       - egg
       - spam
       - ham
@@ -15,7 +15,7 @@ roles:
       - towny.wild.build.<dirt>
       - towny.wild.build.<gold>
   plant_based:
-    member_subjects:
+    subjects:
       - orange
       - apple
       - pear
@@ -29,7 +29,7 @@ subjects:
   spam: {}
   ham:
     permission_nodes:
-     - towny.wild.*
+      - towny.wild.*
   orange: {}
   apple: {}
   pear: {}

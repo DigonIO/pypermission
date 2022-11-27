@@ -80,24 +80,24 @@ def test_write_file_json_typed(serial_authority_typed):
 SAVE_DATA_YAML = {
     "roles": {
         "all": {
-            "member_roles": [
+            "child_roles": [
                 100,
                 "100",
             ],
-            "member_subjects": [],
+            "subjects": [],
             "permission_nodes": [],
         },
         100: {
-            "member_roles": [],
-            "member_subjects": [
+            "child_roles": [],
+            "subjects": [
                 1,
                 "1",
             ],
             "permission_nodes": [],
         },
         "100": {
-            "member_roles": [],
-            "member_subjects": [
+            "child_roles": [],
+            "subjects": [
                 2,
                 "two",
             ],
@@ -115,24 +115,24 @@ SAVE_DATA_YAML = {
 SAVE_DATA_JSON = {
     "roles": {
         "str:all": {
-            "member_roles": [
+            "child_roles": [
                 "int:100",
                 "str:100",
             ],
-            "member_subjects": [],
+            "subjects": [],
             "permission_nodes": [],
         },
         "int:100": {
-            "member_roles": [],
-            "member_subjects": [
+            "child_roles": [],
+            "subjects": [
                 "int:1",
                 "str:1",
             ],
             "permission_nodes": [],
         },
         "str:100": {
-            "member_roles": [],
-            "member_subjects": [
+            "child_roles": [],
+            "subjects": [
                 "int:2",
                 "str:two",
             ],

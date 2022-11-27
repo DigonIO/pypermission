@@ -1,7 +1,7 @@
 {
     "roles": {
         "str:food": {
-            "member_roles": [
+            "child_roles": [
                 "str:animal_based",
                 "str:plant_based"
             ],
@@ -10,7 +10,7 @@
             ]
         },
         "str:animal_based": {
-            "member_subjects": [
+            "subjects": [
                 "str:egg",
                 "str:spam",
                 "str:ham"
@@ -22,7 +22,7 @@
             ]
         },
         "str:plant_based": {
-            "member_subjects": [
+            "subjects": [
                 "str:orange",
                 "str:apple",
                 "str:pear",

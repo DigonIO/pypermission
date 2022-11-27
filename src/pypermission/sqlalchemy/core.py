@@ -112,10 +112,10 @@ class SQLAlchemyAuthority(Authority):
     ) -> None:
         """Add a role to a parent role to inherit all its permissions."""
         serial_rid = entity_id_serializer(rid)
-        serial_member_rid = entity_id_serializer(child_rid)
+        serial_child_rid = entity_id_serializer(child_rid)
         db = self._setup_db_session(session)
 
-        create_parent_child_relationship(serial_pid=serial_rid, serial_cid=serial_member_rid, db=db)
+        create_parent_child_relationship(serial_pid=serial_rid, serial_cid=serial_child_rid, db=db)
 
         _close_db_session(db, session)
 
@@ -385,7 +385,7 @@ class SQLAlchemyAuthority(Authority):
         )
 
         parents_entries = subject_entry.role_entries
-        member_roles = [
+        child_roles = [
             cast(
                 EID,
                 entry.serial_eid
@@ -398,7 +398,7 @@ class SQLAlchemyAuthority(Authority):
         subject_entity_dict: EntityDict[PID, EID] = {
             "entity_id": entity_id,
             "permission_nodes": permission_nodes,
-            "roles": member_roles,
+            "roles": child_roles,
         }
 
         parents: set[RoleEntry] = set(subject_entry.role_entries)
@@ -538,7 +538,7 @@ class SQLAlchemyAuthority(Authority):
         )
 
         parents_entries = role_entry.parent_entries
-        member_roles = [
+        child_roles = [
             cast(
                 EID,
                 entry.serial_eid
@@ -551,7 +551,7 @@ class SQLAlchemyAuthority(Authority):
         role_entity_dict: EntityDict[PID, EID] = {
             "entity_id": entity_id,
             "permission_nodes": permission_nodes,
-            "roles": member_roles,
+            "roles": child_roles,
         }
 
         parents: set[RoleEntry] = set(role_entry.parent_entries)
@@ -729,10 +729,10 @@ class SQLAlchemyAuthority(Authority):
     ) -> None:
         """Remove a role from a role."""
         serial_rid = entity_id_serializer(rid)
-        serial_member_rid = entity_id_serializer(child_rid)
+        serial_child_rid = entity_id_serializer(child_rid)
         db = self._setup_db_session(session)
 
-        delete_parent_child_relationship(serial_pid=serial_rid, serial_cid=serial_member_rid, db=db)
+        delete_parent_child_relationship(serial_pid=serial_rid, serial_cid=serial_child_rid, db=db)
 
         _close_db_session(db, session)
 

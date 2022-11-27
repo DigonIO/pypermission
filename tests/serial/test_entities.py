@@ -116,7 +116,7 @@ def test_rm_child_role(serial_authority: SerialAuthority):
     assert auth.subject_get_roles(sid=EGG) == set()
 
 
-def test_rm_member_role(serial_authority: SerialAuthority):
+def test_rm_child_role(serial_authority: SerialAuthority):
     auth = serial_authority
 
     assert auth.role_get_child_roles(rid=FOOD) == {ANIMAL_BASED, PLANT_BASED}

@@ -88,14 +88,14 @@ roles:
     permission_nodes:
       - chat.*
       - ticket.*
-    member_subjects:
+    subjects:
       - Alice
   user:
     permission_nodes:
       - chat.global
       - ticket.open
       - ticket.close.own
-    member_subjects:
+    subjects:
       - Alice
       - Bob
 subjects:

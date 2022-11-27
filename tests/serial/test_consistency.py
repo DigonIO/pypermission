@@ -6,18 +6,18 @@ from pypermission.serial import SerialAuthority
 ACYCLIC_YAML = """
 roles:
   A:
-    member_roles:
+    child_roles:
       - B
       - C
   B:
-    member_roles:
+    child_roles:
       - F
   C:
-    member_roles:
+    child_roles:
       - D
       - E
   D:
-    member_roles:
+    child_roles:
       - F
   E:
   F:
@@ -26,21 +26,21 @@ roles:
 CYCLIC_A_YAML = """
 roles:
   A:
-    member_roles:
+    child_roles:
       - B
       - C
   B:
-    member_roles:
+    child_roles:
       - F
   C:
-    member_roles:
+    child_roles:
       - D
       - E
   D:
-    member_roles:
+    child_roles:
       - F
   E:
-    member_roles:
+    child_roles:
       - A
   F:
 """
@@ -48,22 +48,22 @@ roles:
 CYCLIC_B_YAML = """
 roles:
   A:
-    member_roles:
+    child_roles:
       - B
       - C
   B:
-    member_roles:
+    child_roles:
       - F
   C:
-    member_roles:
+    child_roles:
       - D
       - E
   D:
-    member_roles:
+    child_roles:
       - F
   E:
   F:
-    member_roles:
+    child_roles:
       - A
 """
 

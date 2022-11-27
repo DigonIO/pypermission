@@ -1,14 +1,14 @@
 roles:
   "all":
-    member_roles:
+    child_roles:
       - 100
       - "100"
   100:
-    member_subjects:
+    subjects:
       - 1
       - "1"
   "100":
-    member_subjects:
+    subjects:
       - 2
       - "two"
 subjects:

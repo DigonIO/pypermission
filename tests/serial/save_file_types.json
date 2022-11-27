@@ -1,19 +1,19 @@
 {
   "roles": {
     "str:all": {
-      "member_roles": [
+      "child_roles": [
         "int:100",
         "str:100"
       ]
     },
     "int:100": {
-      "member_subjects": [
+      "subjects": [
         "int:1",
         "str:1"
       ]
     },
     "str:100": {
-      "member_subjects": [
+      "subjects": [
         "int:2",
         "str:two"
       ]
