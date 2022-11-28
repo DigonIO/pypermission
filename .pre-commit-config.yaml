@@ -39,3 +39,10 @@ repos:
         pass_filenames: false
         always_run: true
         args: [docs/]
+      - id: sphinx
+        name: sphinx
+        entry: sphinx-build
+        language: system
+        pass_filenames: false
+        always_run: true
+        args: [-b, html, docs/, docs/_build/html]
