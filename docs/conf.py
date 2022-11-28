@@ -52,6 +52,9 @@ extensions = [
     "m2r2",
 ]
 
+with open("_assets/prolog.rst", encoding="utf-8") as f:
+    rst_prolog = f.read()
+
 imgmath_image_format = "svg"
 # Add any paths that contain templates here, relative to this directory.
 numpydoc_show_class_members = False
@@ -81,7 +84,12 @@ html_favicon = html_logo
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
-html_static_path = []
+
+# needed to include colors as mentioned here:
+# https://stackoverflow.com/questions/3702865/sphinx-restructuredtext-set-color-for-a-single-word
+html_static_path = ["_static"]
+
+html_css_files = ["custom.css"]
 
 imgmath_latex_preamble = (
     "\\usepackage{xcolor}\n\\definecolor{formulacolor}{RGB}{128,128,128}" "\\color{formulacolor}"

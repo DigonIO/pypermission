@@ -3,7 +3,8 @@ Quick Start (RBAC)
 ==================
 
 To get started, assume we are writing a RBAC permission system for a chat based online
-support service. The permission system provides three role type for accounts, normal `user`, `moderator` and `admin`.
+support service. The permission system provides three role type for accounts, normal
+`user`, `moderator` and `admin`.
 
 User accounts should be able to:
 
@@ -86,4 +87,6 @@ should be able to join a room he was invited to. This can be tested via the
 >>> auth.subject_has_permission(sid="John", node=CNs.JOIN_INV)
 True
 
-As a basic `user` 
+As a basic `user`
+
+.. _NIST_RBAC: https://doi.org/10.1145/344287.344301

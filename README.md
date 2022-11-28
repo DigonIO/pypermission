@@ -27,7 +27,7 @@ and might exhibit unexpected behavior!
 
 ## Features
 
-+ NIST Model for RBAC: <https://doi.org/10.1145/344287.344301>
++ NIST Model for RBAC[^1]
   + Level 1: Flat
   + Level 2a: Hierarchical
   + Level 3a: Constrained (TODO)
@@ -133,3 +133,7 @@ View the API documentation online:
 
 This free and open source software (FOSS) is published under the
 [LGPLv3 license](https://www.gnu.org/licenses/lgpl-3.0.en.html).
+
+---
+
+[^1]: The NIST Model for Role-Based Access Control: Towards a Unified Standard - <https://doi.org/10.1145/344287.344301>

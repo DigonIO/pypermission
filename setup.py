@@ -1,5 +1,6 @@
-from setuptools import setup
 from enum import Enum
+
+from setuptools import setup
 
 with open("src/pypermission/__init__.py", "r") as file:
     for line in file:
@@ -36,6 +37,8 @@ class Dependecy(str, Enum):
     SQLALCHEMY2_STUBS = "sqlalchemy2-stubs==0.0.2a29"
     PRE_COMMIT = "pre-commit==2.20.0"
     SCHEDULER = "scheduler==0.8.0"
+    BLACK = "black==22.10.0"
+    BLACKEN_DOCS = "blacken-docs==1.12.1"
 
 
 Dep = Dependecy
@@ -65,7 +68,7 @@ REQ_TEST = REQ_LINT | {
     Dep.SCHEDULER,
     Dep.MARIADB,
 }
-REQ_DEV = REQ_DOC | REQ_TEST | {Dep.PRE_COMMIT}
+REQ_DEV = REQ_DOC | REQ_TEST | {Dep.PRE_COMMIT, Dep.BLACK, Dep.BLACKEN_DOCS}
 
 req_to_str_list = lambda req: [entry.value for entry in req]
 
