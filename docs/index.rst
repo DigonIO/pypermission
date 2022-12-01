@@ -8,7 +8,8 @@
     :maxdepth: 2
     :caption: Table of Contents
 
-    readme
-    introduction
-    examples
-    api_reference
+    pages/readme
+    pages/introduction
+    pages/examples
+    pages/standardization
+    pages/api_reference
