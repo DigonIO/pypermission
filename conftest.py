@@ -71,8 +71,8 @@ def init_auth(auth: SerialAuthority | SQLAlchemyAuthority):
     ]:
         auth.add_subject(sid=subject)
 
-    auth.role_add_child_role(rid=FOOD, child_rid=ANIMAL_BASED)
-    auth.role_add_child_role(rid=FOOD, child_rid=PLANT_BASED)
+    auth.role_add_inheritance(rid=FOOD, child_rid=ANIMAL_BASED)
+    auth.role_add_inheritance(rid=FOOD, child_rid=PLANT_BASED)
 
     auth.role_assign_subject(rid=ANIMAL_BASED, sid=EGG)
     auth.role_assign_subject(rid=ANIMAL_BASED, sid=SPAM)
@@ -113,8 +113,8 @@ def serial_authority_typed() -> SerialAuthority:
     ]:
         auth.add_subject(sid=subject)
 
-    auth.role_add_child_role(rid=ID_ALL_STR, child_rid=ID_100_STR)
-    auth.role_add_child_role(rid=ID_ALL_STR, child_rid=ID_100_INT)
+    auth.role_add_inheritance(rid=ID_ALL_STR, child_rid=ID_100_STR)
+    auth.role_add_inheritance(rid=ID_ALL_STR, child_rid=ID_100_INT)
 
     auth.role_assign_subject(rid=ID_100_INT, sid=ID_1_INT)
     auth.role_assign_subject(rid=ID_100_INT, sid=ID_1_STR)
@@ -130,7 +130,7 @@ def init_auth_for_get_info_subject(auth: SerialAuthority | SQLAlchemyAuthority):
         auth.add_role(rid=role)
     auth.add_subject(sid=USER)
 
-    auth.role_add_child_role(rid=PARENT_GROUP, child_rid=CHILD_GROUP)
+    auth.role_add_inheritance(rid=PARENT_GROUP, child_rid=CHILD_GROUP)
 
     auth.role_assign_subject(rid=CHILD_GROUP, sid=USER)
 
@@ -148,9 +148,9 @@ def init_auth_for_get_info_role(auth: SerialAuthority | SQLAlchemyAuthority):
     for role in [PARENT_GROUP, CHILD_GROUP, USER_GROUP]:
         auth.add_role(rid=role)
 
-    auth.role_add_child_role(rid=PARENT_GROUP, child_rid=CHILD_GROUP)
+    auth.role_add_inheritance(rid=PARENT_GROUP, child_rid=CHILD_GROUP)
 
-    auth.role_add_child_role(rid=CHILD_GROUP, child_rid=USER_GROUP)
+    auth.role_add_inheritance(rid=CHILD_GROUP, child_rid=USER_GROUP)
 
     auth.role_grant_permission(rid=PARENT_GROUP, node=TPN.TOWNY_CHAT_)
     auth.role_grant_permission(rid=PARENT_GROUP, node=TPN.TOWNY_WILD_)

@@ -41,8 +41,8 @@ Create a graph based role structure. Child roles inherit all permissions from th
 
 .. code-block:: pycon
 
-    >>> auth.role_add_child_role(rid=GID_FOOD, cid=GID_ANIMAL_BASED)
-    >>> auth.role_add_child_role(rid=GID_FOOD, cid=GID_PLANT_BASED)
+    >>> auth.role_add_inheritance(rid=GID_FOOD, cid=GID_ANIMAL_BASED)
+    >>> auth.role_add_inheritance(rid=GID_FOOD, cid=GID_PLANT_BASED)
 
 Check from the child perspective.
 

@@ -122,7 +122,7 @@ def test_rm_child_role(serial_authority: SerialAuthority):
     assert auth.role_get_child_roles(rid=FOOD) == {ANIMAL_BASED, PLANT_BASED}
     assert auth.role_get_parent_roles(rid=ANIMAL_BASED) == {FOOD}
 
-    auth.role_rm_child_role(rid=FOOD, child_rid=ANIMAL_BASED)
+    auth.role_del_inheritance(rid=FOOD, child_rid=ANIMAL_BASED)
 
     assert auth.role_get_child_roles(rid=FOOD) == {PLANT_BASED}
     assert auth.role_get_parent_roles(rid=ANIMAL_BASED) == set()

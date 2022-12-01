@@ -107,7 +107,7 @@ class SQLAlchemyAuthority(Authority):
 
         _close_db_session(db, session)
 
-    def role_add_child_role(
+    def role_add_inheritance(
         self, *, rid: EntityID, child_rid: EntityID, session: Session | None = None
     ) -> None:
         """Add a role to a parent role to inherit all its permissions."""
@@ -724,7 +724,7 @@ class SQLAlchemyAuthority(Authority):
 
         _close_db_session(db, session)
 
-    def role_rm_child_role(
+    def role_del_inheritance(
         self, *, rid: EntityID, child_rid: EntityID, session: Session | None = None
     ) -> None:
         """Remove a role from a role."""

@@ -337,7 +337,7 @@ class SerialAuthority(_Authority):
                 child_rid = entity_id_deserializer(serial_child_rid)
                 if child_rid not in self._roles:
                     raise ParsingError(f"Child role `{child_rid}` was never defined!")
-                self.role_add_child_role(rid=rid, child_rid=child_rid)
+                self.role_add_inheritance(rid=rid, child_rid=child_rid)
 
     def _load_data_store_yaml(self, *, data: DataStoreYAML) -> None:
         """Load state from DataStoreYAML dictionary."""
@@ -398,7 +398,7 @@ class SerialAuthority(_Authority):
             for child_rid in gdefs.get("child_roles") or []:
                 if child_rid not in self._roles:
                     raise ParsingError(f"Child role `{child_rid}` was never defined!")
-                self.role_add_child_role(rid=rid, child_rid=child_rid)
+                self.role_add_inheritance(rid=rid, child_rid=child_rid)
 
     ################################################################################################
     ### Add
@@ -435,7 +435,7 @@ class SerialAuthority(_Authority):
         role.sids.add(sid)
         subject.rids.add(rid)
 
-    def role_add_child_role(self, *, rid: EntityID, child_rid: EntityID) -> None:
+    def role_add_inheritance(self, *, rid: EntityID, child_rid: EntityID) -> None:
         """Add a role to a parent role to inherit all its permissions."""
         assertEntityIDType(eid=rid)
         assertEntityIDType(eid=child_rid)
@@ -829,7 +829,7 @@ class SerialAuthority(_Authority):
         role.sids.remove(sid)
         subject.rids.remove(rid)
 
-    def role_rm_child_role(self, *, rid: EntityID, child_rid: EntityID) -> None:
+    def role_del_inheritance(self, *, rid: EntityID, child_rid: EntityID) -> None:
         """Remove a role from a role."""
         assertEntityIDType(eid=rid)
         assertEntityIDType(eid=child_rid)

@@ -110,12 +110,12 @@ NOTE:
 
 #### 6.2.1.1 Administrative Commands for General Role Hierarchies
 
-| RBAC (ANSI)            | ours                | new naming           |
-| ---------------------- | ------------------- | -------------------- |
-| AddInheritance         | role_add_child_role | role_add_inheritance |
-| DeleteInheritance      | role_rm_child_role  | role_del_inheritance |
-| AddAscentant           | N/A                 | N/A                  |
-| AddDescendant          | N/A                 | N/A                  |
+| RBAC (ANSI)            | new naming           |
+| ---------------------- | -------------------- |
+| AddInheritance         | role_add_inheritance |
+| DeleteInheritance      | role_del_inheritance |
+| AddAscentant           | N/A                  |
+| AddDescendant          | N/A                  |
 
 AddInheritance(r_asc, r_desc) asc_rid, desc_rid
 

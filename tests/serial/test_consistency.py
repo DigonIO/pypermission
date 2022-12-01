@@ -121,4 +121,4 @@ class TestCycleDetection:
         auth.load_YAML(serial_data=ACYCLIC_YAML)
 
         with pytest.raises(RoleCycleError, match=err_msg):
-            auth.role_add_child_role(rid=rid, child_rid="A")
+            auth.role_add_inheritance(rid=rid, child_rid="A")
