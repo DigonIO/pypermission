@@ -517,7 +517,7 @@ class SerialAuthority(_Authority):
     def subject_has_permission(
         self, *, sid: EntityID, node: PermissionNode, payload: str | None = None
     ) -> bool:
-        """Check if a subject has a wanted permission."""
+        """Check if a subject has the wanted permission within the hierarchy."""
         assertEntityIDType(eid=sid)
         permission = self._get_permission(node=node)
         validate_payload_status(permission=permission, payload=payload)
@@ -538,7 +538,7 @@ class SerialAuthority(_Authority):
     def role_has_permission(
         self, *, rid: EntityID, node: PermissionNode, payload: str | None = None
     ) -> bool:
-        """Check if a role has a wanted permission."""
+        """Check if a role has the wanted permission within the hierarchy."""
         assertEntityIDType(eid=rid)
         permission = self._get_permission(node=node)
         validate_payload_status(permission=permission, payload=payload)
