@@ -110,7 +110,7 @@ NOTE:
 
 #### 6.2.1.1 Administrative Commands for General Role Hierarchies
 
-| RBAC (ANSI)            | new naming           |
+| RBAC (ANSI)            | ours                 |
 | ---------------------- | -------------------- |
 | AddInheritance         | role_add_inheritance |
 | DeleteInheritance      | role_del_inheritance |
@@ -136,14 +136,14 @@ AddInheritance(r_asc, r_desc) asc_rid, desc_rid
 
 `AuthorizedPermissions` is not defined here, but implied in section 5.2 (should probably be skipped in guide, as it is confusing with the behaviour of `CheckAccess`, which does not check with respect to hierarchy):
 
-| RBAC (ANSI)               | ours                      | new                       |
-| ------------------------- | ------------------------- | ------------------------- |
-| AuthorizedPermissions     | role_has_permission       | role_inherits_permission  |
-| ^ these check hierarchy ^ | ^ these check hierarchy ^ | ^ these check hierarchy ^ |
+| RBAC (ANSI)               | ours                      |
+| ------------------------- | ------------------------- |
+| AuthorizedPermissions     | role_inherits_permission  |
+| ^ these check hierarchy ^ | ^ these check hierarchy ^ |
 
 #### 6.2.1.4 Advanced Review Functions for General Role Hierarchies
 
-| RBAC (ANSI)                 | new                          |
+| RBAC (ANSI)                 | ours                         |
 | --------------------------- | ---------------------------- |
 | RolePermissions             | role_get_permissions (x2)    |
 | UserPermissions             | subject_get_permissions (x2) |
