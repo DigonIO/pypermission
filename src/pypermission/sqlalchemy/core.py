@@ -250,7 +250,7 @@ class SQLAlchemyAuthority(Authority):
         _close_db_session(db, session)
         return result
 
-    def subject_has_permission(
+    def subject_inherits_permission(
         self,
         *,
         sid: EntityID,
@@ -273,7 +273,7 @@ class SQLAlchemyAuthority(Authority):
 
         role_entries = subject_entry.role_entries
         for entry in role_entries:
-            if _recursive_role_has_permission(
+            if _recursive_role_inherits_permission(
                 role_entry=entry, permission=permission, payload=payload
             ):
                 _close_db_session(db, session)
@@ -282,7 +282,7 @@ class SQLAlchemyAuthority(Authority):
         _close_db_session(db, session)
         return False
 
-    def role_has_permission(
+    def role_inherits_permission(
         self,
         *,
         rid: EntityID,
@@ -298,7 +298,7 @@ class SQLAlchemyAuthority(Authority):
 
         role_entry = read_role(serial_rid=serial_rid, db=db)
 
-        result = _recursive_role_has_permission(
+        result = _recursive_role_inherits_permission(
             role_entry=role_entry, permission=permission, payload=payload
         )
 
@@ -811,7 +811,7 @@ def _has_permission(
     return False
 
 
-def _recursive_role_has_permission(
+def _recursive_role_inherits_permission(
     role_entry: RoleEntry, permission: Permission, payload: str | None
 ) -> bool:
     """Recursively check whether the role or one of its parents has the perm searched for."""
@@ -821,7 +821,9 @@ def _recursive_role_has_permission(
 
     parent_entries: Sequence[RoleEntry] = role_entry.parent_entries
     for entry in parent_entries:
-        if _recursive_role_has_permission(role_entry=entry, permission=permission, payload=payload):
+        if _recursive_role_inherits_permission(
+            role_entry=entry, permission=permission, payload=payload
+        ):
             return True
 
     return False

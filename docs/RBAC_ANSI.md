@@ -75,10 +75,10 @@ Conformance to the standard requires at least the core feature set (6.1)
 
 We do not have a 1:1 analog of `CheckAccess`, as `CheckAccess` does not look at the hierarchy.
 
-| RBAC (ANSI)                  | ours                        | new                              |
-| ---------------------------- | --------------------------- | -------------------------------- |
-| CheckAccess                  | role/subject_has_permission | role/subject_inherits_permission |
-| ^ does not check hierarchy ^ | ^ checks hierarchy        ^ | ^ checks hierarchy             ^ |
+| RBAC (ANSI)                  | new                              |
+| ---------------------------- | -------------------------------- |
+| CheckAccess                  | role/subject_inherits_permission |
+| ^ does not check hierarchy ^ | ^ checks hierarchy             ^ |
 
 NOTE:
 

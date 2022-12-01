@@ -99,7 +99,7 @@ class User:
         return self._accounts
 
     def has_permission(self, node: PermissionNode, payload: str | None = None) -> bool:
-        self._auth.subject_has_permission(sid=self._username, node=node, payload=payload)
+        self._auth.subject_inherits_permission(sid=self._username, node=node, payload=payload)
 
     def list_account_responses(self) -> list[AccountResponse]:
         return [response_factory(acc=acc) for num, acc in self._accounts]

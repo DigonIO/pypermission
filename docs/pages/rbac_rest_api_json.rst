@@ -177,7 +177,7 @@ Furthermore the user class contains a method which lists all permissions of a us
             return self._accounts
 
         def has_permission(self, node: PermissionNode, payload: str | None = None) -> bool:
-            self._auth.subject_has_permission(
+            self._auth.subject_inherits_permission(
                 sid=self._username, node=node, payload=payload
             )
 

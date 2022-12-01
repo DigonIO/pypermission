@@ -23,7 +23,7 @@ def test_readme_code_example():
 
     auth.load_file(path=path / "test_readme.yaml")
 
-    assert auth.subject_has_permission(sid="Bob", node=Nodes.CHAT_GLOBAL)
-    assert auth.subject_has_permission(sid="Alice", node=Nodes.CHAT_MODERATOR)
-    assert auth.subject_has_permission(sid="Bob", node=Nodes.TICKET_OPEN)
-    assert auth.subject_has_permission(sid="Alice", node=Nodes.TICKET_CLOSE_ALL)
+    assert auth.subject_inherits_permission(sid="Bob", node=Nodes.CHAT_GLOBAL)
+    assert auth.subject_inherits_permission(sid="Alice", node=Nodes.CHAT_MODERATOR)
+    assert auth.subject_inherits_permission(sid="Bob", node=Nodes.TICKET_OPEN)
+    assert auth.subject_inherits_permission(sid="Alice", node=Nodes.TICKET_CLOSE_ALL)

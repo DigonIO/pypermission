@@ -79,48 +79,71 @@ def assert_loaded_authority(auth: SerialAuthority | SQLAlchemyAuthority):
     assert auth.role_get_subjects(rid=PLANT_BASED) == {ORANGE, APPLE, PEAR, BANANA}
     assert auth.subject_get_roles(sid=ORANGE) == {PLANT_BASED}
 
-    assert auth.subject_has_permission(sid=EGG, node=TPN.TOWNY_CHAT_GLOBAL) == True
-    assert auth.subject_has_permission(sid=PEAR, node=TPN.TOWNY_CHAT_GLOBAL) == True
+    assert auth.subject_inherits_permission(sid=EGG, node=TPN.TOWNY_CHAT_GLOBAL) == True
+    assert auth.subject_inherits_permission(sid=PEAR, node=TPN.TOWNY_CHAT_GLOBAL) == True
 
-    assert auth.subject_has_permission(sid=EGG, node=TPN.TOWNY_CHAT_TOWN) == True
-    assert auth.subject_has_permission(sid=EGG, node=TPN.TOWNY_CHAT_NATION) == False
+    assert auth.subject_inherits_permission(sid=EGG, node=TPN.TOWNY_CHAT_TOWN) == True
+    assert auth.subject_inherits_permission(sid=EGG, node=TPN.TOWNY_CHAT_NATION) == False
 
-    assert auth.subject_has_permission(sid=PEAR, node=TPN.TOWNY_CHAT_TOWN) == False
-    assert auth.subject_has_permission(sid=PEAR, node=TPN.TOWNY_CHAT_NATION) == True
+    assert auth.subject_inherits_permission(sid=PEAR, node=TPN.TOWNY_CHAT_TOWN) == False
+    assert auth.subject_inherits_permission(sid=PEAR, node=TPN.TOWNY_CHAT_NATION) == True
 
     # test EGG
-    assert auth.subject_has_permission(sid=EGG, node=TPN.TOWNY_WILD_BUILD_X, payload="dirt") == True
-    assert auth.subject_has_permission(sid=EGG, node=TPN.TOWNY_WILD_BUILD_X, payload="gold") == True
     assert (
-        auth.subject_has_permission(sid=EGG, node=TPN.TOWNY_WILD_DESTROY_X, payload="dirt") == False
+        auth.subject_inherits_permission(sid=EGG, node=TPN.TOWNY_WILD_BUILD_X, payload="dirt")
+        == True
     )
     assert (
-        auth.subject_has_permission(sid=EGG, node=TPN.TOWNY_WILD_DESTROY_X, payload="gold") == False
+        auth.subject_inherits_permission(sid=EGG, node=TPN.TOWNY_WILD_BUILD_X, payload="gold")
+        == True
+    )
+    assert (
+        auth.subject_inherits_permission(sid=EGG, node=TPN.TOWNY_WILD_DESTROY_X, payload="dirt")
+        == False
+    )
+    assert (
+        auth.subject_inherits_permission(sid=EGG, node=TPN.TOWNY_WILD_DESTROY_X, payload="gold")
+        == False
     )
 
     # test PEAR
     assert (
-        auth.subject_has_permission(sid=PEAR, node=TPN.TOWNY_WILD_BUILD_X, payload="dirt") == False
+        auth.subject_inherits_permission(sid=PEAR, node=TPN.TOWNY_WILD_BUILD_X, payload="dirt")
+        == False
     )
     assert (
-        auth.subject_has_permission(sid=PEAR, node=TPN.TOWNY_WILD_BUILD_X, payload="gold") == False
+        auth.subject_inherits_permission(sid=PEAR, node=TPN.TOWNY_WILD_BUILD_X, payload="gold")
+        == False
     )
     assert (
-        auth.subject_has_permission(sid=PEAR, node=TPN.TOWNY_WILD_DESTROY_X, payload="dirt") == True
+        auth.subject_inherits_permission(sid=PEAR, node=TPN.TOWNY_WILD_DESTROY_X, payload="dirt")
+        == True
     )
     assert (
-        auth.subject_has_permission(sid=PEAR, node=TPN.TOWNY_WILD_DESTROY_X, payload="gold") == True
+        auth.subject_inherits_permission(sid=PEAR, node=TPN.TOWNY_WILD_DESTROY_X, payload="gold")
+        == True
     )
 
     # test HAM
-    assert auth.subject_has_permission(sid=HAM, node=TPN.TOWNY_WILD_BUILD_X, payload="dirt") == True
-    assert auth.subject_has_permission(sid=HAM, node=TPN.TOWNY_WILD_BUILD_X, payload="gold") == True
-    assert auth.subject_has_permission(sid=HAM, node=TPN.TOWNY_WILD_BUILD_X, payload="iron") == True
     assert (
-        auth.subject_has_permission(sid=HAM, node=TPN.TOWNY_WILD_DESTROY_X, payload="dirt") == True
+        auth.subject_inherits_permission(sid=HAM, node=TPN.TOWNY_WILD_BUILD_X, payload="dirt")
+        == True
     )
     assert (
-        auth.subject_has_permission(sid=HAM, node=TPN.TOWNY_WILD_DESTROY_X, payload="gold") == True
+        auth.subject_inherits_permission(sid=HAM, node=TPN.TOWNY_WILD_BUILD_X, payload="gold")
+        == True
+    )
+    assert (
+        auth.subject_inherits_permission(sid=HAM, node=TPN.TOWNY_WILD_BUILD_X, payload="iron")
+        == True
+    )
+    assert (
+        auth.subject_inherits_permission(sid=HAM, node=TPN.TOWNY_WILD_DESTROY_X, payload="dirt")
+        == True
+    )
+    assert (
+        auth.subject_inherits_permission(sid=HAM, node=TPN.TOWNY_WILD_DESTROY_X, payload="gold")
+        == True
     )
 
 

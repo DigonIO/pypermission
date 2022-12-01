@@ -28,13 +28,13 @@ def test_basic_integration(serial_authority: SerialAuthority):
 def test_rm_permission(serial_authority: SerialAuthority):
     auth = serial_authority
 
-    assert auth.role_has_permission(rid=FOOD, node=TPN.TOWNY_CHAT_GLOBAL) == True
+    assert auth.role_inherits_permission(rid=FOOD, node=TPN.TOWNY_CHAT_GLOBAL) == True
     auth.role_revoke_permission(rid=FOOD, node=TPN.TOWNY_CHAT_GLOBAL)
-    assert auth.role_has_permission(rid=FOOD, node=TPN.TOWNY_CHAT_GLOBAL) == False
+    assert auth.role_inherits_permission(rid=FOOD, node=TPN.TOWNY_CHAT_GLOBAL) == False
 
-    assert auth.subject_has_permission(sid=HAM, node=TPN.TOWNY_WILD_) == True
+    assert auth.subject_inherits_permission(sid=HAM, node=TPN.TOWNY_WILD_) == True
     auth.subject_rm_node(sid=HAM, node=TPN.TOWNY_WILD_)
-    assert auth.subject_has_permission(sid=HAM, node=TPN.TOWNY_WILD_) == False
+    assert auth.subject_inherits_permission(sid=HAM, node=TPN.TOWNY_WILD_) == False
 
 
 def test_subject_get_permissions(serial_authority: SerialAuthority):
