@@ -120,16 +120,14 @@ def perm_tree_matches_key_type(
     return True
 
 
-class PermissionableEntityDict(TypedDict, Generic[PID]):
+class RoleDict(TypedDict, Generic[PID, EID]):
     permission_nodes: PERMISSION_NODES[PID]
-
-
-class RoleDict(PermissionableEntityDict[PID], Generic[PID, EID]):
     parents: list[EID]
 
 
 # NOTE: technically entity_id should not be ommitted
-class EntityDict(PermissionableEntityDict[PID], Generic[PID, EID]):
+class EntityDict(TypedDict, Generic[PID, EID]):
+    permission_nodes: PERMISSION_NODES[PID]
     entity_id: EID
     roles: NotRequired[list[EID]]
 

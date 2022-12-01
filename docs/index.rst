@@ -11,3 +11,4 @@
     readme
     introduction
     examples
+    api_reference

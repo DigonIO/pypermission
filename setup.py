@@ -104,7 +104,11 @@ setup(
     ],
     python_requires=">=3.10",
     extras_require=EXTRAS_REQUIRE,
-    packages=["pypermission"],
+    packages=[
+        "pypermission",
+        "pypermission.serial",
+        "pypermission.sqlalchemy",
+    ],
     package_dir={"": "src"},
     package_data={"pypermission": ["py.typed"]},
     url="https://gitlab.com/DigonIO/PyPermission",
