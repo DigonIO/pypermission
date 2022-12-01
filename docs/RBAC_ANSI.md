@@ -38,7 +38,7 @@ Conformance to the standard requires at least the core feature set (6.1)
 
 ## NOTE
 
-* `role_get_nodes` and `subject_get_nodes` don't return a set of permissions, like the `RolePermissions` and
+* `role_get_permissions` and `subject_get_permissions` don't return a set of permissions, like the `RolePermissions` and
   `UserPermissions` functions, but a NodeMap (`dict[PermissionNode, set[str]]`)
 * `RoleOperationsOnObject` and `UserOperationsOnObject` are left open in the standard concerning their behaviour (direct relation/inherited relation/active role).
 * `authorized_users` depends on the role-hierarchy, whereas `role_get_subjects` does not
@@ -53,7 +53,7 @@ Conformance to the standard requires at least the core feature set (6.1)
 
 ### 6.1.1 administrative core commands
 
-| RBAC (ANSI)      | new                    |
+| RBAC (ANSI)      | ours                   |
 | ---------------- | ---------------------- |
 | AddUser          | add_subject            |
 | DeleteUser       | del_subject            |
@@ -75,7 +75,7 @@ Conformance to the standard requires at least the core feature set (6.1)
 
 We do not have a 1:1 analog of `CheckAccess`, as `CheckAccess` does not look at the hierarchy.
 
-| RBAC (ANSI)                  | new                              |
+| RBAC (ANSI)                  | ours                             |
 | ---------------------------- | -------------------------------- |
 | CheckAccess                  | role/subject_inherits_permission |
 | ^ does not check hierarchy ^ | ^ checks hierarchy             ^ |
@@ -93,14 +93,14 @@ NOTE:
 
 ### 6.1.4 advanced review functions
 
-| RBAC (ANSI)                 | ours              | new                          |
-| --------------------------- | ----------------- | ---------------------------- |
-| RolePermissions             | role_get_nodes    | role_get_permissions (x2)    |
-| UserPermissions             | subject_get_nodes | subject_get_permissions (x2) |
-| SessionRoles                | N/A               |                              |
-| SessionPermissions          | N/A               |                              |
-| RoleOperationsOnObject (x1) | N/A               |                              |
-| UserOperationsOnObject (x2) | N/A               |                              |
+| RBAC (ANSI)                 | ours                         |
+| --------------------------- | ---------------------------- |
+| RolePermissions             | role_get_permissions (x2)    |
+| UserPermissions             | subject_get_permissions (x2) |
+| SessionRoles                |                              |
+| SessionPermissions          |                              |
+| RoleOperationsOnObject (x1) |                              |
+| UserOperationsOnObject (x2) |                              |
 
 * `(xN)` identifies the number `N` of possible implementations the standard allows
 
@@ -143,15 +143,15 @@ AddInheritance(r_asc, r_desc) asc_rid, desc_rid
 
 #### 6.2.1.4 Advanced Review Functions for General Role Hierarchies
 
-| RBAC (ANSI)                 | ours                | new                          |
-| --------------------------- | ------------------- | ---------------------------- |
-| RolePermissions             | !role_get_nodes!    | role_get_permissions (x2)    |
-| UserPermissions             | !subject_get_nodes! | subject_get_permissions (x2) |
-| RoleOperationsOnObject (x2) | N/A                 | N/A                          |
-| UserOperationsOnObject (x3) | N/A                 | N/A                          |
+| RBAC (ANSI)                 | new                          |
+| --------------------------- | ---------------------------- |
+| RolePermissions             | role_get_permissions (x2)    |
+| UserPermissions             | subject_get_permissions (x2) |
+| RoleOperationsOnObject (x2) | N/A                          |
+| UserOperationsOnObject (x3) | N/A                          |
 
 * `(xN)` identifies the number `N` of possible implementations the standard allows
-* `role_get_nodes` and `subject_get_nodes` currently ignore inherited permissions,
+* `role_get_permissions` and `subject_get_permissions` currently ignore inherited permissions,
   implementation needs to be changed
 
 ### 6.2.2 Limited Role Hierarchies

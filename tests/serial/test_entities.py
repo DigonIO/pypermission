@@ -40,15 +40,15 @@ def test_rm_permission(serial_authority: SerialAuthority):
 def test_subject_get_permissions(serial_authority: SerialAuthority):
     auth = serial_authority
 
-    assert auth.subject_get_nodes(sid=EGG) == {}
-    assert auth.subject_get_nodes(sid=HAM) == {TPN.TOWNY_WILD_: set()}
+    assert auth.subject_get_permissions(sid=EGG) == {}
+    assert auth.subject_get_permissions(sid=HAM) == {TPN.TOWNY_WILD_: set()}
 
 
 def test_role_get_permissions(serial_authority: SerialAuthority):
     auth = serial_authority
 
-    assert auth.role_get_nodes(rid=FOOD) == {TPN.TOWNY_CHAT_GLOBAL: set()}
-    assert auth.role_get_nodes(rid=ANIMAL_BASED) == {
+    assert auth.role_get_permissions(rid=FOOD) == {TPN.TOWNY_CHAT_GLOBAL: set()}
+    assert auth.role_get_permissions(rid=ANIMAL_BASED) == {
         TPN.TOWNY_CHAT_TOWN: set(),
         TPN.TOWNY_WILD_BUILD_X: {"dirt", "gold"},
     }

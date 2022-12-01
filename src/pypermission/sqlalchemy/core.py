@@ -612,7 +612,7 @@ class SQLAlchemyAuthority(Authority):
             roles=roles, role=role_entity_dict, permission_tree=permission_tree
         )
 
-    def subject_get_nodes(
+    def subject_get_permissions(
         self,
         *,
         sid: EntityID,
@@ -630,7 +630,7 @@ class SQLAlchemyAuthority(Authority):
         _close_db_session(db, session)
         return result
 
-    def role_get_nodes(
+    def role_get_permissions(
         self,
         *,
         rid: EntityID,

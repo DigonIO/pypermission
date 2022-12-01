@@ -750,14 +750,14 @@ class SerialAuthority(_Authority):
 
         return RoleInfoDict(roles=roles, role=role_entity_dict, permission_tree=permission_tree)
 
-    def subject_get_nodes(self, *, sid: EntityID) -> NodeMap:
+    def subject_get_permissions(self, *, sid: EntityID) -> NodeMap:
         """Get a copy of all permissions from a subject."""
         assertEntityIDType(eid=sid)
 
         perm_map = self._get_subject(sid=sid).permission_map
         return _build_permission_node_map(perm_map=perm_map)
 
-    def role_get_nodes(self, *, rid: EntityID) -> NodeMap:
+    def role_get_permissions(self, *, rid: EntityID) -> NodeMap:
         """Get a copy of all permissions from a role."""
         assertEntityIDType(eid=rid)
 
