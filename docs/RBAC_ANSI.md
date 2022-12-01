@@ -6,7 +6,9 @@
   <https://www.document-center.com/standards/show/ANSI/INCITS-359-PDF/history/2012%20R17%20EDITION>
 * B specification of the INCITS 359-2012 standard: <https://info.usherbrooke.ca/mfrappier/RBAC-in-B/>
 
-Note, that other authors have identified numerous problems with the ANSI standard (see DOI: 10.1007/978-3-662-43652-3_22), some of the noted problems have been mitigated below according to the problem descriptions
+Note, that other authors have identified numerous problems with the ANSI standard
+(see DOI: 10.1007/978-3-662-43652-3_22), some of the noted problems have been mitigated
+below according to the problem descriptions
 
 Definitions Core RBAC:
 
@@ -42,20 +44,25 @@ Conformance to the standard requires at least the core feature set (6.1)
 * `authorized_users` depends on the role-hierarchy, whereas `role_get_subjects` does not
 * ANSI datasets for the definitions and assignments, but no query functions (as we do), would be nice to include our query functions in the RBAC guide
 
+## TODO
+
+* add flag to `subject_get_permissions` and `role_get_permissions` to switch
+  between directly granted and inherited permissions (default to inherited)
+
 ## 6.1 Core RBAC
 
 ### 6.1.1 administrative core commands
 
-| RBAC (ANSI)      | ours             |
-| ---------------- | ---------------- |
-| AddUser          | new_subject      |
-| DeleteUser       | rm_subject       |
-| AddRole          | new_role         |
-| DeleteRole       | rm_role          |
-| AssignUser       | role_add_subject |
-| DeassignUser     | role_rm_subject  |
-| GrantPermission  | role_add_node    |
-| RevokePermission | role_rm_node     |
+| RBAC (ANSI)      | ours             | new                    |
+| ---------------- | ---------------- | ---------------------- |
+| AddUser          | new_subject      | add_subject            |
+| DeleteUser       | rm_subject       | del_subject            |
+| AddRole          | new_role         | add_role               |
+| DeleteRole       | rm_role          | del_role               |
+| AssignUser       | role_add_subject | role_assign_subject    |
+| DeassignUser     | role_rm_subject  | role_deassign_subject  |
+| GrantPermission  | role_add_node    | role_grant_permission  |
+| RevokePermission | role_rm_node     | role_revoke_permission |
 
 ### 6.1.2 supporting system functions
 
@@ -68,15 +75,10 @@ Conformance to the standard requires at least the core feature set (6.1)
 
 We do not have a 1:1 analog of `CheckAccess`, as `CheckAccess` does not look at the hierarchy.
 
-| RBAC (ANSI)                  | ours                                       |
-| ---------------------------- | ------------------------------------------ |
-| CheckAccess                  | role_has_permission/subject_has_permission |
-| ^ does not check hierarchy ^ | ^ checks hierarchy                       ^ |
-
-Maybe rename:
-
-* `role_has_permission` -> `role_inherits_access`
-* `subject_has_permission` -> `subject_inherits_access`
+| RBAC (ANSI)                  | ours                        | new                              |
+| ---------------------------- | --------------------------- | -------------------------------- |
+| CheckAccess                  | role/subject_has_permission | role/subject_inherits_permission |
+| ^ does not check hierarchy ^ | ^ checks hierarchy        ^ | ^ checks hierarchy             ^ |
 
 NOTE:
 
@@ -91,14 +93,14 @@ NOTE:
 
 ### 6.1.4 advanced review functions
 
-| RBAC (ANSI)                 | ours              |
-| --------------------------- | ----------------- |
-| RolePermissions             | role_get_nodes    |
-| UserPermissions             | subject_get_nodes |
-| SessionRoles                | N/A               |
-| SessionPermissions          | N/A               |
-| RoleOperationsOnObject (x1) | N/A               |
-| UserOperationsOnObject (x2) | N/A               |
+| RBAC (ANSI)                 | ours              | new                          |
+| --------------------------- | ----------------- | ---------------------------- |
+| RolePermissions             | role_get_nodes    | role_get_permissions (x2)    |
+| UserPermissions             | subject_get_nodes | subject_get_permissions (x2) |
+| SessionRoles                | N/A               |                              |
+| SessionPermissions          | N/A               |                              |
+| RoleOperationsOnObject (x1) | N/A               |                              |
+| UserOperationsOnObject (x2) | N/A               |                              |
 
 * `(xN)` identifies the number `N` of possible implementations the standard allows
 
@@ -108,12 +110,14 @@ NOTE:
 
 #### 6.2.1.1 Administrative Commands for General Role Hierarchies
 
-| RBAC (ANSI)            | ours                |
-| ---------------------- | ------------------- |
-| AddInheritance         | role_add_child_role |
-| DeleteInheritance      | role_rm_child_role  |
-| AddAscentant           | N/A                 |
-| AddDescendant          | N/A                 |
+| RBAC (ANSI)            | ours                | new naming           |
+| ---------------------- | ------------------- | -------------------- |
+| AddInheritance         | role_add_child_role | role_add_inheritance |
+| DeleteInheritance      | role_rm_child_role  | role_del_inheritance |
+| AddAscentant           | N/A                 | N/A                  |
+| AddDescendant          | N/A                 | N/A                  |
+
+AddInheritance(r_asc, r_desc) asc_rid, desc_rid
 
 #### 6.2.1.2 Supporting System Functions for General Role Hierarchies
 
@@ -132,21 +136,23 @@ NOTE:
 
 `AuthorizedPermissions` is not defined here, but implied in section 5.2 (should probably be skipped in guide, as it is confusing with the behaviour of `CheckAccess`, which does not check with respect to hierarchy):
 
-| RBAC (ANSI)               | ours                      |
-| ------------------------- | ------------------------- |
-| AuthorizedPermissions     | role_has_permission       |
-| ^ these check hierarchy ^ | ^ these check hierarchy ^ |
+| RBAC (ANSI)               | ours                      | new                       |
+| ------------------------- | ------------------------- | ------------------------- |
+| AuthorizedPermissions     | role_has_permission       | role_inherits_permission  |
+| ^ these check hierarchy ^ | ^ these check hierarchy ^ | ^ these check hierarchy ^ |
 
 #### 6.2.1.4 Advanced Review Functions for General Role Hierarchies
 
-| RBAC (ANSI)                 | ours              |
-| --------------------------- | ----------------- |
-| RolePermissions             | N/A               |
-| UserPermissions             | N/A               |
-| RoleOperationsOnObject (x2) | N/A               |
-| UserOperationsOnObject (x3) | N/A               |
+| RBAC (ANSI)                 | ours                | new                          |
+| --------------------------- | ------------------- | ---------------------------- |
+| RolePermissions             | !role_get_nodes!    | role_get_permissions (x2)    |
+| UserPermissions             | !subject_get_nodes! | subject_get_permissions (x2) |
+| RoleOperationsOnObject (x2) | N/A                 | N/A                          |
+| UserOperationsOnObject (x3) | N/A                 | N/A                          |
 
 * `(xN)` identifies the number `N` of possible implementations the standard allows
+* `role_get_nodes` and `subject_get_nodes` currently ignore inherited permissions,
+  implementation needs to be changed
 
 ### 6.2.2 Limited Role Hierarchies
 
