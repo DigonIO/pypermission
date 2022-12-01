@@ -77,7 +77,7 @@ class SQLAlchemyAuthority(Authority):
     ### Add
     ################################################################################################
 
-    def new_subject(self, sid: EntityID, session: Session | None = None) -> None:
+    def add_subject(self, sid: EntityID, session: Session | None = None) -> None:
         """Create a new subject for a given ID."""
         serial_sid = entity_id_serializer(sid)
         db = self._setup_db_session(session)
@@ -86,7 +86,7 @@ class SQLAlchemyAuthority(Authority):
 
         _close_db_session(db, session)
 
-    def new_role(self, rid: EntityID, session: Session | None = None) -> None:
+    def add_role(self, rid: EntityID, session: Session | None = None) -> None:
         """Create a new role for a given ID."""
         serial_rid = entity_id_serializer(rid)
         db = self._setup_db_session(session)
@@ -95,7 +95,7 @@ class SQLAlchemyAuthority(Authority):
 
         _close_db_session(db, session)
 
-    def role_add_subject(
+    def role_assign_subject(
         self, *, rid: EntityID, sid: EntityID, session: Session | None = None
     ) -> None:
         """Add a subject to a role to inherit all its permissions."""
@@ -139,7 +139,7 @@ class SQLAlchemyAuthority(Authority):
 
         _close_db_session(db, session)
 
-    def role_add_node(
+    def role_grant_permission(
         self,
         *,
         rid: EntityID,
@@ -652,7 +652,7 @@ class SQLAlchemyAuthority(Authority):
     ### Remove
     ################################################################################################
 
-    def rm_subject(self, sid: EntityID, session: Session | None = None) -> None:
+    def del_subject(self, sid: EntityID, session: Session | None = None) -> None:
         """Remove a subject for a given ID."""
         serial_sid = entity_id_serializer(sid)
         db = self._setup_db_session(session)
@@ -661,7 +661,7 @@ class SQLAlchemyAuthority(Authority):
 
         _close_db_session(db, session)
 
-    def rm_role(self, rid: EntityID, session: Session | None = None) -> None:
+    def del_role(self, rid: EntityID, session: Session | None = None) -> None:
         """Remove a role for a given ID."""
         serial_rid = entity_id_serializer(rid)
         db = self._setup_db_session(session)
@@ -690,7 +690,7 @@ class SQLAlchemyAuthority(Authority):
 
         _close_db_session(db, session)
 
-    def role_rm_node(
+    def role_revoke_permission(
         self,
         *,
         rid: EntityID,
@@ -708,7 +708,7 @@ class SQLAlchemyAuthority(Authority):
 
         _close_db_session(db, session)
 
-    def role_rm_subject(
+    def role_deassign_subject(
         self,
         *,
         rid: EntityID,

@@ -53,16 +53,16 @@ Conformance to the standard requires at least the core feature set (6.1)
 
 ### 6.1.1 administrative core commands
 
-| RBAC (ANSI)      | ours             | new                    |
-| ---------------- | ---------------- | ---------------------- |
-| AddUser          | new_subject      | add_subject            |
-| DeleteUser       | rm_subject       | del_subject            |
-| AddRole          | new_role         | add_role               |
-| DeleteRole       | rm_role          | del_role               |
-| AssignUser       | role_add_subject | role_assign_subject    |
-| DeassignUser     | role_rm_subject  | role_deassign_subject  |
-| GrantPermission  | role_add_node    | role_grant_permission  |
-| RevokePermission | role_rm_node     | role_revoke_permission |
+| RBAC (ANSI)      | new                    |
+| ---------------- | ---------------------- |
+| AddUser          | add_subject            |
+| DeleteUser       | del_subject            |
+| AddRole          | add_role               |
+| DeleteRole       | del_role               |
+| AssignUser       | role_assign_subject    |
+| DeassignUser     | role_deassign_subject  |
+| GrantPermission  | role_grant_permission  |
+| RevokePermission | role_revoke_permission |
 
 ### 6.1.2 supporting system functions
 

@@ -404,7 +404,7 @@ class SerialAuthority(_Authority):
     ### Add
     ################################################################################################
 
-    def new_subject(self, *, sid: EntityID) -> None:
+    def add_subject(self, *, sid: EntityID) -> None:
         """Create a new subject for a given ID."""
         assertEntityIDType(eid=sid)
 
@@ -414,7 +414,7 @@ class SerialAuthority(_Authority):
         subject = Subject(id=sid)
         self._subjects[sid] = subject
 
-    def new_role(self, *, rid: EntityID) -> None:
+    def add_role(self, *, rid: EntityID) -> None:
         """Create a new role for a given ID."""
         assertEntityIDType(eid=rid)
 
@@ -424,7 +424,7 @@ class SerialAuthority(_Authority):
         role = Role(id=rid)
         self._roles[rid] = role
 
-    def role_add_subject(self, *, rid: EntityID, sid: EntityID) -> None:
+    def role_assign_subject(self, *, rid: EntityID, sid: EntityID) -> None:
         """Add a subject to a role to inherit all its permissions."""
         assertEntityIDType(eid=rid)
         assertEntityIDType(eid=sid)
@@ -461,7 +461,7 @@ class SerialAuthority(_Authority):
             permission_map=permission_map, permission=permission, payload=payload
         )
 
-    def role_add_node(
+    def role_grant_permission(
         self, *, rid: EntityID, node: PermissionNode, payload: str | None = None
     ) -> None:
         """Add a permission to a role."""
@@ -768,7 +768,7 @@ class SerialAuthority(_Authority):
     ### Remove
     ################################################################################################
 
-    def rm_subject(self, sid: EntityID) -> None:
+    def del_subject(self, sid: EntityID) -> None:
         """Remove a subject for a given ID."""
         assertEntityIDType(eid=sid)
 
@@ -778,7 +778,7 @@ class SerialAuthority(_Authority):
         for rid in subject.rids:
             self._roles[rid].sids.remove(sid)
 
-    def rm_role(self, rid: EntityID) -> None:
+    def del_role(self, rid: EntityID) -> None:
         """Remove a role for a given ID."""
         assertEntityIDType(eid=rid)
 
@@ -805,7 +805,7 @@ class SerialAuthority(_Authority):
             permission_map=permission_map, permission=permission, payload=payload
         )
 
-    def role_rm_node(
+    def role_revoke_permission(
         self, *, rid: EntityID, node: PermissionNode, payload: str | None = None
     ) -> None:
         """Remove a permission from a role."""
@@ -818,7 +818,7 @@ class SerialAuthority(_Authority):
             permission_map=permission_map, permission=permission, payload=payload
         )
 
-    def role_rm_subject(self, *, rid: EntityID, sid: EntityID) -> None:
+    def role_deassign_subject(self, *, rid: EntityID, sid: EntityID) -> None:
         """Remove a subject from a role."""
         assertEntityIDType(eid=rid)
         assertEntityIDType(eid=sid)

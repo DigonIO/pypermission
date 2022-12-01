@@ -74,13 +74,13 @@ first have to be defined within a ``PermissionNode`` structure:
 
 Assume we want to manage access to the chat system for the three basic roles `user`,
 `moderator` and `admin`. To create the given roles, the
-:py:meth:`~pypermission.serial.SerialAuthority.new_role` method can be used:
+:py:meth:`~pypermission.serial.SerialAuthority.add_role` method can be used:
 
 .. code-block:: python
 
-    auth.new_role(rid="user")
-    auth.new_role(rid="moderator")
-    auth.new_role(rid="admin")
+    auth.add_role(rid="user")
+    auth.add_role(rid="moderator")
+    auth.add_role(rid="admin")
 
 Verify that the authority contains all the expected roles with the
 :py:meth:`~pypermission.serial.SerialAuthority.get_roles` method:
@@ -92,9 +92,9 @@ Next we want to create the subjects `Alice`, `Bob` and `John`.
 
 .. code-block:: python
 
-    auth.new_subject(sid="Alice")
-    auth.new_subject(sid="Bob")
-    auth.new_subject(sid="John")
+    auth.add_subject(sid="Alice")
+    auth.add_subject(sid="Bob")
+    auth.add_subject(sid="John")
 
 Verify that the authority contains all the expected subjects with the
 :py:meth:`~pypermission.serial.SerialAuthority.get_subjects` method:
@@ -110,10 +110,10 @@ Assign the subjects as follows:
 
 .. code-block:: python
 
-    auth.role_add_subject(rid="admin", sid="Alice")
-    auth.role_add_subject(rid="moderator", sid="Bob")
-    auth.role_add_subject(rid="user", sid="Bob")
-    auth.role_add_subject(rid="user", sid="John")
+    auth.role_assign_subject(rid="admin", sid="Alice")
+    auth.role_assign_subject(rid="moderator", sid="Bob")
+    auth.role_assign_subject(rid="user", sid="Bob")
+    auth.role_assign_subject(rid="user", sid="John")
 
 Now exemplarily review that the user `Bob` got both - the `user` and the `moderator` role assigned
 with the :py:meth:`~pypermission.serial.SerialAuthority.subject_get_roles` method:

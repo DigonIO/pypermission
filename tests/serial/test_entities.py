@@ -29,7 +29,7 @@ def test_rm_permission(serial_authority: SerialAuthority):
     auth = serial_authority
 
     assert auth.role_has_permission(rid=FOOD, node=TPN.TOWNY_CHAT_GLOBAL) == True
-    auth.role_rm_node(rid=FOOD, node=TPN.TOWNY_CHAT_GLOBAL)
+    auth.role_revoke_permission(rid=FOOD, node=TPN.TOWNY_CHAT_GLOBAL)
     assert auth.role_has_permission(rid=FOOD, node=TPN.TOWNY_CHAT_GLOBAL) == False
 
     assert auth.subject_has_permission(sid=HAM, node=TPN.TOWNY_WILD_) == True
@@ -54,7 +54,7 @@ def test_role_get_permissions(serial_authority: SerialAuthority):
     }
 
 
-def test_rm_subject(serial_authority: SerialAuthority):
+def test_del_subject(serial_authority: SerialAuthority):
     auth = serial_authority
 
     assert auth.get_subjects() == {
@@ -73,7 +73,7 @@ def test_rm_subject(serial_authority: SerialAuthority):
         BANANA,
     }
 
-    auth.rm_subject(sid=ORANGE)
+    auth.del_subject(sid=ORANGE)
 
     assert auth.get_subjects() == {
         EGG,
@@ -96,7 +96,7 @@ def test_rm_parent_role(serial_authority: SerialAuthority):
     assert auth.get_roles() == {FOOD, ANIMAL_BASED, PLANT_BASED}
     assert auth.role_get_parent_roles(rid=ANIMAL_BASED) == {FOOD}
 
-    auth.rm_role(rid=FOOD)
+    auth.del_role(rid=FOOD)
 
     assert auth.get_roles() == {ANIMAL_BASED, PLANT_BASED}
     assert auth.role_get_parent_roles(rid=ANIMAL_BASED) == set()
@@ -109,7 +109,7 @@ def test_rm_child_role(serial_authority: SerialAuthority):
     assert auth.role_get_child_roles(rid=FOOD) == {ANIMAL_BASED, PLANT_BASED}
     assert auth.subject_get_roles(sid=EGG) == {ANIMAL_BASED}
 
-    auth.rm_role(rid=ANIMAL_BASED)
+    auth.del_role(rid=ANIMAL_BASED)
 
     assert auth.get_roles() == {FOOD, PLANT_BASED}
     assert auth.role_get_child_roles(rid=FOOD) == {PLANT_BASED}
@@ -134,7 +134,7 @@ def test_rm_member_subject(serial_authority: SerialAuthority):
     assert auth.role_get_subjects(rid=ANIMAL_BASED) == {EGG, SPAM, HAM}
     assert auth.subject_get_roles(sid=EGG) == {ANIMAL_BASED}
 
-    auth.role_rm_subject(rid=ANIMAL_BASED, sid=EGG)
+    auth.role_deassign_subject(rid=ANIMAL_BASED, sid=EGG)
 
     assert auth.role_get_subjects(rid=ANIMAL_BASED) == {SPAM, HAM}
     assert auth.subject_get_roles(sid=EGG) == set()
@@ -143,12 +143,12 @@ def test_rm_member_subject(serial_authority: SerialAuthority):
 def test_unknown_perm_node():
     auth = SerialAuthority()
 
-    auth.new_subject(sid=APPLE)
+    auth.add_subject(sid=APPLE)
 
-    auth.new_role(rid=FOOD)
+    auth.add_role(rid=FOOD)
 
     with pytest.raises(UnknownPermissionNodeError):
         auth.subject_add_node(sid=APPLE, node=TownyPermissionNode.TOWNY_CHAT_)
 
     with pytest.raises(UnknownPermissionNodeError):
-        auth.role_add_node(rid=FOOD, node=TownyPermissionNode.TOWNY_CHAT_)
+        auth.role_grant_permission(rid=FOOD, node=TownyPermissionNode.TOWNY_CHAT_)

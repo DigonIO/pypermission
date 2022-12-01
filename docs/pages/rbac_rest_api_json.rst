@@ -297,6 +297,6 @@ umgesetzt werden.
             self._users[user_banker.username] = user_banker
             self._users[user_customer.username] = user_customer
 
-            self._auth.role_add_subject(rid=GROUP_ADMIN, sid=user_admin.username)
-            self._auth.role_add_subject(rid=GROUP_BANKER, sid=user_banker.username)
-            self._auth.role_add_subject(rid=GROUP_CUSTOMER, sid=user_customer.username)
+            self._auth.role_assign_subject(rid=GROUP_ADMIN, sid=user_admin.username)
+            self._auth.role_assign_subject(rid=GROUP_BANKER, sid=user_banker.username)
+            self._auth.role_assign_subject(rid=GROUP_CUSTOMER, sid=user_customer.username)

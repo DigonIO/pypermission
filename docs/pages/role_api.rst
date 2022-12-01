@@ -89,11 +89,11 @@ Add subjects to a roles.
 
 .. code-block:: pycon
 
-    >>> auth.role_add_subject(rid=GID_ANIMAL_BASED, sid=SID_EGG)
-    >>> auth.role_add_subject(rid=GID_ANIMAL_BASED, sid=SID_SPAM)
+    >>> auth.role_assign_subject(rid=GID_ANIMAL_BASED, sid=SID_EGG)
+    >>> auth.role_assign_subject(rid=GID_ANIMAL_BASED, sid=SID_SPAM)
 
-    >>> auth.role_add_subject(rid=GID_PLANT_BASED, sid=SID_ORANGE)
-    >>> auth.role_add_subject(rid=GID_PLANT_BASED, sid=SID_APPLE)
+    >>> auth.role_assign_subject(rid=GID_PLANT_BASED, sid=SID_ORANGE)
+    >>> auth.role_assign_subject(rid=GID_PLANT_BASED, sid=SID_APPLE)
 
 Check the member subject IDs.
 
