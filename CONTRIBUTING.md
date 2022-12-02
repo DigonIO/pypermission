@@ -1,6 +1,6 @@
-# Contributing to PyPermission
+# Contributing
 
-Contributions are highly appreciated.
+Contributions to PyPermission are highly appreciated.
 
 ## Code of Conduct
 

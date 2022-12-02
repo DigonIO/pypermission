@@ -1,6 +1,21 @@
-# RBAC Features (NIST)
+# RBAC (NIST)
 
-## Flat RBAC
+The original NIST RBAC model[^1] defines 4 feature levels and distinguishes level
+2, 3 and 4 further depending on the support for either a) arbitrary or b) limited
+hierarchies.
+
+.. note::
+   * assign implies a matching revoke method
+   * convention shows the senior (more powerful) roles on top in diagram
+   * unclear, if `user-role` review in flat RBAC and Hierarchical RBAC are 2 functions each or 2 for flat and 4 for hierarchical (probably 4)
+   * Our Wildcard Feature is closely related to the customizable permissions in section 7.4
+   * What NIST calls Users we call subjects
+   * The standard writes:
+      | The standard allows for deleting an edge, but states that implied edges will be retained; an operation that deletes an edge and all implied edges can also be defined
+
+     We disagree with this notion - implied edges will be removed
+
+## L.1 Flat RBAC
 
 * assign user to role - `user-role` (many-to-many relation)
 * assign permission to role - `permission-role` (many-to-many relation)
@@ -9,7 +24,7 @@
   * list roles a specific user can take
   * list users that can take a specific role
 
-## Hierarchical RBAC
+## L.2 Hierarchical RBAC
 
 * assign seniority relation between roles `role-role` (many-to-many relation)
 * senior roles acquire permissions of their juniors
@@ -21,15 +36,15 @@
   * activation hierarchy - roles need to be activated for permissions to take effect,
     activation of several roles at the same time possible
 
-### General Hierarchical RBAC
+### L.2a General Hierarchical RBAC
 
 * directed acyclic graphs
 
-### Restricted Hierarchical RBAC
+### L.2b Restricted Hierarchical RBAC
 
 * restricted to tree/inv. tree or similar
 
-## Constrained RBAC
+## L.3 Constrained RBAC
 
 * Separation of duties (SOD)
 * possible implementation as
@@ -49,32 +64,12 @@
       therefore allowing a structure to have active conflicts (with constraints unenforced)
     * If a structure with active conflicts is a valid state, conflict-review must be possible
 
-## Symmetric RBAC
+## L.4 Symmetric RBAC
 
 * `permission-role` review
   * list permission assigned to specific role (selectable between direct and indirect relations)
   * list roles assigned to specific permission  (selectable between direct and indirect relations)
 
-## TODO
+---
 
-* remove permission_nodes directly assigned to users (not part of NIST RBAC)
-* Flat permission nodes in RBAC example
-* correct external link
-
-## NOTE
-
-* assign implies a matching revoke method
-* convention shows the senior (more powerful) roles on top in diagram
-* lattice-based access control (LBAC) - possible when introducing new Permission type?
-  e.g. SuperPermission: requires `[BAN_USER, JOIN_INV, MSG_X]`
-* unclear, if `user-role` review in flat RBAC and Hierarchical RBAC are 2 functions each
-  or 2 for flat and 4 for hierarchical (probably 4)
-* The Wildcard Feature is closely related to the customizable permissions in section 7.4
-* SOD defined on permission base in NIST or only role based?
-* can we maybe rm the session argument from the functions in SQLAlchemyAuthority and just
-  run self._session_maker() to get a session? Or (if possible somehow) have a session in
-  SQLAlchemyAuthority exist within context manager
-* What NIST calls Users we call subjects
-* wikipedia describes the `operation-permission` relation as a many-to-many relation
-
-> The standard allows for deleting an edge, but states that implied edges will be retained; an operation that deletes an edge and all implied edges can also be defined
+[^1]: The NIST model for role-based access control: towards a unified standard - <https://doi.org/10.1145/344287.344301>

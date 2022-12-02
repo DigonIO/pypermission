@@ -1,9 +1,9 @@
 Standardization
----------------
+===============
 
 .. toctree::
-    :maxdepth: 2
+    :maxdepth: 0
     :caption: Table of Contents
 
-    standardization/rbac_ansi
-    standardization/rbac_nist
+    standardization/RBAC_NIST
+    standardization/RBAC_ANSI

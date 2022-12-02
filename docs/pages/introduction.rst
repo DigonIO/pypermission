@@ -127,4 +127,4 @@ with the  :py:meth:`~pypermission.serial.SerialAuthority.role_get_subjects` meth
 >>> auth.role_get_subjects(rid='user') == {'Bob', 'John'}
 True
 
-.. _NIST_RBAC: https://doi.org/10.1145/344287.344301
+.. _NIST_RBAC: The NIST model for role-based access control: towards a unified standard - https://doi.org/10.1145/344287.344301

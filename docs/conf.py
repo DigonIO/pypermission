@@ -21,15 +21,13 @@ sys.path.insert(0, os.path.abspath(".."))
 # -- Project information -----------------------------------------------------
 
 with open("../src/pypermission/__init__.py", "r") as file:
-    for line in file:
-        if "__version__" in line:
-            version = line.split('"')[1]
-        if "__author__" in line:
-            author = line.split('"')[1]
+    content = file.read()
+    co = compile(content, "header.py", "exec")
+    version = co.co_consts[co.co_names.index("__version__")]
+    author = co.co_consts[co.co_names.index("__author__")]
 
 project = "PyPermission"
 copyright = "2022, " + author
-author = author
 
 # The full version, including alpha/beta/rc tags
 release = version
@@ -49,7 +47,8 @@ extensions = [
     "sphinx.ext.imgmath",
     "sphinx.ext.viewcode",
     "numpydoc",
-    "m2r2",
+    "m2r2",  # would be nice to replace with myst_parser, but this fails for current README.md
+    # "myst_parser",
 ]
 
 with open("_assets/prolog.rst", encoding="utf-8") as f:
@@ -66,7 +65,7 @@ autosummary_generate = True
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
 # This pattern also affects html_static_path and html_extra_path.
-exclude_patterns = ["_build", "Thumbs.db", ".DS_Store", "_assets", "**.md"]
+exclude_patterns = ["_build", "Thumbs.db", ".DS_Store", "_assets"]
 pygments_style = "default"
 
 # -- Options for HTML output -------------------------------------------------

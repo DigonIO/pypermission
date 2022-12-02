@@ -1,14 +1,19 @@
 # RBAC (ANSI)
 
-* INCITS 359-2004
-* INCITS 359-2012 (R2017)
-  <https://standards.incits.org/apps/group_public/project/details.php?project_id=1906>
-  <https://www.document-center.com/standards/show/ANSI/INCITS-359-PDF/history/2012%20R17%20EDITION>
-* B specification of the INCITS 359-2012 standard: <https://info.usherbrooke.ca/mfrappier/RBAC-in-B/>
+The RBAC standard published by ANSI/INCITs[^1][^2] expands on the NIST RBAC model.
+Note that Other authors have identified numerous problems with the ANSI standard[^3][^4][^5],
+some of the noted problems have been mitigated below according to the problem descriptions.
+The PyPermission library does not conform to the ANSI standard, as conformance to the
+standard requires at least the core feature set (6.1).
 
-Note, that other authors have identified numerous problems with the ANSI standard
-(see DOI: 10.1007/978-3-662-43652-3_22), some of the noted problems have been mitigated
-below according to the problem descriptions
+Below follows an overview of the RBAC INCITS 359-2012 standard as well as the differences in naming
+and behaviour compared to the PyPermission library.
+
+.. warning::
+
+   * `role_get_permissions` and `subject_get_permissions` don't return a set of permissions, like the `RolePermissions` and `UserPermissions` functions, but a NodeMap (`dict[PermissionNode, set[str]]`)
+   * `RoleOperationsOnObject` and `UserOperationsOnObject` are left open in the standard concerning their behaviour (direct relation/inherited relation/active role).
+   * `authorized_users` depends on the role-hierarchy, whereas `role_get_subjects` does not
 
 Definitions Core RBAC:
 
@@ -33,21 +38,6 @@ Definitions Hierarchical RBAC:
 * `RH` (ROLES X ROLES) many-to-many relation
 * `authorized_users(r: ROLES) -> 2^USERS`
 * `authorized_permissions(r: ROLES) -> 2^PRMS`
-
-Conformance to the standard requires at least the core feature set (6.1)
-
-## NOTE
-
-* `role_get_permissions` and `subject_get_permissions` don't return a set of permissions, like the `RolePermissions` and
-  `UserPermissions` functions, but a NodeMap (`dict[PermissionNode, set[str]]`)
-* `RoleOperationsOnObject` and `UserOperationsOnObject` are left open in the standard concerning their behaviour (direct relation/inherited relation/active role).
-* `authorized_users` depends on the role-hierarchy, whereas `role_get_subjects` does not
-* ANSI datasets for the definitions and assignments, but no query functions (as we do), would be nice to include our query functions in the RBAC guide
-
-## TODO
-
-* add flag to `subject_get_permissions` and `role_get_permissions` to switch
-  between directly granted and inherited permissions (default to inherited)
 
 ## 6.1 Core RBAC
 
@@ -97,10 +87,10 @@ NOTE:
 | --------------------------- | ---------------------------- |
 | RolePermissions             | role_get_permissions (x2)    |
 | UserPermissions             | subject_get_permissions (x2) |
-| SessionRoles                |                              |
-| SessionPermissions          |                              |
-| RoleOperationsOnObject (x1) |                              |
-| UserOperationsOnObject (x2) |                              |
+| SessionRoles                | N/A                          |
+| SessionPermissions          | N/A                          |
+| RoleOperationsOnObject (x1) | N/A                          |
+| UserOperationsOnObject (x2) | N/A                          |
 
 * `(xN)` identifies the number `N` of possible implementations the standard allows
 
@@ -132,7 +122,7 @@ AddInheritance(r_asc, r_desc) asc_rid, desc_rid
 | ------------------------- | ----------------- |
 | AuthorizedUsers           | N/A               |
 | AuthorizedRoles           | N/A               |
-| ^ these check hierarchy ^ |                   |
+| ^ these check hierarchy ^ | \                 |
 
 `AuthorizedPermissions` is not defined here, but implied in section 5.2 (should probably be skipped in guide, as it is confusing with the behaviour of `CheckAccess`, which does not check with respect to hierarchy):
 
@@ -245,3 +235,11 @@ Same as in 6.2.1 and 6.4.1, except for redefinitions of `CreateSession` and `Add
 ### 6.4.3 DSD Relations with Limited Role Hierarchies
 
 Same as 6.2.2 (Limited Role Hierarchies), 6.4.1.1 (Administrative Commands for DSD Relations), 6.4.2 (DSD Relations with General Role Hierarchies), 6.2.1.4 (Advanced Review Functions for General Role Hierarchies)
+
+---
+
+[^1]: INCITS 359-2004: Information technology - Role Based Access Control - <https://profsandhu.com/journals/tissec/ANSI+INCITS+359-2004.pdf>
+[^2]: INCITS 359-2012[R2017]: Information technology - Role Based Access Control - <https://standards.incits.org/apps/group_public/project/details.php?project_id=1906>
+[^3]: A formal validation of the RBAC ANSI 2012 standard using B - <https://doi.org/10.1016/j.scico.2016.04.011>
+[^4]: B specification of the INCITS 359-2012 standard - <https://info.usherbrooke.ca/mfrappier/RBAC-in-B/>
+[^5]: Validating the RBAC ANSI 2012 Standard Using B - <https://doi.org/10.1007/978-3-662-43652-3_22>

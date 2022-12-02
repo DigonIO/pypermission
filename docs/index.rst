@@ -13,3 +13,4 @@
     pages/examples
     pages/standardization
     pages/api_reference
+    pages/addendum

@@ -3,11 +3,10 @@ from enum import Enum
 from setuptools import setup
 
 with open("src/pypermission/__init__.py", "r") as file:
-    for line in file:
-        if "__version__" in line:
-            version = line.split('"')[1]
-        if "__author__" in line:
-            author = line.split('"')[1]
+    content = file.read()
+    co = compile(content, "header.py", "exec")
+    version = co.co_consts[co.co_names.index("__version__")]
+    author = co.co_consts[co.co_names.index("__author__")]
 
 with open("README.md", encoding="utf-8") as f:
     LONG_DESCRIPTION = f.read()

@@ -1,6 +1,6 @@
-<h1 align="center">
-  <img alt="PyPermission" src="./docs/_assets/logo_name.svg" width="60%">
-</h1>
+<h2 align="center">
+  <img alt="PyPermission" src="https://gitlab.com/DigonIO/pypermission/-/raw/master/docs/_assets/logo_name.svg" width="60%">
+</h2>
 
 <p>
     A role-based access control (RBAC) permission library for python.
