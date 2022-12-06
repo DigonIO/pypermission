@@ -17,7 +17,7 @@ pylint_3_10_7:
   image: "python:3.10.7-alpine3.16"
   script:
     - pip install .[lint]
-    - pylint src
+    - python -m pylint src
   allow_failure: true
 
 mypy_3_10_7:
@@ -25,7 +25,7 @@ mypy_3_10_7:
   image: "python:3.10.7-alpine3.16"
   script:
     - pip install .[lint]
-    - mypy src
+    - python -m mypy src
   allow_failure: true
 
 pydocstyle_3_10_7:
@@ -33,7 +33,7 @@ pydocstyle_3_10_7:
   image: "python:3.10.7-alpine3.16"
   script:
     - pip install .[lint]
-    - pydocstyle src
+    - python -m pydocstyle src
   allow_failure: true
 
 bandit_3_10_7:
@@ -41,7 +41,7 @@ bandit_3_10_7:
   image: "python:3.10.7-alpine3.16"
   script:
     - pip install .[lint]
-    - bandit -r src
+    - python -m bandit -r src
   allow_failure: false
 
 #### documentation ####
@@ -50,7 +50,7 @@ doc_3_10_7:
   image: "python:3.10.7-alpine3.16"
   script:
     - pip install .[doc]
-    - sphinx-build -b html docs/ docs/_build/html
+    - python -m sphinx -b html docs/ docs/_build/html
 
 #### testing ####
 pytest_3_10_7:
@@ -60,7 +60,7 @@ pytest_3_10_7:
   script:
     - pip install -e .[test]
     - python ci/init_test_db.py
-    - pytest --cov=src/ tests/
+    - python -m pytest --cov=src/ tests/
   services:
     - name: mariadb:10.10.1-rc-jammy
 
@@ -71,7 +71,7 @@ pydoctest_3_10_7:
   script:
     - pip install -e .[test]
     - python ci/init_test_db.py
-    - pytest docs/
+    - python -m pytest docs/
   services:
     - name: mariadb:10.10.1-rc-jammy
 
@@ -82,7 +82,7 @@ pypi:
   script:
     - pip install .
     - pip install twine
-    - python setup.py sdist bdist_wheel
-    - twine upload dist/*
+    - python -m python setup.py sdist bdist_wheel
+    - python -m twine upload dist/*
   rules:
     - if: '$CI_COMMIT_TAG =~ /^\d+.\d+.\d+/'

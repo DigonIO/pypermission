@@ -48,7 +48,7 @@ Install the project with the development requirements and install
 
 ```bash
 pip install -e .[dev]
-pre-commit install
+python -m pre_commit install
 ```
 
 ## Running tests
@@ -60,14 +60,14 @@ tests require access to a running `MariaDB` database. Follow the
 [coverage](https://pypi.org/project/coverage/) a report for the test coverage can be generated:
 
 ```bash
-pytest --cov=src/ tests/
-coverage html
+python -m pytest --cov=src/ tests/
+python -m coverage html
 ```
 
 To test the examples in the documentation run:
 
 ```bash
-pytest docs/
+python -m pytest docs/
 ```
 
 ## Building the documentation
@@ -75,7 +75,7 @@ pytest docs/
 To build the documentation locally, run:
 
 ```bash
-sphinx-build -b html docs/ docs/_build/html
+python -m sphinx -b html docs/ docs/_build/html
 ```
 
 We are using Sphinx with [numpydoc](https://numpydoc.readthedocs.io/en/latest/format.html)

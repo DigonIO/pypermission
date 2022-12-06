@@ -5,7 +5,7 @@ API Reference
 
 .. autosummary::
     :toctree: _autosummary
-    :template: custom-module-template.rst
+    :template: custom-reduced-module-template.rst
     :recursive:
 
     core

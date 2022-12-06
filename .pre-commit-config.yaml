@@ -8,7 +8,7 @@ repos:
         language: python
         language_version: python3
         types_or: [cython, pyi, python]
-        args: ["--filter-files"]
+        args: [--filter-files]
       - id: black
         name: black
         description: "Black: The uncompromising Python code formatter"
@@ -27,22 +27,22 @@ repos:
         files: '\.(rst|md|markdown|py|tex)$'
       - id: pytest-check
         name: pytest-check
-        entry: pytest
+        entry: python
         language: system
         pass_filenames: false
         always_run: true
-        args: [tests/]
+        args: [-m, pytest, tests/]
       - id: pytest-docs
         name: pytest-docs
-        entry: pytest
+        entry: python
         language: system
         pass_filenames: false
         always_run: true
-        args: [docs/]
+        args: [-m, pytest, docs/]
       - id: sphinx
         name: sphinx
-        entry: sphinx-build
+        entry: python
         language: system
         pass_filenames: false
         always_run: true
-        args: [-b, html, docs/, docs/_build/html]
+        args: [-m, sphinx, -b, html, docs/, docs/_build/html]
