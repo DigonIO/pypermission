@@ -46,6 +46,7 @@ extensions = [
     "sphinx.ext.coverage",
     "sphinx.ext.imgmath",
     "sphinx.ext.viewcode",
+    "sphinxcontrib.mermaid",
     "numpydoc",
     "m2r2",  # would be nice to replace with myst_parser, but this fails for current README.md
     # "myst_parser",
@@ -100,3 +101,6 @@ latex_elements = {
         r"\usepackage[columns=1]{idxlayout}\makeindex",
     ],
 }
+
+mermaid_output_format = "svg"
+mermaid_cmd = "./node_modules/.bin/mmdc"

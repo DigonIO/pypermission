@@ -17,6 +17,7 @@ class Dependecy(str, Enum):
     SQLALCHEMY = "sqlalchemy==1.4.42"
     NUMPYDOC = "numpydoc==1.5.0"
     SPHINX = "Sphinx==5.2.3"
+    SPHINX_MERMAID = "sphinxcontrib-mermaid==0.7.1"
     M2R2 = "m2r2==0.3.3"
     DOCUTILS = "docutils==0.19"
     FURO = "furo==2022.9.29"
@@ -38,6 +39,8 @@ class Dependecy(str, Enum):
     SCHEDULER = "scheduler==0.8.0"
     BLACK = "black==22.10.0"
     BLACKEN_DOCS = "blacken-docs==1.12.1"
+    ISORT = "isort==5.10.1"
+    SETUPTOOLS = "setuptools==65.6.3"  # weird bug with m2r2 otherwise
 
 
 Dep = Dependecy
@@ -57,7 +60,16 @@ REQ_LINT = REQ_ALL | {
     Dep.MYPY_EXTENSIONS,
     Dep.SQLALCHEMY2_STUBS,
 }
-REQ_DOC = REQ_ALL | {Dep.SPHINX, Dep.M2R2, Dep.DOCUTILS, Dep.FURO, Dep.NUMPYDOC, Dep.TYPING_EXTENSIONS}
+REQ_DOC = REQ_ALL | {
+    Dep.SPHINX,
+    Dep.M2R2,
+    Dep.DOCUTILS,
+    Dep.FURO,
+    Dep.NUMPYDOC,
+    Dep.TYPING_EXTENSIONS,
+    Dep.SPHINX_MERMAID,
+    Dep.SETUPTOOLS,
+}
 REQ_TEST = REQ_LINT | {
     Dep.PYTEST,
     Dep.PYTEST_COV,
@@ -67,7 +79,7 @@ REQ_TEST = REQ_LINT | {
     Dep.SCHEDULER,
     Dep.MARIADB,
 }
-REQ_DEV = REQ_DOC | REQ_TEST | {Dep.PRE_COMMIT, Dep.BLACK, Dep.BLACKEN_DOCS}
+REQ_DEV = REQ_DOC | REQ_TEST | {Dep.PRE_COMMIT, Dep.BLACK, Dep.BLACKEN_DOCS, Dep.ISORT}
 
 req_to_str_list = lambda req: [entry.value for entry in req]
 

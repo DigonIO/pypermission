@@ -125,9 +125,7 @@ True
 
 ## Documentation
 
-View the API documentation online:
-
-<https://pypermission.readthedocs.io/en/latest/readme.html>
+View the API documentation [online](https://pypermission.readthedocs.io/en/latest/readme.html).
 
 ## License
 

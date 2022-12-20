@@ -72,7 +72,7 @@ The defined relations can directly be assigned to the authority from the file:
 
 .. invisible-code-block: python
 
-    auth.load_file(path="docs/pages/chat_rooms.yaml")
+    auth.load_file(path="docs/pages/examples/chat_rooms.yaml")
 
 .. skip: next
 
