@@ -46,8 +46,15 @@ The **Role Symmetry** adds support for:
 Starting RBAC with PyPermission
 ===============================
 
-Lets define a simple online chat system. The features managed by the permission system
-first have to be defined within a ``PermissionNode`` structure:
+The basic functionality of an RBAC system can be demonstrated for a hypothetical chat
+program:
+
+Defining Permissions
+--------------------
+
+First we have to define a couple of meaningful permissions for the operations we want to
+separate access for by creating a ``PermissionNode`` structure. These have to be registered to
+a :py:class:`~pypermission.serial.SerialAuthority` class:
 
 .. code-block:: python
 
@@ -56,25 +63,24 @@ first have to be defined within a ``PermissionNode`` structure:
 
 
     class ChatNodes(PermissionNode):
-        _ = "chat.*"
-        INV = "chat.invite"
-        BAN_ = "chat.ban.*"
-        BAN_USER = "chat.ban.user"
-        BAN_ANY = "chat.ban.any"
-        JOIN_ = "chat.join.*"
-        JOIN_INV = "chat.join.invited"
-        JOIN_ANY = "chat.join.any"
-        LEAVE = "chat.leave"
-        MSG = "chat.message"
+        INV = "invite"
+        BAN = "ban"
+        JOIN = "join"
+        LEAVE = "leave"
+        MSG = "message"
 
 
     CNs = ChatNodes
 
     auth = SerialAuthority(nodes=CNs)
 
+Managing Roles
+--------------
+
 Assume we want to manage access to the chat system for the three basic roles `user`,
 `moderator` and `admin`. To create the given roles, the
-:py:meth:`~pypermission.serial.SerialAuthority.add_role` method can be used:
+:py:meth:`~pypermission.serial.SerialAuthority.add_role` method can be used (likewise
+:py:meth:`~pypermission.serial.SerialAuthority.del_role` removes a given role):
 
 .. code-block:: python
 
@@ -88,7 +94,17 @@ Verify that the authority contains all the expected roles with the
 >>> auth.get_roles() == {'admin', 'user', 'moderator'}
 True
 
-Next we want to create the subjects `Alice`, `Bob` and `John`.
+Granting Permissions
+--------------------
+
+
+
+Managing Subjects
+-----------------
+
+Next we want to create the subjects `Alice`, `Bob` and `John`. To create subjects,
+use the :py:meth:`~pypermission.serial.SerialAuthority.add_subject` method (similarly
+use :py:meth:`~pypermission.serial.SerialAuthority.del_subject` to remove a subject):
 
 .. code-block:: python
 
@@ -102,7 +118,12 @@ Verify that the authority contains all the expected subjects with the
 >>> auth.get_subjects() == {'Alice', 'Bob', 'John'}
 True
 
-Assign the subjects as follows:
+Subject-Role Assignment
+-----------------------
+
+Users can be assigned to multiple roles and likewise the same role can be given to multiple users.
+
+In this example, we want to achieve the following assignment:
 
 * `Alice` as a member of the `admin` role
 * `Bob` as a member of the `moderator` and `user` roles

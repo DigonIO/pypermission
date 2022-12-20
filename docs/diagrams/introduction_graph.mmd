@@ -1,0 +1,25 @@
+flowchart LR
+    subgraph permissions
+        direction LR
+        invite
+        ban
+        join
+        leave
+        message
+    end
+    subgraph roles
+        direction LR
+        user
+        moderator
+        admin
+    end
+    subgraph users
+        direction LR
+        Alice
+        Bob
+        John
+    end
+    Alice --- admin
+    Bob --- moderator
+    Bob --- user
+    John --- user

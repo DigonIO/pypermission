@@ -103,4 +103,8 @@ latex_elements = {
 }
 
 mermaid_output_format = "svg"
+# as we are using static svg files, there is no need to configure
+# mermaid_version for the unpkg CDN or mermaid initialize code:
+mermaid_version = ""
+mermaid_init_js = ""
 mermaid_cmd = "./node_modules/.bin/mmdc"
