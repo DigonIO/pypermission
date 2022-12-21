@@ -1,7 +1,109 @@
-.green {
-    color: green;
+/* Colours */
+
+.black {
+    color: black;
+}
+
+.gray {
+    color: gray;
+}
+
+.silver {
+    color: silver;
+}
+
+.white {
+    color: white;
+}
+
+.maroon {
+    color: maroon;
 }
 
 .red {
     color: red;
+}
+
+.fuchsia {
+    color: fuchsia;
+}
+
+.pink {
+    color: pink;
+}
+
+.orange {
+    color: orange;
+}
+
+.yellow {
+    color: yellow;
+}
+
+.lime {
+    color: lime;
+}
+
+.green {
+    color: green;
+}
+
+.olive {
+    color: olive;
+}
+
+.teal {
+    color: teal;
+}
+
+.cyan {
+    color: cyan;
+}
+
+.aqua {
+    color: aqua;
+}
+
+.blue {
+    color: blue;
+}
+
+.navy {
+    color: navy;
+}
+
+.purple {
+    color: purple;
+}
+
+/* Text Sizes */
+
+.huge {
+    font-size: huge;
+}
+
+.big {
+    font-size: big;
+}
+
+.small {
+    font-size: small;
+}
+
+.tiny {
+    font-size: tiny;
+}
+
+/* Incremental Display */
+
+.incremental {
+    font-style: italic;
+    /* color: olive; */
+}
+
+
+/* TODO switch to red when light mode */
+
+.pre:not(:where(a *, dl *)) {
+    color: #ed9d13;
 }

@@ -2,7 +2,7 @@
 Introduction to RBAC
 ====================
 
-The original `NIST Model for RBAC <NIST_RBAC_>`_ isolates the following functional
+The original *NIST Model for RBAC*\ [#NIST_RBAC]_ isolates the following functional
 capabilities. Features implemented in this library are highlighted below:
 
 +-------------+----------------------------+------------------+---------------+
@@ -17,10 +17,10 @@ capabilities. Features implemented in this library are highlighted below:
 
 Within a **Role Structure** the following features are supported:
 
-* assign user to role - *user-role* (many-to-many relationship)
-* assign permission to role - *permission-role* (many-to-many relationship)
+* assign user to role - `user-role` (many-to-many relationship)
+* assign permission to role - `permission-role` (many-to-many relationship)
 * users can simultaneously exercise permissions of multiple roles
-* *user-role* review
+* `user-role` review
 
   * list roles assigned to specific user
   * list users assigned to specific role
@@ -28,16 +28,16 @@ Within a **Role Structure** the following features are supported:
 A **Hierarchical Role Structure** additionally supports:
 
 * senior roles acquire permissions of their juniors
-* assign seniority relation between roles - *role-role*
-* **General Hierarchy** - *role-role* (many-to-many relationship)
-* *user-role* review extended by
+* assign seniority relation between roles - `role-role`
+* **General Hierarchy** - `role-role` (many-to-many relationship)
+* `user-role` review extended by
 
   * list all roles a specific user can take
   * list all users that can take a specific role
 
 The **Role Symmetry** adds support for:
 
-* *permission-role* review
+* `permission-role` review
 
   * list permission assigned to specific role (selectable between direct and indirect relations)
   * list roles assigned to specific permission (selectable between direct and indirect relations)
@@ -47,14 +47,19 @@ Starting RBAC with PyPermission
 ===============================
 
 The basic functionality of an RBAC system can be demonstrated for a hypothetical chat
-program:
+program. The library provides different backends for persistency - for simplicity reasons
+the following example uses the :py:mod:`pypermission.serial` module which stores and loads
+the state to either a single ``json`` or ``yaml`` file. Alternatively
+:py:mod:`pypermission.sqlalchemy` module can be used to write and read the state to a database
+supported by ``sqlalchemy``\ [#sqlalchemy]_. Most of the functions presented below are available in both backends,
+the :py:mod:`pypermission.sqlalchemy` however module requires a database session.
 
 Defining Permissions
 --------------------
 
 First we have to define a couple of meaningful permissions for the operations we want to
-separate access for by creating a ``PermissionNode`` structure. These have to be registered to
-a :py:class:`~pypermission.serial.SerialAuthority` class:
+separate access for by creating a :py:class:`~pypermission.core.PermissionNode` structure.
+These have to be registered to a :py:class:`~pypermission.serial.core.SerialAuthority` class:
 
 .. code-block:: python
 
@@ -63,11 +68,12 @@ a :py:class:`~pypermission.serial.SerialAuthority` class:
 
 
     class ChatNodes(PermissionNode):
-        INV = "invite"
-        BAN = "ban"
         JOIN = "join"
         LEAVE = "leave"
         MSG = "message"
+        INV = "invite"
+        BAN_USER = "ban_user"
+        CHANGE_ROLE = "change_role"
 
 
     CNs = ChatNodes
@@ -77,10 +83,10 @@ a :py:class:`~pypermission.serial.SerialAuthority` class:
 Managing Roles
 --------------
 
-Assume we want to manage access to the chat system for the three basic roles `user`,
+Assume we want to manage access to the chat system for the three basic roles *user*,
 `moderator` and `admin`. To create the given roles, the
-:py:meth:`~pypermission.serial.SerialAuthority.add_role` method can be used (likewise
-:py:meth:`~pypermission.serial.SerialAuthority.del_role` removes a given role):
+:py:meth:`~pypermission.serial.core.SerialAuthority.add_role` method can be used (likewise
+:py:meth:`~pypermission.serial.core.SerialAuthority.del_role` removes a given role):
 
 .. code-block:: python
 
@@ -89,7 +95,7 @@ Assume we want to manage access to the chat system for the three basic roles `us
     auth.add_role(rid="admin")
 
 Verify that the authority contains all the expected roles with the
-:py:meth:`~pypermission.serial.SerialAuthority.get_roles` method:
+:py:meth:`~pypermission.serial.core.SerialAuthority.get_roles` method:
 
 >>> auth.get_roles() == {'admin', 'user', 'moderator'}
 True
@@ -97,14 +103,65 @@ True
 Granting Permissions
 --------------------
 
+We can grant a permission to multiple roles, while at the same time a single role can
+be granted multiple permissions. Here we are going to perform the following permission assignment:
 
+* The `user` role should be able to `join`, `leave` and `message` a chat room.
+* A `moderator` should be granted the `invite` and `ban_user` permission.
+* All permissions should be granted to the `admin` role. Note the call to the
+  :py:meth:`~pypermission.serial.core.SerialAuthority.root_node` method granting
+  all permissions within the authority using a single statement.
+
+To grant a permission to a role, the
+:py:meth:`~pypermission.serial.core.SerialAuthority.role_grant_permission` method is provided
+(a permission can be revoked with the
+:py:meth:`~pypermission.serial.core.SerialAuthority.role_revoke_permission` method).
+
+.. note::
+   There are multiple ways to achieve grant users the same permissions as shown here.
+   Concerning *separation of duties*\ [#WIKI_SOD]_\ , the setup shown here is certainly not ideal.
+
+.. code-block:: python
+
+    auth.role_grant_permission(rid="user", node=CNs.JOIN)
+    auth.role_grant_permission(rid="user", node=CNs.LEAVE)
+    auth.role_grant_permission(rid="user", node=CNs.MSG)
+
+    auth.role_grant_permission(rid="moderator", node=CNs.INV)
+    auth.role_grant_permission(rid="moderator", node=CNs.BAN_USER)
+
+    auth.role_grant_permission(rid="admin", node=auth.root_node())
+
+To verify that the permissions have been granted as desired to the given roles,
+we use the :py:meth:`~pypermission.serial.core.SerialAuthority.role_get_permissions` method:
+
+.. warning::
+   Checking the output of :py:meth:`~pypermission.serial.core.SerialAuthority.role_get_permissions`
+   is not sufficient to identify all permissions of a given role, as permissions can be
+   granted through either the role hierarchy (TODO Guide) or the permission hierarchy (TODO Guide).
+   This method only returns the :py:class:`~pypermission.core.PermissionNode` instances
+   that are directly assigned to a role.
+
+>>> {CNs.JOIN, CNs.LEAVE, CNs.MSG} == set(auth.role_get_permissions(rid='user'))
+True
+
+>>> {CNs.INV, CNs.BAN_USER} == set(auth.role_get_permissions(rid='moderator'))
+True
+
+Note, how the :py:meth:`~pypermission.serial.core.SerialAuthority.role_get_permissions` method
+only returns a single :py:class:`~pypermission.core.PermissionNode` for the `admin` role.
+In section :ref:`introduction.access_checking` we will show that the `admin` role has indeed access to all
+:py:class:`~pypermission.core.PermissionNode`\ s of the ``auth`` object.
+
+>>> set(auth.role_get_permissions(rid='admin'))
+{<RootPermissionNode.ROOT_: '*'>}
 
 Managing Subjects
 -----------------
 
 Next we want to create the subjects `Alice`, `Bob` and `John`. To create subjects,
-use the :py:meth:`~pypermission.serial.SerialAuthority.add_subject` method (similarly
-use :py:meth:`~pypermission.serial.SerialAuthority.del_subject` to remove a subject):
+use the :py:meth:`~pypermission.serial.core.SerialAuthority.add_subject` method (similarly
+use :py:meth:`~pypermission.serial.core.SerialAuthority.del_subject` to remove a subject):
 
 .. code-block:: python
 
@@ -113,7 +170,7 @@ use :py:meth:`~pypermission.serial.SerialAuthority.del_subject` to remove a subj
     auth.add_subject(sid="John")
 
 Verify that the authority contains all the expected subjects with the
-:py:meth:`~pypermission.serial.SerialAuthority.get_subjects` method:
+:py:meth:`~pypermission.serial.core.SerialAuthority.get_subjects` method:
 
 >>> auth.get_subjects() == {'Alice', 'Bob', 'John'}
 True
@@ -137,15 +194,26 @@ In this example, we want to achieve the following assignment:
     auth.role_assign_subject(rid="user", sid="John")
 
 Now exemplarily review that the user `Bob` got both - the `user` and the `moderator` role assigned
-with the :py:meth:`~pypermission.serial.SerialAuthority.subject_get_roles` method:
+with the :py:meth:`~pypermission.serial.core.SerialAuthority.subject_get_roles` method:
 
 >>> auth.subject_get_roles(sid='Bob') == {'moderator', 'user'}
 True
 
 Likewise verify that the `user` role has been assigned to both - `Bob` and `John`
-with the  :py:meth:`~pypermission.serial.SerialAuthority.role_get_subjects` method:
+with the  :py:meth:`~pypermission.serial.core.SerialAuthority.role_get_subjects` method:
 
 >>> auth.role_get_subjects(rid='user') == {'Bob', 'John'}
 True
 
-.. _NIST_RBAC: The NIST model for role-based access control: towards a unified standard - https://doi.org/10.1145/344287.344301
+.. _introduction.access_checking:
+
+Access Checking
+---------------
+
+.. mermaid:: ../diagrams/introduction_graph.mmd
+
+.. rubric:: Footnotes
+
+.. [#NIST_RBAC] The NIST model for role-based access control: towards a unified standard - https://doi.org/10.1145/344287.344301
+.. [#WIKI_SOD] Wikipedia - Separation of duties (SOD) - https://en.wikipedia.org/wiki/Separation_of_duties
+.. [#sqlalchemy] SQLAlchemy - The Python SQL Toolkit and Object Relational Mapper - https://www.sqlalchemy.org/

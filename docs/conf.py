@@ -75,9 +75,9 @@ pygments_style = "default"
 # a list of builtin themes.
 #
 html_theme = "furo"
-html_theme_path = [
-    "_themes",
-]
+# html_theme_path = [
+#     "_themes",
+# ]
 html_logo = "./_assets/logo.svg"
 html_favicon = html_logo
 
@@ -108,3 +108,19 @@ mermaid_output_format = "svg"
 mermaid_version = ""
 mermaid_init_js = ""
 mermaid_cmd = "./node_modules/.bin/mmdc"
+mermaid_params = [
+    "--theme",
+    "dark",
+    "--backgroundColor",
+    "transparent",
+    # using the config file given svg issues:
+    # https://github.com/mermaid-js/mermaid/issues/2102
+    # https://github.com/mermaid-js/mermaid/issues/2688
+    "--configFile",
+    "docs/_static/mermaid_config.json",
+]
+
+# TODO: there is a problem with the `mermaid_sequence_config` option in the mermaid extension,
+# report upstream, until fix is available - we just add the `--configFile` parameter directly
+# to `mermaid_params` above
+# mermaid_sequence_config = "docs/_static/mermaid_config.json"

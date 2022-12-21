@@ -10,5 +10,3 @@ Examples
     examples/role_api
     examples/persistency
     examples/rbac_rest_api_json
-
-.. mermaid:: ../diagrams/gantt.mmd
