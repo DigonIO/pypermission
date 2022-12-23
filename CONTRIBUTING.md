@@ -72,15 +72,24 @@ python -m pytest docs/
 
 ## Building the documentation
 
+We are using Sphinx with [numpydoc](https://numpydoc.readthedocs.io/en/latest/format.html)
+formatting. Additionally the documentation is tested with `pytest` together with the
+`sybil` extension to parse the doctests.
+
+Note, that some figures included in the documentation
+require the mermaid cli (`mmdc`) which additionally requires the `chrome` or `chromium`
+browser to be installed in order to generate the static `svg` files. With `npm` installed, make
+`mmdc` available locally in the `node_modules` as follows:
+
+```bash
+npm install
+```
+
 To build the documentation locally, run:
 
 ```bash
 python -m sphinx -b html docs/ docs/_build/html
 ```
-
-We are using Sphinx with [numpydoc](https://numpydoc.readthedocs.io/en/latest/format.html)
-formatting. Additionally the documentation is tested with `pytest` together with the
-`sybil` extension to parse the doctests.
 
 ## Pull requests
 
