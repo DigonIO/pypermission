@@ -514,7 +514,7 @@ class SerialAuthority(_Authority):
         role = self._get_role(rid=rid)
         return role.parent_ids.copy()
 
-    def subject_inherits_permission(
+    def subject_obtains_permission(
         self, *, sid: EntityID, node: PermissionNode, payload: str | None = None
     ) -> bool:
         """Check if a subject has the wanted permission within the hierarchy."""
@@ -528,14 +528,14 @@ class SerialAuthority(_Authority):
 
         for rid in subject.rids:
             role = self._roles[rid]
-            if self._recursive_role_inherits_permission(
+            if self._recursive_role_obtains_permission(
                 role=role, permission=permission, payload=payload
             ):
                 return True
 
         return False
 
-    def role_inherits_permission(
+    def role_obtains_permission(
         self, *, rid: EntityID, node: PermissionNode, payload: str | None = None
     ) -> bool:
         """Check if a role has the wanted permission within the hierarchy."""
@@ -544,7 +544,7 @@ class SerialAuthority(_Authority):
         validate_payload_status(permission=permission, payload=payload)
         role = self._get_role(rid=rid)
 
-        return self._recursive_role_inherits_permission(
+        return self._recursive_role_obtains_permission(
             role=role, permission=permission, payload=payload
         )
 
@@ -869,7 +869,7 @@ class SerialAuthority(_Authority):
             parent_parent = self._roles[parent_parent_id]
             self._detect_role_cycle(role=parent_parent, child_rid=child_rid)
 
-    def _recursive_role_inherits_permission(
+    def _recursive_role_obtains_permission(
         self, role: Role, permission: Permission, payload: str | None
     ) -> bool:
         """Recursively check whether the role or one of its parents has the perm searched for."""
@@ -878,7 +878,7 @@ class SerialAuthority(_Authority):
 
         for parent_id in role.parent_ids:
             parent = self._roles[parent_id]
-            if self._recursive_role_inherits_permission(
+            if self._recursive_role_obtains_permission(
                 role=parent, permission=permission, payload=payload
             ):
                 return True

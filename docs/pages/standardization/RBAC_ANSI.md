@@ -67,7 +67,7 @@ We do not have a 1:1 analog of `CheckAccess`, as `CheckAccess` does not look at 
 
 | RBAC (ANSI)                  | ours                                                   |
 | ---------------------------- | ------------------------------------------------------ |
-| CheckAccess                  | role_inherits_permission & subject_inherits_permission |
+| CheckAccess                  | role_obtains_permission & subject_obtains_permission   |
 | ^ does not check hierarchy ^ | ^ checks hierarchy                                   ^ |
 
 NOTE:
@@ -128,7 +128,7 @@ AddInheritance(r_asc, r_desc) asc_rid, desc_rid
 
 | RBAC (ANSI)               | ours                      |
 | ------------------------- | ------------------------- |
-| AuthorizedPermissions     | role_inherits_permission  |
+| AuthorizedPermissions     | role_obtains_permission  |
 | ^ these check hierarchy ^ | ^ these check hierarchy ^ |
 
 #### 6.2.1.4 Advanced Review Functions for General Role Hierarchies

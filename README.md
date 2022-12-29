@@ -110,16 +110,16 @@ auth.load_file(path="save_file.yaml")
 Now check if a subject has a desired permission.
 
 ```pycon
->>> auth.subject_inherits_permission(sid="Bob", node=Nodes.CHAT_GLOBAL)
+>>> auth.subject_obtains_permission(sid="Bob", node=Nodes.CHAT_GLOBAL)
 True
 
->>> auth.subject_inherits_permission(sid="Alice", node=Nodes.CHAT_MODERATOR)
+>>> auth.subject_obtains_permission(sid="Alice", node=Nodes.CHAT_MODERATOR)
 True
 
->>> auth.subject_inherits_permission(sid="Bob", node=Nodes.TICKET_OPEN)
+>>> auth.subject_obtains_permission(sid="Bob", node=Nodes.TICKET_OPEN)
 True
 
->>> auth.subject_inherits_permission(sid="Alice", node=Nodes.TICKET_CLOSE_ALL)
+>>> auth.subject_obtains_permission(sid="Alice", node=Nodes.TICKET_CLOSE_ALL)
 True
 ```
 

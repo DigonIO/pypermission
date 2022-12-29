@@ -122,18 +122,18 @@ Child roles inherit the permissions of the parent role.
 
 .. code-block:: pycon
 
-    >>> auth.role_inherits_permission(rid=GID_ANIMAL_BASED, node=BuildinPN.ADMIN)
+    >>> auth.role_obtains_permission(rid=GID_ANIMAL_BASED, node=BuildinPN.ADMIN)
     True
 
-    >>> auth.role_inherits_permission(rid=GID_PLANT_BASED, node=BuildinPN.ADMIN)
+    >>> auth.role_obtains_permission(rid=GID_PLANT_BASED, node=BuildinPN.ADMIN)
     True
 
 Subjects inherit the permissions of the roles their are member of.
 
 .. code-block:: pycon
 
-    >>> auth.subject_inherits_permission(sid=SID_EGG, node=BuildinPN.ADMIN)
+    >>> auth.subject_obtains_permission(sid=SID_EGG, node=BuildinPN.ADMIN)
     True
 
-    >>> auth.subject_inherits_permission(sid=SID_ORANGE, node=BuildinPN.ADMIN)
+    >>> auth.subject_obtains_permission(sid=SID_ORANGE, node=BuildinPN.ADMIN)
     True

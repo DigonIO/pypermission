@@ -82,9 +82,9 @@ The defined relations can directly be assigned to the authority from the file:
 
 We can now test, if the permissions from above are available as expected. User `John`
 should be able to join a room he was invited to. This can be tested via the
-:py:func:`~pypermission.serial.core.SerialAuthority.subject_inherits_permission`
+:py:func:`~pypermission.serial.core.SerialAuthority.subject_obtains_permission`
 
->>> auth.subject_inherits_permission(sid="John", node=CNs.JOIN_INV)
+>>> auth.subject_obtains_permission(sid="John", node=CNs.JOIN_INV)
 True
 
 As a basic `user`

@@ -81,10 +81,10 @@ Subject permission API
 
 .. code-block:: pycon
 
-    >>> auth.subject_inherits_permission(sid=EGG, node=BuildinPN.COMMAND_STATS)
+    >>> auth.subject_obtains_permission(sid=EGG, node=BuildinPN.COMMAND_STATS)
     True
 
-    >>> auth.subject_inherits_permission(sid=EGG, node=BuildinPN.COMMAND_RESPAWN)
+    >>> auth.subject_obtains_permission(sid=EGG, node=BuildinPN.COMMAND_RESPAWN)
     False
 
 .. code-block:: pycon
@@ -93,5 +93,5 @@ Subject permission API
 
 .. code-block:: pycon
 
-    >>> auth.subject_inherits_permission(sid=EGG, node=BuildinPN.COMMAND_STATS)
+    >>> auth.subject_obtains_permission(sid=EGG, node=BuildinPN.COMMAND_STATS)
     False
