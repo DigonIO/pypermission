@@ -108,6 +108,31 @@ Assume we want to manage access to the chat system for the three basic roles `us
     auth.add_role(rid="moderator")
     auth.add_role(rid="admin")
 
+Subject-Role Assignment
+-----------------------
+
+A subject can be assigned to multiple roles and likewise the same role can be given
+to multiple subjects.
+
+For management of the `subject-role` assignment, use the
+:py:meth:`~pypermission.serial.core.SerialAuthority.role_assign_subject` method
+to add a relation (use
+:py:meth:`~pypermission.serial.core.SerialAuthority.role_deassign_subject`
+to remove a relation).
+
+In this example, we want to achieve the following assignment:
+
+* `Alice` as a member of the `admin` role
+* `Bob` as a member of the `moderator` and `user` roles
+* `John` as a member of the `user` role only
+
+.. code-block:: python
+
+    auth.role_assign_subject(rid="admin", sid="Alice")
+    auth.role_assign_subject(rid="moderator", sid="Bob")
+    auth.role_assign_subject(rid="user", sid="Bob")
+    auth.role_assign_subject(rid="user", sid="John")
+
 Granting Permissions
 --------------------
 
@@ -140,33 +165,6 @@ To grant a permission to a role, the
 
     auth.role_grant_permission(rid="admin", node=auth.root_node())
 
-
-Subject-Role Assignment
------------------------
-
-A subject can be assigned to multiple roles and likewise the same role can be given
-to multiple subjects.
-
-For management of the `subject-role` assignment, use the
-:py:meth:`~pypermission.serial.core.SerialAuthority.role_assign_subject` method
-to add a relation (use
-:py:meth:`~pypermission.serial.core.SerialAuthority.role_deassign_subject`
-to remove a relation).
-
-In this example, we want to achieve the following assignment:
-
-* `Alice` as a member of the `admin` role
-* `Bob` as a member of the `moderator` and `user` roles
-* `John` as a member of the `user` role only
-
-.. code-block:: python
-
-    auth.role_assign_subject(rid="admin", sid="Alice")
-    auth.role_assign_subject(rid="moderator", sid="Bob")
-    auth.role_assign_subject(rid="user", sid="Bob")
-    auth.role_assign_subject(rid="user", sid="John")
-
-
 Review the RBAC configuration
 -----------------------------
 
@@ -193,6 +191,21 @@ Verify that the authority contains all the expected roles with the
 :py:meth:`~pypermission.serial.core.SerialAuthority.get_roles` method:
 
 >>> auth.get_roles() == {'admin', 'user', 'moderator'}
+True
+
+Subject-Role Review
+^^^^^^^^^^^^^^^^^^^
+
+To exemplarily review that the subject `Bob` got both - the `user` and the `moderator` role
+assigned with the :py:meth:`~pypermission.serial.core.SerialAuthority.subject_get_roles` method:
+
+>>> auth.subject_get_roles(sid='Bob') == {'moderator', 'user'}
+True
+
+Likewise verify that the `user` role has been assigned to both - `Bob` and `John`
+with the  :py:meth:`~pypermission.serial.core.SerialAuthority.role_get_subjects` method:
+
+>>> auth.role_get_subjects(rid='user') == {'Bob', 'John'}
 True
 
 Permission-Role Review
@@ -223,21 +236,6 @@ the `admin` role has indeed access to all
 
 >>> set(auth.role_get_permissions(rid='admin'))
 {<RootPermissionNode.ROOT_: '*'>}
-
-Subject-Role Review
-^^^^^^^^^^^^^^^^^^^
-
-To exemplarily review that the subject `Bob` got both - the `user` and the `moderator` role
-assigned with the :py:meth:`~pypermission.serial.core.SerialAuthority.subject_get_roles` method:
-
->>> auth.subject_get_roles(sid='Bob') == {'moderator', 'user'}
-True
-
-Likewise verify that the `user` role has been assigned to both - `Bob` and `John`
-with the  :py:meth:`~pypermission.serial.core.SerialAuthority.role_get_subjects` method:
-
->>> auth.role_get_subjects(rid='user') == {'Bob', 'John'}
-True
 
 .. _introduction.access_checking:
 
