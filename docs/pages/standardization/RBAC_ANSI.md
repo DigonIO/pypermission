@@ -65,10 +65,10 @@ Definitions Hierarchical RBAC:
 
 We do not have a 1:1 analog of `CheckAccess`, as `CheckAccess` does not look at the hierarchy.
 
-| RBAC (ANSI)                  | ours                             |
-| ---------------------------- | -------------------------------- |
-| CheckAccess                  | role/subject_inherits_permission |
-| ^ does not check hierarchy ^ | ^ checks hierarchy             ^ |
+| RBAC (ANSI)                  | ours                                                   |
+| ---------------------------- | ------------------------------------------------------ |
+| CheckAccess                  | role_inherits_permission & subject_inherits_permission |
+| ^ does not check hierarchy ^ | ^ checks hierarchy                                   ^ |
 
 NOTE:
 
