@@ -81,6 +81,19 @@ These have to be registered to a :py:class:`~pypermission.serial.core.SerialAuth
 
     auth = SerialAuthority(nodes=CNs)
 
+Managing Subjects
+-----------------
+
+Next we want to create the subjects `Alice`, `Bob` and `John`. To create subjects,
+use the :py:meth:`~pypermission.serial.core.SerialAuthority.add_subject` method (similarly
+use :py:meth:`~pypermission.serial.core.SerialAuthority.del_subject` to remove a subject):
+
+.. code-block:: python
+
+    auth.add_subject(sid="Alice")
+    auth.add_subject(sid="Bob")
+    auth.add_subject(sid="John")
+
 Managing Roles
 --------------
 
@@ -94,19 +107,6 @@ Assume we want to manage access to the chat system for the three basic roles `us
     auth.add_role(rid="user")
     auth.add_role(rid="moderator")
     auth.add_role(rid="admin")
-
-Managing Subjects
------------------
-
-Next we want to create the subjects `Alice`, `Bob` and `John`. To create subjects,
-use the :py:meth:`~pypermission.serial.core.SerialAuthority.add_subject` method (similarly
-use :py:meth:`~pypermission.serial.core.SerialAuthority.del_subject` to remove a subject):
-
-.. code-block:: python
-
-    auth.add_subject(sid="Alice")
-    auth.add_subject(sid="Bob")
-    auth.add_subject(sid="John")
 
 Granting Permissions
 --------------------
@@ -177,15 +177,6 @@ as shown in the following diagram:
 
 Using more elaborated setups necessitates a variety of review functions.
 
-Role Review
-^^^^^^^^^^^
-
-Verify that the authority contains all the expected roles with the
-:py:meth:`~pypermission.serial.core.SerialAuthority.get_roles` method:
-
->>> auth.get_roles() == {'admin', 'user', 'moderator'}
-True
-
 Subject Review
 ^^^^^^^^^^^^^^
 
@@ -193,6 +184,15 @@ Verify that the authority contains all the expected subjects with the
 :py:meth:`~pypermission.serial.core.SerialAuthority.get_subjects` method:
 
 >>> auth.get_subjects() == {'Alice', 'Bob', 'John'}
+True
+
+Role Review
+^^^^^^^^^^^
+
+Verify that the authority contains all the expected roles with the
+:py:meth:`~pypermission.serial.core.SerialAuthority.get_roles` method:
+
+>>> auth.get_roles() == {'admin', 'user', 'moderator'}
 True
 
 Permission-Role Review
