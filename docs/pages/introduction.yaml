@@ -1,0 +1,30 @@
+roles:
+  admin:
+    child_roles: []
+    permission_nodes:
+    - '*'
+    subjects:
+    - Alice
+  moderator:
+    child_roles: []
+    permission_nodes:
+    - invite
+    - ban_user
+    subjects:
+    - Bob
+  user:
+    child_roles: []
+    permission_nodes:
+    - join
+    - leave
+    - message
+    subjects:
+    - Bob
+    - John
+subjects:
+  Alice:
+    permission_nodes: []
+  Bob:
+    permission_nodes: []
+  John:
+    permission_nodes: []

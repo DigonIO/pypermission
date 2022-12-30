@@ -242,15 +242,84 @@ the `admin` role has indeed access to all
 Access Checking
 ---------------
 
+To check, if a subject can obtain a permission, use the
+:py:meth:`~pypermission.serial.core.SerialAuthority.subject_obtains_permission`
+method (similarly to check if a role can obtain a given permission, use the
+:py:meth:`~pypermission.serial.core.SerialAuthority.role_obtains_permission` method).
+
+.. warning::
+   In contrast to the similar ``CheckAccess`` function defined in the RBAC standard
+   published by ANSI/INCITs\ [#INCITS2004]_\ [#INCITS2017]_, our methods will
+   check for possible hierarchical ordering of roles. This means the method can
+   still return ``True``, even if the permission has not directly been assigned to
+   a given role but is inferred through inheritance. For more on this topic see TODO: example link,
+   as this introduction is mainly focussed on flat RBAC.
+
+As a `user`, `John` should be allowed to `join` a chat, however he should not be able
+to obtain the permission to `invite`.
+
+>>> auth.subject_obtains_permission(sid='John', node=CNs.JOIN)
+True
+
+>>> auth.subject_obtains_permission(sid='John', node=CNs.INV)
+False
+
+As both a `user` and a `moderator`, `Bob` should be able to `join` and `invite` a chat. The
+`change_role` permission however should be denied to him:
+
+>>> auth.subject_obtains_permission(sid='Bob', node=CNs.JOIN)
+True
+
+>>> auth.subject_obtains_permission(sid='Bob', node=CNs.INV)
+True
+
+>>> auth.subject_obtains_permission(sid='Bob', node=CNs.CHANGE_ROLE)
+False
+
+Finally, for our `admin` `Alice`, we expect access to all of the functions above:
+
+>>> auth.subject_obtains_permission(sid='Alice', node=CNs.JOIN)
+True
+
+>>> auth.subject_obtains_permission(sid='Alice', node=CNs.INV)
+True
+
+>>> auth.subject_obtains_permission(sid='Alice', node=CNs.CHANGE_ROLE)
+True
+
 Storing And Loading State
 -------------------------
+
+To store the state of the authority to a file, use the
+:py:meth:`~pypermission.serial.core.SerialAuthority.save_file` method. The file
+format will be determined by the file extension given. Recognized extensions are
+``.json``, ``.yml`` and ``.yaml`` for either JSON or YAML formatting. Note that
+YAML formatting requires the ``PyYAML`` library to be available to the python
+runtime.
+
+.. invisible-code-block: python
+
+    from pathlib import Path
+    import os
+    cwd = Path.cwd()
+    os.chdir(cwd / "docs/pages/")
+
+
+>>> from pathlib import Path
+>>> auth.save_file(path=Path("introduction.yaml"))
+
+.. invisible-code-block: python
+
+    os.chdir(cwd)
+
+.. literalinclude:: introduction.yaml
+   :language: yaml
 
 TODO
 ----
 
 * Document ``del_subject``, ``del_role``, ``role_deassign_subject``,
-  ``subject_obtains_permission``, ``role_obtains_permission``, ``role_revoke_permission``,
-  ``role_add_inheritance``
+  ``role_revoke_permission``, ``role_add_inheritance``
 * Do we have a "list permissions" function (Permission review subsubsection)?
 
 .. rubric:: Footnotes
@@ -258,3 +327,5 @@ TODO
 .. [#NIST_RBAC] The NIST model for role-based access control: towards a unified standard - https://doi.org/10.1145/344287.344301
 .. [#WIKI_SOD] Wikipedia - Separation of duties (SOD) - https://en.wikipedia.org/wiki/Separation_of_duties
 .. [#sqlalchemy] SQLAlchemy - The Python SQL Toolkit and Object Relational Mapper - https://www.sqlalchemy.org/
+.. [#INCITS2004] INCITS 359-2004: Information technology - Role Based Access Control - <https://profsandhu.com/journals/tissec/ANSI+INCITS+359-2004.pdf>
+.. [#INCITS2017] INCITS 359-2012[R2017]: Information technology - Role Based Access Control - <https://standards.incits.org/apps/group_public/project/details.php?project_id=1906>
