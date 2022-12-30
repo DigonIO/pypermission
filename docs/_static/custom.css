@@ -106,6 +106,19 @@ body:not([data-theme="light"]) .pre:not(:where(a *, dl *)) {
     color: #9CDCFE;
 }
 
+
+@media not print {
+    @media (prefers-color-scheme: dark) {
+        body:not([data-theme="light"]) {
+            --color-api-keyword: #569CD6;
+            --color-problematic: green;
+            --color-api-pre-name: #4EC9B0;
+            --color-api-name: #DCDCAA;
+        }
+    }
+}
+
+
 .pre:not(:where(a *, dl *)) {
     color: #008000;
 }
