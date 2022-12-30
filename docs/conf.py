@@ -16,7 +16,7 @@ import sys
 
 from sphinx.locale import _
 
-sys.path.insert(0, os.path.abspath(".."))
+# sys.path.insert(0, os.path.abspath(".."))
 
 # -- Project information -----------------------------------------------------
 
@@ -67,7 +67,14 @@ autosummary_generate = True
 # directories to ignore when looking for source files.
 # This pattern also affects html_static_path and html_extra_path.
 exclude_patterns = ["_build", "Thumbs.db", ".DS_Store", "_assets"]
-pygments_style = "default"
+# pygments_style = "material"  # beautiful dark alternative
+# pygments_style = "trac" # neat bold fonts
+# pygments_style = "autumn"  # nice colors but misses background
+# pygments_style = "friendly"
+# pygments_style = "emacs"
+# pygments_style = "tango"  # neat colors
+pygments_style = "manni"  # nice overall light theme out of the box
+
 
 # -- Options for HTML output -------------------------------------------------
 
@@ -89,7 +96,7 @@ html_favicon = html_logo
 # https://stackoverflow.com/questions/3702865/sphinx-restructuredtext-set-color-for-a-single-word
 html_static_path = ["_static"]
 
-html_css_files = ["custom.css"]
+html_css_files = ["custom.css", "custom_pygments.css"]
 
 imgmath_latex_preamble = (
     "\\usepackage{xcolor}\n\\definecolor{formulacolor}{RGB}{128,128,128}" "\\color{formulacolor}"

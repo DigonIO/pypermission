@@ -1,226 +1,62 @@
 /* Colours */
-
-.black {
-    color: black;
-}
-
-.gray {
-    color: gray;
-}
-
-.silver {
-    color: silver;
-}
-
-.white {
-    color: white;
-}
-
-.maroon {
-    color: maroon;
-}
-
-.red {
-    color: red;
-}
-
-.fuchsia {
-    color: fuchsia;
-}
-
-.pink {
-    color: pink;
-}
-
-.orange {
-    color: orange;
-}
-
-.yellow {
-    color: yellow;
-}
-
-.lime {
-    color: lime;
-}
-
-.green {
-    color: green;
-}
-
-.olive {
-    color: olive;
-}
-
-.teal {
-    color: teal;
-}
-
-.cyan {
-    color: cyan;
-}
-
-.aqua {
-    color: aqua;
-}
-
-.blue {
-    color: blue;
-}
-
-.navy {
-    color: navy;
-}
-
-.purple {
-    color: purple;
-}
+.black { color: black; }
+.gray { color: gray; }
+.silver { color: silver; }
+.white { color: white; }
+.maroon { color: maroon; }
+.red { color: red; }
+.fuchsia { color: fuchsia; }
+.pink { color: pink; }
+.orange { color: orange; }
+.yellow { color: yellow; }
+.lime { color: lime; }
+.green { color: green; }
+.olive { color: olive; }
+.teal { color: teal; }
+.cyan { color: cyan; }
+.aqua { color: aqua; }
+.blue { color: blue; }
+.navy { color: navy; }
+.purple { color: purple; }
 
 /* Text Sizes */
-
-.huge {
-    font-size: huge;
-}
-
-.big {
-    font-size: big;
-}
-
-.small {
-    font-size: small;
-}
-
-.tiny {
-    font-size: tiny;
-}
+.huge { font-size: huge; }
+.big { font-size: big; }
+.small { font-size: small; }
+.tiny { font-size: tiny; }
 
 /* Text markup */
 
-body:not([data-theme="light"]) .incremental {
-    font-style: italic;
-    color: #CE9178;
+body {
+    --color-brand-primary: #204a87;
+    --color-brand-content: #204a87;
 }
 
-body:not([data-theme="light"]) .pre:not(:where(a *, dl *)) {
-    /* color: #ed9d13; */
-    color: #9CDCFE;
+.incremental { color: #CC3300;; font-style: italic; }
+.pre:not(:where(dl *)) { color: #204a87; }
+.pre:not(:where(a *, dl *)) { color: #7694c2; }
+
+@media not print {
+body[data-theme="dark"] .incremental { color: #CE9178; font-style: italic; }
+body[data-theme="dark"] .pre:not(:where(dl *)) { color: #368ce2; }
+body[data-theme="dark"] .pre:not(:where(a *, dl *)) { color: #9CDCFE; /* color: #ed9d13; */ }
+@media (prefers-color-scheme: dark) {
+    body:not([data-theme="light"]) .incremental { color: #CE9178; font-style: italic; }
+    body:not([data-theme="light"]) .pre:not(:where(dl *)) { color: #368ce2; }
+    body:not([data-theme="light"]) .pre:not(:where(a *, dl *)) { color: #9CDCFE; /* color: #ed9d13; */ }
+}
 }
 
-.pre:not(:where(a *, dl *)) {
-    color: #008000;
-}
 
-/* CODE HIGHLIGHTING DARK MODE */
-/* Heavily copied from VSCode Dark+ (default) color scheme*/
-
-body:not([data-theme="light"]) .highlight {
-    background: #1E1E1E;
-    /* color: #d0d0d0; */
+/*
+@media not print {
+    @media (prefers-color-scheme: dark) {
+        body:not([data-theme="light"]) {
+            --color-api-keyword: #569CD6;
+            --color-problematic: green;
+            --color-api-pre-name: #4EC9B0;
+            --color-api-name: #DCDCAA;
+        }
+    }
 }
-
-/* Literal['self'] */
-body:not([data-theme="light"]) .highlight .bp {
-    color: #2fbccd;
-}
-
-/* comment [`#`] */
-body:not([data-theme="light"]) .highlight .c1 {
-    color: #6A9955;
-}
-
-/* Literal['>>>'] */
-body:not([data-theme="light"]) .highlight .gp {
-    /* color: #1CDC9A; */
-    color: #11D116;
-}
-
-/* console output */
-body:not([data-theme="light"]) .highlight .go {
-    /* color: #cccccc; */
-    color: #D4D4D4;
-}
-
-/* Literal['class', 'return', 'for', 'def'] */
-body:not([data-theme="light"]) .highlight .k {
-    /* color: #569CD6; */
-    color: #C586C0;
-}
-
-/* None */
-body:not([data-theme="light"]) .highlight .kc {
-    color: #569CD6;
-}
-
-/* Literal['import'] | Literal['from'] */
-body:not([data-theme="light"]) .highlight .kn {
-    color: #C586C0;
-}
-
-/* yaml value */
-body:not([data-theme="light"]) .highlight .l {
-    color: #CE9178;
-}
-
-/* named variables/identifier/class */
-body:not([data-theme="light"]) .highlight .n {
-    /* color: #4EC9B0; */
-    color: #9CDCFE;
-}
-
-/* functions, dtypes? Literal['set', 'str', 'dict', 'int'] */
-body:not([data-theme="light"]) .highlight .nb {
-    /* color: #2fbccd; */
-    color: #4EC9B0;
-}
-
-/* identifier class */
-body:not([data-theme="light"]) .highlight .nc {
-    color: #4EC9B0;
-}
-
-/* Literal['@property'] */
-body:not([data-theme="light"]) .highlight .nd {
-    /* color: #DCDCAA; */
-    color: #4EC9B0;
-}
-
-/* identifier function */
-body:not([data-theme="light"]) .highlight .nf {
-    /* color: #9CDCFE; */
-    color: #DCDCAA;
-}
-
-/* import: module name */
-body:not([data-theme="light"]) .highlight .nn {
-    color: #4EC9B0;
-}
-
-/* yaml key */
-body:not([data-theme="light"]) .highlight .nt {
-    color: #569CD6;
-}
-
-/* operators: ['.', '=', '->'] */
-body:not([data-theme="light"]) .highlight .o {
-    color: #d0d0d0;
-}
-
-/* operators: ['in'] */
-body:not([data-theme="light"]) .highlight .ow {
-    color: #569CD6;
-}
-
-/* paranthesis, commas: ['{', '}', '(', ')', ','] */
-body:not([data-theme="light"]) .highlight .p {
-    color: #FFD700;
-}
-
-/* strings one tick */
-body:not([data-theme="light"]) .highlight .s1 {
-    color: #CE9178;
-}
-
-/* strings two ticks */
-body:not([data-theme="light"]) .highlight .s2 {
-    color: #CE9178;
-}
+*/
