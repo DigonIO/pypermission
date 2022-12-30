@@ -248,7 +248,9 @@ Storing And Loading State
 TODO
 ----
 
-* Document ``del_subject``, ``del_role``
+* Document ``del_subject``, ``del_role``, ``role_deassign_subject``,
+  ``subject_obtains_permission``, ``role_obtains_permission``, ``role_revoke_permission``,
+  ``role_add_inheritance``
 * Do we have a "list permissions" function (Permission review subsubsection)?
 
 .. rubric:: Footnotes

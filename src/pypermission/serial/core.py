@@ -193,9 +193,11 @@ class SerialAuthority(_Authority):
             )
 
     def dump_JSON(self) -> str:
+        """Dumps the authorities current state to a JSON formatted string."""
         return json.dumps(self._dump_data_store_json())
 
     def dump_YAML(self) -> str:
+        """Dumps the authorities current state to a YAML formatted string."""
         # TODO: try/except
         try:
             import yaml
@@ -211,10 +213,12 @@ class SerialAuthority(_Authority):
             raise TypeError("This should never happen, please report!")
 
     def load_JSON(self, *, serial_data: str) -> None:
+        """Load a previous state from a JSON formatted string."""
         data = json.loads(serial_data)
         self._load_data_store_json(data=data)
 
     def load_YAML(self, *, serial_data: str) -> None:
+        """Load a previous state from a YAML formatted string."""
         # TODO: try/except
         try:
             import yaml
