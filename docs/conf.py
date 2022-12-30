@@ -96,7 +96,7 @@ html_favicon = html_logo
 # https://stackoverflow.com/questions/3702865/sphinx-restructuredtext-set-color-for-a-single-word
 html_static_path = ["_static"]
 
-html_css_files = ["custom.css", "pygments.css"]
+html_css_files = ["custom.css", "custom_pygments.css"]
 
 imgmath_latex_preamble = (
     "\\usepackage{xcolor}\n\\definecolor{formulacolor}{RGB}{128,128,128}" "\\color{formulacolor}"
