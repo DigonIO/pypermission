@@ -17,8 +17,8 @@ capabilities. Features implemented in this library are highlighted below:
 
 Within a **Role Structure** the following features are supported:
 
-* assign subject to role - `subject-role` (many-to-many relationship)
-* assign permission to role - `permission-role` (many-to-many relationship)
+* assign subject to role - `subject-role` (`many-to-many` relationship)
+* assign permission to role - `permission-role` (`many-to-many` relationship)
 * subjects can simultaneously exercise permissions of multiple roles
 * `subject-role` review
 
@@ -29,7 +29,7 @@ A **Hierarchical Role Structure** additionally supports:
 
 * senior roles acquire permissions of their juniors
 * assign seniority relation between roles - `role-role`
-* **General Hierarchy** - `role-role` (many-to-many relationship)
+* **General Hierarchy** - `role-role` (`many-to-many` relationship)
 * `subject-role` review extended by
 
   * list all roles a specific subject can take
