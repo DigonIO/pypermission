@@ -8,8 +8,8 @@ roles:
   moderator:
     child_roles: []
     permission_nodes:
-    - invite
     - ban_user
+    - invite
     subjects:
     - Bob
   user:

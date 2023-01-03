@@ -61,6 +61,7 @@ class DataStore(TypedDict, Generic[T], total=False):
 DataStoreYAML = DataStore[EntityID]
 DataStoreJSON = DataStore[str]
 
+
 ####################################################################################################
 ### Permissionable entities
 ####################################################################################################
@@ -157,15 +158,15 @@ class SerialAuthority(_Authority):
     ### IO
     ################################################################################################
 
-    def save_file(self, *, path: Path | str) -> None:
+    def save_file(self, *, path: Path | str, sort_keys=False) -> None:
         """Save the current state to file formatted as JSON or YAML."""
         path = Path(path)
         ftype = path.suffix[1:]
 
         if ftype == "json":
-            serial_data = self.dump_JSON()
+            serial_data = self.dump_JSON(sort_keys=sort_keys)
         elif ftype in ["yaml", "yml"]:
-            serial_data = self.dump_YAML()
+            serial_data = self.dump_YAML(sort_keys=sort_keys)
         else:
             raise PathError(
                 f"Unknown file extension `{ftype}`! Possible extensions are: `json`, `yaml`"
@@ -192,11 +193,11 @@ class SerialAuthority(_Authority):
                 f"Unknown file extension `{ftype}`! Possible extensions are: `json`, `yaml`"
             )
 
-    def dump_JSON(self) -> str:
+    def dump_JSON(self, sort_keys=False) -> str:
         """Dumps the authorities current state to a JSON formatted string."""
-        return json.dumps(self._dump_data_store_json())
+        return json.dumps(self._dump_data_store_json(sort=sort_keys), sort_keys=sort_keys)
 
-    def dump_YAML(self) -> str:
+    def dump_YAML(self, sort_keys=False) -> str:
         """Dumps the authorities current state to a YAML formatted string."""
         # TODO: try/except
         try:
@@ -206,7 +207,9 @@ class SerialAuthority(_Authority):
                 "Dumping to YAML requires the installation of the optional dependency PyYAML."
                 "To install PyYAML, use your preferred python package manager."
             )
-        yaml_content = yaml.safe_dump(self._dump_data_store_yaml(), encoding=None)
+        yaml_content = yaml.safe_dump(
+            self._dump_data_store_yaml(sort=sort_keys), encoding=None, sort_keys=sort_keys
+        )
         if isinstance(yaml_content, str):
             return yaml_content
         else:
@@ -231,20 +234,22 @@ class SerialAuthority(_Authority):
         data = yaml.safe_load(serial_data)
         self._load_data_store_yaml(data=data)
 
-    def _dump_data_store_json(self) -> DataStoreJSON:
-        """Save the current state to string formatted as YAML."""
+    def _dump_data_store_json(self, sort=False) -> DataStoreJSON:
+        """Save the current state to a JSON compatible dictionary."""
         roles = {
             entity_id_serializer(rid): RoleStoreJSON(
-                child_roles=[entity_id_serializer(eid) for eid in role.child_ids],
-                subjects=[entity_id_serializer(eid) for eid in role.sids],
-                permission_nodes=self._generate_permission_node_list(role),
+                child_roles=_maybe_sort(
+                    [entity_id_serializer(eid) for eid in role.child_ids], sort=sort
+                ),
+                subjects=_maybe_sort([entity_id_serializer(eid) for eid in role.sids], sort=sort),
+                permission_nodes=self._generate_permission_node_list(role, sort=sort),
             )
             for rid, role in self._roles.items()
         }
 
         subjects = {
             entity_id_serializer(sid): SubjectStore(
-                permission_nodes=self._generate_permission_node_list(subject),
+                permission_nodes=self._generate_permission_node_list(subject, sort=sort),
             )
             for sid, subject in self._subjects.items()
         }
@@ -254,20 +259,20 @@ class SerialAuthority(_Authority):
             subjects=subjects,
         )
 
-    def _dump_data_store_yaml(self) -> DataStoreYAML:
-        """Save the current state to string formatted as YAML."""
+    def _dump_data_store_yaml(self, sort=False) -> DataStoreYAML:
+        """Save the current state to a YAML compatible dictionary."""
         roles = {
             rid: RoleStoreYAML(
-                child_roles=list(role.child_ids),
-                subjects=list(role.sids),
-                permission_nodes=self._generate_permission_node_list(role),
+                child_roles=sorted(role.child_ids) if sort else list(role.child_ids),
+                subjects=sorted(role.sids) if sort else list(role.sids),
+                permission_nodes=self._generate_permission_node_list(role, sort=sort),
             )
             for rid, role in self._roles.items()
         }
 
         subjects = {
             sid: SubjectStore(
-                permission_nodes=self._generate_permission_node_list(subject),
+                permission_nodes=self._generate_permission_node_list(subject, sort=sort),
             )
             for sid, subject in self._subjects.items()
         }
@@ -923,7 +928,7 @@ class SerialAuthority(_Authority):
             self._visit_role(role=unmarked.pop(), l=l, perm=perm, temp=temp)
         return l
 
-    def _generate_permission_node_list(self, entity: PermissionableEntity) -> list[str]:
+    def _generate_permission_node_list(self, entity: PermissionableEntity, sort=False) -> list[str]:
         permission_nodes: list[str] = []
         for permission, payload_set in entity.permission_map.items():
             if permission.has_payload:
@@ -935,7 +940,7 @@ class SerialAuthority(_Authority):
                 permission_nodes.append(
                     self._serialize_permission_node(permission=permission, payload=None)
                 )
-        return permission_nodes
+        return _maybe_sort(permission_nodes, sort=sort)
 
 
 ####################################################################################################
@@ -976,3 +981,7 @@ def _rm_permission_map_entry(
         payload_set.remove(payload)
     if not payload:
         permission_map.pop(permission)
+
+
+def _maybe_sort(sequence, sort=False):
+    return sorted(sequence) if sort else sequence

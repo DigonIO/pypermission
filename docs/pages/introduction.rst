@@ -306,7 +306,7 @@ runtime.
 
 
 >>> from pathlib import Path
->>> auth.save_file(path=Path("introduction.yaml"))
+>>> auth.save_file(path=Path("introduction.yaml"), sort_keys=True)
 
 .. invisible-code-block: python
 
