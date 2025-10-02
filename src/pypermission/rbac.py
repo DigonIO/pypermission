@@ -20,10 +20,6 @@ class RBAC:
         except IntegrityError:
             db.rollback()
 
-    def get_roles(self, *, db: Session) -> tuple[str, ...]:
-        roles_orm = db.scalars(select(RoleORM)).all()
-        return tuple(role_orm.id for role_orm in roles_orm)
-
     def delete_role(self, *, role: str, db: Session) -> None:
         role_orm = db.get(RoleORM, role)
         if role_orm is None:
@@ -31,9 +27,17 @@ class RBAC:
         db.delete(role_orm)
         db.flush()
 
-    def add_role_hierarchy(self, *, parent_role: str, child_role: str, db: Session) -> None:
+    def get_roles(self, *, db: Session) -> tuple[str, ...]:
+        role_orms = db.scalars(select(RoleORM)).all()
+        return tuple(role_orm.id for role_orm in role_orms)
+
+    def add_role_hierarchy(
+        self, *, parent_role: str, child_role: str, db: Session
+    ) -> None:
         if parent_role == child_role:
-            raise PyPermissionError("The parent role and the child role must not be the same!")
+            raise PyPermissionError(
+                "The parent role and the child role must not be the same!"
+            )
 
         root_cte = (
             select(HierarchyORM)
@@ -63,6 +67,27 @@ class RBAC:
             db.flush()
         except IntegrityError:
             db.rollback()
+
+    def delete_role_hierarchy(
+        self, *, parent_role: str, child_role: str, db: Session
+    ) -> None:
+        hierarchy_orm = db.get(HierarchyORM, (parent_role, child_role))
+        if hierarchy_orm is None:
+            return
+        db.delete(hierarchy_orm)
+        db.flush()
+
+    def get_role_parents(self, role: str, db: Session) -> tuple[str, ...]:
+        relation_orms = db.scalars(
+            select(HierarchyORM).where(HierarchyORM.child_role_id == role)
+        ).all()
+        return tuple(relation_orm.parent_role_id for relation_orm in relation_orms)
+
+    def get_role_children(self, role: str, db: Session) -> tuple[str, ...]:
+        relation_orms = db.scalars(
+            select(HierarchyORM).where(HierarchyORM.parent_role_id == role)
+        ).all()
+        return tuple(relation_orm.child_role_id for relation_orm in relation_orms)
 
 
 # def assign_role(self, *, parent_role_id: str, child_role_id: str) -> None: ...
