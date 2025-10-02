@@ -77,17 +77,57 @@ class RBAC:
         db.delete(hierarchy_orm)
         db.flush()
 
-    def get_role_parents(self, role: str, db: Session) -> tuple[str, ...]:
+    def get_role_parents(self, *, role: str, db: Session) -> tuple[str, ...]:
         relation_orms = db.scalars(
             select(HierarchyORM).where(HierarchyORM.child_role_id == role)
         ).all()
         return tuple(relation_orm.parent_role_id for relation_orm in relation_orms)
 
-    def get_role_children(self, role: str, db: Session) -> tuple[str, ...]:
+    def get_role_children(self, *, role: str, db: Session) -> tuple[str, ...]:
         relation_orms = db.scalars(
             select(HierarchyORM).where(HierarchyORM.parent_role_id == role)
         ).all()
         return tuple(relation_orm.child_role_id for relation_orm in relation_orms)
+
+    def get_role_descendants(self, *, role: str, db: Session) -> tuple[str, ...]:
+        root_cte = (
+            select(HierarchyORM)
+            .where(HierarchyORM.parent_role_id == role)
+            .cte(name="root_cte", recursive=True)
+        )
+
+        traversing_cte = root_cte.alias()
+        relations_cte = root_cte.union_all(
+            select(HierarchyORM).where(
+                HierarchyORM.parent_role_id == traversing_cte.c.child_role_id
+            )
+        )
+
+        descendant_relations = (
+            db.scalars(select(relations_cte.c.child_role_id)).unique().all()
+        )
+
+        return tuple(descendant_relations)
+
+    def get_role_ancestors(self, *, role: str, db: Session) -> tuple[str, ...]:
+        root_cte = (
+            select(HierarchyORM)
+            .where(HierarchyORM.child_role_id == role)
+            .cte(name="root_cte", recursive=True)
+        )
+
+        traversing_cte = root_cte.alias()
+        relations_cte = root_cte.union_all(
+            select(HierarchyORM).where(
+                HierarchyORM.child_role_id == traversing_cte.c.parent_role_id
+            )
+        )
+
+        descendant_relations = (
+            db.scalars(select(relations_cte.c.parent_role_id)).unique().all()
+        )
+
+        return tuple(descendant_relations)
 
 
 # def assign_role(self, *, parent_role_id: str, child_role_id: str) -> None: ...
