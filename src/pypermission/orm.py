@@ -1,7 +1,7 @@
 import datetime as dt
 
 from sqlalchemy.orm import DeclarativeBase
-from sqlalchemy import DateTime, String, ForeignKey
+from sqlalchemy import String, ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column
 
 
@@ -13,8 +13,8 @@ class RoleORM(BaseORM):
     id: Mapped[str] = mapped_column(String, primary_key=True)
 
 
-class RoleHierarchyORM(BaseORM):
-    __tablename__ = "pp_role_hierarchy_table"
+class HierarchyORM(BaseORM):
+    __tablename__ = "pp_hierarchy_table"
     parent_role_id: Mapped[str] = mapped_column(
         String, ForeignKey(RoleORM.id), primary_key=True
     )
@@ -28,8 +28,8 @@ class SubjectORM(BaseORM):
     id: Mapped[str] = mapped_column(String, primary_key=True)
 
 
-class RoleAssignmentORM(BaseORM):
-    __tablename__ = "pp_role_assignment_table"
+class MemberORM(BaseORM):
+    __tablename__ = "pp_member_table"
     role_id: Mapped[str] = mapped_column(
         String, ForeignKey(RoleORM.id), primary_key=True
     )

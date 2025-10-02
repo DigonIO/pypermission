@@ -4,7 +4,8 @@ from sqlalchemy.engine.base import Engine
 from sqlalchemy.exc import IntegrityError
 
 
-from pypermission.orm import BaseORM, RoleORM
+from pypermission.orm import BaseORM, RoleORM, HierarchyORM
+from pypermission.exc import PyPermissionError
 
 
 class RBAC:
@@ -29,6 +30,39 @@ class RBAC:
             return
         db.delete(role_orm)
         db.flush()
+
+    def add_role_hierarchy(self, *, parent_role: str, child_role: str, db: Session) -> None:
+        if parent_role == child_role:
+            raise PyPermissionError("The parent role and the child role must not be the same!")
+
+        root_cte = (
+            select(HierarchyORM)
+            .where(HierarchyORM.parent_role_id == child_role)
+            .cte(name="root_cte", recursive=True)
+        )
+
+        traversing_cte = root_cte.alias()
+        relations_cte = root_cte.union_all(
+            select(HierarchyORM).where(
+                HierarchyORM.parent_role_id == traversing_cte.c.child_role_id
+            )
+        )
+
+        critical_leaf_relations = db.execute(
+            select(relations_cte).where(relations_cte.c.child_role_id == parent_role)
+        ).all()
+
+        if critical_leaf_relations:
+            raise PyPermissionError("The requested hierarchy would generate a loop!")
+
+        try:
+            hierarchy_orm = HierarchyORM(
+                parent_role_id=parent_role, child_role_id=child_role
+            )
+            db.add(hierarchy_orm)
+            db.flush()
+        except IntegrityError:
+            db.rollback()
 
 
 # def assign_role(self, *, parent_role_id: str, child_role_id: str) -> None: ...
