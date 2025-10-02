@@ -4,7 +4,7 @@ from sqlalchemy.engine.base import Engine
 from sqlalchemy.exc import IntegrityError
 
 
-from pypermission.orm import BaseORM, RoleORM, HierarchyORM
+from pypermission.orm import BaseORM, RoleORM, HierarchyORM, SubjectORM
 from pypermission.exc import PyPermissionError
 
 
@@ -35,9 +35,13 @@ class RBAC:
         self, *, parent_role: str, child_role: str, db: Session
     ) -> None:
         if parent_role == child_role:
-            raise PyPermissionError(
-                "The parent role and the child role must not be the same!"
-            )
+            raise PyPermissionError("Both roles must not be the same!")
+
+        roles = db.scalars(
+            select(RoleORM.id).where(RoleORM.id.in_([parent_role, child_role]))
+        ).all()
+        if len(roles) < 2:
+            raise PyPermissionError("One or both roles do not exist!")
 
         root_cte = (
             select(HierarchyORM)
@@ -65,12 +69,22 @@ class RBAC:
             )
             db.add(hierarchy_orm)
             db.flush()
-        except IntegrityError:
+        except IntegrityError as err:
+            print(err)
             db.rollback()
 
     def delete_role_hierarchy(
         self, *, parent_role: str, child_role: str, db: Session
     ) -> None:
+        if parent_role == child_role:
+            raise PyPermissionError("Both roles must not be the same!")
+
+        roles = db.scalars(
+            select(RoleORM.id).where(RoleORM.id.in_([parent_role, child_role]))
+        ).all()
+        if len(roles) < 2:
+            raise PyPermissionError("One or both roles do not exist!")
+
         hierarchy_orm = db.get(HierarchyORM, (parent_role, child_role))
         if hierarchy_orm is None:
             return
@@ -81,12 +95,16 @@ class RBAC:
         relation_orms = db.scalars(
             select(HierarchyORM).where(HierarchyORM.child_role_id == role)
         ).all()
+        if len(relation_orms) == 0 and db.get(RoleORM, role) is None:
+            raise PyPermissionError(f"Role {role} does not exist!")
         return tuple(relation_orm.parent_role_id for relation_orm in relation_orms)
 
     def get_role_children(self, *, role: str, db: Session) -> tuple[str, ...]:
         relation_orms = db.scalars(
             select(HierarchyORM).where(HierarchyORM.parent_role_id == role)
         ).all()
+        if len(relation_orms) == 0 and db.get(RoleORM, role) is None:
+            raise PyPermissionError(f"Role {role} does not exist!")
         return tuple(relation_orm.child_role_id for relation_orm in relation_orms)
 
     def get_role_descendants(self, *, role: str, db: Session) -> tuple[str, ...]:
@@ -107,6 +125,8 @@ class RBAC:
             db.scalars(select(relations_cte.c.child_role_id)).unique().all()
         )
 
+        if len(descendant_relations) == 0 and db.get(RoleORM, role) is None:
+            raise PyPermissionError(f"Role {role} does not exist!")
         return tuple(descendant_relations)
 
     def get_role_ancestors(self, *, role: str, db: Session) -> tuple[str, ...]:
@@ -123,11 +143,32 @@ class RBAC:
             )
         )
 
-        descendant_relations = (
+        ancestor_relations = (
             db.scalars(select(relations_cte.c.parent_role_id)).unique().all()
         )
 
-        return tuple(descendant_relations)
+        if len(ancestor_relations) == 0 and db.get(RoleORM, role) is None:
+            raise PyPermissionError(f"Role {role} does not exist!")
+        return tuple(ancestor_relations)
+
+    def add_subject(self, *, subject: str, db: Session) -> None:
+        try:
+            subject_orm = SubjectORM(id=subject)
+            db.add(subject_orm)
+            db.flush()
+        except IntegrityError:
+            db.rollback()
+
+    def delete_subject(self, *, subject: str, db: Session) -> None:
+        subject_orm = db.get(SubjectORM, subject)
+        if subject_orm is None:
+            return
+        db.delete(subject_orm)
+        db.flush()
+
+    def get_subjects(self, *, db: Session) -> tuple[str, ...]:
+        subject_orms = db.scalars(select(SubjectORM)).all()
+        return tuple(subject_orm.id for subject_orm in subject_orms)
 
 
 # def assign_role(self, *, parent_role_id: str, child_role_id: str) -> None: ...
