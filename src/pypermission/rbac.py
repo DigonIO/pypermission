@@ -1,10 +1,16 @@
 from sqlalchemy.sql import select
-from sqlalchemy.orm import DeclarativeBase, Session
+from sqlalchemy.orm import Session
 from sqlalchemy.engine.base import Engine
 from sqlalchemy.exc import IntegrityError
 
-
-from pypermission.orm import BaseORM, RoleORM, HierarchyORM, SubjectORM, MemberORM
+from pypermission.orm import (
+    BaseORM,
+    RoleORM,
+    HierarchyORM,
+    SubjectORM,
+    MemberORM,
+    PolicyORM,
+)
 from pypermission.exc import PyPermissionError
 
 
@@ -117,28 +123,6 @@ class RBAC:
             raise PyPermissionError(f"Role ('{role}') does not exist!")
         return tuple(children)
 
-    def get_role_descendants(self, *, role: str, db: Session) -> tuple[str, ...]:
-        root_cte = (
-            select(HierarchyORM)
-            .where(HierarchyORM.parent_role_id == role)
-            .cte(name="root_cte", recursive=True)
-        )
-
-        traversing_cte = root_cte.alias()
-        relations_cte = root_cte.union_all(
-            select(HierarchyORM).where(
-                HierarchyORM.parent_role_id == traversing_cte.c.child_role_id
-            )
-        )
-
-        descendant_relations = (
-            db.scalars(select(relations_cte.c.child_role_id)).unique().all()
-        )
-
-        if len(descendant_relations) == 0 and db.get(RoleORM, role) is None:
-            raise PyPermissionError(f"Role ('{role}') does not exist!")
-        return tuple(descendant_relations)
-
     def get_role_ancestors(self, *, role: str, db: Session) -> tuple[str, ...]:
         root_cte = (
             select(HierarchyORM)
@@ -160,6 +144,28 @@ class RBAC:
         if len(ancestor_relations) == 0 and db.get(RoleORM, role) is None:
             raise PyPermissionError(f"Role ('{role}') does not exist!")
         return tuple(ancestor_relations)
+
+    def get_role_descendants(self, *, role: str, db: Session) -> tuple[str, ...]:
+        root_cte = (
+            select(HierarchyORM)
+            .where(HierarchyORM.parent_role_id == role)
+            .cte(name="root_cte", recursive=True)
+        )
+
+        traversing_cte = root_cte.alias()
+        relations_cte = root_cte.union_all(
+            select(HierarchyORM).where(
+                HierarchyORM.parent_role_id == traversing_cte.c.child_role_id
+            )
+        )
+
+        descendant_relations = (
+            db.scalars(select(relations_cte.c.child_role_id)).unique().all()
+        )
+
+        if len(descendant_relations) == 0 and db.get(RoleORM, role) is None:
+            raise PyPermissionError(f"Role ('{role}') does not exist!")
+        return tuple(descendant_relations)
 
     def create_subject(self, *, subject: str, db: Session) -> None:
         try:
@@ -215,6 +221,96 @@ class RBAC:
         if len(roles) == 0 and db.get(SubjectORM, subject) is None:
             raise PyPermissionError(f"Subject ('{subject}') does not exist!")
         return tuple(roles)
+
+    def grant_permission(
+        self,
+        *,
+        role: str,
+        resource_type: str,
+        resource_id: str,
+        action: str,
+        db: Session,
+    ) -> None:
+        try:
+            policy_orm = PolicyORM(
+                role_id=role,
+                resource_type=resource_type,
+                resource_id=resource_id,
+                action=action,
+            )
+            db.add(policy_orm)
+            db.flush()
+        except IntegrityError as err:
+            db.rollback()
+            print(err)
+
+    def check_subject_permission(
+        self,
+        subject: str,
+        resource_type: str,
+        resource_id: str,
+        action: str,
+        db: Session,
+    ) -> bool:
+        root_cte = (
+            select(MemberORM.role_id)
+            .where(MemberORM.subject_id == subject)
+            .cte(recursive=True)
+        )
+
+        traversing_cte = root_cte.alias()
+        relations_cte = root_cte.union_all(
+            select(HierarchyORM.parent_role_id).join(
+                traversing_cte, HierarchyORM.child_role_id == traversing_cte.c.role_id
+            )
+        )
+
+        foo = db.scalars(select(relations_cte)).all()
+        print(foo)
+
+        policy_orms = db.scalars(
+            select(PolicyORM)
+            .join(relations_cte, PolicyORM.role_id == relations_cte.c.role_id)
+            .where(
+                PolicyORM.resource_type == resource_type,
+                PolicyORM.resource_id.in_((resource_id, "*")),
+                PolicyORM.action == action,
+            )
+        ).all()
+
+        return len(policy_orms) > 0
+
+    def check_role_permission(
+        self,
+        role: str,
+        resource_type: str,
+        resource_id: str,
+        action: str,
+        db: Session,
+    ) -> bool:
+        root_cte = (
+            select(RoleORM.id.label("role_id"))
+            .where(RoleORM.id == role)
+            .cte(recursive=True)
+        )
+
+        traversing_cte = root_cte.alias()
+        relations_cte = root_cte.union_all(
+            select(HierarchyORM.parent_role_id).where(  # NOTE Magic here???
+                HierarchyORM.child_role_id == traversing_cte.c.role_id
+            )
+        )
+        policy_orms = db.scalars(
+            select(PolicyORM)
+            .join(relations_cte, PolicyORM.role_id == relations_cte.c.role_id)
+            .where(
+                PolicyORM.resource_type == resource_type,
+                PolicyORM.resource_id.in_((resource_id, "*")),
+                PolicyORM.action == action,
+            )
+        ).all()
+
+        return len(policy_orms) > 0
 
 
 # def assign_role(self, *, parent_role_id: str, child_role_id: str) -> None: ...
