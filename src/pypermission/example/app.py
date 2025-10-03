@@ -6,16 +6,6 @@ from sqlalchemy.engine.base import Engine
 from pypermission.rbac import RBAC, Policy, Permission
 
 
-# "Emma"
-# "James"
-# "Sophia"
-# "Henry"
-# "Charlotte"
-# "Benjamin"
-# "Olivia"
-# "Thomas"
-
-
 class ExampleError(Exception): ...
 
 
@@ -477,16 +467,18 @@ class ExampleApp:
         self._create_moderator_role_policies(ctx=ctx)
         self._create_admin_role_policies(ctx=ctx)
 
+        ctx.db.commit()
+
         self.create_user(
-            username="Emma",
-            email="emma@digon.io",
+            username="Alex",
+            email="alex@digon.io",
             role="admin",
             ctx=ctx,
             rbac=False,
         )
         self.create_user(
-            username="James",
-            email="james@digon.io",
+            username="Max",
+            email="max@digon.io",
             role="moderator",
             ctx=ctx,
             rbac=False,
@@ -513,17 +505,6 @@ class ExampleApp:
                     resource_type="base",
                     resource_id="",
                     action="group:create",
-                ),
-            ),
-            db=ctx.db,
-        )
-        self.rbac.create_policy(
-            policy=Policy(
-                role="moderator",
-                permission=Permission(
-                    resource_type="group",
-                    resource_id="*",
-                    action="deactivate",
                 ),
             ),
             db=ctx.db,
