@@ -1,8 +1,6 @@
-import datetime as dt
-
-from sqlalchemy.orm import DeclarativeBase
-from sqlalchemy import String, ForeignKey
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, DeclarativeBase, relationship
+from sqlalchemy.sql.sqltypes import String
+from sqlalchemy.sql.schema import ForeignKey
 
 
 class BaseORM(DeclarativeBase): ...
@@ -16,10 +14,10 @@ class RoleORM(BaseORM):
 class HierarchyORM(BaseORM):
     __tablename__ = "pp_hierarchy_table"
     parent_role_id: Mapped[str] = mapped_column(
-        String, ForeignKey(RoleORM.id), primary_key=True
+        String, ForeignKey("pp_role_table.id", ondelete="CASCADE"), primary_key=True
     )
     child_role_id: Mapped[str] = mapped_column(
-        String, ForeignKey(RoleORM.id), primary_key=True
+        String, ForeignKey("pp_role_table.id", ondelete="CASCADE"), primary_key=True
     )
 
 
@@ -31,18 +29,18 @@ class SubjectORM(BaseORM):
 class MemberORM(BaseORM):
     __tablename__ = "pp_member_table"
     role_id: Mapped[str] = mapped_column(
-        String, ForeignKey(RoleORM.id), primary_key=True
+        String, ForeignKey("pp_role_table.id", ondelete="CASCADE"), primary_key=True
     )
     subject_id: Mapped[str] = mapped_column(
-        String, ForeignKey(SubjectORM.id), primary_key=True
+        String, ForeignKey("pp_subject_table.id", ondelete="CASCADE"), primary_key=True
     )
 
 
 class PolicyORM(BaseORM):
     __tablename__ = "pp_policy_table"
-    role_id: Mapped[str] = mapped_column(String, primary_key=True)
-    resource_type: Mapped[str] = mapped_column(String, primary_key=True)
-    resource_id: Mapped[str] = mapped_column(
-        String, primary_key=True
+    role_id: Mapped[str] = mapped_column(
+        String, ForeignKey("pp_role_table.id", ondelete="CASCADE"), primary_key=True
     )
+    resource_type: Mapped[str] = mapped_column(String, primary_key=True)
+    resource_id: Mapped[str] = mapped_column(String, primary_key=True)
     action: Mapped[str] = mapped_column(String, primary_key=True)
