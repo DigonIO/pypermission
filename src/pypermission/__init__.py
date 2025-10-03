@@ -1,3 +1,3 @@
-from pypermission.rbac import RBAC
+from pypermission.rbac import RBAC, Policy, Permission
 
-__all__ = ["RBAC"]
+__all__ = ["RBAC", "Policy", "Permission"]

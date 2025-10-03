@@ -14,6 +14,34 @@ from pypermission.orm import (
 from pypermission.exc import PyPermissionError
 
 
+class Permission:
+    resource_type: str
+    resource_id: str
+    action: str
+
+    def __init__(self, *, resource_type: str, resource_id: str, action: str) -> None:
+        self.resource_type = resource_type
+        self.resource_id = resource_id
+        self.action = action
+
+    def __str__(self) -> str:
+        if self.resource_id is None:
+            return f"{self.resource_type} - {self.action}"
+        return f"{self.resource_type}[{self.resource_id}] - {self.action}"
+
+
+class Policy:
+    role: str
+    permission: Permission
+
+    def __init__(self, *, role: str, permission: Permission) -> None:
+        self.role = role
+        self.permission = permission
+
+    def __str__(self) -> str:
+        return f"{self.role} - {self.permission}"
+
+
 class RBAC:
     def __init__(self, *, engine: Engine) -> None:
         BaseORM.metadata.create_all(bind=engine)
@@ -193,7 +221,7 @@ class RBAC:
             db.flush()
         except IntegrityError as err:
             db.rollback()
-            print(err)
+            # TODO 'psycopg.errors.UniqueViolation'
 
             subject_orm = db.get(SubjectORM, subject)
             if subject_orm is None:
@@ -222,34 +250,36 @@ class RBAC:
             raise PyPermissionError(f"Subject ('{subject}') does not exist!")
         return tuple(roles)
 
-    def grant_permission(
+    def create_policy(
         self,
         *,
-        role: str,
-        resource_type: str,
-        resource_id: str,
-        action: str,
+        policy: Policy,
         db: Session,
     ) -> None:
         try:
             policy_orm = PolicyORM(
-                role_id=role,
-                resource_type=resource_type,
-                resource_id=resource_id,
-                action=action,
+                role_id=policy.role,
+                resource_type=policy.permission.resource_type,
+                resource_id=policy.permission.resource_id,
+                action=policy.permission.action,
             )
             db.add(policy_orm)
             db.flush()
         except IntegrityError as err:
             db.rollback()
-            print(err)
+            # TODO 'psycopg.errors.UniqueViolation'
+
+    def delete_policy(
+        self,
+        *,
+        policy: Policy,
+        db: Session,
+    ) -> None: ...
 
     def check_subject_permission(
         self,
         subject: str,
-        resource_type: str,
-        resource_id: str,
-        action: str,
+        permission: Permission,
         db: Session,
     ) -> bool:
         root_cte = (
@@ -265,16 +295,13 @@ class RBAC:
             )
         )
 
-        foo = db.scalars(select(relations_cte)).all()
-        print(foo)
-
         policy_orms = db.scalars(
             select(PolicyORM)
             .join(relations_cte, PolicyORM.role_id == relations_cte.c.role_id)
             .where(
-                PolicyORM.resource_type == resource_type,
-                PolicyORM.resource_id.in_((resource_id, "*")),
-                PolicyORM.action == action,
+                PolicyORM.resource_type == permission.resource_type,
+                PolicyORM.resource_id.in_((permission.resource_id, "*")),
+                PolicyORM.action == permission.action,
             )
         ).all()
 
@@ -283,9 +310,7 @@ class RBAC:
     def check_role_permission(
         self,
         role: str,
-        resource_type: str,
-        resource_id: str,
-        action: str,
+        permission: Permission,
         db: Session,
     ) -> bool:
         root_cte = (
@@ -304,13 +329,49 @@ class RBAC:
             select(PolicyORM)
             .join(relations_cte, PolicyORM.role_id == relations_cte.c.role_id)
             .where(
-                PolicyORM.resource_type == resource_type,
-                PolicyORM.resource_id.in_((resource_id, "*")),
-                PolicyORM.action == action,
+                PolicyORM.resource_type == permission.resource_type,
+                PolicyORM.resource_id.in_((permission.resource_id, "*")),
+                PolicyORM.action == permission.action,
             )
         ).all()
 
         return len(policy_orms) > 0
+
+    def get_subject_policies(self, *, subject: str, db: Session) -> tuple[Policy, ...]:
+        root_cte = (
+            select(MemberORM.role_id)
+            .where(MemberORM.subject_id == subject)
+            .cte(recursive=True)
+        )
+
+        traversing_cte = root_cte.alias()
+        relations_cte = root_cte.union_all(
+            select(HierarchyORM.parent_role_id).join(
+                traversing_cte, HierarchyORM.child_role_id == traversing_cte.c.role_id
+            )
+        )
+
+        policy_orms = (
+            db.scalars(
+                select(PolicyORM).join(
+                    relations_cte, PolicyORM.role_id == relations_cte.c.role_id
+                )
+            )
+            .unique()
+            .all()
+        )
+
+        return tuple(
+            Policy(
+                role=policy_orm.role_id,
+                permission=Permission(
+                    resource_type=policy_orm.resource_type,
+                    resource_id=policy_orm.resource_id,
+                    action=policy_orm.action,
+                ),
+            )
+            for policy_orm in policy_orms
+        )
 
 
 # def assign_role(self, *, parent_role_id: str, child_role_id: str) -> None: ...

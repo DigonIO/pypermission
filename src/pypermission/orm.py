@@ -41,6 +41,6 @@ class MemberORM(BaseORM):
 class PolicyORM(BaseORM):
     __tablename__ = "pp_policy_table"
     role_id: Mapped[str] = mapped_column(String, primary_key=True)
-    resource_type: Mapped[str] = mapped_column(String)
-    resource_id: Mapped[str | None] = mapped_column(String, nullable=True)
-    action: Mapped[str] = mapped_column(String)
+    resource_type: Mapped[str] = mapped_column(String, primary_key=True)
+    resource_id: Mapped[str] = mapped_column(String, primary_key=True)
+    action: Mapped[str] = mapped_column(String, primary_key=True)
