@@ -25,9 +25,9 @@ class Permission:
         self.action = action
 
     def __str__(self) -> str:
-        if self.resource_id is None:
-            return f"{self.resource_type} - {self.action}"
-        return f"{self.resource_type}[{self.resource_id}] - {self.action}"
+        if not self.resource_id:
+            return f"{self.resource_type}:{self.action}"
+        return f"{self.resource_type}[{self.resource_id}]:{self.action}"
 
 
 class Policy:
@@ -39,7 +39,7 @@ class Policy:
         self.permission = permission
 
     def __str__(self) -> str:
-        return f"{self.role} - {self.permission}"
+        return f"{self.role}:{self.permission}"
 
 
 class RBAC:
@@ -84,7 +84,7 @@ class RBAC:
         root_cte = (
             select(HierarchyORM)
             .where(HierarchyORM.parent_role_id == child_role)
-            .cte(name="root_cte", recursive=True)
+            .cte(recursive=True)
         )
 
         traversing_cte = root_cte.alias()
