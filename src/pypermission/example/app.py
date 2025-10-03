@@ -16,7 +16,7 @@ from pypermission.rbac import RBAC, Policy, Permission
 # "Thomas"
 
 
-class DemoError(Exception): ...
+class ExampleError(Exception): ...
 
 
 class Context:
@@ -64,7 +64,7 @@ class Group:
         self.owner = owner
 
 
-class DemoApp:
+class ExampleApp:
     rbac: RBAC
 
     _users: dict[str, User] = {}
@@ -86,7 +86,7 @@ class DemoApp:
         match rbac, ctx.username:
             case True, str():
                 if ctx.username not in self._users:
-                    raise DemoError(f"Unknown user '{ctx.username}' in context!")
+                    raise ExampleError(f"Unknown user '{ctx.username}' in context!")
 
                 if not self.rbac.check_subject_permission(
                     subject=ctx.username,
@@ -95,13 +95,13 @@ class DemoApp:
                     ),
                     db=ctx.db,
                 ):
-                    raise DemoError("Permission not granted!")
+                    raise ExampleError("Permission not granted!")
             case False, None:
                 ...
             case False, str():
                 ...
             case True, None:
-                raise DemoError("No user in context!")
+                raise ExampleError("No user in context!")
 
         user = User(username=username, email=email, role=role)
         self._users[username] = user
@@ -121,7 +121,7 @@ class DemoApp:
         match rbac, ctx.username:
             case True, str():
                 if ctx.username not in self._users:
-                    raise DemoError(f"Unknown user '{ctx.username}' in context!")
+                    raise ExampleError(f"Unknown user '{ctx.username}' in context!")
 
                 if not self.rbac.check_subject_permission(
                     subject=ctx.username,
@@ -130,18 +130,18 @@ class DemoApp:
                     ),
                     db=ctx.db,
                 ):
-                    raise DemoError("Permission not granted!")
+                    raise ExampleError("Permission not granted!")
             case False, None:
                 ...
             case False, str():
                 ...
             case True, None:
-                raise DemoError("No user in context!")
+                raise ExampleError("No user in context!")
 
         try:
             return self._users[username]
         except KeyError:
-            raise DemoError(f"Unknown user '{username}'!")
+            raise ExampleError(f"Unknown user '{username}'!")
 
     def edit_user_email(
         self,
@@ -155,7 +155,7 @@ class DemoApp:
         match rbac, ctx.username:
             case True, str():
                 if ctx.username not in self._users:
-                    raise DemoError(f"Unknown user '{ctx.username}' in context!")
+                    raise ExampleError(f"Unknown user '{ctx.username}' in context!")
 
                 if not self.rbac.check_subject_permission(
                     subject=ctx.username,
@@ -164,20 +164,20 @@ class DemoApp:
                     ),
                     db=ctx.db,
                 ):
-                    raise DemoError("Permission not granted!")
+                    raise ExampleError("Permission not granted!")
             case False, None:
                 ...
             case False, str():
                 ...
             case True, None:
-                raise DemoError("No user in context!")
+                raise ExampleError("No user in context!")
 
         try:
             user = self._users[username]
             user.email = email
             return user
         except KeyError:
-            raise DemoError(f"Unknown user '{username}'!")
+            raise ExampleError(f"Unknown user '{username}'!")
 
     def set_user_state(
         self,
@@ -191,7 +191,7 @@ class DemoApp:
         match rbac, ctx.username:
             case True, str():
                 if ctx.username not in self._users:
-                    raise DemoError(f"Unknown user '{ctx.username}' in context!")
+                    raise ExampleError(f"Unknown user '{ctx.username}' in context!")
 
                 if not self.rbac.check_subject_permission(
                     subject=ctx.username,
@@ -200,20 +200,20 @@ class DemoApp:
                     ),
                     db=ctx.db,
                 ):
-                    raise DemoError("Permission not granted!")
+                    raise ExampleError("Permission not granted!")
             case False, None:
                 ...
             case False, str():
                 ...
             case True, None:
-                raise DemoError("No user in context!")
+                raise ExampleError("No user in context!")
 
         try:
             user = self._users[username]
             user.state = state
             return user
         except KeyError:
-            raise DemoError(f"Unknown user '{username}'!")
+            raise ExampleError(f"Unknown user '{username}'!")
 
     def delete_user(
         self,
@@ -226,7 +226,7 @@ class DemoApp:
         match rbac, ctx.username:
             case True, str():
                 if ctx.username not in self._users:
-                    raise DemoError(f"Unknown user '{ctx.username}' in context!")
+                    raise ExampleError(f"Unknown user '{ctx.username}' in context!")
 
                 if not self.rbac.check_subject_permission(
                     subject=ctx.username,
@@ -235,13 +235,13 @@ class DemoApp:
                     ),
                     db=ctx.db,
                 ):
-                    raise DemoError("Permission not granted!")
+                    raise ExampleError("Permission not granted!")
             case False, None:
                 ...
             case False, str():
                 ...
             case True, None:
-                raise DemoError("No user in context!")
+                raise ExampleError("No user in context!")
 
         try:
             user = self._users[username]
@@ -261,7 +261,7 @@ class DemoApp:
             del self._users[username]
             return user
         except KeyError:
-            raise DemoError(f"Unknown user '{username}'!")
+            raise ExampleError(f"Unknown user '{username}'!")
 
     def create_group(
         self,
@@ -275,9 +275,9 @@ class DemoApp:
         match rbac, owner, ctx.username:
             case True, str(), str():
                 if ctx.username not in self._users:
-                    raise DemoError(f"Unknown user '{ctx.username}' in context!")
+                    raise ExampleError(f"Unknown user '{ctx.username}' in context!")
                 if ctx.username != owner:
-                    raise DemoError(
+                    raise ExampleError(
                         f"User '{ctx.username}' cannot create a group on behalf of '{owner}'."
                     )
 
@@ -290,15 +290,15 @@ class DemoApp:
                     ),
                     db=ctx.db,
                 ):
-                    raise DemoError("Permission not granted!")
+                    raise ExampleError("Permission not granted!")
             case True, str(), None:
-                raise DemoError("No user in context!")
+                raise ExampleError("No user in context!")
             case False, str(), None:
                 ...
             case False, str(), str():
                 ...
             case _:
-                raise DemoError("Invalid combination of arguments!")
+                raise ExampleError("Invalid combination of arguments!")
 
         group = Group(groupname=groupname, description=description, owner=owner)
         self._create_group_role_and_policies(groupname=groupname, owner=owner, ctx=ctx)
@@ -315,7 +315,7 @@ class DemoApp:
         match rbac, ctx.username:
             case True, str():
                 if ctx.username not in self._users:
-                    raise DemoError(f"Unknown user '{ctx.username}' in context!")
+                    raise ExampleError(f"Unknown user '{ctx.username}' in context!")
 
                 if not self.rbac.check_subject_permission(
                     subject=ctx.username,
@@ -324,18 +324,18 @@ class DemoApp:
                     ),
                     db=ctx.db,
                 ):
-                    raise DemoError("Permission not granted!")
+                    raise ExampleError("Permission not granted!")
             case False, None:
                 ...
             case False, str():
                 ...
             case True, None:
-                raise DemoError("No user in context!")
+                raise ExampleError("No user in context!")
 
         try:
             return self._groups[groupname]
         except KeyError:
-            raise DemoError(f"Unknown group '{groupname}'!")
+            raise ExampleError(f"Unknown group '{groupname}'!")
 
     def edit_group_description(
         self,
@@ -349,7 +349,7 @@ class DemoApp:
         match rbac, ctx.username:
             case True, str():
                 if ctx.username not in self._users:
-                    raise DemoError(f"Unknown user '{ctx.username}' in context!")
+                    raise ExampleError(f"Unknown user '{ctx.username}' in context!")
 
                 if not self.rbac.check_subject_permission(
                     subject=ctx.username,
@@ -358,20 +358,20 @@ class DemoApp:
                     ),
                     db=ctx.db,
                 ):
-                    raise DemoError("Permission not granted!")
+                    raise ExampleError("Permission not granted!")
             case False, None:
                 ...
             case False, str():
                 ...
             case True, None:
-                raise DemoError("No user in context!")
+                raise ExampleError("No user in context!")
 
         try:
             group = self._groups[groupname]
             group.description = description
             return group
         except KeyError:
-            raise DemoError(f"Unknown group '{groupname}'!")
+            raise ExampleError(f"Unknown group '{groupname}'!")
 
     def set_group_state(
         self,
@@ -385,7 +385,7 @@ class DemoApp:
         match rbac, ctx.username:
             case True, str():
                 if ctx.username not in self._users:
-                    raise DemoError(f"Unknown user '{ctx.username}' in context!")
+                    raise ExampleError(f"Unknown user '{ctx.username}' in context!")
 
                 if not self.rbac.check_subject_permission(
                     subject=ctx.username,
@@ -396,20 +396,20 @@ class DemoApp:
                     ),
                     db=ctx.db,
                 ):
-                    raise DemoError("Permission not granted!")
+                    raise ExampleError("Permission not granted!")
             case False, None:
                 ...
             case False, str():
                 ...
             case True, None:
-                raise DemoError("No user in context!")
+                raise ExampleError("No user in context!")
 
         try:
             group = self._groups[groupname]
             group.state = state
             return group
         except KeyError:
-            raise DemoError(f"Unknown group '{groupname}'!")
+            raise ExampleError(f"Unknown group '{groupname}'!")
 
     def delete_group(
         self,
@@ -422,7 +422,7 @@ class DemoApp:
         match rbac, ctx.username:
             case True, str():
                 if ctx.username not in self._users:
-                    raise DemoError(f"Unknown user '{ctx.username}' in context!")
+                    raise ExampleError(f"Unknown user '{ctx.username}' in context!")
 
                 if not self.rbac.check_subject_permission(
                     subject=ctx.username,
@@ -431,13 +431,13 @@ class DemoApp:
                     ),
                     db=ctx.db,
                 ):
-                    raise DemoError("Permission not granted!")
+                    raise ExampleError("Permission not granted!")
             case False, None:
                 ...
             case False, str():
                 ...
             case True, None:
-                raise DemoError("No user in context!")
+                raise ExampleError("No user in context!")
 
         try:
             group = self._groups[groupname]
@@ -448,7 +448,7 @@ class DemoApp:
             del self._groups[groupname]
             return group
         except KeyError:
-            raise DemoError(f"Unknown group '{groupname}'!")
+            raise ExampleError(f"Unknown group '{groupname}'!")
 
     def populate_scenario(self, *, ctx: Context) -> None:
         self.rbac.create_role(role="admin", db=ctx.db)
