@@ -2,7 +2,6 @@ import networkx as nx
 import plotly.graph_objects as go
 from sqlalchemy.sql import select
 from sqlalchemy.orm import Session
-from dash import Dash, dcc, html, Input, Output
 
 from pypermission.models import HierarchyORM, MemberORM, PolicyORM, RoleORM, SubjectORM
 
@@ -10,30 +9,30 @@ from pypermission.models import HierarchyORM, MemberORM, PolicyORM, RoleORM, Sub
 def plot_dag(db: Session) -> None:
 
     role_orms = db.scalars(select(RoleORM)).all()
-    roles = [role_orm.id for role_orm in role_orms]
+    roles = set(role_orm.id for role_orm in role_orms)
 
     hierarchy_orms = db.scalars(select(HierarchyORM)).all()
-    role_hierarchy = [
+    role_hierarchy = set(
         (hierarchy_orm.child_role_id, hierarchy_orm.parent_role_id)
         for hierarchy_orm in hierarchy_orms
-    ]
+    )
 
     subject_orms = db.scalars(select(SubjectORM)).all()
-    subjects = [subject_orm.id for subject_orm in subject_orms]
+    subjects = set(subject_orm.id for subject_orm in subject_orms)
 
     member_orms = db.scalars(select(MemberORM)).all()
-    members = [
+    members = set(
         (member_orm.subject_id, member_orm.role_id) for member_orm in member_orms
-    ]
+    )
 
     policy_orms = db.scalars(select(PolicyORM)).all()
-    permissions = [
+    permissions = set(
         _permission_to_str(
             policy_orm.resource_type, policy_orm.resource_id, policy_orm.action
         )
         for policy_orm in policy_orms
-    ]
-    policies = [
+    )
+    policies = set(
         (
             policy_orm.role_id,
             _permission_to_str(
@@ -41,7 +40,7 @@ def plot_dag(db: Session) -> None:
             ),
         )
         for policy_orm in policy_orms
-    ]
+    )
 
     G = nx.DiGraph()
     G.add_nodes_from(roles, type="role")
