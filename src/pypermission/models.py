@@ -40,6 +40,13 @@ class Policy:
         return f"{self.role}:{self.permission}"
 
 
+class FrozenClass(type):
+    def __setattr__(cls, key, value):
+        if key in cls.__dict__:
+            raise AttributeError(f"FrozenClass attributes cannot be overwrite!")
+        super().__setattr__(key, value)
+
+
 ################################################################################
 #### RoleORM
 ################################################################################
