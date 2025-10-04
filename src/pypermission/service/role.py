@@ -20,28 +20,93 @@ class RoleService(metaclass=FrozenClass):
 
     @classmethod
     def create(cls, *, role: str, db: Session) -> None:
+        """
+        Create a new role .
+
+        Parameters
+        ----------
+        role : str
+            The ID of the role to create.
+        db : Session
+            The SQLAlchemy session.
+
+        Raises
+        ------
+        PyPermissionError
+            If a role with the given ID already exists.
+        """
         try:
             role_orm = RoleORM(id=role)
             db.add(role_orm)
             db.flush()
         except IntegrityError:
             db.rollback()
+            raise PyPermissionError(f"The role '{role}' already exists!")
 
     @classmethod
     def delete(cls, *, role: str, db: Session) -> None:
+        """
+        Delete an existing role.
+
+        Parameters
+        ----------
+        role : str
+            The ID of the role to delete.
+        db : Session
+            The SQLAlchemy session.
+
+        Raises
+        ------
+        PyPermissionError
+            If a role with the given ID does not exist.
+        """
         role_orm = db.get(RoleORM, role)
         if role_orm is None:
-            return
+            raise PyPermissionError(f"An unknown role '{role}' cannot be deleted!")
         db.delete(role_orm)
         db.flush()
 
     @classmethod
     def list(cls, *, db: Session) -> tuple[str, ...]:
+        """
+        Retrieve all roles currently defined.
+
+        Parameters
+        ----------
+        db : Session
+            The SQLAlchemy session.
+
+        Returns
+        -------
+        tuple[str]
+            A tuple containing the IDs of all roles.
+        """
         role_orms = db.scalars(select(RoleORM)).all()
         return tuple(role_orm.id for role_orm in role_orms)
 
     @classmethod
     def add_hierarchy(cls, *, parent_role: str, child_role: str, db: Session) -> None:
+        """
+        Add a parent-child relationship between two roles.
+
+        Parameters
+        ----------
+        parent_role : str
+            The ID of the parent role.
+        child_role : str
+            The ID of the child role.
+        db : Session
+            The SQLAlchemy session.
+
+        Raises
+        ------
+        PyPermissionError
+            If the parent and child roles are the same.
+            If one or both roles do not exist in the system.
+            If adding the hierarchy would create a loop.
+        IntegrityError
+            If a database integrity issue occurs while adding the hierarchy.
+        """
         if parent_role == child_role:
             raise PyPermissionError(
                 f"Both roles ('{parent_role}') must not be the same!"
@@ -89,6 +154,27 @@ class RoleService(metaclass=FrozenClass):
     def remove_hierarchy(
         cls, *, parent_role: str, child_role: str, db: Session
     ) -> None:
+        """
+        Remove a parent-child relationship between two roles.
+
+        Parameters
+        ----------
+        parent_role : str
+            The ID of the parent role.
+        child_role : str
+            The ID of the child role.
+        db : Session
+            The SQLAlchemy session.
+
+        Raises
+        ------
+        PyPermissionError
+            If the parent and child roles are the same.
+            If one or both roles do not exist in the system.
+            If adding the hierarchy would create a loop.
+        IntegrityError
+            If a database integrity issue occurs while adding the hierarchy.
+        """
         if parent_role == child_role:
             raise PyPermissionError(
                 f"Both roles ('{parent_role}') must not be the same!"
