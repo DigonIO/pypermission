@@ -1,52 +1,46 @@
+from typing import Final
+
 from sqlalchemy.engine.base import Engine
 
-from pypermission.rbac import RBAC, Policy, Permission
+from pypermission import RBAC
+from pypermission.models import Policy, Permission, create_rbac_database_table
 from pypermission.example.models import Context
 from pypermission.example.service.user import UserService
 from pypermission.example.service.group import GroupService
 
 
 class ExampleApp:
-    _rbac: RBAC
-    _user: UserService
-    _group: GroupService
+    _user: Final = UserService
+    _group: Final = GroupService
 
     def __init__(self, *, engine: Engine) -> None:
-        self._rbac = RBAC(engine=engine)
-        self._user = UserService(rbac=self._rbac)
-        self._group = GroupService(rbac=self._rbac)
-
-    # NOTE RBAC is only exposed here for testing purposes.
-    # In a real application, the RBAC API should be wrapped with business logic.
-    @property
-    def rbac(self) -> RBAC:
-        return self._rbac
+        create_rbac_database_table(engine=engine)
 
     @property
-    def user(self) -> UserService:
+    def user(self) -> type[UserService]:
         return self._user
 
     @property
-    def group(self) -> GroupService:
+    def group(self) -> type[GroupService]:
         return self._group
 
     def populate_example(self, *, ctx: Context) -> None:
-        self.rbac.create_role(role="admin", db=ctx.db)
-        self.rbac.create_role(role="moderator", db=ctx.db)
-        self.rbac.create_role(role="user", db=ctx.db)
-        self.rbac.create_role(role="guest", db=ctx.db)
+        RBAC.role.create(role="admin", db=ctx.db)
+        RBAC.role.create(role="moderator", db=ctx.db)
+        RBAC.role.create(role="user", db=ctx.db)
+        RBAC.role.create(role="guest", db=ctx.db)
 
-        self.rbac.add_role_hierarchy(
+        RBAC.role.add_hierarchy(
             parent_role="guest",
             child_role="user",
             db=ctx.db,
         )
-        self.rbac.add_role_hierarchy(
+        RBAC.role.add_hierarchy(
             parent_role="user",
             child_role="moderator",
             db=ctx.db,
         )
-        self.rbac.add_role_hierarchy(
+        RBAC.role.add_hierarchy(
             parent_role="moderator",
             child_role="admin",
             db=ctx.db,
@@ -111,7 +105,7 @@ class ExampleApp:
         )
 
     def _create_guest_role_policies(self, ctx: Context) -> None:
-        self.rbac.create_policy(
+        RBAC.policy.create(
             policy=Policy(
                 role="guest",
                 permission=Permission(
@@ -124,7 +118,7 @@ class ExampleApp:
         )
 
     def _create_user_role_policies(self, ctx: Context) -> None:
-        self.rbac.create_policy(
+        RBAC.policy.create(
             policy=Policy(
                 role="user",
                 permission=Permission(
@@ -137,7 +131,7 @@ class ExampleApp:
         )
 
     def _create_moderator_role_policies(self, ctx: Context) -> None:
-        self.rbac.create_policy(
+        RBAC.policy.create(
             policy=Policy(
                 role="moderator",
                 permission=Permission(
@@ -148,7 +142,7 @@ class ExampleApp:
             ),
             db=ctx.db,
         )
-        self.rbac.create_policy(
+        RBAC.policy.create(
             policy=Policy(
                 role="moderator",
                 permission=Permission(
@@ -159,7 +153,7 @@ class ExampleApp:
             ),
             db=ctx.db,
         )
-        self.rbac.create_policy(
+        RBAC.policy.create(
             policy=Policy(
                 role="moderator",
                 permission=Permission(
@@ -170,7 +164,7 @@ class ExampleApp:
             ),
             db=ctx.db,
         )
-        self.rbac.create_policy(
+        RBAC.policy.create(
             policy=Policy(
                 role="moderator",
                 permission=Permission(
@@ -181,7 +175,7 @@ class ExampleApp:
             ),
             db=ctx.db,
         )
-        self.rbac.create_policy(
+        RBAC.policy.create(
             policy=Policy(
                 role="moderator",
                 permission=Permission(
@@ -194,7 +188,7 @@ class ExampleApp:
         )
 
     def _create_admin_role_policies(self, ctx: Context) -> None:
-        self.rbac.create_policy(
+        RBAC.policy.create(
             policy=Policy(
                 role="admin",
                 permission=Permission(
@@ -205,7 +199,7 @@ class ExampleApp:
             ),
             db=ctx.db,
         )
-        self.rbac.create_policy(
+        RBAC.policy.create(
             policy=Policy(
                 role="admin",
                 permission=Permission(
@@ -216,7 +210,7 @@ class ExampleApp:
             ),
             db=ctx.db,
         )
-        self.rbac.create_policy(
+        RBAC.policy.create(
             policy=Policy(
                 role="admin",
                 permission=Permission(

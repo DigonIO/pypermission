@@ -2,7 +2,7 @@ from typing import Sequence
 
 from sqlalchemy.sql import select
 
-from pypermission.rbac import RBAC, Policy, Permission
+from pypermission import RBAC, Policy, Permission
 from pypermission.example.models import UserORM, Context, ExampleError, State
 
 ################################################################################
@@ -11,13 +11,9 @@ from pypermission.example.models import UserORM, Context, ExampleError, State
 
 
 class UserService:
-    _rbac: RBAC
-
-    def __init__(self, *, rbac: RBAC):
-        self._rbac = rbac
-
+    @classmethod
     def create(
-        self,
+        cls,
         *,
         username: str,
         email: str,
@@ -32,7 +28,7 @@ class UserService:
                 if ctx.db.get(UserORM, ctx.username) is None:
                     raise ExampleError(f"Unknown user '{ctx.username}' in context!")
 
-                if not self._rbac.check_subject_permission(
+                if not RBAC.subject.check_permission(
                     subject=ctx.username,
                     permission=Permission(
                         resource_type="base", resource_id="", action="user:create"
@@ -51,12 +47,13 @@ class UserService:
         ctx.db.add(user_orm)
         ctx.db.flush()
 
-        self._create_role_and_policies(username=username, role=role, ctx=ctx)
+        cls._create_role_and_policies(username=username, role=role, ctx=ctx)
 
         return user_orm
 
+    @classmethod
     def list(
-        self,
+        cls,
         *,
         ctx: Context,
         rbac: bool = True,
@@ -68,7 +65,7 @@ class UserService:
                 if ctx.db.get(UserORM, ctx.username) is None:
                     raise ExampleError(f"Unknown user '{ctx.username}' in context!")
 
-                if not self._rbac.check_subject_permission(
+                if not RBAC.subject.check_permission(
                     subject=ctx.username,
                     permission=Permission(
                         resource_type="user", resource_id="*", action="access"
@@ -85,8 +82,9 @@ class UserService:
 
         return ctx.db.scalars(select(UserORM)).all()
 
+    @classmethod
     def get(
-        self,
+        cls,
         *,
         username: str,
         ctx: Context,
@@ -99,7 +97,7 @@ class UserService:
                 if ctx.db.get(UserORM, ctx.username) is None:
                     raise ExampleError(f"Unknown user '{ctx.username}' in context!")
 
-                if not self._rbac.check_subject_permission(
+                if not RBAC.subject.check_permission(
                     subject=ctx.username,
                     permission=Permission(
                         resource_type="user", resource_id=username, action="access"
@@ -119,8 +117,9 @@ class UserService:
             raise ExampleError(f"Unknown user '{username}'!")
         return user_orm
 
+    @classmethod
     def set_email(
-        self,
+        cls,
         *,
         username: str,
         email: str,
@@ -134,7 +133,7 @@ class UserService:
                 if ctx.db.get(UserORM, ctx.username) is None:
                     raise ExampleError(f"Unknown user '{ctx.username}' in context!")
 
-                if not self._rbac.check_subject_permission(
+                if not RBAC.subject.check_permission(
                     subject=ctx.username,
                     permission=Permission(
                         resource_type="user", resource_id=username, action="edit"
@@ -156,8 +155,9 @@ class UserService:
         ctx.db.flush()
         return user_orm
 
+    @classmethod
     def set_state(
-        self,
+        cls,
         *,
         username: str,
         state: State,
@@ -171,7 +171,7 @@ class UserService:
                 if ctx.db.get(UserORM, ctx.username) is None:
                     raise ExampleError(f"Unknown user '{ctx.username}' in context!")
 
-                if not self._rbac.check_subject_permission(
+                if not RBAC.subject.check_permission(
                     subject=ctx.username,
                     permission=Permission(
                         resource_type="user", resource_id=username, action="deactivate"
@@ -193,8 +193,9 @@ class UserService:
         ctx.db.flush()
         return user_orm
 
+    @classmethod
     def delete(
-        self,
+        cls,
         *,
         username: str,
         ctx: Context,
@@ -207,7 +208,7 @@ class UserService:
                 if ctx.db.get(UserORM, ctx.username) is None:
                     raise ExampleError(f"Unknown user '{ctx.username}' in context!")
 
-                if not self._rbac.check_subject_permission(
+                if not RBAC.subject.check_permission(
                     subject=ctx.username,
                     permission=Permission(
                         resource_type="user", resource_id=username, action="delete"
@@ -227,12 +228,12 @@ class UserService:
             raise ExampleError(f"Unknown user '{username}'!")
 
         USER_ROLE = f"user[{username}]"
-        self._rbac.delete_role(role=USER_ROLE, db=ctx.db)
-        self._rbac.delete_subject(subject=username, db=ctx.db)
+        RBAC.role.delete(role=USER_ROLE, db=ctx.db)
+        RBAC.subject.delete(subject=username, db=ctx.db)
 
         for group_orm in user_orm.group_orms:
             GROUP_ROLE__OWNER = f"group[{group_orm.groupname}]:owner"
-            self._rbac.delete_role(role=GROUP_ROLE__OWNER, db=ctx.db)
+            RBAC.role.delete(role=GROUP_ROLE__OWNER, db=ctx.db)
 
         ctx.db.delete(user_orm)
         ctx.db.flush()
@@ -243,15 +244,16 @@ class UserService:
     #### Util
     ################################################################################
 
-    def _create_role_and_policies(self, username: str, role: str, ctx: Context) -> None:
-        self._rbac.create_subject(subject=username, db=ctx.db)
-        self._rbac.assign_role(role=role, subject=username, db=ctx.db)
+    @classmethod
+    def _create_role_and_policies(cls, username: str, role: str, ctx: Context) -> None:
+        RBAC.subject.create(subject=username, db=ctx.db)
+        RBAC.subject.assign_role(role=role, subject=username, db=ctx.db)
 
         USER_ROLE = f"user[{username}]"
-        self._rbac.create_role(role=USER_ROLE, db=ctx.db)
-        self._rbac.assign_role(subject=username, role=USER_ROLE, db=ctx.db)
+        RBAC.role.create(role=USER_ROLE, db=ctx.db)
+        RBAC.subject.assign_role(subject=username, role=USER_ROLE, db=ctx.db)
 
-        self._rbac.create_policy(
+        RBAC.policy.create(
             policy=Policy(
                 role=USER_ROLE,
                 permission=Permission(
@@ -260,7 +262,7 @@ class UserService:
             ),
             db=ctx.db,
         )
-        self._rbac.create_policy(
+        RBAC.policy.create(
             policy=Policy(
                 role=USER_ROLE,
                 permission=Permission(
@@ -269,7 +271,7 @@ class UserService:
             ),
             db=ctx.db,
         )
-        self._rbac.create_policy(
+        RBAC.policy.create(
             policy=Policy(
                 role=USER_ROLE,
                 permission=Permission(
