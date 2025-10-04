@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy.engine.base import Engine
 from sqlalchemy.exc import IntegrityError
 
-from pypermission.orm import (
+from pypermission.models import (
     BaseORM,
     RoleORM,
     HierarchyORM,

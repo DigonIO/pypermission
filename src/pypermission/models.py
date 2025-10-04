@@ -1,4 +1,4 @@
-from sqlalchemy.orm import Mapped, mapped_column, DeclarativeBase, relationship
+from sqlalchemy.orm import Mapped, mapped_column, DeclarativeBase
 from sqlalchemy.sql.sqltypes import String
 from sqlalchemy.sql.schema import ForeignKey
 
