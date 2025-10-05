@@ -1,4 +1,4 @@
-site_name: PyPermission Docs
+site_name: Python RBAC Docs
 
 theme:
   name: material
@@ -20,10 +20,13 @@ plugins:
             show_source: false
 
 nav:
-  - Home: index.md
-  - API Reference <api/index.md>:
+  - README: readme_symlink.md
+  - Guide:
+      - Start: guide/index.md
+  - Comparison to ANSI: ansi.md
+  - API Reference:
       - RBAC: api/rbac.md
-      - Role Service: api/role.md
-      - Subject Service: api/subject.md
-      - Policy Service: api/policy.md
+      - Role service: api/role.md
+      - Subject service: api/subject.md
+      - Policy service: api/policy.md
       - Models: api/models.md

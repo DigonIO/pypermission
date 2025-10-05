@@ -1,6 +1,6 @@
 from enum import StrEnum
 
-from sqlalchemy.orm import Mapped, mapped_column, DeclarativeBase, relationship, Session
+from sqlalchemy.orm import Mapped, mapped_column, relationship, Session
 from sqlalchemy.sql.sqltypes import String
 from sqlalchemy.sql.sqltypes import Enum as SqlEnum
 from sqlalchemy.sql.schema import ForeignKey

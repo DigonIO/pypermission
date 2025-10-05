@@ -8,7 +8,6 @@ __version__ = "0.1.0"
 __author__ = "Jendrik A. Potyka, Fabian A. Preiss"
 
 from typing import Final
-from types import ModuleType
 
 from pypermission.service.role import RoleService
 from pypermission.service.subject import SubjectService
