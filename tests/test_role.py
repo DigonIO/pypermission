@@ -32,3 +32,16 @@ def test_delete_role__success(*, db: Session) -> None:
 def test_delete_role__unknown(*, db: Session) -> None:
     with pytest.raises(PyPermissionError):
         RoleService.delete(role="Alex", db=db)
+
+
+################################################################################
+#### Test role list
+################################################################################
+
+
+def test_list__success(*, db: Session) -> None:
+    assert RoleService.list(db=db) == tuple()
+    RoleService.create(role="Alex", db=db)
+    assert RoleService.list(db=db) == ("Alex",)
+    RoleService.create(role="Max", db=db)
+    assert RoleService.list(db=db) == ("Alex", "Max")
