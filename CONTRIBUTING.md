@@ -1,4 +1,4 @@
-# HowTo: Contributing
+# HowTo: Contribute to pypermission
 
 ## Development setup
 
@@ -18,4 +18,18 @@ Generate the html coverage report. The command creates a folder `htmlcov` with a
 
 ```console
 uv run coverage html
+```
+
+## Documentation
+
+Build the documentation.
+
+```console
+uv run mkdocs build
+```
+
+Serve the documentation for easy local development.
+
+```console
+uv run mkdocs serve
 ```
