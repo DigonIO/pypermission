@@ -30,9 +30,24 @@ class Namespace(type):
 
 
 class RBAC(metaclass=FrozenClass):
+    """
+    Namespace for the role, subject and policy services.
+    """
+
     role: Final = RoleService
+    """
+    Shorthand for all RoleService functions.
+    """
+
     subject: Final = SubjectService
+    """
+    Shorthand for all SubjectService functions.
+    """
+
     policy: Final = PolicyService
+    """
+    Shorthand for all PolicyService functions hello.
+    """
 
 
 __all__ = [

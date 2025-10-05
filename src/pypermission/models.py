@@ -13,11 +13,37 @@ class BaseORM(DeclarativeBase): ...
 
 
 class Permission:
+    """
+    Represents an action that can be performed on a specific resource.
+
+    Attributes
+    ----------
+    resource_type : str
+        The type of the resource (e.g., "document", "user").
+    resource_id : str
+        The ID of the resource instance. The start ('*') acts as a wildcard matching all IDs of the resource. The empty string ('') can be used for actions on resources that do not have an ID.
+    action : str
+        The action allowed on the resource (e.g., "read", "write", "delete").
+    """
+
     resource_type: str
     resource_id: str
     action: str
 
     def __init__(self, *, resource_type: str, resource_id: str, action: str) -> None:
+        """
+        Initialize the Permission instance.
+
+        Parameters
+        ----------
+        resource_type : str
+            The type of the resource (e.g., "document", "user").
+        resource_id : str
+            The ID of the resource instance. The start ('*') acts as a wildcard matching all IDs of the resource. The empty string ('') can be used for actions on resources that do not have an ID.
+        action : str
+            The action allowed on the resource (e.g., "read", "write", "delete").
+        """
+
         self.resource_type = resource_type
         self.resource_id = resource_id
         self.action = action
@@ -118,4 +144,13 @@ class PolicyORM(BaseORM):
 
 
 def create_rbac_database_table(*, engine: Engine) -> None:
+    """
+    Create all for PyPermission required database table via. SQLAlchemy.
+
+    Parameters
+    ----------
+    engine : sqlalchemy.engine.base.Engine
+        The SQLAlchemy engine.
+
+    """
     BaseORM.metadata.create_all(bind=engine)

@@ -1,0 +1,29 @@
+site_name: PyPermission Docs
+
+theme:
+  name: material
+  palette:
+    # Palette toggle for dark mode
+    primary: teal
+    scheme: slate
+
+plugins:
+  - search
+  - mkdocstrings:
+      handlers:
+        python:
+          options:
+            show_signature_annotations: true
+            docstring_style: numpy
+            members_order: source
+            show_root_heading: true
+            show_source: false
+
+nav:
+  - Home: index.md
+  - API Reference <api/index.md>:
+      - RBAC: api/rbac.md
+      - Role Service: api/role.md
+      - Subject Service: api/subject.md
+      - Policy Service: api/policy.md
+      - Models: api/models.md
