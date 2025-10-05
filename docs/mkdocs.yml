@@ -32,7 +32,10 @@ nav:
       - Subject service: api/subject.md
       - Policy service: api/policy.md
       - Models: api/models.md
+  - Roadmap: roadmap.md
 
 markdown_extensions:
   - pymdownx.highlight
   - pymdownx.superfences
+  - pymdownx.tasklist:
+      custom_checkbox: true
