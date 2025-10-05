@@ -92,7 +92,9 @@ Fine-Tuned AI services for developers.
 
 Digon.IO provides end-to-end consulting and development for SMEs and software companies building data-driven solutions - with a focus on supply chain optimization and text processing. [(Website)](https://digon.io) [(Technical Blog)](https://digon.io/en/blog)
 
+_The sponsor logo is the property of Digon.IO GmbH. Standard trademark and copyright restrictions apply to any use outside this repository._
+
 ## License
 
-+ **Library source code:** LGPL-3.0-only
-+ **Library logo:** LGPL-3.0-only
++ **Library source code:** Licensed under SUL-1.0.
++ **Library logo:**  The library logo is a trademark of the project (unregistered). You are permitted to use the logo **only** in contexts that directly reference, document, or promote this library. For example, in a dependent project or in a blog post discussing this library. Any other use is prohibited.
