@@ -867,6 +867,18 @@ wheels = [
 ]
 
 [[package]]
+name = "mkdocs-coverage"
+version = "2.0.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "mkdocs" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/ed/99/3dc73a10a97b3b2f1071051987e0653b0de16b284ab669e5060c819c2609/mkdocs_coverage-2.0.0.tar.gz", hash = "sha256:628568ae5364eec06581bd6d7d83a56f9682a57350e73f07c298d5e104c7f69a", size = 31167, upload-time = "2025-09-11T12:14:05.947Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/90/b7/463c1c3ecc4c2e7bcb73bdc348ab356553ded0e39d25e6f1eee9c6f9c431/mkdocs_coverage-2.0.0-py3-none-any.whl", hash = "sha256:7df7449811ecea1802d42344d925a34eac9a084f22d3140bae234fad8cefa1ad", size = 6890, upload-time = "2025-09-11T12:14:03.7Z" },
+]
+
+[[package]]
 name = "mkdocs-get-deps"
 version = "0.2.0"
 source = { registry = "https://pypi.org/simple" }
@@ -1286,6 +1298,7 @@ dev = [
     { name = "coverage" },
     { name = "ipykernel" },
     { name = "mkdocs" },
+    { name = "mkdocs-coverage" },
     { name = "mkdocs-material" },
     { name = "mkdocstrings", extra = ["python"] },
     { name = "psycopg" },
@@ -1309,6 +1322,7 @@ dev = [
     { name = "coverage", specifier = ">=7.10.7" },
     { name = "ipykernel", specifier = ">=6.30.1" },
     { name = "mkdocs", specifier = ">=1.6.1" },
+    { name = "mkdocs-coverage", specifier = ">=2.0.0" },
     { name = "mkdocs-material", specifier = ">=9.6.21" },
     { name = "mkdocstrings", extras = ["python"], specifier = ">=0.30.1" },
     { name = "psycopg", specifier = ">=3.2.10" },

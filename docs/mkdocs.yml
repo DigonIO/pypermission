@@ -19,6 +19,9 @@ plugins:
             members_order: source
             show_root_heading: true
             show_source: false
+  - coverage:
+      page_path: coverage
+      html_report_dir: htmlcov
 
 nav:
   - README: readme_symlink.md
@@ -26,13 +29,14 @@ nav:
   - Guide:
       - Start: guide/index.md
   - Comparison to ANSI: ansi.md
+  - Roadmap: roadmap.md
   - API Reference:
       - RBAC: api/rbac.md
       - Role service: api/role.md
       - Subject service: api/subject.md
       - Policy service: api/policy.md
       - Models: api/models.md
-  - Roadmap: roadmap.md
+  - Coverage Report: coverage.md
 
 markdown_extensions:
   - pymdownx.highlight
