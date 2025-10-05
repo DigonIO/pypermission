@@ -21,13 +21,6 @@ from pypermission.models import (
 from pypermission.exc import PyPermissionError, PyPermissionNotGrantedError
 
 
-class Namespace(type):
-    def __setattr__(cls, key, value):
-        if key in cls.__dict__:
-            raise AttributeError(f"Cannot overwrite any attribute!")
-        super().__setattr__(key, value)
-
-
 class RBAC(metaclass=FrozenClass):
     """
     Namespace for the role, subject and policy services.
@@ -45,7 +38,7 @@ class RBAC(metaclass=FrozenClass):
 
     policy: Final = PolicyService
     """
-    Shorthand for all PolicyService functions hello.
+    Shorthand for all PolicyService functions.
     """
 
 

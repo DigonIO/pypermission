@@ -1,6 +1,16 @@
-# Python RBAC with SQLAlchemy
+![alt text](./assets/logo_name.svg "Title")
 
-## Features
+A python `RBAC` library for projects where `SQLAlchemy` is a valid option.
+
+[![License: SUL-1.0](assets/badges/license.svg)](https://spdx.org/licenses/SUL-1.0.html)
+[![Code style: black](assets/badges/black.svg)](https://github.com/psf/black)
+[![Imports: isort](assets/badges/isort.svg)](https://pycqa.github.io/isort/)
+
+## Python RBAC with SQLAlchemy
+
++ RBAC with NIST Level 2
++ Persistency via SQLAlchemy
+    + Postgresql (psycopg)
 
 ## Installation
 
