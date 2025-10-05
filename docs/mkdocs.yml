@@ -3,9 +3,10 @@ site_name: Python RBAC Docs
 theme:
   name: material
   palette:
-    # Palette toggle for dark mode
     primary: teal
     scheme: slate
+  features:
+    - content.code.copy
 
 plugins:
   - search
@@ -30,3 +31,7 @@ nav:
       - Subject service: api/subject.md
       - Policy service: api/policy.md
       - Models: api/models.md
+
+markdown_extensions:
+  - pymdownx.highlight
+  - pymdownx.superfences
