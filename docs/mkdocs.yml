@@ -26,7 +26,8 @@ plugins:
 nav:
   - README: readme_symlink.md
   - Quick Start: quick_start.md
-  - Guide:
+  - Permission Design Guide: permission_design_guide.md
+  - Implementation Guide:
       - Start: guide/index.md
   - Comparison to ANSI: ansi.md
   - Roadmap: roadmap.md
@@ -43,3 +44,16 @@ markdown_extensions:
   - pymdownx.superfences
   - pymdownx.tasklist:
       custom_checkbox: true
+  - admonition
+  - pymdownx.details
+  - pymdownx.arithmatex:
+      generic: true
+
+
+extra_javascript:
+  - javascripts/katex.js
+  - https://unpkg.com/katex@0/dist/katex.min.js
+  - https://unpkg.com/katex@0/dist/contrib/auto-render.min.js
+
+extra_css:
+  - https://unpkg.com/katex@0/dist/katex.min.css

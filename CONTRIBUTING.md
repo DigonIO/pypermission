@@ -22,14 +22,15 @@ uv run coverage html
 
 ## Documentation
 
-Build the documentation.
-
-```console
-uv run mkdocs build
-```
-
 Serve the documentation for easy local development.
 
 ```console
-uv run mkdocs serve
+uv run mkdocs serve -f docs/mkdocs.yml
 ```
+
+Build the documentation.
+
+```console
+uv run mkdocs build -f docs/mkdocs.yml
+```
+
