@@ -4,9 +4,10 @@ from sqlalchemy.sql import select
 from sqlalchemy.orm import Session
 
 from pypermission.models import HierarchyORM, MemberORM, PolicyORM, RoleORM, SubjectORM
+from pypermission.exc import PyPermissionError
 
 
-def plot_dag(db: Session) -> None:
+def dag_factory(*, db: Session) -> nx.DiGraph:
 
     role_orms = db.scalars(select(RoleORM)).all()
     roles = set(role_orm.id for role_orm in role_orms)
@@ -14,7 +15,7 @@ def plot_dag(db: Session) -> None:
     hierarchy_orms = db.scalars(select(HierarchyORM)).all()
     role_hierarchy = set(
         (hierarchy_orm.child_role_id, hierarchy_orm.parent_role_id)
-        for hierarchy_orm in hierarchy_orms
+            for hierarchy_orm in hierarchy_orms
     )
 
     subject_orms = db.scalars(select(SubjectORM)).all()
@@ -42,15 +43,23 @@ def plot_dag(db: Session) -> None:
         for policy_orm in policy_orms
     )
 
-    G = nx.DiGraph()
-    G.add_nodes_from(roles, type="role")
-    G.add_edges_from(role_hierarchy)
-    G.add_nodes_from(subjects, type="subject")
-    G.add_edges_from(members)
-    G.add_nodes_from(permissions, type="permission")
-    G.add_edges_from(policies)
+    dag = nx.DiGraph()
+    dag.add_nodes_from(roles, type="role")
+    dag.add_edges_from(role_hierarchy)
+    dag.add_nodes_from(subjects, type="subject")
+    dag.add_edges_from(members)
+    dag.add_nodes_from(permissions, type="permission")
+    dag.add_edges_from(policies)
 
-    fig = _build_plotly_figure(G=G)
+    return dag
+
+
+def plot_factory(*, dag: nx.DiGraph) -> None:
+
+    if not len(dag):
+        raise PyPermissionError("The RBAC system is empty. Nothing to plot!")
+
+    fig = _build_plotly_figure(dag=dag)
     fig.write_html("dag.html", auto_open=True)
 
 
@@ -67,12 +76,14 @@ COLOR_MAP = {
 NodePositions = dict[str, tuple[float, int]]
 
 
-def _build_plotly_figure(*, G: nx.DiGraph) -> go.Figure:
-    node_positions = _calc_node_positions(G=G)
-    node_colors = tuple(COLOR_MAP[G.nodes[n]["type"]] for n in G.nodes())
+def _build_plotly_figure(*, dag: nx.DiGraph) -> go.Figure:
+    node_positions = _calc_node_positions(dag=dag)
+    node_colors = tuple(COLOR_MAP[dag.nodes[n]["type"]] for n in dag.nodes())
 
-    nodes = _build_nodes(G=G, node_positions=node_positions, node_colors=node_colors)
-    edges = _build_edges(G=G, node_positions=node_positions)
+    nodes = _build_nodes(
+        dag=dag, node_positions=node_positions, node_colors=node_colors
+    )
+    edges = _build_edges(dag=dag, node_positions=node_positions)
 
     fig = go.Figure(data=[nodes, edges])
     fig.update_layout(
@@ -85,10 +96,10 @@ def _build_plotly_figure(*, G: nx.DiGraph) -> go.Figure:
     return fig
 
 
-def _build_edges(*, G: nx.DiGraph, node_positions: NodePositions) -> go.Scatter:
+def _build_edges(*, dag: nx.DiGraph, node_positions: NodePositions) -> go.Scatter:
     edge_x, edge_y = [], []
 
-    for u, v in G.edges():
+    for u, v in dag.edges():
         x0, y0 = node_positions[u]
         x1, y1 = node_positions[v]
         edge_x.extend([x0, x1, None])
@@ -104,30 +115,30 @@ def _build_edges(*, G: nx.DiGraph, node_positions: NodePositions) -> go.Scatter:
 
 
 def _build_nodes(
-    *, G: nx.DiGraph, node_positions: NodePositions, node_colors: tuple[str, ...]
+    *, dag: nx.DiGraph, node_positions: NodePositions, node_colors: tuple[str, ...]
 ) -> go.Scatter:
     return go.Scatter(
-        x=[node_positions[n][0] for n in G.nodes()],
-        y=[node_positions[n][1] for n in G.nodes()],
+        x=[node_positions[n][0] for n in dag.nodes()],
+        y=[node_positions[n][1] for n in dag.nodes()],
         mode="markers+text",
-        text=[str(n) for n in G.nodes()],
+        text=[str(n) for n in dag.nodes()],
         textposition="top center",
         marker=dict(size=20, color=node_colors, line=dict(width=2, color="black")),
     )
 
 
-def _calc_node_positions(*, G: nx.DiGraph) -> dict[str, tuple[float, int]]:
+def _calc_node_positions(*, dag: nx.DiGraph) -> dict[str, tuple[float, int]]:
     layers = {}
-    for node in nx.topological_sort(G):
-        node_type = G.nodes[node]["type"]
+    for node in nx.topological_sort(dag):
+        node_type = dag.nodes[node]["type"]
         if node_type == "subject":
             layers[node] = 1
         else:
-            layers[node] = 1 + max(layers[p] for p in G.predecessors(node))
+            layers[node] = 1 + max(layers[p] for p in dag.predecessors(node))
 
     max_layer = max(layers.values())
-    for node in G.nodes():
-        if G.nodes[node]["type"] == "permission":
+    for node in dag.nodes():
+        if dag.nodes[node]["type"] == "permission":
             layers[node] = max_layer
 
     layer_nodes: dict[int, list[str]] = {}
