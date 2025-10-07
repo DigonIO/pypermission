@@ -18,9 +18,12 @@ def plot_factory(*, dag: nx.DiGraph) -> None:
 ################################################################################
 
 COLOR_MAP = {
-    "role_node": "lightgreen",
-    "subject_node": "lightblue",
-    "permission_node": "lightcoral",
+    "subject_node": "darkturquoise",
+    "member_edge": "darkturquoise",
+    "role_node": "coral",
+    "hierarchy_edge": "coral",
+    "permission_node": "forestgreen",
+    "policy_edge": "forestgreen",
 }
 
 NodePositions = dict[str, tuple[float, int]]
@@ -28,16 +31,16 @@ NodePositions = dict[str, tuple[float, int]]
 
 def _build_plotly_figure(*, dag: nx.DiGraph) -> go.Figure:
     node_positions = _calc_node_positions(dag=dag)
-    node_colors = tuple(COLOR_MAP[dag.nodes[n]["type"]] for n in dag.nodes())
+    nodes = _build_nodes(dag=dag, node_positions=node_positions)
 
-    nodes = _build_nodes(
-        dag=dag, node_positions=node_positions, node_colors=node_colors
+    edge_colors = tuple(COLOR_MAP[dag.edges[n]["type"]] for n in dag.edges())
+    edges = _build_edges(
+        dag=dag, node_positions=node_positions, edge_colors=edge_colors
     )
-    edges = _build_edges(dag=dag, node_positions=node_positions)
 
-    fig = go.Figure(data=[nodes, edges])
+    fig = go.Figure(data=[edges[0], edges[1], edges[2], nodes[0], nodes[1], nodes[2]])
     fig.update_layout(
-        showlegend=False,
+        showlegend=True,
         margin=dict(l=20, r=20, t=20, b=20),
         xaxis=dict(showgrid=False, zeroline=False, showticklabels=False),
         yaxis=dict(showgrid=False, zeroline=False, showticklabels=False),
@@ -46,34 +49,100 @@ def _build_plotly_figure(*, dag: nx.DiGraph) -> go.Figure:
     return fig
 
 
-def _build_edges(*, dag: nx.DiGraph, node_positions: NodePositions) -> go.Scatter:
-    edge_x, edge_y = [], []
+def _build_nodes(
+    *, dag: nx.DiGraph, node_positions: NodePositions
+) -> tuple[go.Scatter, go.Scatter, go.Scatter]:
+    node_subjects = tuple(
+        node for node, data in dag.nodes.data() if data["type"] == "subject_node"
+    )
+    node_roles = tuple(
+        node for node, data in dag.nodes.data() if data["type"] == "role_node"
+    )
+    node_permissions = tuple(
+        node for node, data in dag.nodes.data() if data["type"] == "permission_node"
+    )
 
-    for u, v in dag.edges():
-        x0, y0 = node_positions[u]
-        x1, y1 = node_positions[v]
-        edge_x.extend([x0, x1, None])
-        edge_y.extend([y0, y1, None])
-
-    return go.Scatter(
-        x=edge_x,
-        y=edge_y,
-        line=dict(width=1, color="black"),
-        hoverinfo="none",
-        mode="lines",
+    return (
+        go.Scatter(
+            x=tuple(node_positions[node][0] for node in node_subjects),
+            y=tuple(node_positions[node][1] for node in node_subjects),
+            mode="markers+text",
+            text=tuple(str(n) for n in node_subjects),
+            textposition="top center",
+            textfont=dict(size=20, color="black"),
+            marker=dict(size=20, color=COLOR_MAP["subject_node"]),
+            name="Subjects",
+        ),
+        go.Scatter(
+            x=tuple(node_positions[node][0] for node in node_roles),
+            y=tuple(node_positions[node][1] for node in node_roles),
+            mode="markers+text",
+            text=[str(n) for n in node_roles],
+            textposition="top center",
+            textfont=dict(size=20, color="black"),
+            marker=dict(size=20, color=COLOR_MAP["role_node"]),
+            name="Roles",
+        ),
+        go.Scatter(
+            x=tuple(node_positions[node][0] for node in node_permissions),
+            y=tuple(node_positions[node][1] for node in node_permissions),
+            mode="markers+text",
+            text=tuple(str(node) for node in node_permissions),
+            textposition="top center",
+            textfont=dict(size=20, color="black"),
+            marker=dict(size=20, color=COLOR_MAP["permission_node"]),
+            name="Permissions",
+        ),
     )
 
 
-def _build_nodes(
-    *, dag: nx.DiGraph, node_positions: NodePositions, node_colors: tuple[str, ...]
-) -> go.Scatter:
-    return go.Scatter(
-        x=[node_positions[n][0] for n in dag.nodes()],
-        y=[node_positions[n][1] for n in dag.nodes()],
-        mode="markers+text",
-        text=[str(n) for n in dag.nodes()],
-        textposition="top center",
-        marker=dict(size=20, color=node_colors, line=dict(width=2, color="black")),
+def _build_edges(
+    *, dag: nx.DiGraph, node_positions: NodePositions, edge_colors: tuple[str, ...]
+) -> tuple[go.Scatter, go.Scatter, go.Scatter]:
+    edge_x_member, edge_y_member = [], []
+    edge_x_hierarchy, edge_y_hierarchy = [], []
+    edge_x_policy, edge_y_policy = [], []
+
+    for n_0, n_1, data in dag.edges.data():
+        x_0, y_0 = node_positions[n_0]
+        x_1, y_1 = node_positions[n_1]
+
+        match data["type"]:
+            case "member_edge":
+                edge_x_member.extend([x_0, x_1, None])
+                edge_y_member.extend([y_0, y_1, None])
+            case "hierarchy_edge":
+                edge_x_hierarchy.extend([x_0, x_1, None])
+                edge_y_hierarchy.extend([y_0, y_1, None])
+            case "policy_edge":
+                edge_x_policy.extend([x_0, x_1, None])
+                edge_y_policy.extend([y_0, y_1, None])
+
+    return (
+        go.Scatter(
+            x=edge_x_member,
+            y=edge_y_member,
+            line=dict(width=2, color=COLOR_MAP["member_edge"]),
+            hoverinfo="none",
+            mode="lines",
+            name="Role assignment",
+        ),
+        go.Scatter(
+            x=edge_x_hierarchy,
+            y=edge_y_hierarchy,
+            line=dict(width=2, color=COLOR_MAP["hierarchy_edge"]),
+            hoverinfo="none",
+            mode="lines",
+            name="Role hierarchy",
+        ),
+        go.Scatter(
+            x=edge_x_policy,
+            y=edge_y_policy,
+            line=dict(width=2, color=COLOR_MAP["policy_edge"]),
+            hoverinfo="none",
+            mode="lines",
+            name="Permission assignment",
+        ),
     )
 
 
@@ -123,9 +192,3 @@ def _calc_node_positions(*, dag: nx.DiGraph) -> dict[str, tuple[float, int]]:
         for x, node in zip(xs, nodes_in_layer):
             node_positions[node] = (x, y)
     return node_positions
-
-
-def _permission_to_str(resource_type: str, resource_id: str, action: str) -> str:
-    if not resource_id:
-        return f"{resource_type}:{action}"
-    return f"{resource_type}[{resource_id}]:{action}"

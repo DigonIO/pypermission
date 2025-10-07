@@ -8,19 +8,6 @@ from pypermission.models import RoleORM, HierarchyORM, MemberORM, PolicyORM
 from pypermission.exc import PyPermissionError
 
 ################################################################################
-#### Types
-################################################################################
-
-NodePositions = dict[str, tuple[float, int]]
-
-
-COLOR_MAP = {
-    "role_node": "lightgreen",
-    "subject_node": "lightblue",
-    "permission_node": "lightcoral",
-}
-
-################################################################################
 #### Role dag tools
 ################################################################################
 
