@@ -1,57 +1,7 @@
 import networkx as nx
 import plotly.graph_objects as go
-from sqlalchemy.sql import select
-from sqlalchemy.orm import Session
 
-from pypermission.models import HierarchyORM, MemberORM, PolicyORM, RoleORM, SubjectORM
 from pypermission.exc import PyPermissionError
-
-
-def dag_factory(*, db: Session) -> nx.DiGraph:
-
-    role_orms = db.scalars(select(RoleORM)).all()
-    roles = set(role_orm.id for role_orm in role_orms)
-
-    hierarchy_orms = db.scalars(select(HierarchyORM)).all()
-    role_hierarchy = set(
-        (hierarchy_orm.child_role_id, hierarchy_orm.parent_role_id)
-            for hierarchy_orm in hierarchy_orms
-    )
-
-    subject_orms = db.scalars(select(SubjectORM)).all()
-    subjects = set(subject_orm.id for subject_orm in subject_orms)
-
-    member_orms = db.scalars(select(MemberORM)).all()
-    members = set(
-        (member_orm.subject_id, member_orm.role_id) for member_orm in member_orms
-    )
-
-    policy_orms = db.scalars(select(PolicyORM)).all()
-    permissions = set(
-        _permission_to_str(
-            policy_orm.resource_type, policy_orm.resource_id, policy_orm.action
-        )
-        for policy_orm in policy_orms
-    )
-    policies = set(
-        (
-            policy_orm.role_id,
-            _permission_to_str(
-                policy_orm.resource_type, policy_orm.resource_id, policy_orm.action
-            ),
-        )
-        for policy_orm in policy_orms
-    )
-
-    dag = nx.DiGraph()
-    dag.add_nodes_from(roles, type="role")
-    dag.add_edges_from(role_hierarchy)
-    dag.add_nodes_from(subjects, type="subject")
-    dag.add_edges_from(members)
-    dag.add_nodes_from(permissions, type="permission")
-    dag.add_edges_from(policies)
-
-    return dag
 
 
 def plot_factory(*, dag: nx.DiGraph) -> None:
@@ -68,9 +18,9 @@ def plot_factory(*, dag: nx.DiGraph) -> None:
 ################################################################################
 
 COLOR_MAP = {
-    "role": "lightgreen",
-    "subject": "lightblue",
-    "permission": "lightcoral",
+    "role_node": "lightgreen",
+    "subject_node": "lightblue",
+    "permission_node": "lightcoral",
 }
 
 NodePositions = dict[str, tuple[float, int]]
@@ -128,25 +78,41 @@ def _build_nodes(
 
 
 def _calc_node_positions(*, dag: nx.DiGraph) -> dict[str, tuple[float, int]]:
-    layers = {}
+    role_layers: dict[str, int] = {}
     for node in nx.topological_sort(dag):
-        node_type = dag.nodes[node]["type"]
-        if node_type == "subject":
-            layers[node] = 1
-        else:
-            layers[node] = 1 + max(layers[p] for p in dag.predecessors(node))
+        if dag.nodes[node]["type"] == "role_node":
+            predecessors = tuple(dag.predecessors(node))
+            role_layers[node] = (
+                1
+                + max(
+                    tuple(
+                        role_layers[p]
+                        for p in predecessors
+                        if dag.nodes[p]["type"] == "role_node"
+                    )
+                    + (0,)
+                )
+                if predecessors
+                else 1
+            )
 
-    max_layer = max(layers.values())
-    for node in dag.nodes():
-        if dag.nodes[node]["type"] == "permission":
-            layers[node] = max_layer
+    subject_layer = 0
+    permission_layer = max(role_layers.values()) + 1
 
-    layer_nodes: dict[int, list[str]] = {}
-    for node, layer in layers.items():
-        layer_nodes.setdefault(layer, []).append(node)
+    layer_x_nodes: dict[int, list[str]] = {
+        layer: [] for layer in range(subject_layer, permission_layer + 1)
+    }
+    for node in nx.topological_sort(dag):
+        match dag.nodes[node]["type"]:
+            case "role_node":
+                layer_x_nodes[role_layers[node]].append(node)
+            case "subject_node":
+                layer_x_nodes[subject_layer].append(node)
+            case "permission_node":
+                layer_x_nodes[permission_layer].append(node)
 
     node_positions = {}
-    for layer, nodes_in_layer in layer_nodes.items():
+    for layer, nodes_in_layer in layer_x_nodes.items():
         n_nodes = len(nodes_in_layer)
         xs: tuple[float, ...]
         if n_nodes == 1:
