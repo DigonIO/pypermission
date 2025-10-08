@@ -147,9 +147,26 @@ def _build_edges(
 
 
 def _calc_node_positions(*, dag: nx.DiGraph) -> dict[str, tuple[float, float]]:
+
+    role_nodes = [n for n, d in dag.nodes(data=True) if d.get("type") == "role_node"]
+    hierarchy_edges = [
+        (u, v) for u, v, d in dag.edges(data=True) if d.get("type") == "hierarchy_edge"
+    ]
+
+    role_sdag = nx.DiGraph()
+    role_sdag.add_nodes_from(role_nodes)
+    role_sdag.add_edges_from(hierarchy_edges)
+
+    unsorted_role_sdags = [
+        dag.subgraph(c).copy() for c in nx.weakly_connected_components(role_sdag)
+    ]
+    role_sdags = sorted(
+        unsorted_role_sdags, key=lambda g: g.number_of_nodes(), reverse=False
+    )
+
     role_layers: dict[str, int] = {}
-    for node in nx.topological_sort(dag):
-        if dag.nodes[node]["type"] == "role_node":
+    for sdag in role_sdags:
+        for node in nx.topological_sort(sdag):
             predecessors = tuple(dag.predecessors(node))
             role_layers[node] = (
                 1
@@ -173,22 +190,24 @@ def _calc_node_positions(*, dag: nx.DiGraph) -> dict[str, tuple[float, float]]:
     }
     for node in nx.topological_sort(dag):
         match dag.nodes[node]["type"]:
-            case "role_node":
-                layer_x_nodes[role_layers[node]].append(node)
             case "subject_node":
                 layer_x_nodes[subject_layer].append(node)
             case "permission_node":
                 layer_x_nodes[permission_layer].append(node)
+
+    for sdag in role_sdags:
+        for node in nx.topological_sort(sdag):
+            layer_x_nodes[role_layers[node]].append(node)
 
     node_positions = {}
     for layer, nodes_in_layer in layer_x_nodes.items():
         n_nodes = len(nodes_in_layer)
         ys: tuple[float, ...]
         if n_nodes == 1:
-            ys = (0.0,)
+            ys = (1,)
         else:
-            ys = tuple(2 * x / (n_nodes - 1) - 1 for x in range(n_nodes))
+            ys = tuple(1 * x / (n_nodes - 1) for x in range(n_nodes))
         x = -layer
         for y, node in zip(ys, nodes_in_layer):
-            node_positions[node] = (x, y)
+            node_positions[node] = (float(x), y)
     return node_positions
