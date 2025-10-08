@@ -165,11 +165,11 @@ def _calc_node_positions(*, dag: nx.DiGraph) -> dict[str, tuple[float, int]]:
                 else 1
             )
 
-    subject_layer = 0
-    permission_layer = max(role_layers.values()) + 1
+    permission_layer = 0
+    subject_layer = max(role_layers.values()) + 1
 
     layer_x_nodes: dict[int, list[str]] = {
-        layer: [] for layer in range(subject_layer, permission_layer + 1)
+        layer: [] for layer in range(permission_layer, subject_layer + 1)
     }
     for node in nx.topological_sort(dag):
         match dag.nodes[node]["type"]:
