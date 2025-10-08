@@ -127,6 +127,11 @@ class SubjectService(metaclass=FrozenClass):
             raise PyPermissionNotGrantedError()
 
     @classmethod
+    def permissions(cls, *, subject: str, db: Session) -> tuple[Permission, ...]:
+        # TODO
+        return tuple()
+
+    @classmethod
     def policies(cls, *, subject: str, db: Session) -> tuple[Policy, ...]:
         root_cte = (
             select(MemberORM.role_id)
