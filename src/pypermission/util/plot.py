@@ -26,7 +26,7 @@ COLOR_MAP = {
     "policy_edge": "forestgreen",
 }
 
-NodePositions = dict[str, tuple[float, int]]
+NodePositions = dict[str, tuple[float, float]]
 
 
 def _build_plotly_figure(*, dag: nx.DiGraph) -> go.Figure:
@@ -146,7 +146,7 @@ def _build_edges(
     )
 
 
-def _calc_node_positions(*, dag: nx.DiGraph) -> dict[str, tuple[float, int]]:
+def _calc_node_positions(*, dag: nx.DiGraph) -> dict[str, tuple[float, float]]:
     role_layers: dict[str, int] = {}
     for node in nx.topological_sort(dag):
         if dag.nodes[node]["type"] == "role_node":
@@ -183,12 +183,12 @@ def _calc_node_positions(*, dag: nx.DiGraph) -> dict[str, tuple[float, int]]:
     node_positions = {}
     for layer, nodes_in_layer in layer_x_nodes.items():
         n_nodes = len(nodes_in_layer)
-        xs: tuple[float, ...]
+        ys: tuple[float, ...]
         if n_nodes == 1:
-            xs = (0.0,)
+            ys = (0.0,)
         else:
-            xs = tuple(2 * x / (n_nodes - 1) - 1 for x in range(n_nodes))
-        y = -layer
-        for x, node in zip(xs, nodes_in_layer):
+            ys = tuple(2 * x / (n_nodes - 1) - 1 for x in range(n_nodes))
+        x = -layer
+        for y, node in zip(ys, nodes_in_layer):
             node_positions[node] = (x, y)
     return node_positions
