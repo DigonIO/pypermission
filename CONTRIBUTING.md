@@ -2,8 +2,17 @@
 
 ## Development setup
 
+Install dependencies
+
 ```console
 uv sync
+```
+
+To run the postgres database with docker, first create the `.env` file at `docker/.env` and set the required variables based on the `docker/.env.template` file. Then:
+
+```console
+cd docker
+docker compose up
 ```
 
 ## Testing
@@ -33,4 +42,3 @@ Build the documentation.
 ```console
 uv run mkdocs build -f docs/mkdocs.yml
 ```
-

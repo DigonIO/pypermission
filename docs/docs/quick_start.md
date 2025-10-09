@@ -1,6 +1,6 @@
 # Quick Start
 
-To get started with a basic RBAC example, first set up a SQLAlchemy environment.
+To get started with a basic RBAC example, first set up an SQLAlchemy environment.
 In this example, we use an in-memory SQLite database (you can also use PostgreSQL via `psycopg`). After setting up the database, we need to create the required RBAC tables.
 
 ``` python
@@ -20,7 +20,7 @@ pypermission organizes its core functionality into three main services:
 `RoleService`, `SubjectService`, and `PolicyService`.
 These services are accessible through the main RBAC class, which provides a unified interface for managing Roles, Subjects, and Policies. The examples below demonstrates basic usage.
 
-Create a _user_ and an _admin_ Role create a relation so that the _admin_ Role inherits all permissions of the _user_ Role and potential ascendant Permissions.
+Create a _user_ and an _admin_ Role and create a relation such that the _admin_ Role inherits all permissions of the _user_ Role and potential ascendant Permissions.
 
 ``` python
 from pypermission import RBAC
@@ -50,16 +50,16 @@ with db_factory() as db:
     RBAC.role.create(role="user[Alex]", db=db)
     RBAC.role.create(role="user[Max]", db=db)
 
-    RBAC.subject.assign_role(role="user[Alex]", subject="Alex", db=db)
-    RBAC.subject.assign_role(role="user[Max]", subject="Max", db=db)
+    RBAC.subject.assign_role(subject="Alex", role="user[Alex]", db=db)
+    RBAC.subject.assign_role(subject="Max", role="user[Max]", db=db)
 
-    RBAC.subject.assign_role(role="admin", subject="Alex", db=db)
-    RBAC.subject.assign_role(role="user", subject="Max", db=db)
+    RBAC.subject.assign_role(subject="Alex", role="admin", db=db)
+    RBAC.subject.assign_role(subject="Max", role="user", db=db)
 
     db.commit()
 ```
 
-Next, assign Permissions to the Roles. In this simple example, we define who can edit which user. Every user with the _user_ Role is allowed to view all users, but can only edit their own account. Users with the _admin_ Role are allowed to edit any user.
+Next, assign Permissions to the Roles. In this simple example, we define who can edit which user. Every user with the Role _user_ is allowed to view all users, but can only edit their own account. Users with the Role _admin_ are allowed to edit any user.
 
 ``` python
 from pypermission import Policy, Permission
@@ -86,7 +86,7 @@ with db_factory() as db:
 
     RBAC.policy.create(
         policy=Policy(
-            role="user[Alex]",",
+            role="user[Alex]",
             permission=Permission(
                 resource_type="user", resource_id="Alex", action="edit"
             ),
@@ -95,7 +95,7 @@ with db_factory() as db:
     )
     RBAC.policy.create(
         policy=Policy(
-            role="user[Max]",",
+            role="user[Max]",
             permission=Permission(
                 resource_type="user", resource_id="Max", action="edit"
             ),
@@ -108,32 +108,30 @@ with db_factory() as db:
 
 !!! note
 
-    The ResourceID is typically the ID of an application resource. For example, it could be the UserID, which is often an `int` or a `UUID` (`strings` are also possible). The asterisk `*` can be used as a wildcard and matches all ResourceIDs for the corresponding ResourceType.This also applies when checking whether a subject has a given Permission. ResourceIDs can also include a scope, for more details, see the [Permission Design Guide](permission_design_guide.md).
+    The ResourceID is typically the ID of an application resource. For example, it could be the UserID, which is typically an `int`, a `UUID` or a `string`. For use with this library, you have to cast the value to a string. The asterisk `*` can be used as a wildcard and matches all ResourceIDs for the corresponding ResourceType.This also applies when checking whether a subject has a given Permission. ResourceIDs can also include a scope, for more details, see the [Permission Design Guide](permission_design_guide.md).
 
-No check permission access.
+Now check permission access.
+
+!!! warning
+
+    The following part of this guide is incomplete.
 
 ``` python
 with db_factory() as db:
     result: bool = RBAC.subject.check_permission(
-        policy=Policy(
-            subject="Max",
-            permission=Permission(
-                resource_type="user", resource_id="Max", action="view"
-            ),
+        subject="Max",
+        permission=Permission(
+            resource_type="user", resource_id="Max", action="view"
         ),
         db=db,
     )
     result: bool = RBAC.subject.check_permission(
-        policy=Policy(
-            subject="Max",
-            permission=Permission(
-                resource_type="user", resource_id="Alex", action="view"
-            ),
+        subject="Max",
+        permission=Permission(
+            resource_type="user", resource_id="Alex", action="view"
         ),
         db=db,
     )
-
-    db.commit()
 ```
 
 True
@@ -142,25 +140,19 @@ True
 ``` python
 with db_factory() as db:
     result: bool = RBAC.subject.check_permission(
-        policy=Policy(
-            subject="Max",
-            permission=Permission(
-                resource_type="user", resource_id="Max", action="edit"
-            ),
+        subject="Max",
+        permission=Permission(
+            resource_type="user", resource_id="Max", action="edit"
         ),
         db=db,
     )
     result: bool = RBAC.subject.check_permission(
-        policy=Policy(
-            subject="Max",
-            permission=Permission(
-                resource_type="user", resource_id="Alex", action="edit"
-            ),
+        subject="Max",
+        permission=Permission(
+            resource_type="user", resource_id="Alex", action="edit"
         ),
         db=db,
     )
-
-    db.commit()
 ```
 
 True
@@ -169,19 +161,16 @@ False
 ``` python
 with db_factory() as db:
     result: bool = RBAC.subject.check_permission(
-        policy=Policy(
-            subject="Alex",
-            permission=Permission(
-                resource_type="user", resource_id="Max", action="edit"
-            ),
+        subject="Alex",
+        permission=Permission(
+            resource_type="user", resource_id="Max", action="edit"
         ),
         db=db,
     )
 
-    db.commit()
 ```
 
 True
 
 !!! tip
-    The `RBAC.subject.check_permission` returns a bool. There is also the `RBAC.subject.assert_permission` function. It raises the `pypermission.exc.PyPermissionNotGrantedError` error if the passen is not granted to the subject.
+    The `RBAC.subject.check_permission` returns a bool. There is also the `RBAC.subject.assert_permission` function. It raises the `pypermission.exc.PyPermissionNotGrantedError` error if the permission is not granted to the subject.
