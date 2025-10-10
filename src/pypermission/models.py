@@ -11,7 +11,6 @@ class BaseORM(DeclarativeBase): ...
 #### Types
 ################################################################################
 
-
 class Permission:
     """
     Represents an action that can be performed on a specific resource.

@@ -14,6 +14,7 @@ from pypermission.models import (
 )
 from pypermission.exc import PyPermissionError, PyPermissionNotGrantedError
 
+
 ################################################################################
 #### SubjectService
 ################################################################################

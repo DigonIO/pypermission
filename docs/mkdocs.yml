@@ -35,7 +35,6 @@ nav:
       - RBAC: api/rbac.md
       - Role service: api/role.md
       - Subject service: api/subject.md
-      - Policy service: api/policy.md
       - Models: api/models.md
   - Coverage Report: coverage.md
 

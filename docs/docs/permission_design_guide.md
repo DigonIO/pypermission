@@ -11,10 +11,10 @@ In some cases, a hybrid approach combining both methods can also be applied. The
 
 We define the core concepts of our RBAC model as follows:
 
++ **Role** - A collection of permissions assigned to a subject or group of subjects.
 + **ResourceType** - The type or category of a resource (e.g., Group, Event).
 + **ResourceID** - A unique identifier for a specific instance of a resource.
 + **Action** - An operation that can be performed on a resource (e.g., Create, Edit, Delete).
-+ **Role** - A collection of permissions assigned to a subject or group of subjects.
 + **Permission** - Grants the ability to perform a specific action on a resource.
 + **Policy** - A set of permissions assigned to a role.
 
