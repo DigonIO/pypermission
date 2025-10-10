@@ -41,10 +41,11 @@ class SubjectService(metaclass=FrozenClass):
     @classmethod
     def list(cls, *, db: Session) -> tuple[str, ...]:
         subjects = db.scalars(select(SubjectORM.id)).all()
-        return tuple(subject for subject in subjects)
+        return tuple(subjects)
 
     @classmethod
     def assign_role(cls, *, subject: str, role: str, db: Session) -> None:
+        # TODO raise IntegrityError if subject or role is unknown and if possible via ORM
         try:
             member_orm = MemberORM(role_id=role, subject_id=subject)
             db.add(member_orm)
@@ -62,6 +63,7 @@ class SubjectService(metaclass=FrozenClass):
 
     @classmethod
     def deassign_role(cls, *, subject: str, role: str, db: Session) -> None:
+        # TODO raise IntegrityError if subject or role is unknown and if possible via ORM
         member_orm = db.get(MemberORM, (role, subject))
         if member_orm is None:
             subject_orm = db.get(SubjectORM, subject)
@@ -75,6 +77,7 @@ class SubjectService(metaclass=FrozenClass):
 
     @classmethod
     def assigned_roles(cls, *, subject: str, db: Session) -> tuple[str, ...]:
+        # TODO raise IntegrityError if subject is unknown and if possible via ORM
         roles = db.scalars(
             select(MemberORM.role_id).where(MemberORM.subject_id == subject)
         ).all()
@@ -90,6 +93,8 @@ class SubjectService(metaclass=FrozenClass):
         permission: Permission,
         db: Session,
     ) -> bool:
+        # TODO raise IntegrityError if subject is unknown and if possible via ORM
+
         root_cte = (
             select(MemberORM.role_id)
             .where(MemberORM.subject_id == subject)
@@ -128,11 +133,42 @@ class SubjectService(metaclass=FrozenClass):
 
     @classmethod
     def permissions(cls, *, subject: str, db: Session) -> tuple[Permission, ...]:
-        # TODO
-        return tuple()
+        # TODO raise IntegrityError if subject is unknown and if possible via ORM
+        root_cte = (
+            select(MemberORM.role_id)
+            .where(MemberORM.subject_id == subject)
+            .cte(recursive=True)
+        )
+
+        traversing_cte = root_cte.alias()
+        relations_cte = root_cte.union_all(
+            select(HierarchyORM.parent_role_id).join(
+                traversing_cte, HierarchyORM.child_role_id == traversing_cte.c.role_id
+            )
+        )
+
+        policy_orms = (
+            db.scalars(
+                select(PolicyORM).join(
+                    relations_cte, PolicyORM.role_id == relations_cte.c.role_id
+                )
+            )
+            .unique()
+            .all()
+        )
+
+        return tuple(
+            Permission(
+                resource_type=policy_orm.resource_type,
+                resource_id=policy_orm.resource_id,
+                action=policy_orm.action,
+            )
+            for policy_orm in policy_orms
+        )
 
     @classmethod
     def policies(cls, *, subject: str, db: Session) -> tuple[Policy, ...]:
+        # TODO raise IntegrityError if subject is unknown and if possible via ORM
         root_cte = (
             select(MemberORM.role_id)
             .where(MemberORM.subject_id == subject)

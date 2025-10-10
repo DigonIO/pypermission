@@ -8,6 +8,8 @@ from pypermission.models import (
     HierarchyORM,
     PolicyORM,
     FrozenClass,
+    MemberORM,
+    Policy,
 )
 from pypermission.exc import PyPermissionError, PyPermissionNotGrantedError
 
@@ -261,6 +263,16 @@ class RoleService(metaclass=FrozenClass):
         return tuple(descendant_relations)
 
     @classmethod
+    def assigned_subjects(cls, *, role: str, db: Session) -> tuple[str, ...]:
+        # TODO raise IntegrityError if role is unknown and if possible via ORM
+        subjects = db.scalars(
+            select(MemberORM.subject_id).where(MemberORM.role_id == role)
+        ).all()
+        if len(subjects) == 0 and db.get(RoleORM, role) is None:
+            raise PyPermissionError(f"Role ('{role}') does not exist!")
+        return tuple(subjects)
+
+    @classmethod
     def check_permission(
         cls,
         *,
@@ -302,3 +314,54 @@ class RoleService(metaclass=FrozenClass):
     ) -> None:
         if not cls.check_permission(role=role, permission=permission, db=db):
             raise PyPermissionNotGrantedError()
+
+    @classmethod
+    def permissions(
+        cls,
+        *,
+        role: str,
+        inherited: bool = True,
+        db: Session,
+    ) -> tuple[Permission, ...]:
+        # TODO raise IntegrityError if role is unknown and if possible via ORM
+        root_cte = (
+            select(RoleORM.id.label("role_id"))
+            .where(RoleORM.id == role)
+            .cte(recursive=True)
+        )
+
+        traversing_cte = root_cte.alias()
+        relations_cte = root_cte.union_all(
+            select(HierarchyORM.parent_role_id).where(
+                HierarchyORM.child_role_id == traversing_cte.c.role_id
+            )
+        )
+        policy_orms = (
+            db.scalars(
+                select(PolicyORM).join(
+                    relations_cte, PolicyORM.role_id == relations_cte.c.role_id
+                )
+            )
+            .unique()
+            .all()
+        )
+
+        return tuple(
+            Permission(
+                resource_type=policy_orm.resource_type,
+                resource_id=policy_orm.resource_id,
+                action=policy_orm.action,
+            )
+            for policy_orm in policy_orms
+        )
+
+    @classmethod
+    def policies(
+        cls,
+        *,
+        role: str,
+        inherited: bool = True,
+        db: Session,
+    ) -> tuple[Policy, ...]:
+        # TODO raise IntegrityError if role is unknown and if possible via ORM
+        return ()
