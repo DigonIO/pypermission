@@ -11,7 +11,6 @@ from typing import Final
 
 from pypermission.service.role import RoleService
 from pypermission.service.subject import SubjectService
-from pypermission.service.policy import PolicyService
 from pypermission.models import (
     Policy,
     Permission,
@@ -34,11 +33,6 @@ class RBAC(metaclass=FrozenClass):
     subject: Final = SubjectService
     """
     Shorthand for all SubjectService functions.
-    """
-
-    policy: Final = PolicyService
-    """
-    Shorthand for all PolicyService functions.
     """
 
 

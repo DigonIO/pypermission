@@ -273,6 +273,51 @@ class RoleService(metaclass=FrozenClass):
         return tuple(subjects)
 
     @classmethod
+    def grant_permission(
+        cls,
+        *,
+        role: str,
+        permission: Permission,
+        db: Session,
+    ) -> None:
+        try:
+            policy_orm = PolicyORM(
+                role_id=role,
+                resource_type=permission.resource_type,
+                resource_id=permission.resource_id,
+                action=permission.action,
+            )
+            db.add(policy_orm)
+            db.flush()
+        except IntegrityError as err:
+            db.rollback()
+            # TODO 'psycopg.errors.UniqueViolation'
+
+    @classmethod
+    def revoke_permission(
+        cls,
+        *,
+        role: str,
+        permission: Permission,
+        db: Session,
+    ) -> None:
+        policy_tuple = (
+            role,
+            permission.resource_type,
+            permission.resource_id,
+            permission.action,
+        )
+        policy_orm = db.get(
+            PolicyORM,
+            policy_tuple,
+        )
+        if policy_orm is None:
+            raise PyPermissionError(f"Unknown policy '{policy_tuple}'!")
+
+        db.delete(policy_orm)
+        db.flush()
+
+    @classmethod
     def check_permission(
         cls,
         *,
