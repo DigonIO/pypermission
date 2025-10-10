@@ -76,7 +76,7 @@ class SubjectService(metaclass=FrozenClass):
         db.flush()
 
     @classmethod
-    def assigned_roles(cls, *, subject: str, db: Session) -> tuple[str, ...]:
+    def roles(cls, *, subject: str, db: Session) -> tuple[str, ...]:
         # TODO raise IntegrityError if subject is unknown and if possible via ORM
         roles = db.scalars(
             select(MemberORM.role_id).where(MemberORM.subject_id == subject)

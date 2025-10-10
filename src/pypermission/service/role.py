@@ -263,7 +263,7 @@ class RoleService(metaclass=FrozenClass):
         return tuple(descendant_relations)
 
     @classmethod
-    def assigned_subjects(cls, *, role: str, db: Session) -> tuple[str, ...]:
+    def subjects(cls, *, role: str, db: Session) -> tuple[str, ...]:
         # TODO raise IntegrityError if role is unknown and if possible via ORM
         subjects = db.scalars(
             select(MemberORM.subject_id).where(MemberORM.role_id == role)
