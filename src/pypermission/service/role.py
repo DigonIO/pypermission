@@ -1,7 +1,9 @@
+from collections.abc import Sequence
+
 from sqlalchemy.sql import select
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
-from collections.abc import Sequence
+
 from pypermission.models import (
     Permission,
     RoleORM,
@@ -110,16 +112,17 @@ class RoleService(metaclass=FrozenClass):
             If a database integrity issue occurs while adding the hierarchy.
         """
         if parent_role == child_role:
-            raise PyPermissionError(
-                f"Both roles ('{parent_role}') must not be the same!"
-            )
+            raise PyPermissionError(f"Both roles '{parent_role}' must not be the same!")
 
         roles = db.scalars(
             select(RoleORM.id).where(RoleORM.id.in_([parent_role, child_role]))
         ).all()
-        if len(roles) < 2:
+        if len(roles) == 1:
+            missing_role = child_role if parent_role in roles else parent_role
+            raise PyPermissionError(f"Role '{missing_role}' does not exist!")
+        elif len(roles) == 0:
             raise PyPermissionError(
-                f"One or both roles ('{parent_role}', '{child_role}') do not exist!"
+                f"Roles '{parent_role}' and '{child_role}' do not exist!"
             )
 
         root_cte = (
@@ -149,8 +152,10 @@ class RoleService(metaclass=FrozenClass):
             db.add(hierarchy_orm)
             db.flush()
         except IntegrityError as err:
-
             db.rollback()
+            raise PyPermissionError(
+                f"The hierarchy '{parent_role}' -> '{child_role}' exists!"
+            )
 
     @classmethod
     def remove_hierarchy(
@@ -178,19 +183,25 @@ class RoleService(metaclass=FrozenClass):
             If a database integrity issue occurs while adding the hierarchy.
         """
         if parent_role == child_role:
-            raise PyPermissionError(
-                f"Both roles ('{parent_role}') must not be the same!"
-            )
+            raise PyPermissionError(f"Both roles '{parent_role}' must not be the same!")
 
         hierarchy_orm = db.get(HierarchyORM, (parent_role, child_role))
         if hierarchy_orm is None:
             roles = db.scalars(
                 select(RoleORM.id).where(RoleORM.id.in_([parent_role, child_role]))
             ).all()
-            if len(roles) < 2:
+            if len(roles) == 1:
+                missing_role = child_role if parent_role in roles else parent_role
+                raise PyPermissionError(f"Role '{missing_role}' does not exist!")
+            elif len(roles) == 0:
                 raise PyPermissionError(
-                    f"One or both roles ('{parent_role}', '{child_role}') do not exist!"
+                    f"Roles '{parent_role}' and '{child_role}' do not exist!"
                 )
+            else:
+                raise PyPermissionError(
+                    f"The hierarchy '{parent_role}' -> '{child_role}' does not exists!"
+                )
+
         db.delete(hierarchy_orm)
         db.flush()
 
@@ -202,7 +213,7 @@ class RoleService(metaclass=FrozenClass):
             )
         ).all()
         if len(parents) == 0 and db.get(RoleORM, role) is None:
-            raise PyPermissionError(f"Role ('{role}') does not exist!")
+            raise PyPermissionError(f"Role '{role}' does not exist!")
         return tuple(parents)
 
     @classmethod
@@ -213,7 +224,7 @@ class RoleService(metaclass=FrozenClass):
             )
         ).all()
         if len(children) == 0 and db.get(RoleORM, role) is None:
-            raise PyPermissionError(f"Role ('{role}') does not exist!")
+            raise PyPermissionError(f"Role '{role}' does not exist!")
         return tuple(children)
 
     @classmethod
@@ -236,7 +247,7 @@ class RoleService(metaclass=FrozenClass):
         )
 
         if len(ancestor_relations) == 0 and db.get(RoleORM, role) is None:
-            raise PyPermissionError(f"Role ('{role}') does not exist!")
+            raise PyPermissionError(f"Role '{role}' does not exist!")
         return tuple(ancestor_relations)
 
     @classmethod
@@ -259,7 +270,7 @@ class RoleService(metaclass=FrozenClass):
         )
 
         if len(descendant_relations) == 0 and db.get(RoleORM, role) is None:
-            raise PyPermissionError(f"Role ('{role}') does not exist!")
+            raise PyPermissionError(f"Role '{role}' does not exist!")
         return tuple(descendant_relations)
 
     @classmethod
