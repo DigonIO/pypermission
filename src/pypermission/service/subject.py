@@ -1,7 +1,7 @@
 from sqlalchemy.sql import select
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
-
+from collections.abc import Sequence
 from pypermission.models import (
     Policy,
     Permission,
@@ -133,29 +133,7 @@ class SubjectService(metaclass=FrozenClass):
 
     @classmethod
     def permissions(cls, *, subject: str, db: Session) -> tuple[Permission, ...]:
-        # TODO raise IntegrityError if subject is unknown and if possible via ORM
-        root_cte = (
-            select(MemberORM.role_id)
-            .where(MemberORM.subject_id == subject)
-            .cte(recursive=True)
-        )
-
-        traversing_cte = root_cte.alias()
-        relations_cte = root_cte.union_all(
-            select(HierarchyORM.parent_role_id).join(
-                traversing_cte, HierarchyORM.child_role_id == traversing_cte.c.role_id
-            )
-        )
-
-        policy_orms = (
-            db.scalars(
-                select(PolicyORM).join(
-                    relations_cte, PolicyORM.role_id == relations_cte.c.role_id
-                )
-            )
-            .unique()
-            .all()
-        )
+        policy_orms = get_policy_orms_for_subject(subject=subject, db=db)
 
         return tuple(
             Permission(
@@ -168,29 +146,7 @@ class SubjectService(metaclass=FrozenClass):
 
     @classmethod
     def policies(cls, *, subject: str, db: Session) -> tuple[Policy, ...]:
-        # TODO raise IntegrityError if subject is unknown and if possible via ORM
-        root_cte = (
-            select(MemberORM.role_id)
-            .where(MemberORM.subject_id == subject)
-            .cte(recursive=True)
-        )
-
-        traversing_cte = root_cte.alias()
-        relations_cte = root_cte.union_all(
-            select(HierarchyORM.parent_role_id).join(
-                traversing_cte, HierarchyORM.child_role_id == traversing_cte.c.role_id
-            )
-        )
-
-        policy_orms = (
-            db.scalars(
-                select(PolicyORM).join(
-                    relations_cte, PolicyORM.role_id == relations_cte.c.role_id
-                )
-            )
-            .unique()
-            .all()
-        )
+        policy_orms = get_policy_orms_for_subject(subject=subject, db=db)
 
         return tuple(
             Policy(
@@ -203,3 +159,36 @@ class SubjectService(metaclass=FrozenClass):
             )
             for policy_orm in policy_orms
         )
+
+
+################################################################################
+#### Util
+################################################################################
+
+
+def get_policy_orms_for_subject(*, subject: str, db: Session) -> Sequence[PolicyORM]:
+    # TODO raise IntegrityError if subject is unknown and if possible via ORM
+    root_cte = (
+        select(MemberORM.role_id)
+        .where(MemberORM.subject_id == subject)
+        .cte(recursive=True)
+    )
+
+    traversing_cte = root_cte.alias()
+    relations_cte = root_cte.union_all(
+        select(HierarchyORM.parent_role_id).join(
+            traversing_cte, HierarchyORM.child_role_id == traversing_cte.c.role_id
+        )
+    )
+
+    policy_orms = (
+        db.scalars(
+            select(PolicyORM).join(
+                relations_cte, PolicyORM.role_id == relations_cte.c.role_id
+            )
+        )
+        .unique()
+        .all()
+    )
+
+    return policy_orms

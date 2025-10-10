@@ -1,7 +1,7 @@
 from sqlalchemy.sql import select
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
-
+from collections.abc import Sequence
 from pypermission.models import (
     Permission,
     RoleORM,
@@ -323,7 +323,50 @@ class RoleService(metaclass=FrozenClass):
         inherited: bool = True,
         db: Session,
     ) -> tuple[Permission, ...]:
-        # TODO raise IntegrityError if role is unknown and if possible via ORM
+        policy_orms = get_policy_orms_for_role(role=role, inherited=inherited, db=db)
+
+        return tuple(
+            Permission(
+                resource_type=policy_orm.resource_type,
+                resource_id=policy_orm.resource_id,
+                action=policy_orm.action,
+            )
+            for policy_orm in policy_orms
+        )
+
+    @classmethod
+    def policies(
+        cls,
+        *,
+        role: str,
+        inherited: bool = True,
+        db: Session,
+    ) -> tuple[Policy, ...]:
+        policy_orms = get_policy_orms_for_role(role=role, inherited=inherited, db=db)
+
+        return tuple(
+            Policy(
+                role=role,
+                permission=Permission(
+                    resource_type=policy_orm.resource_type,
+                    resource_id=policy_orm.resource_id,
+                    action=policy_orm.action,
+                ),
+            )
+            for policy_orm in policy_orms
+        )
+
+
+################################################################################
+#### Util
+################################################################################
+
+
+def get_policy_orms_for_role(
+    *, role: str, inherited: bool = True, db: Session
+) -> Sequence[PolicyORM]:
+    # TODO raise IntegrityError if role is unknown and if possible via ORM
+    if inherited:
         root_cte = (
             select(RoleORM.id.label("role_id"))
             .where(RoleORM.id == role)
@@ -345,23 +388,11 @@ class RoleService(metaclass=FrozenClass):
             .unique()
             .all()
         )
-
-        return tuple(
-            Permission(
-                resource_type=policy_orm.resource_type,
-                resource_id=policy_orm.resource_id,
-                action=policy_orm.action,
-            )
-            for policy_orm in policy_orms
+    else:
+        policy_orms = (
+            db.scalars(select(PolicyORM).where(PolicyORM.role_id == role))
+            .unique()
+            .all()
         )
 
-    @classmethod
-    def policies(
-        cls,
-        *,
-        role: str,
-        inherited: bool = True,
-        db: Session,
-    ) -> tuple[Policy, ...]:
-        # TODO raise IntegrityError if role is unknown and if possible via ORM
-        return ()
+    return policy_orms
