@@ -6,7 +6,11 @@ some of the noted problems have been mitigated below according to the problem de
 The PyPermission library does not conform to the ANSI standard, as conformance to the
 standard requires at least the core feature set (6.1) and this library does not implement the ANSI session concept.
 
-Below follows an overview of the _RBAC INCITS 359-2012_ standard, where we modified parts of the notation for consistency as well as correctness[^3] reasons (the original notation can be referenced quickly via the section references). Where applicable we provide the equivalent implementation resource of the PyPermission library.
+Below follows an overview of the _RBAC INCITS 359-2012_ standard, in the form where we modified parts of the notation for consistency as well as correctness[^3] reasons (the original notation can be referenced quickly via the section references). Where applicable we provide the equivalent implementation resource of the PyPermission library.
+
+!!! warning
+
+    As this library currently does not implement the RBAC session concept, the types `SESSIONS`, `USER_SESSIONS` and `SESSION_ROLES` from the ANSI standard have no equivalent!
 
 ## 5 RBAC Reference Model
 
@@ -24,10 +28,6 @@ Below follows an overview of the _RBAC INCITS 359-2012_ standard, where we modif
 | `SESSIONS`                                       | _N/A_                            |
 | `USER_SESSIONS: USERS x SESSIONS`                | _N/A_                            |
 | `SESSION_ROLES: SESSION x ROLES`                 | _N/A_                            |
-
-!!! note
-
-    As this library currently does not implement the RBAC session concept, the types `SESSIONS`, `USER_SESSIONS` and `SESSION_ROLES` from the ANSI standard have no equivalent!
 
 | ANSI Methods                                 | This library                         |
 | -------------------------------------------- | ------------------------------------ |
@@ -47,7 +47,6 @@ Below follows an overview of the _RBAC INCITS 359-2012_ standard, where we modif
 | -------------------------------------------- | ------------------------------------ |
 | `authorized_users(r: ROLES) -> 2^USERS`      | `TODO`                               |
 | `authorized_permissions(r: ROLES) -> 2^PRMS` | `pypermission.RBAC.role.permissions` |
-
 
 ## 6 RBAC System and Administrative Functional Specification
 
