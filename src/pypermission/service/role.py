@@ -555,7 +555,7 @@ class RoleService(metaclass=FrozenClass):
         db: Session,
     ) -> tuple[Permission, ...]:
         """
-        Get all Permissions to a Role.
+        Get all granted Permissions for a Role.
 
         Parameters
         ----------
@@ -596,7 +596,7 @@ class RoleService(metaclass=FrozenClass):
         db: Session,
     ) -> tuple[Policy, ...]:
         """
-        Get all Policies to a Role.
+        Get all granted Policies for a Role.
 
         Parameters
         ----------

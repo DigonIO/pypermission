@@ -24,6 +24,21 @@ class SubjectService(metaclass=FrozenClass):
 
     @classmethod
     def create(cls, *, subject: str, db: Session) -> None:
+        """
+        Create a new Subject.
+
+        Parameters
+        ----------
+        subject : str
+            The SubjectID of the Subject to create.
+        db : Session
+            The SQLAlchemy session.
+
+        Raises
+        ------
+        PyPermissionError
+            If a Subject with the given SubjectID already exists.
+        """
         try:
             subject_orm = SubjectORM(id=subject)
             db.add(subject_orm)
@@ -34,6 +49,21 @@ class SubjectService(metaclass=FrozenClass):
 
     @classmethod
     def delete(cls, *, subject: str, db: Session) -> None:
+        """
+        Delete an existing Subject.
+
+        Parameters
+        ----------
+        subject : str
+            The SubjectID to delete.
+        db : Session
+            The SQLAlchemy session.
+
+        Raises
+        ------
+        PyPermissionError
+            If a Subject with the given SubjectID does not exist.
+        """
         subject_orm = db.get(SubjectORM, subject)
         if subject_orm is None:
             raise PyPermissionError(f"The Subject '{subject}' does not exists!")
@@ -42,11 +72,43 @@ class SubjectService(metaclass=FrozenClass):
 
     @classmethod
     def list(cls, *, db: Session) -> tuple[str, ...]:
+        """
+        Get all Subjects.
+
+        Parameters
+        ----------
+        db : Session
+            The SQLAlchemy session.
+
+        Returns
+        -------
+        tuple[str, ...]
+            A tuple containing all SubjectIDs.
+        """
         subjects = db.scalars(select(SubjectORM.id)).all()
         return tuple(subjects)
 
     @classmethod
     def assign_role(cls, *, subject: str, role: str, db: Session) -> None:
+        """
+        Assign a Subject to a Role.
+
+        Parameters
+        ----------
+        subject : str
+            The target SubjectID.
+        role : str
+            The target RoleID.
+        db : Session
+            The SQLAlchemy session.
+
+        Raises
+        ------
+        PyPermissionError
+            If the Subject does not exist.
+            If the Role does not exist.
+            If the Subject was assigned to Role before. TODO
+        """
         # TODO raise IntegrityError if subject or role is unknown and if possible via ORM
         try:
             member_orm = MemberORM(role_id=role, subject_id=subject)
@@ -65,6 +127,25 @@ class SubjectService(metaclass=FrozenClass):
 
     @classmethod
     def deassign_role(cls, *, subject: str, role: str, db: Session) -> None:
+        """
+        Deassign a Subject from a Role.
+
+        Parameters
+        ----------
+        subject : str
+            The target SubjectID.
+        role : str
+            The target RoleID.
+        db : Session
+            The SQLAlchemy session.
+
+        Raises
+        ------
+        PyPermissionError
+            If the Subject does not exist.
+            If the Role does not exist.
+            If the Subject is not assigned to the Role. TODO
+        """
         # TODO raise IntegrityError if subject or role is unknown and if possible via ORM
         member_orm = db.get(MemberORM, (role, subject))
         if member_orm is None:
@@ -79,6 +160,26 @@ class SubjectService(metaclass=FrozenClass):
 
     @classmethod
     def roles(cls, *, subject: str, db: Session) -> tuple[str, ...]:
+        """
+        Get all assigned Roles for a Subject.
+
+        Parameters
+        ----------
+        subject : str
+            The target SubjectID.
+        db : Session
+            The SQLAlchemy session.
+
+        Returns
+        -------
+        tuple[str, ...]
+            A tuple containing all assigned RoleIDs.
+
+        Raises
+        ------
+        PyPermissionError
+            If the target Subject does not exist.
+        """
         # TODO raise IntegrityError if subject is unknown and if possible via ORM
         roles = db.scalars(
             select(MemberORM.role_id).where(MemberORM.subject_id == subject)
@@ -95,6 +196,28 @@ class SubjectService(metaclass=FrozenClass):
         permission: Permission,
         db: Session,
     ) -> bool:
+        """
+        Check if a Subject has a Permission.
+
+        Parameters
+        ----------
+        subject : str
+            The target SubjectID.
+        permission : Permission
+            The Permission to check for.
+        db : Session
+            The SQLAlchemy session.
+
+        Returns
+        -------
+        bool
+            True if the Permission is granted.
+
+        Raises
+        ------
+        PyPermissionError
+            If the target Subject does not exist. TODO
+        """
         # TODO raise IntegrityError if subject is unknown and if possible via ORM
 
         root_cte = (
@@ -130,6 +253,25 @@ class SubjectService(metaclass=FrozenClass):
         permission: Permission,
         db: Session,
     ) -> None:
+        """
+        Check if a Subject has a Permission.
+
+        Parameters
+        ----------
+        subject : str
+            The target SubjectID.
+        permission : Permission
+            The Permission to check for.
+        db : Session
+            The SQLAlchemy session.
+
+        Raises
+        ------
+        PyPermissionNotGrantedError
+            If the Permission is not granted.
+        PyPermissionError
+            If the target Subject does not exist.
+        """
         if not cls.check_permission(subject=subject, permission=permission, db=db):
             raise PyPermissionNotGrantedError(
                 f"Permission '{permission}' is not granted for Subject '{subject}'!"
@@ -137,7 +279,27 @@ class SubjectService(metaclass=FrozenClass):
 
     @classmethod
     def permissions(cls, *, subject: str, db: Session) -> tuple[Permission, ...]:
-        policy_orms = get_policy_orms_for_subject(subject=subject, db=db)
+        """
+        Get all granted Permissions for a Subject.
+
+        Parameters
+        ----------
+        subject : str
+            The target SubjectID.
+        db : Session
+            The SQLAlchemy session.
+
+        Returns
+        -------
+        tuple[Permission, ...]
+            A tuple containing all granted Permissions.
+
+        Raises
+        ------
+        PyPermissionError
+            If the target Role does not exist.
+        """
+        policy_orms = _get_policy_orms_for_subject(subject=subject, db=db)
 
         return tuple(
             Permission(
@@ -150,7 +312,27 @@ class SubjectService(metaclass=FrozenClass):
 
     @classmethod
     def policies(cls, *, subject: str, db: Session) -> tuple[Policy, ...]:
-        policy_orms = get_policy_orms_for_subject(subject=subject, db=db)
+        """
+        Get all granted Policies for a Subject.
+
+        Parameters
+        ----------
+        subject : str
+            The target SubjectID.
+        db : Session
+            The SQLAlchemy session.
+
+        Returns
+        -------
+        tuple[Policies, ...]
+            A tuple containing all granted Policies.
+
+        Raises
+        ------
+        PyPermissionError
+            If the target Role does not exist.
+        """
+        policy_orms = _get_policy_orms_for_subject(subject=subject, db=db)
 
         return tuple(
             Policy(
@@ -170,7 +352,7 @@ class SubjectService(metaclass=FrozenClass):
 ################################################################################
 
 
-def get_policy_orms_for_subject(*, subject: str, db: Session) -> Sequence[PolicyORM]:
+def _get_policy_orms_for_subject(*, subject: str, db: Session) -> Sequence[PolicyORM]:
     # TODO raise IntegrityError if subject is unknown and if possible via ORM
     root_cte = (
         select(MemberORM.role_id)
