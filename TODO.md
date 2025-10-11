@@ -22,13 +22,6 @@ Next ID: `12`
     * [ ] PolicyService
     * [ ] Util (plotting etc.)
     * [ ] Misc.
-* `4` Testing
-    * [ ] Setup PyDocTest for markdown
-    * [ ] RoleService
-    * [ ] SubjectService
-    * [ ] PolicyService
-    * [ ] Util (plotting etc.)
-    * [ ] Misc.
 * `3` Decide for a seo optimal package name
 * `2` Setup Doc hosting environment
 * `1` CI/CD Pipeline
@@ -38,3 +31,10 @@ Next ID: `12`
     * [ ] Doc publishing
 
 ## Done Tasks
+
+* `4` Testing
+    * [x] Setup PyDocTest for markdown
+    * [x] RoleService
+    * [x] SubjectService
+    * [x] Util (plotting etc.)
+    * [x] Misc.
