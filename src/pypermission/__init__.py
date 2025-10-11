@@ -22,7 +22,7 @@ from pypermission.exc import PyPermissionError, PyPermissionNotGrantedError
 
 class RBAC(metaclass=FrozenClass):
     """
-    Namespace for the role, subject and policy services.
+    Namespace for the Role and Subject services.
     """
 
     role: Final = RoleService

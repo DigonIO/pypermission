@@ -11,18 +11,19 @@ class BaseORM(DeclarativeBase): ...
 #### Types
 ################################################################################
 
+
 class Permission:
     """
-    Represents an action that can be performed on a specific resource.
+    Represents a Resource paired with an Action.
 
     Attributes
     ----------
     resource_type : str
-        The type of the resource (e.g., "document", "user").
+        The ResourceType (e.g., "document", "user").
     resource_id : str
-        The ID of the resource instance. The start ('*') acts as a wildcard matching all IDs of the resource. The empty string ('') can be used for actions on resources that do not have an ID.
+        The ResourceID. The star ('*') acts as a wildcard matching all ResourceIDs of the same ResourceType. The empty string ('') can be used for Actions on Resources that do not have an ResourceID.
     action : str
-        The action allowed on the resource (e.g., "read", "write", "delete").
+        The Action allowed on the Resource (e.g., "read", "write", "delete").
     """
 
     resource_type: str
@@ -31,7 +32,7 @@ class Permission:
 
     def __init__(self, *, resource_type: str, resource_id: str, action: str) -> None:
         """
-        Initialize the Permission instance.
+        Initialize the Permission.
 
         Parameters
         ----------
@@ -42,7 +43,6 @@ class Permission:
         action : str
             The action allowed on the resource (e.g., "read", "write", "delete").
         """
-
         self.resource_type = resource_type
         self.resource_id = resource_id
         self.action = action
@@ -54,10 +54,31 @@ class Permission:
 
 
 class Policy:
+    """
+    Represents a Role paired with a Permission.
+
+    Attributes
+    ----------
+    role : str
+        The target RoleID.
+    permission : Permission
+        The target Permission.
+    """
+
     role: str
     permission: Permission
 
     def __init__(self, *, role: str, permission: Permission) -> None:
+        """
+        Initialize the Policy.
+
+        Parameters
+        ----------
+        role : str
+            The target RoleID.
+        permission : Permission
+            The target Permission.
+        """
         self.role = role
         self.permission = permission
 
@@ -148,7 +169,7 @@ def create_rbac_database_table(*, engine: Engine) -> None:
 
     Parameters
     ----------
-    engine : sqlalchemy.engine.base.Engine
+    engine : Engine
         The SQLAlchemy engine.
 
     """
