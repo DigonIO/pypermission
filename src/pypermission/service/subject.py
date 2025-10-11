@@ -131,7 +131,9 @@ class SubjectService(metaclass=FrozenClass):
         db: Session,
     ) -> None:
         if not cls.check_permission(subject=subject, permission=permission, db=db):
-            raise PyPermissionNotGrantedError()
+            raise PyPermissionNotGrantedError(
+                f"Permission '{permission}' is not granted for Subject '{subject}'!"
+            )
 
     @classmethod
     def permissions(cls, *, subject: str, db: Session) -> tuple[Permission, ...]:

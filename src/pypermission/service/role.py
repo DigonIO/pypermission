@@ -381,13 +381,8 @@ class RoleService(metaclass=FrozenClass):
         db: Session,
     ) -> None:
         if not cls.check_permission(role=role, permission=permission, db=db):
-            p_str = _permission_to_str(
-                resource_type=permission.resource_type,
-                resource_id=permission.resource_id,
-                action=permission.action,
-            )
             raise PyPermissionNotGrantedError(
-                f"Permission '{p_str}' is not granted for Role '{role}'!"
+                f"Permission '{permission}' is not granted for Role '{role}'!"
             )
 
     @classmethod

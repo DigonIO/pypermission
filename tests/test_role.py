@@ -387,7 +387,7 @@ def test_check_permission__success(*, db: Session) -> None:
 # TODO Test unknown role
 
 ################################################################################
-#### Test role check_permission
+#### Test role assert_permission
 ################################################################################
 
 
@@ -447,7 +447,7 @@ def test_permissions__success(*, db: Session) -> None:
 
 
 ################################################################################
-#### Test role permissions
+#### Test role policies
 ################################################################################
 
 
