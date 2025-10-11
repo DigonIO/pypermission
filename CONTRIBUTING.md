@@ -17,8 +17,16 @@ docker compose up
 
 ## Testing
 
+### Standard tests
+
 ```console
 uv run pytest --cov=src/pypermission/ tests
+```
+
+### Doc tests
+
+```console
+uv run pytest --markdown-docs docs/docs
 ```
 
 ## Visual coverage report

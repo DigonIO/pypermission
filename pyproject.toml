@@ -42,5 +42,6 @@ dev = [
     "psycopg>=3.2.10",
     "pytest>=8.4.2",
     "pytest-cov>=7.0.0",
+    "pytest-markdown-docs>=0.9.0",
 ]
 util = ["networkx>=3.5", "plotly>=6.3.1"]

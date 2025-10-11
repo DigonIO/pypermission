@@ -27,7 +27,7 @@ If you find the RBAC library beneficial, please consider supporting the project 
 + Authorization for pythonistas [(Quick Start)](TODO)
 + RBAC with NIST level 2
 + Persistency via SQLAlchemy
-  + Postgresql (psycopg)
+    + Postgresql (psycopg)
 + Full integration guide [(Guide)](TODO)
 + Online documentation [(Full doc)](TODO)
 
@@ -35,45 +35,47 @@ If you find the RBAC library beneficial, please consider supporting the project 
 
 ## Example
 
-``` python title="my_project.main.py"
-from pypermission import RBAC, Policy, Permission, create_rbac_database_table
-from my_project.sqla import sqla_engine, sqla_session_factory
+```python title="my_project.main.py"
+from sqlalchemy.engine import create_engine
+from sqlalchemy.orm import sessionmaker
 
-create_rbac_database_table(engine=sqla_engine)
-```
+engine = create_engine("sqlite:///:memory:", future=True)
+db_factory = sessionmaker(bind=engine, autoflush=False, autocommit=False)
 
-```python
-with sqla_session_factory() as db:
-    RBAC.role.create(role="user", db=db)
-    RBAC.role.create(role="guest", db=db)
-    RBAC.role.add_hierarchy(
-        parent_role="guest", child_role="user", db=db
-    )
+from pypermission import RBAC, Permission, create_rbac_database_table
 
-    RBAC.subject.create(subject="Alex", db=db)
-    RBAC.subject.assign_role(
-        subject="Alex", role="user", db=db
-    )
+create_rbac_database_table(engine=engine)
 
-    RBAC.policy.create(policy=Policy(
-        role="guest",
+with db_factory() as db:
+    # Create an 'admin' Role
+    RBAC.role.create(role="admin", db=db)
+
+    # Allow all Members of the 'admin' Role, to edit any user
+    RBAC.role.grant_permission(
+        role="admin",
         permission=Permission(
-            resource_type="group",
+            resource_type="user",
             resource_id="*",
-            action="access",
+            action="edit",
         ),
         db=db,
-    ))
-```
+    )
 
-```python
-with sqla_session_factory() as db:
+    # Create a Subject for the user 'Alex'
+    RBAC.subject.create(subject="Alex", db=db)
+
+    # Assign Subject 'Alex' to the 'admin' Role
+    RBAC.subject.assign_role(
+        subject="Alex", role="admin", db=db
+    )
+
+    # Test if user 'Alex' can edit user 'Max'
     RBAC.subject.assert_permission(
         subject="Alex",
         permission=Permission(
-            resource_type="group",
+            resource_type="user",
             resource_id="123",
-            action="access",
+            action="edit",
         ),
         db=db,
     )
