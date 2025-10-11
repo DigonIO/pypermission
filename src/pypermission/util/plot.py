@@ -4,13 +4,13 @@ import plotly.graph_objects as go
 from pypermission.exc import PyPermissionError
 
 
-def plot_factory(*, dag: nx.DiGraph) -> None:
+def plot_factory(*, dag: nx.DiGraph, auto_open: bool = False) -> None:
 
     if not len(dag):
         raise PyPermissionError("The RBAC system is empty. Nothing to plot!")
 
     fig = _build_plotly_figure(dag=dag)
-    fig.write_html("dag.html", auto_open=True)
+    fig.write_html("dag.html", auto_open=auto_open)
 
 
 ################################################################################

@@ -15,8 +15,8 @@ from pypermission.exc import PyPermissionError
 def role_dag(
     *,
     root_roles: set[str] | None = None,
-    show_subjects: bool = True,
-    show_permissions: bool = True,
+    include_subjects: bool = True,
+    include_permissions: bool = True,
     db: Session,
 ) -> nx.DiGraph:
     roles, hierarchies = _get_roles_and_hierarchies(root_roles=root_roles, db=db)
@@ -25,12 +25,12 @@ def role_dag(
     dag.add_nodes_from(roles, type="role_node")
     dag.add_edges_from(hierarchies, type="hierarchy_edge")
 
-    if show_subjects:
+    if include_subjects:
         subjects, members = _get_subjects_and_members(roles=roles, db=db)
         dag.add_nodes_from(subjects, type="subject_node")
         dag.add_edges_from(members, type="member_edge")
 
-    if show_permissions:
+    if include_permissions:
         subjects, members = _get_permissions_and_polices(roles=roles, db=db)
         dag.add_nodes_from(subjects, type="permission_node")
         dag.add_edges_from(members, type="policy_edge")
@@ -52,7 +52,7 @@ def _get_roles_and_hierarchies(
 
         hierarchy_orms = db.scalars(select(HierarchyORM)).all()
         hierarchies = set(
-            (hierarchy_orm.child_role_id, hierarchy_orm.parent_role_id)
+            (hierarchy_orm.parent_role_id, hierarchy_orm.child_role_id)
             for hierarchy_orm in hierarchy_orms
         )
         return roles, hierarchies
@@ -61,7 +61,10 @@ def _get_roles_and_hierarchies(
     roles = set(role_orme.id for role_orme in role_ormes)
 
     if unknown_roles := root_roles ^ roles:
-        raise PyPermissionError(f"Unknown role requested: {unknown_roles}")
+        if len(unknown_roles) == 1:
+            raise PyPermissionError(f"Requested role does not exist: {unknown_roles}!")
+        else:
+            raise PyPermissionError(f"Requested roles do not exist: {unknown_roles}!")
 
     root_cte = (
         select(HierarchyORM)
@@ -94,7 +97,7 @@ def _get_subjects_and_members(
         select(MemberORM).where(MemberORM.role_id.in_(roles))
     ).all()
     members = set(
-        (member_orm.subject_id, member_orm.role_id) for member_orm in member_orms
+        (member_orm.role_id, member_orm.subject_id) for member_orm in member_orms
     )
 
     subjects = {member_orm.subject_id for member_orm in member_orms}
@@ -111,15 +114,15 @@ def _get_permissions_and_polices(
     ).all()
     policies = set(
         (
+            policy_orm.role_id,
             _permission_to_str(
                 policy_orm.resource_type, policy_orm.resource_id, policy_orm.action
             ),
-            policy_orm.role_id,
         )
         for policy_orm in policy_orms
     )
 
-    permissions = set(policy[0] for policy in policies)
+    permissions = set(policy[1] for policy in policies)
 
     return permissions, policies
 
