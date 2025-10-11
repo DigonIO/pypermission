@@ -2,18 +2,20 @@ import pytest
 from sqlalchemy.orm import Session
 
 from pypermission.service.role import RoleService as RS
-from pypermission.exc import PyPermissionError
+from pypermission.service.subject import SubjectService as SS
+from pypermission.exc import PyPermissionError, PyPermissionNotGrantedError
+from pypermission.models import Permission
 
 ################################################################################
 #### Test role creation
 ################################################################################
 
 
-def test_create_role__success(db: Session) -> None:
+def test_create__success(db: Session) -> None:
     RS.create(role="user", db=db)
 
 
-def test_create_role__duplicate(*, db: Session) -> None:
+def test_create__duplicate(*, db: Session) -> None:
     RS.create(role="user", db=db)
     with pytest.raises(PyPermissionError):
         RS.create(role="user", db=db)
@@ -24,12 +26,12 @@ def test_create_role__duplicate(*, db: Session) -> None:
 ################################################################################
 
 
-def test_delete_role__success(*, db: Session) -> None:
+def test_delete__success(*, db: Session) -> None:
     RS.create(role="user", db=db)
     RS.delete(role="user", db=db)
 
 
-def test_delete_role__unknown(*, db: Session) -> None:
+def test_delete__unknown(*, db: Session) -> None:
     with pytest.raises(PyPermissionError):
         RS.delete(role="user", db=db)
 
@@ -259,3 +261,136 @@ def test_descendants__unknown(*, db: Session) -> None:
         RS.descendants(role="user", db=db)
 
     assert "Role 'user' does not exist!" == err.value.message
+
+
+################################################################################
+#### Test role grant_permission
+################################################################################
+
+
+def test_grant_permission__success(*, db: Session) -> None:
+    role = "admin"
+    permission = Permission(resource_type="user", resource_id="*", action="edit")
+
+    RS.create(role=role, db=db)
+    RS.grant_permission(role=role, permission=permission, db=db)
+
+
+def test_grant_permission__duplication(*, db: Session) -> None:
+    role = "admin"
+    permission = Permission(resource_type="user", resource_id="*", action="edit")
+
+    RS.create(role=role, db=db)
+    RS.grant_permission(role=role, permission=permission, db=db)
+
+    with pytest.raises(PyPermissionError) as err:
+        RS.grant_permission(role=role, permission=permission, db=db)
+    assert "The Permission 'user[*]:edit' does already exist!" == err.value.message
+
+
+# TODO Test unknown role
+
+
+################################################################################
+#### Test role revoke_permission
+################################################################################
+
+
+def test_revoke_permission__success(*, db: Session) -> None:
+    permission = Permission(resource_type="user", resource_id="*", action="edit")
+
+    RS.create(role="admin", db=db)
+    RS.grant_permission(role="admin", permission=permission, db=db)
+    RS.revoke_permission(role="admin", permission=permission, db=db)
+
+
+def test_revoke_permission__unknown(*, db: Session) -> None:
+    permission = Permission(resource_type="user", resource_id="*", action="edit")
+
+    RS.create(role="admin", db=db)
+    with pytest.raises(PyPermissionError) as err:
+        RS.revoke_permission(role="admin", permission=permission, db=db)
+
+    assert "The Permission 'user[*]:edit' does not exist!" == err.value.message
+
+
+# TODO Test unknown role
+
+
+################################################################################
+#### Test role check_permission
+################################################################################
+
+
+def test_check_permission__success(*, db: Session) -> None:
+    p_view_all = Permission(resource_type="user", resource_id="*", action="view")
+    p_view_123 = Permission(resource_type="user", resource_id="123", action="view")
+    p_edit_all = Permission(resource_type="user", resource_id="*", action="edit")
+    p_edit_123 = Permission(resource_type="user", resource_id="123", action="edit")
+    p_del_all = Permission(resource_type="user", resource_id="*", action="del")
+
+    # Generic roles
+    RS.create(role="user", db=db)
+    RS.create(role="mod", db=db)
+    RS.create(role="admin", db=db)
+    RS.grant_permission(role="user", permission=p_view_all, db=db)
+    RS.grant_permission(role="mod", permission=p_edit_all, db=db)
+    RS.grant_permission(role="admin", permission=p_del_all, db=db)
+
+    RS.add_hierarchy(parent_role="user", child_role="mod", db=db)
+    RS.add_hierarchy(parent_role="mod", child_role="admin", db=db)
+
+    # Application instance role
+    RS.create(role="user[123]", db=db)
+    RS.create(role="user[124]", db=db)
+
+    RS.grant_permission(role="user[123]", permission=p_view_123, db=db)
+    RS.grant_permission(role="user[123]", permission=p_edit_123, db=db)
+
+    # Test generic roles
+    assert RS.check_permission(role="user", permission=p_view_all, db=db) == True
+    assert RS.check_permission(role="user", permission=p_view_123, db=db) == True
+    assert RS.check_permission(role="user", permission=p_edit_all, db=db) == False
+
+    assert RS.check_permission(role="admin", permission=p_view_all, db=db) == True
+    assert RS.check_permission(role="admin", permission=p_edit_all, db=db) == True
+    assert RS.check_permission(role="admin", permission=p_edit_123, db=db) == True
+    assert RS.check_permission(role="admin", permission=p_del_all, db=db) == True
+
+    # Test application instance role
+    assert RS.check_permission(role="user[123]", permission=p_view_123, db=db) == True
+    assert RS.check_permission(role="user[123]", permission=p_edit_123, db=db) == True
+
+    assert RS.check_permission(role="user[124]", permission=p_view_123, db=db) == False
+    assert RS.check_permission(role="user[124]", permission=p_edit_123, db=db) == False
+
+
+# TODO Test unknown role
+
+################################################################################
+#### Test role check_permission
+################################################################################
+
+
+def test_assert_permission__success(*, db: Session) -> None:
+    p_view_all = Permission(resource_type="user", resource_id="*", action="view")
+    p_edit_all = Permission(resource_type="user", resource_id="*", action="edit")
+    p_edit_123 = Permission(resource_type="user", resource_id="123", action="edit")
+    p_del_all = Permission(resource_type="user", resource_id="*", action="del")
+
+    # Generic roles
+    RS.create(role="user", db=db)
+    RS.create(role="mod", db=db)
+    RS.grant_permission(role="user", permission=p_view_all, db=db)
+    RS.grant_permission(role="mod", permission=p_edit_all, db=db)
+
+    RS.add_hierarchy(parent_role="user", child_role="mod", db=db)
+
+    RS.assert_permission(role="mod", permission=p_view_all, db=db)
+    RS.assert_permission(role="mod", permission=p_edit_all, db=db)
+    RS.assert_permission(role="mod", permission=p_edit_123, db=db)
+    with pytest.raises(PyPermissionNotGrantedError) as err:
+        RS.assert_permission(role="mod", permission=p_del_all, db=db)
+    assert (
+        "Permission 'user[*]:del' is not granted for Role 'mod'!" == err.value.message
+    )

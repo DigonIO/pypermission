@@ -13,6 +13,7 @@ from pypermission.models import (
     MemberORM,
     Policy,
 )
+from pypermission.util.role import _permission_to_str
 from pypermission.exc import PyPermissionError, PyPermissionNotGrantedError
 
 ################################################################################
@@ -302,7 +303,12 @@ class RoleService(metaclass=FrozenClass):
             db.flush()
         except IntegrityError as err:
             db.rollback()
-            # TODO 'psycopg.errors.UniqueViolation'
+            p_str = _permission_to_str(
+                resource_type=permission.resource_type,
+                resource_id=permission.resource_id,
+                action=permission.action,
+            )
+            raise PyPermissionError(f"The Permission '{p_str}' does already exist!")
 
     @classmethod
     def revoke_permission(
@@ -323,7 +329,12 @@ class RoleService(metaclass=FrozenClass):
             policy_tuple,
         )
         if policy_orm is None:
-            raise PyPermissionError(f"Unknown policy '{policy_tuple}'!")
+            p_str = _permission_to_str(
+                resource_type=permission.resource_type,
+                resource_id=permission.resource_id,
+                action=permission.action,
+            )
+            raise PyPermissionError(f"The Permission '{p_str}' does not exist!")
 
         db.delete(policy_orm)
         db.flush()
@@ -344,7 +355,7 @@ class RoleService(metaclass=FrozenClass):
 
         traversing_cte = root_cte.alias()
         relations_cte = root_cte.union_all(
-            select(HierarchyORM.parent_role_id).where(  # NOTE Magic here???
+            select(HierarchyORM.parent_role_id).where(
                 HierarchyORM.child_role_id == traversing_cte.c.role_id
             )
         )
@@ -369,7 +380,14 @@ class RoleService(metaclass=FrozenClass):
         db: Session,
     ) -> None:
         if not cls.check_permission(role=role, permission=permission, db=db):
-            raise PyPermissionNotGrantedError()
+            p_str = _permission_to_str(
+                resource_type=permission.resource_type,
+                resource_id=permission.resource_id,
+                action=permission.action,
+            )
+            raise PyPermissionNotGrantedError(
+                f"Permission '{p_str}' is not granted for Role '{role}'!"
+            )
 
     @classmethod
     def permissions(
