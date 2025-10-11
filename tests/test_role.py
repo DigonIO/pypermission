@@ -264,6 +264,25 @@ def test_descendants__unknown(*, db: Session) -> None:
 
 
 ################################################################################
+#### Test role subjects
+################################################################################
+
+
+def test_subjects__success(*, db: Session) -> None:
+    SS.create(subject="ham", db=db)
+    SS.create(subject="spam", db=db)
+    SS.create(subject="eggs", db=db)
+
+    RS.create(role="breakfast", db=db)
+
+    SS.assign_role(subject="ham", role="breakfast", db=db)
+    SS.assign_role(subject="spam", role="breakfast", db=db)
+    SS.assign_role(subject="eggs", role="breakfast", db=db)
+
+    assert {"ham", "spam", "eggs"} == set(RS.subjects(role="breakfast", db=db))
+
+
+################################################################################
 #### Test role grant_permission
 ################################################################################
 
@@ -393,4 +412,65 @@ def test_assert_permission__success(*, db: Session) -> None:
         RS.assert_permission(role="mod", permission=p_del_all, db=db)
     assert (
         "Permission 'user[*]:del' is not granted for Role 'mod'!" == err.value.message
+    )
+
+
+################################################################################
+#### Test role permissions
+################################################################################
+
+
+def test_permissions__success(*, db: Session) -> None:
+    p_view_all = Permission(resource_type="user", resource_id="*", action="view")
+    p_edit_all = Permission(resource_type="user", resource_id="*", action="edit")
+
+    RS.create(role="user", db=db)
+    RS.create(role="mod", db=db)
+
+    RS.grant_permission(role="user", permission=p_view_all, db=db)
+    RS.grant_permission(role="mod", permission=p_edit_all, db=db)
+
+    RS.add_hierarchy(parent_role="user", child_role="mod", db=db)
+
+    assert {str(p_view_all)} == set(
+        str(permission) for permission in RS.permissions(role="user", db=db)
+    )
+
+    assert {str(p_view_all), str(p_edit_all)} == set(
+        str(permission) for permission in RS.permissions(role="mod", db=db)
+    )
+
+    assert {str(p_edit_all)} == set(
+        str(permission)
+        for permission in RS.permissions(role="mod", inherited=False, db=db)
+    )
+
+
+################################################################################
+#### Test role permissions
+################################################################################
+
+
+def test_policies__success(*, db: Session) -> None:
+    p_view_all = Permission(resource_type="user", resource_id="*", action="view")
+    p_edit_all = Permission(resource_type="user", resource_id="*", action="edit")
+
+    RS.create(role="user", db=db)
+    RS.create(role="mod", db=db)
+
+    RS.grant_permission(role="user", permission=p_view_all, db=db)
+    RS.grant_permission(role="mod", permission=p_edit_all, db=db)
+
+    RS.add_hierarchy(parent_role="user", child_role="mod", db=db)
+
+    assert {f"user:{p_view_all}"} == set(
+        str(policies) for policies in RS.policies(role="user", db=db)
+    )
+
+    assert {f"user:{p_view_all}", f"mod:{p_edit_all}"} == set(
+        str(policies) for policies in RS.policies(role="mod", db=db)
+    )
+
+    assert {f"mod:{p_edit_all}"} == set(
+        str(policies) for policies in RS.policies(role="mod", inherited=False, db=db)
     )

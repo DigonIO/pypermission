@@ -277,6 +277,7 @@ class RoleService(metaclass=FrozenClass):
     @classmethod
     def subjects(cls, *, role: str, db: Session) -> tuple[str, ...]:
         # TODO raise IntegrityError if role is unknown and if possible via ORM
+        # TODO add recursive descendants subject lookup for ANSI
         subjects = db.scalars(
             select(MemberORM.subject_id).where(MemberORM.role_id == role)
         ).all()
@@ -420,7 +421,7 @@ class RoleService(metaclass=FrozenClass):
 
         return tuple(
             Policy(
-                role=role,
+                role=policy_orm.role_id,
                 permission=Permission(
                     resource_type=policy_orm.resource_type,
                     resource_id=policy_orm.resource_id,
