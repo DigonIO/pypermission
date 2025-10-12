@@ -39,6 +39,7 @@ nav:
   - Coverage Report: coverage.md
 
 markdown_extensions:
+  - footnotes
   - pymdownx.highlight
   - pymdownx.superfences
   - pymdownx.tasklist:
@@ -47,7 +48,6 @@ markdown_extensions:
   - pymdownx.details
   - pymdownx.arithmatex:
       generic: true
-
 
 extra_javascript:
   - javascripts/katex.js
