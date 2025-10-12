@@ -1,4 +1,4 @@
-# Quick Start
+# PyPermission - Quick Start
 
 To get started with a basic RBAC example, first set up an SQLAlchemy environment.
 In this example, we use an in-memory SQLite database (you can also use PostgreSQL via `psycopg`). After setting up the database, we need to create the required RBAC tables.

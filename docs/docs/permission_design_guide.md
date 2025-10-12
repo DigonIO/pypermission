@@ -7,31 +7,6 @@ This guide explains how permissions can be designed in RBAC systems. There are t
 
 In some cases, a hybrid approach combining both methods can also be applied. The goal of this guide is to provide a clear overview of these approaches and help design flexible, maintainable permission structures.
 
-## Definitions
-
-We define the core concepts of our RBAC model as follows:
-
-+ **Role** - A collection of permissions assigned to a subject or group of subjects.
-+ **ResourceType** - The type or category of a resource (e.g., Group, Event).
-+ **ResourceID** - A unique identifier for a specific instance of a resource.
-+ **Action** - An operation that can be performed on a resource (e.g., Create, Edit, Delete).
-+ **Permission** - Grants the ability to perform a specific action on a resource.
-+ **Policy** - A set of permissions assigned to a role.
-
-Formally, using set notation:
-
-\[
-\begin{aligned}
-\text{Resource}   & = \text{ResourceType} \times \text{ResourceID} \\[2mm]
-\text{Permission} & = \text{Resource} \times \text{Action} \\
-                  & = \text{ResourceType} \times \text{ResourceID} \times \text{Action} \\[2mm]
-\text{Policy}     & = \text{Role} \times \text{Permission} \\
-                  & = \text{Role} \times \text{ResourceType} \times \text{ResourceID} \times \text{Action}
-\end{aligned}
-\]
-
-In this model, a resource is any object that can be acted upon, a permission links an action to a resource, and a policy assigns one or more permissions to a role.
-
 ## Szenario - MeetDown
 
 We use the fictional platform _MeetDown_ to illustrate the two permission design approaches. In _MeetDown_, users can create Groups and publish Events within them.

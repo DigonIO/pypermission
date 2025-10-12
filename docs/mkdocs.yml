@@ -26,6 +26,7 @@ plugins:
 nav:
   - README: readme_symlink.md
   - Quick Start: quick_start.md
+  - Definitions: definitions.md
   - Permission Design Guide: permission_design_guide.md
   - Implementation Guide:
       - Start: guide/index.md
