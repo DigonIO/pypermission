@@ -11,7 +11,7 @@ engine = create_engine("sqlite:///:memory:", future=True)
 db_factory = sessionmaker(bind=engine, autoflush=False, autocommit=False)
 ```
 
-```python continuation
+```{.python continuation}
 from pypermission import create_rbac_database_table
 
 create_rbac_database_table(engine=engine)
@@ -23,7 +23,7 @@ These services are accessible through the main RBAC class, which provides a unif
 
 Create a _user_ and an _admin_ Role and create a relation such that the _admin_ Role inherits all permissions of the _user_ Role and potential ascendant Permissions.
 
-```python continuation
+```{.python continuation}
 from pypermission import RBAC
 
 with db_factory() as db:
@@ -43,7 +43,7 @@ Next, create two Subjects: _Alex_ and _Max_.
 For each Subject, a dedicated Role is created to store Subject-specific Permissions.
 These Roles are then assigned alongside the shared _user_ and _admin_ Roles.
 
-```python continuation
+```{.python continuation}
 with db_factory() as db:
     RBAC.subject.create(subject="Alex", db=db)
     RBAC.subject.create(subject="Max", db=db)
@@ -62,7 +62,7 @@ with db_factory() as db:
 
 Next, assign Permissions to the Roles. In this simple example, we define who can edit which user. Every user with the Role _user_ is allowed to view all users, but can only edit their own account. Users with the Role _admin_ are allowed to edit any user.
 
-```python continuation
+```{.python continuation}
 from pypermission import Permission
 
 with db_factory() as db:
@@ -110,7 +110,7 @@ Now check permission access.
 
     The following part of this guide is incomplete.
 
-```python continuation
+```{.python continuation}
 with db_factory() as db:
     RBAC.subject.assert_permission(
         subject="Max",
@@ -128,7 +128,7 @@ with db_factory() as db:
     )
 ```
 
-```python continuation
+```{.python continuation}
 from pypermission import PyPermissionNotGrantedError
 with db_factory() as db:
     RBAC.subject.assert_permission(
@@ -151,7 +151,7 @@ with db_factory() as db:
         ...
 ```
 
-```python continuation
+```{.python continuation}
 with db_factory() as db:
     RBAC.subject.assert_permission(
         subject="Alex",

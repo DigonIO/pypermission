@@ -26,7 +26,7 @@ uv run pytest --cov=src/pypermission/ tests
 ### Doc tests
 
 ```console
-uv run pytest --markdown-docs docs/docs
+uv run pytest --markdown-docs --markdown-docs-syntax=superfences docs/docs
 ```
 
 ## Visual coverage report
