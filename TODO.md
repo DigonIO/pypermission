@@ -14,8 +14,8 @@ Next ID: `14`
     * [ ] Why not Sessions?
     * [ ] How can I implement Feature Flagging?
 * `12` Add missing functionality
-    * [ ] `RBAC.role.subjects` (`include_descendent_subjects` support)
-    * [ ] `RBAC.subject.roles` (`include_ascendent_roles` support)
+    * [ ] `RBAC.role.subjects` (`include_descendant_subjects` support)
+    * [ ] `RBAC.subject.roles` (`include_ascendant_roles` support)
     * [ ] `RBAC.role.actions_on_resource`
     * [ ] `RBAC.subject.actions_on_resource`
 * `11` Doc - Compare to ANSI

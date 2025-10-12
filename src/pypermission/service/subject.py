@@ -160,7 +160,7 @@ class SubjectService(metaclass=FrozenClass):
 
     @classmethod
     def roles(
-        cls, *, subject: str, include_ascendent_roles: bool = False, db: Session
+        cls, *, subject: str, include_ascendant_roles: bool = False, db: Session
     ) -> tuple[str, ...]:
         """
         Get all Roles assigned to a Subject.
@@ -169,8 +169,8 @@ class SubjectService(metaclass=FrozenClass):
         ----------
         subject : str
             The target SubjectID.
-        include_ascendent_roles: bool
-            Include all ascendent Roles.
+        include_ascendant_roles: bool
+            Include all ascendant Roles.
         db : Session
             The SQLAlchemy session.
 
@@ -186,8 +186,8 @@ class SubjectService(metaclass=FrozenClass):
         """
         # TODO raise IntegrityError if subject is unknown and if possible via ORM
 
-        if include_ascendent_roles:
-            # TODO add recursive ascendent Role lookup for ANSI
+        if include_ascendant_roles:
+            # TODO add recursive ascendant Role lookup for ANSI
             raise NotImplementedError()
 
         roles = db.scalars(

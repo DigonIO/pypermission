@@ -352,7 +352,7 @@ class RoleService(metaclass=FrozenClass):
 
     @classmethod
     def subjects(
-        cls, *, role: str, include_descendent_subjects: bool = False, db: Session
+        cls, *, role: str, include_descendant_subjects: bool = False, db: Session
     ) -> tuple[str, ...]:
         """
         Get all Subjects assigned to a Role.
@@ -361,7 +361,7 @@ class RoleService(metaclass=FrozenClass):
         ----------
         role : str
             The target RoleID.
-        include_descendent_subjects: bool
+        include_descendant_subjects: bool
             Include all Subjects for descendant Roles.
         db : Session
             The SQLAlchemy session.
@@ -378,7 +378,7 @@ class RoleService(metaclass=FrozenClass):
         """
         # TODO raise IntegrityError if role is unknown and if possible via ORM
 
-        if include_descendent_subjects:
+        if include_descendant_subjects:
             # TODO add recursive descendants subject lookup for ANSI
             raise NotImplementedError()
 
