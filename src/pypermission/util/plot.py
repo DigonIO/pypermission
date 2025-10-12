@@ -4,13 +4,32 @@ import plotly.graph_objects as go
 from pypermission.exc import PyPermissionError
 
 
-def plot_factory(*, dag: nx.DiGraph, auto_open: bool = False) -> None:
+def plot_factory(
+    *, dag: nx.DiGraph, auto_open: bool = False, file_path: str = "dag.html"
+) -> None:
+    """
+    Generate an interactive HTML visualization of an RBAC DAG and save it to `file_path`.
+
+    Parameters
+    ----------
+    dag : nx.DiGraph
+        The RBAC system DAG.
+    auto_open : bool
+        Automatically opens the plot in the browser.
+    file_path: str
+        Path and filename for the generated HTML as string.
+
+    Raises
+    ------
+    PyPermissionError
+        Raised when the input DAG is empty, indicating that there is no data to plot.
+    """
 
     if not len(dag):
         raise PyPermissionError("The RBAC system is empty. Nothing to plot!")
 
     fig = _build_plotly_figure(dag=dag)
-    fig.write_html("dag.html", auto_open=auto_open)
+    fig.write_html(file_path, auto_open=auto_open)
 
 
 ################################################################################

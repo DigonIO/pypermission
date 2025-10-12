@@ -19,6 +19,26 @@ def role_dag(
     include_permissions: bool = True,
     db: Session,
 ) -> nx.DiGraph:
+    """
+    Generate a directed acyclic graph (DAG) that reflects the role hierarchy
+    from the viewpoint of the `root_roles`.
+    By definition, the resulting DAG does **not** contain any roles that are
+    descendants of those root roles.
+
+    Parameters
+    ----------
+    root_roles : set[str] | None
+        Root Roles of the generated DAG. If its None, all existing Roles will be included.
+    include_subjects : bool
+        Include assigned Subjects in the DAG.
+    include_permissions : bool
+        Include granted Permissions in the DAG.
+
+    Returns
+    -------
+    nx.DiGraph
+        The generated DAG.
+    """
     roles, hierarchies = _get_roles_and_hierarchies(root_roles=root_roles, db=db)
 
     dag = nx.DiGraph()

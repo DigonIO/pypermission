@@ -37,6 +37,7 @@ nav:
       - Role service: api/role.md
       - Subject service: api/subject.md
       - Models: api/models.md
+      - Util: api/util.md
   - Coverage Report: coverage.md
 
 markdown_extensions:

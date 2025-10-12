@@ -50,3 +50,11 @@ Build the documentation.
 ```console
 uv run mkdocs build -f docs/mkdocs.yml
 ```
+
+## Static Type analysis
+
+Run mypy with:
+
+```console
+uv run mypy src
+```
