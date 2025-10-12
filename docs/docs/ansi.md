@@ -50,7 +50,7 @@ The ANSI standard additionally defines a Static Separation of Duty (SSD) Relatio
 
 | ANSI Method                                          | This library                         |
 | ---------------------------------------------------- | ------------------------------------ |
-| `authorized_users(r: Role) -> set[User]`             | `TODO`                               |
+| `authorized_users(r: Role) -> set[User]`             | `pypermission.RBAC.role.subjects`    |
 | `authorized_permissions(r: Role) -> set[Permission]` | `pypermission.RBAC.role.permissions` |
 
 !!! note
@@ -59,7 +59,7 @@ The ANSI standard additionally defines a Static Separation of Duty (SSD) Relatio
 
 ## 6 RBAC System and Administrative Functional Specification
 
-TODO: `AddInheritance`, `DeleteInheritance`, `AddActiveRoleRH`, `AuxAddActiveRoleRH`, `AddActiveRoleHC`
+TODO: `AddActiveRoleRH`, `AuxAddActiveRoleRH`, `AddActiveRoleHC`
 
 ### 7.1 Core RBAC
 
@@ -104,8 +104,8 @@ TODO: `AddInheritance`, `DeleteInheritance`, `AddActiveRoleRH`, `AuxAddActiveRol
 | `user_permissions(u: User) -> set[Permission]`⚠️                    | `RBAC.subject.permissions`🔧 |
 | `session_roles(s: Session) -> set[Role]`                              | _N/A_                         |
 | `session_permissions(s: Session) -> set[Permission]`                  | _N/A_                         |
-| `role_operations_on_object(r: Role, o: Object) -> set[Operation]`⚠️ | TODO                          |
-| `user_operations_on_object(u: User, o: Object) -> set[Operation]`⚠️ | TODO                          |
+| `role_operations_on_object(r: Role, o: Object) -> set[Operation]`⚠️ | `RBAC.role.actions_on_resource` |
+| `user_operations_on_object(u: User, o: Object) -> set[Operation]`⚠️ | `RBAC.subject.actions_on_resource`|
 
 ### 7.2 Hierarchical RBAC
 
@@ -129,20 +129,19 @@ TODO: `AddInheritance`, `DeleteInheritance`, `AddActiveRoleRH`, `AuxAddActiveRol
 
 ##### 7.2.1.3 Review Functions for General Role Hierarchies
 
-| ANSI Methods                             | This library |
-| ---------------------------------------- | ------------ |
-| `authorized_users(r: Role) -> set[User]` |              |
-| `authorized_roles(u: User) -> set[Role]` |              |
+| ANSI Methods                             | This library                      |
+| ---------------------------------------- | --------------------------------- |
+| `authorized_users(r: Role) -> set[User]` | `pypermission.RBAC.role.subjects` |
+| `authorized_roles(u: User) -> set[Role]` | `pypermission.RBAC.subject.roles` |
 
 ##### 7.2.1.4 Advanced Review Functions for General Role Hierarchies
 
-| ANSI Methods                                                          | This library               |
-| --------------------------------------------------------------------- | -------------------------- |
-| `role_permissions(r: Role) -> set[Permission]`⚠️                    | `RBAC.role.permissions`🔧    |
-| `user_permissions(u: User) -> set[Permission]`⚠️                    | `RBAC.subject.permissions`🔧 |
-| `role_operations_on_object(r: Role, o: Object) -> set[Operation]`⚠️ | TODO                       |
-| `user_operations_on_object(u: User, o: Object) -> set[Operation]`⚠️ | TODO                       |
-|                                                                       |                            |
+| ANSI Methods                                                          | This library                       |
+| --------------------------------------------------------------------- | ---------------------------------- |
+| `role_permissions(r: Role) -> set[Permission]`⚠️                    | `RBAC.role.permissions`🔧         |
+| `user_permissions(u: User) -> set[Permission]`⚠️                    | `RBAC.subject.permissions`🔧      |
+| `role_operations_on_object(r: Role, o: Object) -> set[Operation]`⚠️ | `RBAC.role.actions_on_resource`    |
+| `user_operations_on_object(u: User, o: Object) -> set[Operation]`⚠️ | `RBAC.subject.actions_on_resource` |
 
 #### 7.2.2.1 Administrative Commands for Limited Role Hierarchies
 

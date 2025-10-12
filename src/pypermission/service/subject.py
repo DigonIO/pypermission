@@ -159,7 +159,9 @@ class SubjectService(metaclass=FrozenClass):
         db.flush()
 
     @classmethod
-    def roles(cls, *, subject: str, db: Session) -> tuple[str, ...]:
+    def roles(
+        cls, *, subject: str, include_ascendent_roles: bool = False, db: Session
+    ) -> tuple[str, ...]:
         """
         Get all Roles assigned to a Subject.
 
@@ -167,6 +169,8 @@ class SubjectService(metaclass=FrozenClass):
         ----------
         subject : str
             The target SubjectID.
+        include_ascendent_roles: bool
+            Include all ascendent Roles.
         db : Session
             The SQLAlchemy session.
 
@@ -181,6 +185,11 @@ class SubjectService(metaclass=FrozenClass):
             If the target Subject does not exist.
         """
         # TODO raise IntegrityError if subject is unknown and if possible via ORM
+
+        if include_ascendent_roles:
+            # TODO add recursive ascendent Role lookup for ANSI
+            raise NotImplementedError()
+
         roles = db.scalars(
             select(MemberORM.role_id).where(MemberORM.subject_id == subject)
         ).all()
@@ -345,6 +354,18 @@ class SubjectService(metaclass=FrozenClass):
             )
             for policy_orm in policy_orms
         )
+
+    @classmethod
+    def actions_on_resource(
+        cls,
+        *,
+        role: str,
+        resource_type: str,
+        resource_id: str,
+        db: Session,
+    ) -> tuple[Policy, ...]:
+        raise NotImplementedError()
+        return tuple()
 
 
 ################################################################################

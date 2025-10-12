@@ -351,7 +351,9 @@ class RoleService(metaclass=FrozenClass):
         return tuple(descendant_relations)
 
     @classmethod
-    def subjects(cls, *, role: str, db: Session) -> tuple[str, ...]:
+    def subjects(
+        cls, *, role: str, include_descendent_subjects: bool = False, db: Session
+    ) -> tuple[str, ...]:
         """
         Get all Subjects assigned to a Role.
 
@@ -359,6 +361,8 @@ class RoleService(metaclass=FrozenClass):
         ----------
         role : str
             The target RoleID.
+        include_descendent_subjects: bool
+            Include all Subjects for descendant Roles.
         db : Session
             The SQLAlchemy session.
 
@@ -373,7 +377,11 @@ class RoleService(metaclass=FrozenClass):
             If the target Role does not exist.
         """
         # TODO raise IntegrityError if role is unknown and if possible via ORM
-        # TODO add recursive descendants subject lookup for ANSI
+
+        if include_descendent_subjects:
+            # TODO add recursive descendants subject lookup for ANSI
+            raise NotImplementedError()
+
         subjects = db.scalars(
             select(MemberORM.subject_id).where(MemberORM.role_id == role)
         ).all()
@@ -630,6 +638,19 @@ class RoleService(metaclass=FrozenClass):
             )
             for policy_orm in policy_orms
         )
+
+    @classmethod
+    def actions_on_resource(
+        cls,
+        *,
+        role: str,
+        resource_type: str,
+        resource_id: str,
+        inherited: bool = True,
+        db: Session,
+    ) -> tuple[Policy, ...]:
+        raise NotImplementedError()
+        return tuple()
 
 
 ################################################################################
