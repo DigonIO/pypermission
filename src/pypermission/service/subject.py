@@ -161,7 +161,7 @@ class SubjectService(metaclass=FrozenClass):
     @classmethod
     def roles(cls, *, subject: str, db: Session) -> tuple[str, ...]:
         """
-        Get all assigned Roles for a Subject.
+        Get all Roles assigned to a Subject.
 
         Parameters
         ----------
@@ -197,7 +197,7 @@ class SubjectService(metaclass=FrozenClass):
         db: Session,
     ) -> bool:
         """
-        Check if a Subject has a Permission.
+        Check if a Subject has access to a specific Permission via its Role hierarchy.
 
         Parameters
         ----------
@@ -254,7 +254,7 @@ class SubjectService(metaclass=FrozenClass):
         db: Session,
     ) -> None:
         """
-        Check if a Subject has a Permission.
+        Asserts that a Subject has access to a specific Permission via its Role hierarchy.
 
         Parameters
         ----------
@@ -280,7 +280,7 @@ class SubjectService(metaclass=FrozenClass):
     @classmethod
     def permissions(cls, *, subject: str, db: Session) -> tuple[Permission, ...]:
         """
-        Get all granted Permissions for a Subject.
+        Get all Permissions a Subject has access to via its Role hierarchy.
 
         Parameters
         ----------
@@ -313,7 +313,7 @@ class SubjectService(metaclass=FrozenClass):
     @classmethod
     def policies(cls, *, subject: str, db: Session) -> tuple[Policy, ...]:
         """
-        Get all granted Policies for a Subject.
+        Get all Policies associated to a Subject via its Role hierarchy.
 
         Parameters
         ----------

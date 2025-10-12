@@ -17,9 +17,8 @@ Next ID: `12`
 * `7` Support for Sqlite & PostgreSQL IntegrityErrors
 * `6` Add Postgres as explicit dependency group
 * `5` Write Python docstrings
-    * [ ] RoleService
-    * [ ] SubjectService
-    * [ ] PolicyService
+    * [x] RoleService
+    * [x] SubjectService
     * [ ] Util (plotting etc.)
     * [ ] Misc.
 * `3` Decide for a seo optimal package name

@@ -2,6 +2,7 @@ from sqlalchemy.orm import Mapped, mapped_column, DeclarativeBase
 from sqlalchemy.sql.sqltypes import String
 from sqlalchemy.sql.schema import ForeignKey
 from sqlalchemy.engine.base import Engine
+from typing import Never
 
 
 class BaseORM(DeclarativeBase): ...
@@ -21,7 +22,7 @@ class Permission:
     resource_type : str
         The ResourceType (e.g., "document", "user").
     resource_id : str
-        The ResourceID. The star ('*') acts as a wildcard matching all ResourceIDs of the same ResourceType. The empty string ('') can be used for Actions on Resources that do not have an ResourceID.
+        The ResourceID. The star '*' acts as a wildcard matching all ResourceIDs of the same ResourceType. The empty string can be used for Actions on Resources that do not have an ResourceID.
     action : str
         The Action allowed on the Resource (e.g., "read", "write", "delete").
     """
@@ -39,7 +40,7 @@ class Permission:
         resource_type : str
             The type of the resource (e.g., "document", "user").
         resource_id : str
-            The ID of the resource instance. The start ('*') acts as a wildcard matching all IDs of the resource. The empty string ('') can be used for actions on resources that do not have an ID.
+            The ID of the resource instance. The start '*' acts as a wildcard matching all IDs of the resource. The empty string can be used for actions on resources that do not have an ID.
         action : str
             The action allowed on the resource (e.g., "read", "write", "delete").
         """
@@ -87,7 +88,7 @@ class Policy:
 
 
 class FrozenClass(type):
-    def __setattr__(cls, key, value):
+    def __setattr__(cls, key: str, value: Never) -> None:
         if key in cls.__dict__:
             raise AttributeError(f"FrozenClass attributes cannot be overwrite!")
         super().__setattr__(key, value)
@@ -165,7 +166,7 @@ class PolicyORM(BaseORM):
 
 def create_rbac_database_table(*, engine: Engine) -> None:
     """
-    Create all for PyPermission required database table via. SQLAlchemy.
+    Create all required database tables via. SQLAlchemy for PyPermission.
 
     Parameters
     ----------

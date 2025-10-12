@@ -107,7 +107,7 @@ class RoleService(metaclass=FrozenClass):
         PyPermissionError
             If arguments `parent_role` and `child_role` are equal.
             If one or both Roles do not exist.
-            If adding the hierarchy would create a loop.
+            If adding the hierarchy would create a cycle.
             If the hierarchy already exists.
         """
         if parent_role == child_role:
@@ -562,7 +562,7 @@ class RoleService(metaclass=FrozenClass):
         role : str
             The target RoleID.
         inherited : bool
-            Includes all Permissions inherited by ancestors.
+            Includes all Permissions inherited by ancestor Roles.
         db : Session
             The SQLAlchemy session.
 
@@ -603,7 +603,7 @@ class RoleService(metaclass=FrozenClass):
         role : str
             The target RoleID.
         inherited : bool
-            Includes all Policies inherited by ancestors.
+            Includes all Policies inherited by ancestor Roles.
         db : Session
             The SQLAlchemy session.
 
