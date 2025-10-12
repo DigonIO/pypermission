@@ -1,6 +1,6 @@
 ![alt text](./assets/logo_name.svg "Title")
 
-A python `RBAC` library for projects where `SQLAlchemy` is a valid option.
+The python `RBAC` library for projects where `SQLAlchemy` is a valid option.
 
 [![repository](https://img.shields.io/badge/src-GitLab-orange)](https://gitlab.com/DigonIO/pypermission)
 [![mirror](https://img.shields.io/badge/mirror-GitHub-orange)](https://github.com/DigonIO/pypermission)

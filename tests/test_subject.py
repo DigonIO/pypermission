@@ -20,7 +20,7 @@ def test_create__duplicate(*, db: Session) -> None:
     with pytest.raises(PyPermissionError) as err:
         SS.create(subject="Alex", db=db)
 
-    assert "The Subject 'Alex' already exists!" == err.value.message
+    assert "Subject 'Alex' already exists!" == err.value.message
 
 
 ################################################################################
@@ -36,7 +36,7 @@ def test_delete__success(db: Session) -> None:
 def test_delete__unknown(db: Session) -> None:
     with pytest.raises(PyPermissionError) as err:
         SS.delete(subject="Alex", db=db)
-    assert "The Subject 'Alex' does not exists!" == err.value.message
+    assert "Subject 'Alex' does not exists!" == err.value.message
 
 
 ################################################################################
@@ -100,7 +100,7 @@ def test_roles__success(db: Session) -> None:
 def test_roles__unknown(db: Session) -> None:
     with pytest.raises(PyPermissionError) as err:
         SS.roles(subject="Alex", db=db)
-    assert "The Subject 'Alex' does not exist!" == err.value.message
+    assert "Subject 'Alex' does not exist!" == err.value.message
 
 
 ################################################################################

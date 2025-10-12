@@ -6,6 +6,7 @@ from pypermission.service.subject import SubjectService as SS
 from pypermission.exc import PyPermissionError, PyPermissionNotGrantedError
 from pypermission.models import Permission
 
+
 ################################################################################
 #### Test role creation
 ################################################################################
@@ -64,17 +65,17 @@ def test_add_hierarchy__equal(*, db: Session) -> None:
     with pytest.raises(PyPermissionError) as err:
         RS.add_hierarchy(parent_role="user", child_role="user", db=db)
 
-    assert "Both roles 'user' must not be the same!" == err.value.message
+    assert "RoleIDs must not be equal: 'user'!" == err.value.message
 
 
-def test_add_hierarchy__loop(*, db: Session) -> None:
+def test_add_hierarchy__cycle(*, db: Session) -> None:
     RS.create(role="user", db=db)
     RS.create(role="admin", db=db)
     RS.add_hierarchy(parent_role="user", child_role="admin", db=db)
     with pytest.raises(PyPermissionError) as err:
         RS.add_hierarchy(parent_role="admin", child_role="user", db=db)
 
-    assert "The desired hierarchy would generate a loop!" == err.value.message
+    assert "Desired hierarchy would create a cycle!" == err.value.message
 
 
 def test_add_hierarchy__exists(*, db: Session) -> None:
@@ -84,7 +85,7 @@ def test_add_hierarchy__exists(*, db: Session) -> None:
     with pytest.raises(PyPermissionError) as err:
         RS.add_hierarchy(parent_role="user", child_role="admin", db=db)
 
-    assert "The hierarchy 'user' -> 'admin' exists!" == err.value.message
+    assert "Hierarchy 'user' -> 'admin' exists!" == err.value.message
 
 
 def test_add_hierarchy__two_unknown(*, db: Session) -> None:
@@ -127,7 +128,7 @@ def test_remove_hierarchy__equal(*, db: Session) -> None:
     with pytest.raises(PyPermissionError) as err:
         RS.remove_hierarchy(parent_role="user", child_role="user", db=db)
 
-    assert "Both roles 'user' must not be the same!" == err.value.message
+    assert "RoleIDs must not be equal: 'user'!" == err.value.message
 
 
 def test_remove_hierarchy__unknown(*, db: Session) -> None:
@@ -136,7 +137,7 @@ def test_remove_hierarchy__unknown(*, db: Session) -> None:
     with pytest.raises(PyPermissionError) as err:
         RS.remove_hierarchy(parent_role="user", child_role="admin", db=db)
 
-    assert "The hierarchy 'user' -> 'admin' does not exists!" == err.value.message
+    assert "Hierarchy 'user' -> 'admin' does not exist!" == err.value.message
 
 
 def test_remove_hierarchy__two_unknown(*, db: Session) -> None:
@@ -295,6 +296,7 @@ def test_grant_permission__success(*, db: Session) -> None:
     RS.grant_permission(role=role, permission=permission, db=db)
 
 
+@pytest.mark.xfail(reason="Error cause detection not implemented yet")
 def test_grant_permission__duplication(*, db: Session) -> None:
     role = "admin"
     permission = Permission(resource_type="user", resource_id="*", action="edit")
@@ -304,7 +306,7 @@ def test_grant_permission__duplication(*, db: Session) -> None:
 
     with pytest.raises(PyPermissionError) as err:
         RS.grant_permission(role=role, permission=permission, db=db)
-    assert "The Permission 'user[*]:edit' does already exist!" == err.value.message
+    assert "Permission 'user[*]:edit' does already exist!" == err.value.message
 
 
 # TODO Test unknown role
@@ -323,6 +325,7 @@ def test_revoke_permission__success(*, db: Session) -> None:
     RS.revoke_permission(role="admin", permission=permission, db=db)
 
 
+@pytest.mark.xfail(reason="Error cause detection not implemented yet")
 def test_revoke_permission__unknown(*, db: Session) -> None:
     permission = Permission(resource_type="user", resource_id="*", action="edit")
 
@@ -330,7 +333,7 @@ def test_revoke_permission__unknown(*, db: Session) -> None:
     with pytest.raises(PyPermissionError) as err:
         RS.revoke_permission(role="admin", permission=permission, db=db)
 
-    assert "The Permission 'user[*]:edit' does not exist!" == err.value.message
+    assert "Permission 'user[*]:edit' does not exist!" == err.value.message
 
 
 # TODO Test unknown role

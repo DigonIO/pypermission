@@ -26,7 +26,7 @@ def plot_factory(
     """
 
     if not len(dag):
-        raise PyPermissionError("The RBAC system is empty. Nothing to plot!")
+        raise PyPermissionError("RBAC system is empty. Nothing to plot!")
 
     fig = _build_plotly_figure(dag=dag)
     fig.write_html(file_path, auto_open=auto_open)

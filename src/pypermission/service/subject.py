@@ -45,7 +45,7 @@ class SubjectService(metaclass=FrozenClass):
             db.flush()
         except IntegrityError:
             db.rollback()
-            raise PyPermissionError(f"The Subject '{subject}' already exists!")
+            raise PyPermissionError(f"Subject '{subject}' already exists!")
 
     @classmethod
     def delete(cls, *, subject: str, db: Session) -> None:
@@ -66,7 +66,7 @@ class SubjectService(metaclass=FrozenClass):
         """
         subject_orm = db.get(SubjectORM, subject)
         if subject_orm is None:
-            raise PyPermissionError(f"The Subject '{subject}' does not exists!")
+            raise PyPermissionError(f"Subject '{subject}' does not exists!")
         db.delete(subject_orm)
         db.flush()
 
@@ -120,10 +120,10 @@ class SubjectService(metaclass=FrozenClass):
 
             subject_orm = db.get(SubjectORM, subject)
             if subject_orm is None:
-                raise PyPermissionError(f"The Subject '{subject}' does not exist!")
+                raise PyPermissionError(f"Subject '{subject}' does not exist!")
             role_orm = db.get(RoleORM, role)
             if role_orm is None:
-                raise PyPermissionError(f"The Role '{role}' does not exist!")
+                raise PyPermissionError(f"Role '{role}' does not exist!")
 
     @classmethod
     def deassign_role(cls, *, subject: str, role: str, db: Session) -> None:
@@ -194,7 +194,7 @@ class SubjectService(metaclass=FrozenClass):
             select(MemberORM.role_id).where(MemberORM.subject_id == subject)
         ).all()
         if len(roles) == 0 and db.get(SubjectORM, subject) is None:
-            raise PyPermissionError(f"The Subject '{subject}' does not exist!")
+            raise PyPermissionError(f"Subject '{subject}' does not exist!")
         return tuple(roles)
 
     @classmethod

@@ -45,7 +45,7 @@ class RoleService(metaclass=FrozenClass):
             db.flush()
         except IntegrityError:
             db.rollback()
-            raise PyPermissionError(f"The Role '{role}' already exists!")
+            raise PyPermissionError(f"Role '{role}' already exists!")
 
     @classmethod
     def delete(cls, *, role: str, db: Session) -> None:
@@ -66,7 +66,7 @@ class RoleService(metaclass=FrozenClass):
         """
         role_orm = db.get(RoleORM, role)
         if role_orm is None:
-            raise PyPermissionError(f"The Role '{role}' does not exist!")
+            raise PyPermissionError(f"Role '{role}' does not exist!")
         db.delete(role_orm)
         db.flush()
 
@@ -142,7 +142,7 @@ class RoleService(metaclass=FrozenClass):
         ).all()
 
         if critical_leaf_relations:
-            raise PyPermissionError("The desired hierarchy would create a loop!")
+            raise PyPermissionError("Desired hierarchy would create a cycle!")
 
         try:
             hierarchy_orm = HierarchyORM(
@@ -153,7 +153,7 @@ class RoleService(metaclass=FrozenClass):
         except IntegrityError as err:
             db.rollback()
             raise PyPermissionError(
-                f"The hierarchy '{parent_role}' -> '{child_role}' exists!"
+                f"Hierarchy '{parent_role}' -> '{child_role}' exists!"
             )
 
     @classmethod
@@ -196,7 +196,7 @@ class RoleService(metaclass=FrozenClass):
                 )
             else:
                 raise PyPermissionError(
-                    f"The hierarchy '{parent_role}' -> '{child_role}' does not exist!"
+                    f"Hierarchy '{parent_role}' -> '{child_role}' does not exist!"
                 )
 
         db.delete(hierarchy_orm)
