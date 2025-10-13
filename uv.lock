@@ -850,6 +850,15 @@ wheels = [
 ]
 
 [[package]]
+name = "plotly-stubs"
+version = "0.0.6"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/07/80/928585fcf5d78377291e02081d816753cfa5669ffa08f4cc612e06c16097/plotly_stubs-0.0.6.tar.gz", hash = "sha256:ddd83fd9f440dac00fcb29524c127598f740a3e93c6b43c95f471603265e14ea", size = 50722, upload-time = "2025-07-29T07:09:35.375Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/0d/fd/0eef6785d0a7363f7024c9e2c8ff4fb6f1174aff8e6ab2f0f6397b659b42/plotly_stubs-0.0.6-py3-none-any.whl", hash = "sha256:7cc0b438c4daf58f83c37fefac54c0251664664e5a429b73f1ab0a80169d625e", size = 104430, upload-time = "2025-07-29T07:09:34.21Z" },
+]
+
+[[package]]
 name = "pluggy"
 version = "1.6.0"
 source = { registry = "https://pypi.org/simple" }
@@ -963,6 +972,7 @@ dev = [
     { name = "mkdocs-coverage" },
     { name = "mkdocs-material" },
     { name = "mkdocstrings", extra = ["python"] },
+    { name = "plotly-stubs" },
     { name = "psycopg" },
     { name = "pytest" },
     { name = "pytest-cov" },
@@ -986,6 +996,7 @@ dev = [
     { name = "mkdocs-coverage", specifier = ">=2.0.0" },
     { name = "mkdocs-material", specifier = ">=9.6.21" },
     { name = "mkdocstrings", extras = ["python"], specifier = ">=0.30.1" },
+    { name = "plotly-stubs", specifier = ">=0.0.6" },
     { name = "psycopg", specifier = ">=3.2.10" },
     { name = "pytest", specifier = ">=8.4.2" },
     { name = "pytest-cov", specifier = ">=7.0.0" },
