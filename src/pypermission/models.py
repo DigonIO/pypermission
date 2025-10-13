@@ -53,6 +53,19 @@ class Permission:
             return f"{self.resource_type}:{self.action}"
         return f"{self.resource_type}[{self.resource_id}]:{self.action}"
 
+    def __eq__(self, other: object) -> bool:
+        if not isinstance(other, Permission):
+            return False
+
+        return (
+            self.resource_type == other.resource_type
+            and self.resource_id == other.resource_id
+            and self.action == other.action
+        )
+
+    def __ne__(self, other: object) -> bool:
+        return not self.__eq__(other)
+
 
 class Policy:
     """
@@ -85,6 +98,15 @@ class Policy:
 
     def __str__(self) -> str:
         return f"{self.role}:{self.permission}"
+
+    def __eq__(self, other: object) -> bool:
+        if not isinstance(other, Policy):
+            return False
+
+        return self.role == other.role and self.permission == other.permission
+
+    def __ne__(self, other: object) -> bool:
+        return not self.__eq__(other)
 
 
 class FrozenClass(type):
