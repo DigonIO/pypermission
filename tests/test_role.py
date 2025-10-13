@@ -270,50 +270,44 @@ def test_descendants__unknown(*, db: Session) -> None:
 
 
 def test_subjects__success(*, db: Session) -> None:
-    SS.create(subject="ham", db=db)
-    SS.create(subject="spam", db=db)
-    SS.create(subject="eggs", db=db)
+    SS.create(subject="Oscar", db=db)
+    SS.create(subject="Charlie", db=db)
+    SS.create(subject="Mike", db=db)
 
-    RS.create(role="breakfast", db=db)
+    RS.create(role="user", db=db)
 
-    SS.assign_role(subject="ham", role="breakfast", db=db)
-    SS.assign_role(subject="spam", role="breakfast", db=db)
-    SS.assign_role(subject="eggs", role="breakfast", db=db)
+    SS.assign_role(subject="Oscar", role="user", db=db)
+    SS.assign_role(subject="Charlie", role="user", db=db)
+    SS.assign_role(subject="Mike", role="user", db=db)
 
-    assert Counter(("ham", "spam", "eggs")) == Counter(
-        RS.subjects(role="breakfast", db=db)
+    assert Counter(("Oscar", "Charlie", "Mike")) == Counter(
+        RS.subjects(role="user", db=db)
     )
 
 
 @pytest.mark.xfail(reason="Flag not yet implemented")
 def test_subjects_include_descendant__success(*, db: Session) -> None:
-    SS.create(subject="ham", db=db)
-    SS.create(subject="spam", db=db)
-    SS.create(subject="eggs", db=db)
+    SS.create(subject="Oscar", db=db)
+    SS.create(subject="Charlie", db=db)
+    SS.create(subject="Mike", db=db)
 
-    RS.create(role="first_breakfast", db=db)
-    RS.create(role="second_breakfast", db=db)
-    RS.add_hierarchy(
-        parent_role="first_breakfast", child_role="second_breakfast", db=db
-    )
+    RS.create(role="user", db=db)
+    RS.create(role="moderator", db=db)
+    RS.add_hierarchy(parent_role="user", child_role="moderator", db=db)
 
-    SS.assign_role(subject="ham", role="first_breakfast", db=db)
-    SS.assign_role(subject="eggs", role="first_breakfast", db=db)
-    SS.assign_role(subject="spam", role="second_breakfast", db=db)
-    SS.assign_role(subject="eggs", role="second_breakfast", db=db)
+    SS.assign_role(subject="Oscar", role="user", db=db)
+    SS.assign_role(subject="Mike", role="user", db=db)
+    SS.assign_role(subject="Charlie", role="moderator", db=db)
+    SS.assign_role(subject="Mike", role="moderator", db=db)
 
-    assert Counter(("ham", "eggs")) == Counter(
-        RS.subjects(role="first_breakfast", db=db)
-    )
-    assert Counter(("spam", "eggs")) == Counter(
-        RS.subjects(role="second_breakfast", db=db)
-    )
+    assert Counter(("Oscar", "Mike")) == Counter(RS.subjects(role="user", db=db))
+    assert Counter(("Charlie", "Mike")) == Counter(RS.subjects(role="moderator", db=db))
 
-    assert Counter(("ham", "spam", "eggs")) == Counter(
-        RS.subjects(role="first_breakfast", include_descendant_subjects=True, db=db)
+    assert Counter(("Oscar", "Charlie", "Mike")) == Counter(
+        RS.subjects(role="user", include_descendant_subjects=True, db=db)
     )
-    assert Counter(("spam", "eggs")) == Counter(
-        RS.subjects(role="second_breakfast", include_descendant_subjects=True, db=db)
+    assert Counter(("Charlie", "Mike")) == Counter(
+        RS.subjects(role="moderator", include_descendant_subjects=True, db=db)
     )
 
 
