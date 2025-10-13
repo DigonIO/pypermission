@@ -313,7 +313,13 @@ def test_subjects_include_descendant__success(*, db: Session) -> None:
 
 @pytest.mark.xfail(reason="Not implemented")
 def test_subjects_include_descendant__unknown_role(*, db: Session) -> None:
-    raise NotImplementedError
+    with pytest.raises(PyPermissionError) as err:
+        RS.subjects(role="unknown", include_descendant_subjects=True, db=db)
+    assert "Role 'unknown' does not exist!" == err.value.message
+
+    with pytest.raises(PyPermissionError) as err:
+        RS.subjects(role="unknown", include_descendant_subjects=False, db=db)
+    assert "Role 'unknown' does not exist!" == err.value.message
 
 
 ################################################################################
@@ -323,7 +329,7 @@ def test_subjects_include_descendant__unknown_role(*, db: Session) -> None:
 
 def test_grant_permission__success(*, db: Session) -> None:
     role = "admin"
-    permission = Permission(resource_type="user", resource_id="*", action="edit")
+    permission = Permission(resource_type="event", resource_id="*", action="edit")
 
     RS.create(role=role, db=db)
     RS.grant_permission(role=role, permission=permission, db=db)
@@ -332,19 +338,23 @@ def test_grant_permission__success(*, db: Session) -> None:
 @pytest.mark.xfail(reason="Error cause detection not implemented yet")
 def test_grant_permission__duplication(*, db: Session) -> None:
     role = "admin"
-    permission = Permission(resource_type="user", resource_id="*", action="edit")
+    permission = Permission(resource_type="event", resource_id="*", action="edit")
 
     RS.create(role=role, db=db)
     RS.grant_permission(role=role, permission=permission, db=db)
 
     with pytest.raises(PyPermissionError) as err:
         RS.grant_permission(role=role, permission=permission, db=db)
-    assert "Permission 'user[*]:edit' does already exist!" == err.value.message
+    assert "Permission 'event[*]:edit' does already exist!" == err.value.message
 
 
-@pytest.mark.xfail(reason="Not Implemented")
 def test_grant_permission__unknown_role(*, db: Session) -> None:
-    raise NotImplementedError
+    role = "unknown"
+    permission = Permission(resource_type="event", resource_id="*", action="edit")
+
+    with pytest.raises(PyPermissionError) as err:
+        RS.grant_permission(role=role, permission=permission, db=db)
+    assert "Role 'unknown' does not exist!" == err.value.message
 
 
 ################################################################################
@@ -353,7 +363,7 @@ def test_grant_permission__unknown_role(*, db: Session) -> None:
 
 
 def test_revoke_permission__success(*, db: Session) -> None:
-    permission = Permission(resource_type="user", resource_id="*", action="edit")
+    permission = Permission(resource_type="event", resource_id="*", action="edit")
 
     RS.create(role="admin", db=db)
     RS.grant_permission(role="admin", permission=permission, db=db)
@@ -362,18 +372,21 @@ def test_revoke_permission__success(*, db: Session) -> None:
 
 @pytest.mark.xfail(reason="Error cause detection not implemented yet")
 def test_revoke_permission__unknown_permission(*, db: Session) -> None:
-    permission = Permission(resource_type="user", resource_id="*", action="edit")
+    permission = Permission(resource_type="event", resource_id="*", action="edit")
 
     RS.create(role="admin", db=db)
     with pytest.raises(PyPermissionError) as err:
         RS.revoke_permission(role="admin", permission=permission, db=db)
 
-    assert "Permission 'user[*]:edit' does not exist!" == err.value.message
+    assert "Permission 'event[*]:edit' does not exist!" == err.value.message
 
 
-@pytest.mark.xfail(reason="Not Implemented")
 def test_revoke_permission__unknown_role(*, db: Session) -> None:
-    raise NotImplementedError
+    permission = Permission(resource_type="event", resource_id="*", action="edit")
+    with pytest.raises(PyPermissionError) as err:
+        RS.revoke_permission(role="unknown", permission=permission, db=db)
+
+    assert "Role 'unknown' does not exist!" == err.value.message
 
 
 ################################################################################
@@ -382,11 +395,11 @@ def test_revoke_permission__unknown_role(*, db: Session) -> None:
 
 
 def test_check_permission__success(*, db: Session) -> None:
-    p_view_all = Permission(resource_type="user", resource_id="*", action="view")
-    p_view_123 = Permission(resource_type="user", resource_id="123", action="view")
-    p_edit_all = Permission(resource_type="user", resource_id="*", action="edit")
-    p_edit_123 = Permission(resource_type="user", resource_id="123", action="edit")
-    p_del_all = Permission(resource_type="user", resource_id="*", action="del")
+    p_view_all = Permission(resource_type="event", resource_id="*", action="view")
+    p_view_123 = Permission(resource_type="event", resource_id="123", action="view")
+    p_edit_all = Permission(resource_type="event", resource_id="*", action="edit")
+    p_edit_123 = Permission(resource_type="event", resource_id="123", action="edit")
+    p_del_all = Permission(resource_type="event", resource_id="*", action="del")
 
     # Generic roles
     RS.create(role="user", db=db)
@@ -426,7 +439,11 @@ def test_check_permission__success(*, db: Session) -> None:
 
 @pytest.mark.xfail(reason="Not implemented")
 def test_check_permission__unknown_role(db: Session) -> None:
-    raise NotImplementedError
+    p_view_all = Permission(resource_type="event", resource_id="*", action="view")
+
+    with pytest.raises(PyPermissionError) as err:
+        RS.check_permission(role="unknown", permission=p_view_all, db=db)
+    assert "Role 'unknown' does not exist!" == err.value.message
 
 
 ################################################################################
@@ -435,10 +452,10 @@ def test_check_permission__unknown_role(db: Session) -> None:
 
 
 def test_assert_permission__success(*, db: Session) -> None:
-    p_view_all = Permission(resource_type="user", resource_id="*", action="view")
-    p_edit_all = Permission(resource_type="user", resource_id="*", action="edit")
-    p_edit_123 = Permission(resource_type="user", resource_id="123", action="edit")
-    p_del_all = Permission(resource_type="user", resource_id="*", action="del")
+    p_view_all = Permission(resource_type="event", resource_id="*", action="view")
+    p_edit_all = Permission(resource_type="event", resource_id="*", action="edit")
+    p_edit_123 = Permission(resource_type="event", resource_id="123", action="edit")
+    p_del_all = Permission(resource_type="event", resource_id="*", action="del")
 
     # Generic roles
     RS.create(role="user", db=db)
@@ -454,7 +471,7 @@ def test_assert_permission__success(*, db: Session) -> None:
     with pytest.raises(PyPermissionNotGrantedError) as err:
         RS.assert_permission(role="mod", permission=p_del_all, db=db)
     assert (
-        "Permission 'user[*]:del' is not granted for Role 'mod'!" == err.value.message
+        "Permission 'event[*]:del' is not granted for Role 'mod'!" == err.value.message
     )
 
 
@@ -464,8 +481,8 @@ def test_assert_permission__success(*, db: Session) -> None:
 
 
 def test_permissions__success(*, db: Session) -> None:
-    p_view_all = Permission(resource_type="user", resource_id="*", action="view")
-    p_edit_all = Permission(resource_type="user", resource_id="*", action="edit")
+    p_view_all = Permission(resource_type="event", resource_id="*", action="view")
+    p_edit_all = Permission(resource_type="event", resource_id="*", action="edit")
 
     RS.create(role="user", db=db)
     RS.create(role="mod", db=db)
@@ -500,8 +517,8 @@ def test_permissions__unknown_role(db: Session) -> None:
 
 
 def test_policies__success(*, db: Session) -> None:
-    p_view_all = Permission(resource_type="user", resource_id="*", action="view")
-    p_edit_all = Permission(resource_type="user", resource_id="*", action="edit")
+    p_view_all = Permission(resource_type="event", resource_id="*", action="view")
+    p_edit_all = Permission(resource_type="event", resource_id="*", action="edit")
 
     RS.create(role="user", db=db)
     RS.create(role="mod", db=db)

@@ -8,17 +8,38 @@ from sqlalchemy.orm import sessionmaker, Session
 
 from pypermission.models import BaseORM
 
+from sqlalchemy.event import listen
+
+
+# https://docs.sqlalchemy.org/en/20/dialects/sqlite.html#foreign-key-support
+# @event.listens_for(engine, "connect")
+def set_sqlite_pragma(dbapi_connection, connection_record):
+    # the sqlite3 driver will not set PRAGMA foreign_keys
+    # if autocommit=False; set to True temporarily
+    ac = dbapi_connection.autocommit
+    dbapi_connection.autocommit = True
+
+    cursor = dbapi_connection.cursor()
+    cursor.execute("PRAGMA foreign_keys=ON")
+    cursor.close()
+
+    # restore previous autocommit setting
+    dbapi_connection.autocommit = ac
+
 
 @pytest.fixture(params=["sqlite", "psql"])
 def engine(request: FixtureRequest) -> Generator[Engine, None, None]:
     match request.param:
         case "sqlite":
             url = "sqlite:///:memory:"
+            engine = create_engine(url, future=True)
+            listen(engine, "connect", set_sqlite_pragma)
         case "psql":
             url = "postgresql+psycopg://username:password@127.0.0.1:23000/database"
+            engine = create_engine(url, future=True)
         case _:
             raise ValueError()
-    engine = create_engine(url, future=True)
+
     BaseORM.metadata.create_all(engine)
     yield engine
     BaseORM.metadata.drop_all(engine)
