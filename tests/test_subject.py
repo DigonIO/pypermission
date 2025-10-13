@@ -5,6 +5,7 @@ from pypermission.service.role import RoleService as RS
 from pypermission.service.subject import SubjectService as SS
 from pypermission.models import Permission
 from pypermission.exc import PyPermissionError, PyPermissionNotGrantedError
+from collections import Counter
 
 ################################################################################
 #### Test subject creation
@@ -15,7 +16,7 @@ def test_create__success(db: Session) -> None:
     SS.create(subject="Alex", db=db)
 
 
-def test_create__duplicate(*, db: Session) -> None:
+def test_create__duplicate_subject(*, db: Session) -> None:
     SS.create(subject="Alex", db=db)
     with pytest.raises(PyPermissionError) as err:
         SS.create(subject="Alex", db=db)
@@ -33,7 +34,7 @@ def test_delete__success(db: Session) -> None:
     SS.delete(subject="Alex", db=db)
 
 
-def test_delete__unknown(db: Session) -> None:
+def test_delete__unknown_subject(db: Session) -> None:
     with pytest.raises(PyPermissionError) as err:
         SS.delete(subject="Alex", db=db)
     assert "Subject 'Alex' does not exists!" == err.value.message
@@ -63,7 +64,15 @@ def test_assign_role__success(db: Session) -> None:
     SS.assign_role(subject="Alex", role="admin", db=db)
 
 
-# TODO Test unknown subject and unknown role
+@pytest.mark.xfail(reason="Not implemented")
+def test_assign_role__unknown_subject(db: Session) -> None:
+    raise NotImplementedError
+
+
+@pytest.mark.xfail(reason="Not implemented")
+def test_assign_role__unknown_role(db: Session) -> None:
+    raise NotImplementedError
+
 
 ################################################################################
 #### Test subject deassign_role
@@ -78,7 +87,15 @@ def test_deassign_role__success(db: Session) -> None:
     SS.deassign_role(subject="Alex", role="admin", db=db)
 
 
-# TODO Test unknown subject and unknown role
+@pytest.mark.xfail(reason="Not implemented")
+def test_deassign_role__unknown_subject(db: Session) -> None:
+    raise NotImplementedError
+
+
+@pytest.mark.xfail(reason="Not implemented")
+def test_deassign_role__unknown_role(db: Session) -> None:
+    raise NotImplementedError
+
 
 ################################################################################
 #### Test subject roles
@@ -97,7 +114,12 @@ def test_roles__success(db: Session) -> None:
     assert ("user", "premium") == SS.roles(subject="Alex", db=db)
 
 
-def test_roles__unknown(db: Session) -> None:
+@pytest.mark.xfail(reason="Flag not yet implemented")
+def test_roles_include_ascendant__success(db: Session) -> None:
+    raise NotImplementedError
+
+
+def test_roles__unknown_subject(db: Session) -> None:
     with pytest.raises(PyPermissionError) as err:
         SS.roles(subject="Alex", db=db)
     assert "Subject 'Alex' does not exist!" == err.value.message
@@ -145,7 +167,10 @@ def test_check_permission__success(db: Session) -> None:
     SS.assert_permission(subject="Alex", permission=del_123, db=db)
 
 
-# TODO Test unknown subject
+@pytest.mark.xfail(reason="Not implemented")
+def test_check_permission__unknown_subject(db: Session) -> None:
+    raise NotImplementedError
+
 
 ################################################################################
 #### Test subject permissions
@@ -172,6 +197,11 @@ def test_permissions__success(*, db: Session) -> None:
     )
 
 
+@pytest.mark.xfail(reason="Not implemented")
+def test_permissions__unknown_subject(db: Session) -> None:
+    raise NotImplementedError
+
+
 ################################################################################
 #### Test subject policies
 ################################################################################
@@ -192,6 +222,81 @@ def test_policies__success(*, db: Session) -> None:
 
     SS.assign_role(subject="Alex", role="mod", db=db)
 
-    assert  {f"user:{view_all}", f"mod:{edit_all}"} == set(
+    assert {f"user:{view_all}", f"mod:{edit_all}"} == set(
         str(policies) for policies in SS.policies(subject="Alex", db=db)
     )
+
+
+@pytest.mark.xfail(reason="Not implemented")
+def test_policies__unknown_subject(db: Session) -> None:
+    raise NotImplementedError
+
+
+################################################################################
+#### Test actions on resource
+################################################################################
+
+
+@pytest.mark.xfail(reason="Not implemented")
+def test_actions_on_resource(*, db: Session) -> None:
+    SS.create(subject="Alex", db=db)
+    SS.create(subject="Uwe", db=db)
+
+    RS.create(role="user", db=db)
+    RS.create(role="user[Uwe]", db=db)
+    RS.create(role="admin", db=db)
+
+    RS.add_hierarchy(parent_role="user", child_role="admin", db=db)
+
+    # Grant permissions
+    p_view_group = Permission(resource_type="group", resource_id="*", action="view")
+    p_edit_group = Permission(resource_type="group", resource_id="*", action="edit")
+    p_edit_event = Permission(resource_type="event", resource_id="124", action="edit")
+
+    RS.grant_permission(role="user", permission=p_view_group, db=db)
+    RS.grant_permission(role="user[Uwe]", permission=p_edit_event, db=db)
+    RS.grant_permission(role="admin", permission=p_edit_group, db=db)
+
+    SS.assign_role(subject="Alex", role="admin", db=db)
+    SS.assign_role(subject="Uwe", role="user", db=db)
+
+    assert Counter(
+        SS.actions_on_resource(
+            subject="Alex", resource_type="group", resource_id="*", db=db
+        )
+    ) == Counter(["view", "edit"])
+    assert Counter(
+        SS.actions_on_resource(
+            subject="Alex", resource_type="group", resource_id="123", db=db
+        )
+    ) == Counter(["view", "edit"])
+
+    assert Counter(
+        SS.actions_on_resource(
+            subject="Uwe", resource_type="group", resource_id="*", db=db
+        )
+    ) == Counter(["view"])
+    assert Counter(
+        SS.actions_on_resource(
+            subject="Uwe", resource_type="group", resource_id="123", db=db
+        )
+    ) == Counter(["view"])
+
+    assert (
+        Counter(
+            SS.actions_on_resource(
+                subject="Uwe", resource_type="event", resource_id="*", db=db
+            )
+        )
+        == Counter()
+    )
+    assert Counter(
+        SS.actions_on_resource(
+            subject="Uwe", resource_type="event", resource_id="123", db=db
+        )
+    ) == Counter(["edit"])
+
+
+@pytest.mark.xfail(reason="Not implemented")
+def test_actions_on_resource__unknown_subject(db: Session) -> None:
+    raise NotImplementedError

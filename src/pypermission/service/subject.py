@@ -359,11 +359,11 @@ class SubjectService(metaclass=FrozenClass):
     def actions_on_resource(
         cls,
         *,
-        role: str,
+        subject: str,
         resource_type: str,
         resource_id: str,
         db: Session,
-    ) -> tuple[Policy, ...]:
+    ) -> tuple[str, ...]:
         raise NotImplementedError()
         return tuple()
 

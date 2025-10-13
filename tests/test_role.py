@@ -16,7 +16,7 @@ def test_create__success(db: Session) -> None:
     RS.create(role="user", db=db)
 
 
-def test_create__duplicate(*, db: Session) -> None:
+def test_create__duplicate_role(*, db: Session) -> None:
     RS.create(role="user", db=db)
     with pytest.raises(PyPermissionError):
         RS.create(role="user", db=db)
@@ -32,7 +32,7 @@ def test_delete__success(*, db: Session) -> None:
     RS.delete(role="user", db=db)
 
 
-def test_delete__unknown(*, db: Session) -> None:
+def test_delete__unknown_role(*, db: Session) -> None:
     with pytest.raises(PyPermissionError):
         RS.delete(role="user", db=db)
 
@@ -88,7 +88,7 @@ def test_add_hierarchy__exists(*, db: Session) -> None:
     assert "Hierarchy 'user' -> 'admin' exists!" == err.value.message
 
 
-def test_add_hierarchy__two_unknown(*, db: Session) -> None:
+def test_add_hierarchy__two_unknown_role_and_user(*, db: Session) -> None:
     with pytest.raises(PyPermissionError) as err:
         RS.add_hierarchy(parent_role="user", child_role="admin", db=db)
 
@@ -102,7 +102,7 @@ def test_add_hierarchy__two_unknown(*, db: Session) -> None:
         ("admin", "user"),
     ],
 )
-def test_add_hierarchy__one_unknown(
+def test_add_hierarchy__one_unknown_role(
     *, known_role: str, unknown_role: str, db: Session
 ) -> None:
     RS.create(role=known_role, db=db)
@@ -131,7 +131,7 @@ def test_remove_hierarchy__equal(*, db: Session) -> None:
     assert "RoleIDs must not be equal: 'user'!" == err.value.message
 
 
-def test_remove_hierarchy__unknown(*, db: Session) -> None:
+def test_remove_hierarchy__unknown_hierarchy(*, db: Session) -> None:
     RS.create(role="user", db=db)
     RS.create(role="admin", db=db)
     with pytest.raises(PyPermissionError) as err:
@@ -140,7 +140,7 @@ def test_remove_hierarchy__unknown(*, db: Session) -> None:
     assert "Hierarchy 'user' -> 'admin' does not exist!" == err.value.message
 
 
-def test_remove_hierarchy__two_unknown(*, db: Session) -> None:
+def test_remove_hierarchy__two_unknown_roles(*, db: Session) -> None:
     with pytest.raises(PyPermissionError) as err:
         RS.remove_hierarchy(parent_role="user", child_role="admin", db=db)
 
@@ -154,7 +154,7 @@ def test_remove_hierarchy__two_unknown(*, db: Session) -> None:
         ("admin", "user"),
     ],
 )
-def test_remove_hierarchy__one_unknown(
+def test_remove_hierarchy__one_unknown_role(
     *, known_role: str, unknown_role: str, db: Session
 ) -> None:
     RS.create(role=known_role, db=db)
@@ -179,7 +179,7 @@ def test_parents__success(*, db: Session) -> None:
     assert ("user", "user_v2") == RS.parents(role="admin", db=db)
 
 
-def test_parents__unknown(*, db: Session) -> None:
+def test_parents__unknown_role(*, db: Session) -> None:
     with pytest.raises(PyPermissionError) as err:
         RS.parents(role="user", db=db)
 
@@ -201,7 +201,7 @@ def test_children__success(*, db: Session) -> None:
     assert ("mod", "mod_v2") == RS.children(role="user", db=db)
 
 
-def test_children__unknown(*, db: Session) -> None:
+def test_children__unknown_role(*, db: Session) -> None:
     with pytest.raises(PyPermissionError) as err:
         RS.children(role="user", db=db)
 
@@ -228,7 +228,7 @@ def test_ancestors__success(*, db: Session) -> None:
     assert {"guest", "user", "mod", "mod_v2"} == set(RS.ancestors(role="admin", db=db))
 
 
-def test_ancestors__unknown(*, db: Session) -> None:
+def test_ancestors__unknown_role(*, db: Session) -> None:
     with pytest.raises(PyPermissionError) as err:
         RS.ancestors(role="user", db=db)
 
@@ -257,7 +257,7 @@ def test_descendants__success(*, db: Session) -> None:
     )
 
 
-def test_descendants__unknown(*, db: Session) -> None:
+def test_descendants__unknown_role(*, db: Session) -> None:
     with pytest.raises(PyPermissionError) as err:
         RS.descendants(role="user", db=db)
 
@@ -311,6 +311,11 @@ def test_subjects_include_descendant__success(*, db: Session) -> None:
     )
 
 
+@pytest.mark.xfail(reason="Not implemented")
+def test_subjects_include_descendant__unknown_role(*, db: Session) -> None:
+    raise NotImplementedError
+
+
 ################################################################################
 #### Test role grant_permission
 ################################################################################
@@ -337,7 +342,9 @@ def test_grant_permission__duplication(*, db: Session) -> None:
     assert "Permission 'user[*]:edit' does already exist!" == err.value.message
 
 
-# TODO Test unknown role
+@pytest.mark.xfail(reason="Not Implemented")
+def test_grant_permission__unknown_role(*, db: Session) -> None:
+    raise NotImplementedError
 
 
 ################################################################################
@@ -354,7 +361,7 @@ def test_revoke_permission__success(*, db: Session) -> None:
 
 
 @pytest.mark.xfail(reason="Error cause detection not implemented yet")
-def test_revoke_permission__unknown(*, db: Session) -> None:
+def test_revoke_permission__unknown_permission(*, db: Session) -> None:
     permission = Permission(resource_type="user", resource_id="*", action="edit")
 
     RS.create(role="admin", db=db)
@@ -364,7 +371,9 @@ def test_revoke_permission__unknown(*, db: Session) -> None:
     assert "Permission 'user[*]:edit' does not exist!" == err.value.message
 
 
-# TODO Test unknown role
+@pytest.mark.xfail(reason="Not Implemented")
+def test_revoke_permission__unknown_role(*, db: Session) -> None:
+    raise NotImplementedError
 
 
 ################################################################################
@@ -398,24 +407,27 @@ def test_check_permission__success(*, db: Session) -> None:
     RS.grant_permission(role="user[123]", permission=p_edit_123, db=db)
 
     # Test generic roles
-    assert RS.check_permission(role="user", permission=p_view_all, db=db) == True
-    assert RS.check_permission(role="user", permission=p_view_123, db=db) == True
-    assert RS.check_permission(role="user", permission=p_edit_all, db=db) == False
+    assert RS.check_permission(role="user", permission=p_view_all, db=db) is True
+    assert RS.check_permission(role="user", permission=p_view_123, db=db) is True
+    assert RS.check_permission(role="user", permission=p_edit_all, db=db) is False
 
-    assert RS.check_permission(role="admin", permission=p_view_all, db=db) == True
-    assert RS.check_permission(role="admin", permission=p_edit_all, db=db) == True
-    assert RS.check_permission(role="admin", permission=p_edit_123, db=db) == True
-    assert RS.check_permission(role="admin", permission=p_del_all, db=db) == True
+    assert RS.check_permission(role="admin", permission=p_view_all, db=db) is True
+    assert RS.check_permission(role="admin", permission=p_edit_all, db=db) is True
+    assert RS.check_permission(role="admin", permission=p_edit_123, db=db) is True
+    assert RS.check_permission(role="admin", permission=p_del_all, db=db) is True
 
     # Test application instance role
-    assert RS.check_permission(role="user[123]", permission=p_view_123, db=db) == True
-    assert RS.check_permission(role="user[123]", permission=p_edit_123, db=db) == True
+    assert RS.check_permission(role="user[123]", permission=p_view_123, db=db) is True
+    assert RS.check_permission(role="user[123]", permission=p_edit_123, db=db) is True
 
-    assert RS.check_permission(role="user[124]", permission=p_view_123, db=db) == False
-    assert RS.check_permission(role="user[124]", permission=p_edit_123, db=db) == False
+    assert RS.check_permission(role="user[124]", permission=p_view_123, db=db) is False
+    assert RS.check_permission(role="user[124]", permission=p_edit_123, db=db) is False
 
 
-# TODO Test unknown role
+@pytest.mark.xfail(reason="Not implemented")
+def test_check_permission__unknown_role(db: Session) -> None:
+    raise NotImplementedError
+
 
 ################################################################################
 #### Test role assert_permission
@@ -477,6 +489,11 @@ def test_permissions__success(*, db: Session) -> None:
     )
 
 
+@pytest.mark.xfail(reason="Not implemented")
+def test_permissions__unknown_role(db: Session) -> None:
+    raise NotImplementedError
+
+
 ################################################################################
 #### Test role policies
 ################################################################################
@@ -507,23 +524,31 @@ def test_policies__success(*, db: Session) -> None:
     )
 
 
+@pytest.mark.xfail(reason="Not implemented")
+def test_policies__unknown_role(db: Session) -> None:
+    raise NotImplementedError
+
+
 ################################################################################
 #### Test actions on resource
 ################################################################################
 
 
 @pytest.mark.xfail(reason="Not implemented")
-def test_actions_on_resource_inherited(*, db: Session) -> None:
-    RS.create(role="user", db=db)
+def test_actions_on_resource_inherited__success(*, db: Session) -> None:
     RS.create(role="admin", db=db)
+    RS.create(role="user", db=db)
+    RS.create(role="user[Uwe]", db=db)
 
     RS.add_hierarchy(parent_role="user", child_role="admin", db=db)
 
     # Grant permissions
     p_view_group = Permission(resource_type="group", resource_id="*", action="view")
     p_edit_group = Permission(resource_type="group", resource_id="*", action="edit")
+    p_edit_event = Permission(resource_type="event", resource_id="124", action="edit")
 
     RS.grant_permission(role="user", permission=p_view_group, db=db)
+    RS.grant_permission(role="user[Uwe]", permission=p_edit_event, db=db)
     RS.grant_permission(role="admin", permission=p_edit_group, db=db)
 
     assert Counter(
@@ -548,11 +573,23 @@ def test_actions_on_resource_inherited(*, db: Session) -> None:
         )
     ) == Counter(["view", "edit"])
 
+    assert Counter(
+        RS.actions_on_resource(
+            role="user[Uwe]", resource_type="event", resource_id="*", db=db
+        )
+    ) == Counter([])
+    assert Counter(
+        RS.actions_on_resource(
+            role="user[Uwe]", resource_type="event", resource_id="124", db=db
+        )
+    ) == Counter(["edit"])
+
 
 @pytest.mark.xfail(reason="Not implemented")
-def test_actions_on_resource_not_inherited(*, db: Session) -> None:
-    RS.create(role="user", db=db)
+def test_actions_on_resource_not_inherited__success(*, db: Session) -> None:
     RS.create(role="admin", db=db)
+    RS.create(role="user", db=db)
+    RS.create(role="user[Uwe]", db=db)
 
     RS.add_hierarchy(parent_role="user", child_role="admin", db=db)
 
@@ -592,3 +629,8 @@ def test_actions_on_resource_not_inherited(*, db: Session) -> None:
             db=db,
         )
     ) == Counter(["edit"])
+
+
+@pytest.mark.xfail(reason="Not implemented")
+def test_actions_on_resource__unknown_role(*, db: Session) -> None:
+    raise NotImplementedError
