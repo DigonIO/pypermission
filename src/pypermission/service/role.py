@@ -648,9 +648,8 @@ class RoleService(metaclass=FrozenClass):
         resource_id: str,
         inherited: bool = True,
         db: Session,
-    ) -> tuple[Policy, ...]:
+    ) -> tuple[str, ...]:
         raise NotImplementedError()
-        return tuple()
 
 
 ################################################################################

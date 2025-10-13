@@ -505,3 +505,90 @@ def test_policies__success(*, db: Session) -> None:
     assert {f"mod:{p_edit_all}"} == set(
         str(policies) for policies in RS.policies(role="mod", inherited=False, db=db)
     )
+
+
+################################################################################
+#### Test actions on resource
+################################################################################
+
+
+@pytest.mark.xfail(reason="Not implemented")
+def test_actions_on_resource_inherited(*, db: Session) -> None:
+    RS.create(role="user", db=db)
+    RS.create(role="admin", db=db)
+
+    RS.add_hierarchy(parent_role="user", child_role="admin", db=db)
+
+    # Grant permissions
+    p_view_group = Permission(resource_type="group", resource_id="*", action="view")
+    p_edit_group = Permission(resource_type="group", resource_id="*", action="edit")
+
+    RS.grant_permission(role="user", permission=p_view_group, db=db)
+    RS.grant_permission(role="admin", permission=p_edit_group, db=db)
+
+    assert Counter(
+        RS.actions_on_resource(
+            role="user", resource_type="group", resource_id="*", db=db
+        )
+    ) == Counter(["view"])
+    assert Counter(
+        RS.actions_on_resource(
+            role="user", resource_type="group", resource_id="123", db=db
+        )
+    ) == Counter(["view"])
+
+    assert Counter(
+        RS.actions_on_resource(
+            role="admin", resource_type="group", resource_id="*", db=db
+        )
+    ) == Counter(["view", "edit"])
+    assert Counter(
+        RS.actions_on_resource(
+            role="admin", resource_type="group", resource_id="123", db=db
+        )
+    ) == Counter(["view", "edit"])
+
+
+@pytest.mark.xfail(reason="Not implemented")
+def test_actions_on_resource_not_inherited(*, db: Session) -> None:
+    RS.create(role="user", db=db)
+    RS.create(role="admin", db=db)
+
+    RS.add_hierarchy(parent_role="user", child_role="admin", db=db)
+
+    # Grant permissions
+    p_view_group = Permission(resource_type="group", resource_id="*", action="view")
+    p_edit_group = Permission(resource_type="group", resource_id="*", action="edit")
+
+    RS.grant_permission(role="user", permission=p_view_group, db=db)
+    RS.grant_permission(role="admin", permission=p_edit_group, db=db)
+
+    assert Counter(
+        RS.actions_on_resource(
+            role="user", resource_type="group", resource_id="*", inherited=False, db=db
+        )
+    ) == Counter(["view"])
+    assert Counter(
+        RS.actions_on_resource(
+            role="user",
+            resource_type="group",
+            resource_id="123",
+            inherited=False,
+            db=db,
+        )
+    ) == Counter(["view"])
+
+    assert Counter(
+        RS.actions_on_resource(
+            role="admin", resource_type="group", resource_id="*", inherited=False, db=db
+        )
+    ) == Counter(["edit"])
+    assert Counter(
+        RS.actions_on_resource(
+            role="admin",
+            resource_type="group",
+            resource_id="123",
+            inherited=False,
+            db=db,
+        )
+    ) == Counter(["edit"])
