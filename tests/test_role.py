@@ -286,7 +286,7 @@ def test_subjects__success(*, db: Session) -> None:
 
 
 @pytest.mark.xfail(reason="Flag not yet implemented")
-def test_subjects_include_descendant__success(*, db: Session) -> None:
+def test_subjects_include_descendants__success(*, db: Session) -> None:
     SS.create(subject="Oscar", db=db)
     SS.create(subject="Charlie", db=db)
     SS.create(subject="Mike", db=db)
@@ -312,7 +312,7 @@ def test_subjects_include_descendant__success(*, db: Session) -> None:
 
 
 @pytest.mark.xfail(reason="Not implemented")
-def test_subjects_include_descendant__unknown_role(*, db: Session) -> None:
+def test_subjects_include_descendants__unknown_role(*, db: Session) -> None:
     with pytest.raises(PyPermissionError) as err:
         RS.subjects(role="unknown", include_descendant_subjects=True, db=db)
     assert "Role 'unknown' does not exist!" == err.value.message
@@ -508,7 +508,9 @@ def test_permissions__success(*, db: Session) -> None:
 
 @pytest.mark.xfail(reason="Not implemented")
 def test_permissions__unknown_role(db: Session) -> None:
-    raise NotImplementedError
+    with pytest.raises(PyPermissionError) as err:
+        RS.permissions(role="unknown", db=db)
+    assert "Role 'unknown' does not exist!" == err.value.message
 
 
 ################################################################################
@@ -543,7 +545,9 @@ def test_policies__success(*, db: Session) -> None:
 
 @pytest.mark.xfail(reason="Not implemented")
 def test_policies__unknown_role(db: Session) -> None:
-    raise NotImplementedError
+    with pytest.raises(PyPermissionError) as err:
+        RS.policies(role="unknown", db=db)
+    assert "Role 'unknown' does not exist!" == err.value.message
 
 
 ################################################################################
@@ -650,4 +654,8 @@ def test_actions_on_resource_not_inherited__success(*, db: Session) -> None:
 
 @pytest.mark.xfail(reason="Not implemented")
 def test_actions_on_resource__unknown_role(*, db: Session) -> None:
-    raise NotImplementedError
+    with pytest.raises(PyPermissionError) as err:
+        RS.actions_on_resource(
+            role="unknown", resource_type="group", resource_id="123", db=db
+        )
+    assert "Role 'unknown' does not exist!" == err.value.message

@@ -66,12 +66,18 @@ def test_assign_role__success(db: Session) -> None:
 
 @pytest.mark.xfail(reason="Not implemented")
 def test_assign_role__unknown_subject(db: Session) -> None:
-    raise NotImplementedError
+    RS.create(role="admin", db=db)
+    with pytest.raises(PyPermissionError) as err:
+        SS.assign_role(subject="unknown", role="admin", db=db)
+    assert "Subject 'unknown' does not exists!" == err.value.message
 
 
 @pytest.mark.xfail(reason="Not implemented")
 def test_assign_role__unknown_role(db: Session) -> None:
-    raise NotImplementedError
+    SS.create(subject="Alex", db=db)
+    with pytest.raises(PyPermissionError) as err:
+        SS.assign_role(subject="Alex", role="unknown", db=db)
+    assert "Role 'unknown' does not exist!" == err.value.message
 
 
 ################################################################################
@@ -89,12 +95,24 @@ def test_deassign_role__success(db: Session) -> None:
 
 @pytest.mark.xfail(reason="Not implemented")
 def test_deassign_role__unknown_subject(db: Session) -> None:
-    raise NotImplementedError
+    SS.create(subject="Alex", db=db)
+    RS.create(role="admin", db=db)
+    SS.assign_role(subject="Alex", role="admin", db=db)
+
+    with pytest.raises(PyPermissionError) as err:
+        SS.deassign_role(subject="unknown", role="admin", db=db)
+    assert "Subject 'unknown' does not exists!" == err.value.message
 
 
 @pytest.mark.xfail(reason="Not implemented")
 def test_deassign_role__unknown_role(db: Session) -> None:
-    raise NotImplementedError
+    SS.create(subject="Alex", db=db)
+    RS.create(role="admin", db=db)
+    SS.assign_role(subject="Alex", role="admin", db=db)
+
+    with pytest.raises(PyPermissionError) as err:
+        SS.deassign_role(subject="Alex", role="unknown", db=db)
+    assert "Role 'unknown' does not exist!" == err.value.message
 
 
 ################################################################################
@@ -104,19 +122,60 @@ def test_deassign_role__unknown_role(db: Session) -> None:
 
 def test_roles__success(db: Session) -> None:
     SS.create(subject="Alex", db=db)
+    SS.create(subject="Uwe", db=db)
 
     RS.create(role="user", db=db)
-    RS.create(role="premium", db=db)
+    RS.create(role="admin", db=db)
 
-    SS.assign_role(subject="Alex", role="user", db=db)
-    SS.assign_role(subject="Alex", role="premium", db=db)
+    RS.add_hierarchy(parent_role="user", child_role="admin", db=db)
 
-    assert ("user", "premium") == SS.roles(subject="Alex", db=db)
+    SS.assign_role(subject="Alex", role="admin", db=db)
+    SS.assign_role(subject="Uwe", role="user", db=db)
+
+    assert Counter(("admin",)) == Counter(SS.roles(subject="Alex", db=db))
+    assert Counter(("user",)) == Counter(SS.roles(subject="Uwe", db=db))
 
 
 @pytest.mark.xfail(reason="Flag not yet implemented")
-def test_roles_include_ascendant__success(db: Session) -> None:
-    raise NotImplementedError
+def test_roles_include_ascendant_next_neighbor__success(db: Session) -> None:
+    SS.create(subject="Alex", db=db)
+    SS.create(subject="Uwe", db=db)
+
+    RS.create(role="user", db=db)
+    RS.create(role="admin", db=db)
+
+    RS.add_hierarchy(parent_role="user", child_role="admin", db=db)
+
+    SS.assign_role(subject="Alex", role="admin", db=db)
+    SS.assign_role(subject="Uwe", role="user", db=db)
+
+    assert Counter(("user", "admin")) == Counter(
+        SS.roles(subject="Alex", include_ascendant_roles=True, db=db)
+    )
+    assert Counter(("user",)) == Counter(
+        SS.roles(subject="Uwe", include_ascendant_roles=True, db=db)
+    )
+
+
+@pytest.mark.xfail(reason="Flag not yet implemented")
+def test_roles_include_ascendant_n2n_neighbor__success(db: Session) -> None:
+    SS.create(subject="Victor", db=db)
+
+    RS.create(role="user", db=db)
+    RS.create(role="premium", db=db)
+    RS.create(role="vip", db=db)
+
+    RS.add_hierarchy(parent_role="user", child_role="premium", db=db)
+    RS.add_hierarchy(parent_role="premium", child_role="vip", db=db)
+
+    SS.assign_role(subject="Victor", role="vip", db=db)
+
+    assert Counter(("vip",)) == Counter(
+        SS.roles(subject="Victor", include_ascendant_roles=False, db=db)
+    )
+    assert Counter(("user", "premium", "vip")) == Counter(
+        SS.roles(subject="Victor", include_ascendant_roles=True, db=db)
+    )
 
 
 def test_roles__unknown_subject(db: Session) -> None:
@@ -169,7 +228,13 @@ def test_check_permission__success(db: Session) -> None:
 
 @pytest.mark.xfail(reason="Not implemented")
 def test_check_permission__unknown_subject(db: Session) -> None:
-    raise NotImplementedError
+    with pytest.raises(PyPermissionError) as err:
+        SS.check_permission(
+            subject="Alex",
+            permission=Permission(resource_type="user", resource_id="*", action="view"),
+            db=db,
+        )
+    assert "Subject 'unknown' does not exist!" == err.value.message
 
 
 ################################################################################
@@ -199,7 +264,9 @@ def test_permissions__success(*, db: Session) -> None:
 
 @pytest.mark.xfail(reason="Not implemented")
 def test_permissions__unknown_subject(db: Session) -> None:
-    raise NotImplementedError
+    with pytest.raises(PyPermissionError) as err:
+        SS.permissions(subject="unknown", db=db)
+    assert "Subject 'unknown' does not exist!" == err.value.message
 
 
 ################################################################################
@@ -229,7 +296,9 @@ def test_policies__success(*, db: Session) -> None:
 
 @pytest.mark.xfail(reason="Not implemented")
 def test_policies__unknown_subject(db: Session) -> None:
-    raise NotImplementedError
+    with pytest.raises(PyPermissionError) as err:
+        SS.policies(subject="unknown", db=db)
+    assert "Subject 'unknown' does not exist!" == err.value.message
 
 
 ################################################################################
@@ -299,4 +368,8 @@ def test_actions_on_resource(*, db: Session) -> None:
 
 @pytest.mark.xfail(reason="Not implemented")
 def test_actions_on_resource__unknown_subject(db: Session) -> None:
-    raise NotImplementedError
+    with pytest.raises(PyPermissionError) as err:
+        SS.actions_on_resource(
+            subject="unknown", resource_type="user", resource_id="*", db=db
+        )
+    assert "Subject 'unknown' does not exist!" == err.value.message

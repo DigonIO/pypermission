@@ -6,10 +6,12 @@
 * `xxxx.` Normal
 * `xxxx!` Critical
 
-Next ID: `14`
+Next ID: `16`
 
 ## Open Tasks
 
+* `15` Tests: Cover more than just next neighbor in role hierarchy tests.
+* `14` Doc - Declare how we differentiate between ascendants/parents & descendants/children
 * `13` Doc - Start with FAQ
     * [ ] Why not Sessions?
     * [ ] How can I implement Feature Flagging?

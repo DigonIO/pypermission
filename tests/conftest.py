@@ -9,11 +9,16 @@ from sqlalchemy.orm import sessionmaker, Session
 from pypermission.models import BaseORM
 
 from sqlalchemy.event import listen
+from sqlite3 import Connection
+from sqlalchemy.pool.base import (
+    _ConnectionRecord,  # pyright: ignore[reportPrivateUsage]
+)
 
 
 # https://docs.sqlalchemy.org/en/20/dialects/sqlite.html#foreign-key-support
-# @event.listens_for(engine, "connect")
-def set_sqlite_pragma(dbapi_connection, connection_record):
+def set_sqlite_pragma(
+    dbapi_connection: Connection, _connection_record: _ConnectionRecord
+) -> None:
     # the sqlite3 driver will not set PRAGMA foreign_keys
     # if autocommit=False; set to True temporarily
     ac = dbapi_connection.autocommit
