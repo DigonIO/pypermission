@@ -37,7 +37,7 @@ def test_delete__success(db: Session) -> None:
 def test_delete__unknown_subject(db: Session) -> None:
     with pytest.raises(PyPermissionError) as err:
         SS.delete(subject="Alex", db=db)
-    assert "Subject 'Alex' does not exists!" == err.value.message
+    assert "Subject 'Alex' does not exist!" == err.value.message
 
 
 ################################################################################
@@ -64,20 +64,26 @@ def test_assign_role__success(db: Session) -> None:
     SS.assign_role(subject="Alex", role="admin", db=db)
 
 
-@pytest.mark.xfail(reason="Not implemented")
 def test_assign_role__unknown_subject(db: Session) -> None:
     RS.create(role="admin", db=db)
     with pytest.raises(PyPermissionError) as err:
         SS.assign_role(subject="unknown", role="admin", db=db)
-    assert "Subject 'unknown' does not exists!" == err.value.message
+
+    assert (
+        "Subject 'unknown' does not exist!" == err.value.message
+        or "Subject 'unknown' or Role 'admin' does not exist!" == err.value.message
+    )
 
 
-@pytest.mark.xfail(reason="Not implemented")
 def test_assign_role__unknown_role(db: Session) -> None:
     SS.create(subject="Alex", db=db)
     with pytest.raises(PyPermissionError) as err:
         SS.assign_role(subject="Alex", role="unknown", db=db)
-    assert "Role 'unknown' does not exist!" == err.value.message
+
+    assert (
+        "Role 'unknown' does not exist!" == err.value.message
+        or "Subject 'Alex' or Role 'unknown' does not exist!" == err.value.message
+    )
 
 
 ################################################################################
@@ -90,29 +96,35 @@ def test_deassign_role__success(db: Session) -> None:
     RS.create(role="admin", db=db)
 
     SS.assign_role(subject="Alex", role="admin", db=db)
+    assert Counter(SS.roles(subject="Alex", db=db)) == Counter(["admin"])
+
     SS.deassign_role(subject="Alex", role="admin", db=db)
+    assert Counter(SS.roles(subject="Alex", db=db)) == Counter()
 
 
-@pytest.mark.xfail(reason="Not implemented")
 def test_deassign_role__unknown_subject(db: Session) -> None:
-    SS.create(subject="Alex", db=db)
     RS.create(role="admin", db=db)
-    SS.assign_role(subject="Alex", role="admin", db=db)
 
     with pytest.raises(PyPermissionError) as err:
         SS.deassign_role(subject="unknown", role="admin", db=db)
-    assert "Subject 'unknown' does not exists!" == err.value.message
+    assert "Subject 'unknown' does not exist!" == err.value.message
 
 
-@pytest.mark.xfail(reason="Not implemented")
 def test_deassign_role__unknown_role(db: Session) -> None:
     SS.create(subject="Alex", db=db)
-    RS.create(role="admin", db=db)
-    SS.assign_role(subject="Alex", role="admin", db=db)
 
     with pytest.raises(PyPermissionError) as err:
         SS.deassign_role(subject="Alex", role="unknown", db=db)
     assert "Role 'unknown' does not exist!" == err.value.message
+
+
+def test_deassign_role__role_not_assigned(db: Session) -> None:
+    SS.create(subject="Alex", db=db)
+    RS.create(role="admin", db=db)
+
+    with pytest.raises(PyPermissionError) as err:
+        SS.deassign_role(subject="Alex", role="admin", db=db)
+    assert "Role 'admin' is not assigned to Subject 'Alex'!" == err.value.message
 
 
 ################################################################################
@@ -226,11 +238,10 @@ def test_check_permission__success(db: Session) -> None:
     SS.assert_permission(subject="Alex", permission=del_123, db=db)
 
 
-@pytest.mark.xfail(reason="Not implemented")
 def test_check_permission__unknown_subject(db: Session) -> None:
     with pytest.raises(PyPermissionError) as err:
         SS.check_permission(
-            subject="Alex",
+            subject="unknown",
             permission=Permission(resource_type="user", resource_id="*", action="view"),
             db=db,
         )
@@ -262,7 +273,6 @@ def test_permissions__success(*, db: Session) -> None:
     )
 
 
-@pytest.mark.xfail(reason="Not implemented")
 def test_permissions__unknown_subject(db: Session) -> None:
     with pytest.raises(PyPermissionError) as err:
         SS.permissions(subject="unknown", db=db)
@@ -294,7 +304,6 @@ def test_policies__success(*, db: Session) -> None:
     )
 
 
-@pytest.mark.xfail(reason="Not implemented")
 def test_policies__unknown_subject(db: Session) -> None:
     with pytest.raises(PyPermissionError) as err:
         SS.policies(subject="unknown", db=db)

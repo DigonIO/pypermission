@@ -12,7 +12,11 @@ from pypermission.models import (
     PolicyORM,
     FrozenClass,
 )
-from pypermission.exc import PyPermissionError, PyPermissionNotGrantedError
+from pypermission.exc import (
+    PyPermissionError,
+    PyPermissionNotGrantedError,
+    process_subject_role_integrity_error,
+)
 
 
 ################################################################################
@@ -66,7 +70,7 @@ class SubjectService(metaclass=FrozenClass):
         """
         subject_orm = db.get(SubjectORM, subject)
         if subject_orm is None:
-            raise PyPermissionError(f"Subject '{subject}' does not exists!")
+            raise PyPermissionError(f"Subject '{subject}' does not exist!")
         db.delete(subject_orm)
         db.flush()
 
@@ -109,21 +113,13 @@ class SubjectService(metaclass=FrozenClass):
             If the Role does not exist.
             If the Subject was assigned to Role before. TODO
         """
-        # TODO raise IntegrityError if subject or role is unknown and if possible via ORM
         try:
             member_orm = MemberORM(role_id=role, subject_id=subject)
             db.add(member_orm)
             db.flush()
         except IntegrityError as err:
             db.rollback()
-            # TODO 'psycopg.errors.UniqueViolation'
-
-            subject_orm = db.get(SubjectORM, subject)
-            if subject_orm is None:
-                raise PyPermissionError(f"Subject '{subject}' does not exist!")
-            role_orm = db.get(RoleORM, role)
-            if role_orm is None:
-                raise PyPermissionError(f"Role '{role}' does not exist!")
+            process_subject_role_integrity_error(err=err, subject=subject, role=role)
 
     @classmethod
     def deassign_role(cls, *, subject: str, role: str, db: Session) -> None:
@@ -155,6 +151,9 @@ class SubjectService(metaclass=FrozenClass):
             role_orm = db.get(RoleORM, role)
             if role_orm is None:
                 raise PyPermissionError(f"Role '{role}' does not exist!")
+            raise PyPermissionError(
+                f"Role '{role}' is not assigned to Subject '{subject}'!"
+            )
         db.delete(member_orm)
         db.flush()
 
@@ -251,8 +250,12 @@ class SubjectService(metaclass=FrozenClass):
                 PolicyORM.action == permission.action,
             )
         ).all()
-
-        return len(policy_orms) > 0
+        if len(policy_orms) > 0:
+            return True
+        subject_orm = db.get(SubjectORM, subject)
+        if subject_orm is None:
+            raise PyPermissionError(f"Subject '{subject}' does not exist!")
+        return False
 
     @classmethod
     def assert_permission(
@@ -306,7 +309,7 @@ class SubjectService(metaclass=FrozenClass):
         Raises
         ------
         PyPermissionError
-            If the target Role does not exist.
+            If the target Subject does not exist.
         """
         policy_orms = _get_policy_orms_for_subject(subject=subject, db=db)
 
@@ -374,7 +377,9 @@ class SubjectService(metaclass=FrozenClass):
 
 
 def _get_policy_orms_for_subject(*, subject: str, db: Session) -> Sequence[PolicyORM]:
-    # TODO raise IntegrityError if subject is unknown and if possible via ORM
+    subject_orm = db.get(SubjectORM, subject)
+    if not subject_orm:
+        raise PyPermissionError(f"Subject '{subject}' does not exist!")
     root_cte = (
         select(MemberORM.role_id)
         .where(MemberORM.subject_id == subject)

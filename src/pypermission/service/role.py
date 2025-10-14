@@ -177,7 +177,7 @@ class RoleService(metaclass=FrozenClass):
         PyPermissionError
             If arguments `parent_role` and `child_role` are equal.
             If one or both Roles do not exist.
-            If the hierarchy does not exists.
+            If the hierarchy does not exist.
         """
         if parent_role == child_role:
             raise PyPermissionError(f"RoleIDs must not be equal: '{parent_role}'!")

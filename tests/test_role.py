@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 
 from pypermission.service.role import RoleService as RS
 from pypermission.service.subject import SubjectService as SS
-from pypermission.exc import PyPermissionError, PyPermissionNotGrantedError
+from pypermission.exc import PyPermissionError, PyPermissionNotGrantedError, ERR_MSG
 from pypermission.models import Permission
 from collections import Counter
 
@@ -18,8 +18,9 @@ def test_create__success(db: Session) -> None:
 
 def test_create__duplicate_role(*, db: Session) -> None:
     RS.create(role="user", db=db)
-    with pytest.raises(PyPermissionError):
+    with pytest.raises(PyPermissionError) as err:
         RS.create(role="user", db=db)
+    assert ERR_MSG.role_exists.format(role="user") == err.value.message
 
 
 ################################################################################
@@ -33,8 +34,9 @@ def test_delete__success(*, db: Session) -> None:
 
 
 def test_delete__unknown_role(*, db: Session) -> None:
-    with pytest.raises(PyPermissionError):
+    with pytest.raises(PyPermissionError) as err:
         RS.delete(role="user", db=db)
+    assert ERR_MSG.non_existent_role.format(role="user") == err.value.message
 
 
 ################################################################################
@@ -43,11 +45,11 @@ def test_delete__unknown_role(*, db: Session) -> None:
 
 
 def test_list__success(*, db: Session) -> None:
-    assert RS.list(db=db) == tuple()
+    assert Counter(RS.list(db=db)) == Counter()
     RS.create(role="user", db=db)
-    assert RS.list(db=db) == ("user",)
+    assert Counter(RS.list(db=db)) == Counter(user=1)
     RS.create(role="admin", db=db)
-    assert RS.list(db=db) == ("user", "admin")
+    assert Counter(RS.list(db=db)) == Counter(user=1, admin=1)
 
 
 ################################################################################
@@ -61,11 +63,10 @@ def test_add_hierarchy__success(*, db: Session) -> None:
     RS.add_hierarchy(parent_role="user", child_role="admin", db=db)
 
 
-def test_add_hierarchy__equal(*, db: Session) -> None:
+def test_add_hierarchy__conflict(*, db: Session) -> None:
     with pytest.raises(PyPermissionError) as err:
         RS.add_hierarchy(parent_role="user", child_role="user", db=db)
-
-    assert "RoleIDs must not be equal: 'user'!" == err.value.message
+    assert ERR_MSG.conflicting_role_ids.format(role="user") == err.value.message
 
 
 def test_add_hierarchy__cycle(*, db: Session) -> None:
@@ -74,8 +75,7 @@ def test_add_hierarchy__cycle(*, db: Session) -> None:
     RS.add_hierarchy(parent_role="user", child_role="admin", db=db)
     with pytest.raises(PyPermissionError) as err:
         RS.add_hierarchy(parent_role="admin", child_role="user", db=db)
-
-    assert "Desired hierarchy would create a cycle!" == err.value.message
+    assert ERR_MSG.cycle_detected == err.value.message
 
 
 def test_add_hierarchy__exists(*, db: Session) -> None:
@@ -85,16 +85,25 @@ def test_add_hierarchy__exists(*, db: Session) -> None:
     with pytest.raises(PyPermissionError) as err:
         RS.add_hierarchy(parent_role="user", child_role="admin", db=db)
 
-    assert "Hierarchy 'user' -> 'admin' exists!" == err.value.message
+    assert (
+        ERR_MSG.hierarchy_exists.format(parent_role="user", child_role="admin")
+        == err.value.message
+    )
 
 
 def test_add_hierarchy__two_unknown_role_and_user(*, db: Session) -> None:
     with pytest.raises(PyPermissionError) as err:
         RS.add_hierarchy(parent_role="user", child_role="admin", db=db)
 
-    assert "Roles 'user' and 'admin' do not exist!" == err.value.message
+    assert (
+        ERR_MSG.missing_parent_child_roles.format(
+            parent_role="user", child_role="admin"
+        )
+        == err.value.message
+    )
 
 
+# FIXME: this does not test permutation correctly
 @pytest.mark.parametrize(
     "known_role, unknown_role",
     [
@@ -109,7 +118,7 @@ def test_add_hierarchy__one_unknown_role(
     with pytest.raises(PyPermissionError) as err:
         RS.add_hierarchy(parent_role=known_role, child_role=unknown_role, db=db)
 
-    assert f"Role '{unknown_role}' does not exist!" == err.value.message
+    assert ERR_MSG.non_existent_role.format(role=unknown_role) == err.value.message
 
 
 ################################################################################
@@ -128,7 +137,7 @@ def test_remove_hierarchy__equal(*, db: Session) -> None:
     with pytest.raises(PyPermissionError) as err:
         RS.remove_hierarchy(parent_role="user", child_role="user", db=db)
 
-    assert "RoleIDs must not be equal: 'user'!" == err.value.message
+    assert ERR_MSG.conflicting_role_ids.format(role="user") == err.value.message
 
 
 def test_remove_hierarchy__unknown_hierarchy(*, db: Session) -> None:
@@ -137,14 +146,22 @@ def test_remove_hierarchy__unknown_hierarchy(*, db: Session) -> None:
     with pytest.raises(PyPermissionError) as err:
         RS.remove_hierarchy(parent_role="user", child_role="admin", db=db)
 
-    assert "Hierarchy 'user' -> 'admin' does not exist!" == err.value.message
+    assert (
+        ERR_MSG.non_existent_hierarchy.format(parent_role="user", child_role="admin")
+        == err.value.message
+    )
 
 
 def test_remove_hierarchy__two_unknown_roles(*, db: Session) -> None:
     with pytest.raises(PyPermissionError) as err:
         RS.remove_hierarchy(parent_role="user", child_role="admin", db=db)
 
-    assert "Roles 'user' and 'admin' do not exist!" == err.value.message
+    assert (
+        ERR_MSG.missing_parent_child_roles.format(
+            parent_role="user", child_role="admin"
+        )
+        == err.value.message
+    )
 
 
 @pytest.mark.parametrize(
@@ -161,7 +178,7 @@ def test_remove_hierarchy__one_unknown_role(
     with pytest.raises(PyPermissionError) as err:
         RS.remove_hierarchy(parent_role=known_role, child_role=unknown_role, db=db)
 
-    assert f"Role '{unknown_role}' does not exist!" == err.value.message
+    assert ERR_MSG.non_existent_role.format(role=unknown_role) == err.value.message
 
 
 ################################################################################
@@ -176,7 +193,7 @@ def test_parents__success(*, db: Session) -> None:
     RS.add_hierarchy(parent_role="user", child_role="admin", db=db)
     RS.add_hierarchy(parent_role="user_v2", child_role="admin", db=db)
 
-    assert ("user", "user_v2") == RS.parents(role="admin", db=db)
+    assert Counter(user=1, user_v2=1) == Counter(RS.parents(role="admin", db=db))
 
 
 def test_parents__unknown_role(*, db: Session) -> None:
