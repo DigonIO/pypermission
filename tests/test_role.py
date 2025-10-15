@@ -108,20 +108,23 @@ def test_add_hierarchy__two_unknown_role_and_user(*, db: Session) -> None:
     )
 
 
-# FIXME: this does not test permutation correctly
 @pytest.mark.parametrize(
-    "known_role, unknown_role",
+    "known_role, unknown_role, known_is_parent",
     [
-        ("user", "admin"),
-        ("admin", "user"),
+        ("user", "admin", True),
+        ("admin", "user", False),
     ],
 )
 def test_add_hierarchy__one_unknown_role(
-    *, known_role: str, unknown_role: str, db: Session
+    *, known_role: str, unknown_role: str, known_is_parent: bool, db: Session
 ) -> None:
     RS.create(role=known_role, db=db)
     with pytest.raises(PyPermissionError) as err:
-        RS.add_hierarchy(parent_role=known_role, child_role=unknown_role, db=db)
+        RS.add_hierarchy(
+            parent_role=known_role if known_is_parent else unknown_role,
+            child_role=unknown_role if known_is_parent else known_role,
+            db=db,
+        )
 
     assert ERR_MSG.non_existent_role.format(role=unknown_role) == err.value.message
 
@@ -169,22 +172,30 @@ def test_remove_hierarchy__two_unknown_roles(*, db: Session) -> None:
     )
 
 
-# TODO: check if this tests permutations correctly
 @pytest.mark.parametrize(
-    "known_role, unknown_role",
+    "known_role, unknown_role, known_is_parent",
     [
-        ("user", "admin"),
-        ("admin", "user"),
+        ("user", "admin", True),
+        ("admin", "user", False),
     ],
 )
-def test_remove_hierarchy__one_unknown_role(
-    *, known_role: str, unknown_role: str, db: Session
+def test_remove_hierarchy_one_unknown_role(
+    *,
+    known_role: str,
+    unknown_role: str,
+    known_is_parent: bool,
+    db: Session,
 ) -> None:
     RS.create(role=known_role, db=db)
-    with pytest.raises(PyPermissionError) as err:
-        RS.remove_hierarchy(parent_role=known_role, child_role=unknown_role, db=db)
 
-    assert ERR_MSG.non_existent_role.format(role=unknown_role) == err.value.message
+    with pytest.raises(PyPermissionError) as exc:
+        RS.remove_hierarchy(
+            parent_role=known_role if known_is_parent else unknown_role,
+            child_role=unknown_role if known_is_parent else known_role,
+            db=db,
+        )
+
+    assert ERR_MSG.non_existent_role.format(role=unknown_role) == exc.value.message
 
 
 ################################################################################
