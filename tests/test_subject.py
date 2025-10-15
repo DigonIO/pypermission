@@ -32,7 +32,10 @@ def test_create__duplicate_subject(*, db: Session) -> None:
 
 def test_delete__success(db: Session) -> None:
     SS.create(subject="Alex", db=db)
+    assert Counter(("Alex",)) == Counter(SS.list(db=db))
+
     SS.delete(subject="Alex", db=db)
+    assert Counter() == Counter(SS.list(db=db))
 
 
 def test_delete__unknown_subject(db: Session) -> None:
@@ -76,11 +79,20 @@ def test_assign_role__unknown_subject(db: Session) -> None:
     with pytest.raises(PyPermissionError) as err:
         SS.assign_role(subject=subject, role=role, db=db)
 
-    assert (
-        ERR_MSG.non_existent_subject.format(subject=subject) == err.value.message
-        or ERR_MSG.non_existent_subject_role.format(subject=subject, role=role)
-        == err.value.message
-    )
+    assert db.bind is not None
+    match db.bind.dialect.name:
+        case "postgresql":
+            assert (
+                ERR_MSG.non_existent_subject.format(subject=subject)
+                == err.value.message
+            )
+        case "sqlite":
+            assert (
+                ERR_MSG.non_existent_subject_role.format(subject=subject, role=role)
+                == err.value.message
+            )
+        case _:
+            assert False
 
 
 def test_assign_role__unknown_role(db: Session) -> None:
@@ -90,11 +102,21 @@ def test_assign_role__unknown_role(db: Session) -> None:
     with pytest.raises(PyPermissionError) as err:
         SS.assign_role(subject=subject, role="unknown", db=db)
 
-    assert (
-        ERR_MSG.non_existent_role.format(role=role) == err.value.message
-        or ERR_MSG.non_existent_subject_role.format(subject=subject, role=role)
-        == err.value.message
-    )
+    assert db.bind is not None
+    match db.bind.dialect.name:
+        case "postgresql":
+            assert (
+                ERR_MSG.non_existent_role.format(role=role)
+                == err.value.message
+                == err.value.message
+            )
+        case "sqlite":
+            assert (
+                ERR_MSG.non_existent_subject_role.format(subject=subject, role=role)
+                == err.value.message
+            )
+        case _:
+            assert False
 
 
 ################################################################################
@@ -224,7 +246,7 @@ def test_roles__unknown_subject(db: Session) -> None:
 ################################################################################
 
 
-def test_check_permission__success(db: Session) -> None:
+def test_check_assert_permission__success(db: Session) -> None:
     subject = "Alex"
     SS.create(subject=subject, db=db)
 
@@ -234,15 +256,25 @@ def test_check_permission__success(db: Session) -> None:
 
     SS.assign_role(subject=subject, role="admin", db=db)
 
-    view_all = Permission(resource_type="user", resource_id="*", action="view")
-    view_123 = Permission(resource_type="user", resource_id="123", action="view")
-    edit_all = Permission(resource_type="user", resource_id="*", action="edit")
-    edit_123 = Permission(resource_type="user", resource_id="123", action="edit")
-    del_all = Permission(resource_type="user", resource_id="*", action="del")
-    del_123 = Permission(resource_type="user", resource_id="123", action="del")
+    view_all = Permission(resource_type="event", resource_id="*", action="view")
+    view_123 = Permission(resource_type="event", resource_id="123", action="view")
+    edit_all = Permission(resource_type="event", resource_id="*", action="edit")
+    edit_123 = Permission(resource_type="event", resource_id="123", action="edit")
+    del_all = Permission(resource_type="event", resource_id="*", action="del")
+    del_123 = Permission(resource_type="event", resource_id="123", action="del")
 
     RS.grant_permission(role="mod", permission=edit_all, db=db)
     RS.grant_permission(role="admin", permission=del_all, db=db)
+
+    SS.assert_permission(subject=subject, permission=edit_all, db=db)
+    SS.assert_permission(subject=subject, permission=del_all, db=db)
+    assert SS.check_permission(subject=subject, permission=edit_all, db=db) == True
+    assert SS.check_permission(subject=subject, permission=del_all, db=db) == True
+
+    SS.assert_permission(subject=subject, permission=edit_123, db=db)
+    SS.assert_permission(subject=subject, permission=del_123, db=db)
+    assert SS.check_permission(subject=subject, permission=edit_123, db=db) == True
+    assert SS.check_permission(subject=subject, permission=del_123, db=db) == True
 
     with pytest.raises(PyPermissionNotGrantedError) as err:
         SS.assert_permission(subject=subject, permission=view_all, db=db)
@@ -252,6 +284,7 @@ def test_check_permission__success(db: Session) -> None:
         )
         == err.value.message
     )
+    assert SS.check_permission(subject=subject, permission=view_all, db=db) == False
 
     with pytest.raises(PyPermissionNotGrantedError) as err:
         SS.assert_permission(subject=subject, permission=view_123, db=db)
@@ -262,10 +295,7 @@ def test_check_permission__success(db: Session) -> None:
         )
         == err.value.message
     )
-    SS.assert_permission(subject=subject, permission=edit_all, db=db)
-    SS.assert_permission(subject=subject, permission=edit_123, db=db)
-    SS.assert_permission(subject=subject, permission=del_all, db=db)
-    SS.assert_permission(subject=subject, permission=del_123, db=db)
+    assert SS.check_permission(subject=subject, permission=view_123, db=db) == False
 
 
 def test_check_permission__unknown_subject(db: Session) -> None:
@@ -273,7 +303,9 @@ def test_check_permission__unknown_subject(db: Session) -> None:
     with pytest.raises(PyPermissionError) as err:
         SS.check_permission(
             subject=subject,
-            permission=Permission(resource_type="user", resource_id="*", action="view"),
+            permission=Permission(
+                resource_type="event", resource_id="*", action="view"
+            ),
             db=db,
         )
 
@@ -289,8 +321,8 @@ def test_permissions__success(*, db: Session) -> None:
     subject = "Alex"
     SS.create(subject=subject, db=db)
 
-    view_all = Permission(resource_type="user", resource_id="*", action="view")
-    edit_all = Permission(resource_type="user", resource_id="*", action="edit")
+    view_all = Permission(resource_type="event", resource_id="*", action="view")
+    edit_all = Permission(resource_type="event", resource_id="*", action="edit")
 
     RS.create(role="user", db=db)
     RS.create(role="mod", db=db)
@@ -298,6 +330,12 @@ def test_permissions__success(*, db: Session) -> None:
 
     RS.grant_permission(role="user", permission=view_all, db=db)
     RS.grant_permission(role="mod", permission=edit_all, db=db)
+
+    RS.assert_permission(role="mod", permission=edit_all, db=db)
+    RS.assert_permission(role="mod", permission=view_all, db=db)
+
+    RS.assert_permission(role="user", permission=view_all, db=db)
+    assert RS.check_permission(role="user", permission=edit_all, db=db) == False
 
     SS.assign_role(subject=subject, role="mod", db=db)
 
@@ -321,8 +359,8 @@ def test_permissions__unknown_subject(db: Session) -> None:
 def test_policies__success(*, db: Session) -> None:
     SS.create(subject="Alex", db=db)
 
-    view_all = Permission(resource_type="user", resource_id="*", action="view")
-    edit_all = Permission(resource_type="user", resource_id="*", action="edit")
+    view_all = Permission(resource_type="event", resource_id="*", action="view")
+    edit_all = Permission(resource_type="event", resource_id="*", action="edit")
 
     RS.create(role="user", db=db)
     RS.create(role="mod", db=db)
@@ -361,7 +399,6 @@ def test_actions_on_resource(*, db: Session) -> None:
 
     RS.add_hierarchy(parent_role="user", child_role="admin", db=db)
 
-    # Grant permissions
     p_view_group = Permission(resource_type="group", resource_id="*", action="view")
     p_edit_group = Permission(resource_type="group", resource_id="*", action="edit")
     p_edit_event = Permission(resource_type="event", resource_id="124", action="edit")
@@ -415,6 +452,6 @@ def test_actions_on_resource__unknown_subject(db: Session) -> None:
     subject = "unknown"
     with pytest.raises(PyPermissionError) as err:
         SS.actions_on_resource(
-            subject=subject, resource_type="user", resource_id="*", db=db
+            subject=subject, resource_type="event", resource_id="*", db=db
         )
     assert ERR_MSG.non_existent_subject.format(subject=subject) == err.value.message

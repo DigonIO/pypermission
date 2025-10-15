@@ -372,6 +372,7 @@ def test_grant_permission__success(*, db: Session) -> None:
 
     RS.create(role=role, db=db)
     RS.grant_permission(role=role, permission=permission, db=db)
+    RS.assert_permission(role=role, permission=permission, db=db)
 
 
 @pytest.mark.xfail(reason="Error cause detection not implemented yet")
