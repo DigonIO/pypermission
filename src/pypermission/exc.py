@@ -80,17 +80,31 @@ def process_subject_role_integrity_error(
 
 
 class ERR_MSG:
+    role_exists = "Role '{role}' already exists!"
+    subject_exists = "Subject '{subject}' already exists!"
+    hierarchy_exists = "Hierarchy '{parent_role}' -> '{child_role}' exists!"
+    permission_exists = "Permission '{permission_str}' does already exist!"
+
     non_existent_subject_role = "Subject '{subject}' or Role '{role}' does not exist!"
     non_existent_subject = "Subject '{subject}' does not exist!"
     non_existent_role = "Role '{role}' does not exist!"
-    role_exists = "Role '{role}' already exists!"
-    unexpected_integrity = "Unexpected IntegrityError!"
-    conflicting_role_ids = "RoleIDs must not be equal: '{role}'!"
-    cycle_detected = "Desired hierarchy would create a cycle!"
-    missing_parent_child_roles = (
-        "Roles '{parent_role}' and '{child_role}' do not exist!"
-    )
-    hierarchy_exists = "Hierarchy '{parent_role}' -> '{child_role}' exists!"
     non_existent_hierarchy = (
         "Hierarchy '{parent_role}' -> '{child_role}' does not exist!"
     )
+    non_existent_parent_child_roles = (
+        "Roles '{parent_role}' and '{child_role}' do not exist!"
+    )
+    non_existent_role_assignment = (
+        "Role '{role}' is not assigned to Subject '{subject}'!"
+    )
+
+    permission_not_granted_for_role = (
+        "Permission '{permission_str}' is not granted for Role '{role}'!"
+    )
+    permission_not_granted_for_subject = (
+        "Permission '{permission_str}' is not granted for Subject '{subject}'!"
+    )
+
+    conflicting_role_ids = "RoleIDs must not be equal: '{role}'!"
+    cycle_detected = "Desired hierarchy would create a cycle!"
+    unexpected_integrity = "Unexpected IntegrityError!"
