@@ -376,15 +376,33 @@ class RoleService(metaclass=FrozenClass):
         PyPermissionError
             If the target Role does not exist.
         """
-        # TODO raise IntegrityError if role is unknown and if possible via ORM
-
         if include_descendant_subjects:
-            # TODO add recursive descendants subject lookup for ANSI
-            raise NotImplementedError()
+            root_cte = (
+                select(RoleORM.id.label("role_id"))
+                .where(RoleORM.id == role)
+                .cte(recursive=True)
+            )
 
-        subjects = db.scalars(
-            select(MemberORM.subject_id).where(MemberORM.role_id == role)
-        ).all()
+            traversing_cte = root_cte.alias()
+            relations_cte = root_cte.union_all(
+                select(HierarchyORM.child_role_id).where(
+                    HierarchyORM.parent_role_id == traversing_cte.c.role_id
+                )
+            )
+            subjects = (
+                db.scalars(
+                    select(MemberORM.subject_id).join(
+                        relations_cte, MemberORM.role_id == relations_cte.c.role_id
+                    )
+                )
+                .unique()
+                .all()
+            )
+        else:
+            subjects = db.scalars(
+                select(MemberORM.subject_id).where(MemberORM.role_id == role)
+            ).all()
+
         if len(subjects) == 0 and db.get(RoleORM, role) is None:
             raise PyPermissionError(f"Role '{role}' does not exist!")
         return tuple(subjects)
@@ -649,7 +667,37 @@ class RoleService(metaclass=FrozenClass):
         inherited: bool = True,
         db: Session,
     ) -> tuple[str, ...]:
-        raise NotImplementedError()
+        if inherited:
+            root_cte = (
+                select(RoleORM.id.label("role_id"))
+                .where(RoleORM.id == role)
+                .cte(recursive=True)
+            )
+            traversing_cte = root_cte.alias()
+            relations_cte = root_cte.union_all(
+                select(HierarchyORM.parent_role_id).where(
+                    HierarchyORM.child_role_id == traversing_cte.c.role_id
+                )
+            )
+            selection = (
+                select(PolicyORM.action)
+                .join(
+                    relations_cte,
+                    PolicyORM.role_id == relations_cte.c.role_id,
+                )
+                .where(
+                    PolicyORM.resource_type == resource_type,
+                    PolicyORM.resource_id.in_((resource_id, "*")),
+                )
+            )
+        else:
+            selection = select(PolicyORM.action).where(
+                PolicyORM.role_id == role,
+                PolicyORM.resource_type == resource_type,
+                PolicyORM.resource_id.in_((resource_id, "*")),
+            )
+        result = db.scalars(selection).all()
+        return tuple(result)
 
 
 ################################################################################

@@ -321,7 +321,6 @@ def test_subjects__success(*, db: Session) -> None:
     )
 
 
-@pytest.mark.xfail(reason="Flag not yet implemented")
 def test_subjects_include_descendants__success(*, db: Session) -> None:
     SS.create(subject="Oscar", db=db)
     SS.create(subject="Charlie", db=db)
@@ -347,7 +346,6 @@ def test_subjects_include_descendants__success(*, db: Session) -> None:
     )
 
 
-@pytest.mark.xfail(reason="Not implemented")
 def test_subjects_include_descendants__unknown_role(*, db: Session) -> None:
     role = "unknown"
     with pytest.raises(PyPermissionError) as err:
@@ -613,7 +611,6 @@ def test_policies__unknown_role(db: Session) -> None:
 ################################################################################
 
 
-@pytest.mark.xfail(reason="Not implemented")
 def test_actions_on_resource_inherited__success(*, db: Session) -> None:
     RS.create(role="admin", db=db)
     RS.create(role="user", db=db)
@@ -664,7 +661,6 @@ def test_actions_on_resource_inherited__success(*, db: Session) -> None:
     ) == Counter(["edit"])
 
 
-@pytest.mark.xfail(reason="Not implemented")
 def test_actions_on_resource_not_inherited__success(*, db: Session) -> None:
     RS.create(role="admin", db=db)
     RS.create(role="user", db=db)
