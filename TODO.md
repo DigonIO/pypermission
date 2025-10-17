@@ -16,16 +16,10 @@ Next ID: `17`
 * `13` Doc - Start with FAQ
     * [ ] Why not Sessions?
     * [ ] How can I implement Feature Flagging?
-* `12` Add missing functionality
-    * [ ] `RBAC.role.subjects` (`include_descendant_subjects` support)
-    * [ ] `RBAC.subject.roles` (`include_ascendant_roles` support)
-    * [ ] `RBAC.role.actions_on_resource`
-    * [ ] `RBAC.subject.actions_on_resource`
 * `11` Doc - Compare to ANSI
 * `10` Doc - Compare to NIST
-* `9` Doc - Finalize README (and create better symlink name)
+* `9` Doc - Finalize README
 * `8` Doc - Add CHANGELOG
-* `7` Support for Sqlite & PostgreSQL IntegrityErrors
 * `6` Add Postgres as explicit dependency group
 * `3` Decide for a seo optimal package name
 * `2` Setup Doc hosting environment
@@ -37,6 +31,12 @@ Next ID: `17`
 
 ## Done Tasks
 
+* `12` Add missing functionality
+    * [x] `RBAC.role.subjects` (`include_descendant_subjects` support)
+    * [x] `RBAC.subject.roles` (`include_ascendant_roles` support)
+    * [x] `RBAC.role.actions_on_resource`
+    * [x] `RBAC.subject.actions_on_resource`
+* `7` Support for Sqlite & PostgreSQL IntegrityErrors
 * `5` Write Python docstrings
     * [x] RoleService
     * [x] SubjectService
