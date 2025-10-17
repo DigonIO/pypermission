@@ -483,7 +483,7 @@ def test_check_permission__success(*, db: Session) -> None:
     assert RS.check_permission(role="user[124]", permission=p_edit_123, db=db) is False
 
 
-@pytest.mark.xfail(reason="Not implemented")
+@pytest.mark.xfail(reason="Error Cause Not implemented")
 def test_check_permission__unknown_role(db: Session) -> None:
     p_view_all = Permission(resource_type="event", resource_id="*", action="view")
 
@@ -560,7 +560,7 @@ def test_permissions__success(*, db: Session) -> None:
     )
 
 
-@pytest.mark.xfail(reason="Not implemented")
+@pytest.mark.xfail(reason="Error Cause Not implemented")
 def test_permissions__unknown_role(db: Session) -> None:
     with pytest.raises(PyPermissionError) as err:
         RS.permissions(role="unknown", db=db)
@@ -598,7 +598,7 @@ def test_policies__success(*, db: Session) -> None:
     )
 
 
-@pytest.mark.xfail(reason="Not implemented")
+@pytest.mark.xfail(reason="Error Cause Not implemented")
 def test_policies__unknown_role(db: Session) -> None:
     with pytest.raises(PyPermissionError) as err:
         RS.policies(role="unknown", db=db)

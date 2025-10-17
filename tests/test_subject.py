@@ -192,7 +192,6 @@ def test_roles__success(db: Session) -> None:
     assert Counter(("user",)) == Counter(SS.roles(subject="Uwe", db=db))
 
 
-@pytest.mark.xfail(reason="Flag not yet implemented")
 def test_roles_include_ascendant_next_neighbor__success(db: Session) -> None:
     SS.create(subject="Alex", db=db)
     SS.create(subject="Uwe", db=db)
@@ -213,7 +212,6 @@ def test_roles_include_ascendant_next_neighbor__success(db: Session) -> None:
     )
 
 
-@pytest.mark.xfail(reason="Flag not yet implemented")
 def test_roles_include_ascendant_n2n_neighbor__success(db: Session) -> None:
     SS.create(subject="Victor", db=db)
 
@@ -388,27 +386,29 @@ def test_policies__unknown_subject(db: Session) -> None:
 ################################################################################
 
 
-@pytest.mark.xfail(reason="Not implemented")
-def test_actions_on_resource(*, db: Session) -> None:
-    SS.create(subject="Alex", db=db)
+def test_actions_on_resource_inherited(*, db: Session) -> None:
     SS.create(subject="Uwe", db=db)
+    SS.create(subject="Alex", db=db)
 
     RS.create(role="user", db=db)
     RS.create(role="user[Uwe]", db=db)
     RS.create(role="admin", db=db)
 
+    SS.assign_role(subject="Uwe", role="user", db=db)
+    SS.assign_role(subject="Uwe", role="user[Uwe]", db=db)
+    SS.assign_role(subject="Alex", role="admin", db=db)
+
     RS.add_hierarchy(parent_role="user", child_role="admin", db=db)
 
     p_view_group = Permission(resource_type="group", resource_id="*", action="view")
     p_edit_group = Permission(resource_type="group", resource_id="*", action="edit")
-    p_edit_event = Permission(resource_type="event", resource_id="124", action="edit")
+    p_edit_group_uwe = Permission(
+        resource_type="group", resource_id="123", action="edit"
+    )
 
     RS.grant_permission(role="user", permission=p_view_group, db=db)
-    RS.grant_permission(role="user[Uwe]", permission=p_edit_event, db=db)
+    RS.grant_permission(role="user[Uwe]", permission=p_edit_group_uwe, db=db)
     RS.grant_permission(role="admin", permission=p_edit_group, db=db)
-
-    SS.assign_role(subject="Alex", role="admin", db=db)
-    SS.assign_role(subject="Uwe", role="user", db=db)
 
     assert Counter(
         SS.actions_on_resource(
@@ -430,21 +430,70 @@ def test_actions_on_resource(*, db: Session) -> None:
         SS.actions_on_resource(
             subject="Uwe", resource_type="group", resource_id="123", db=db
         )
-    ) == Counter(["view"])
+    ) == Counter(["view", "edit"])
 
-    assert (
-        Counter(
-            SS.actions_on_resource(
-                subject="Uwe", resource_type="event", resource_id="*", db=db
-            )
-        )
-        == Counter()
+
+def test_actions_on_resource_not_inherited(*, db: Session) -> None:
+    SS.create(subject="Uwe", db=db)
+    SS.create(subject="Alex", db=db)
+
+    RS.create(role="user", db=db)
+    RS.create(role="user[Uwe]", db=db)
+    RS.create(role="admin", db=db)
+
+    SS.assign_role(subject="Uwe", role="user", db=db)
+    SS.assign_role(subject="Uwe", role="user[Uwe]", db=db)
+    SS.assign_role(subject="Alex", role="admin", db=db)
+
+    RS.add_hierarchy(parent_role="user", child_role="admin", db=db)
+
+    p_view_group = Permission(resource_type="group", resource_id="*", action="view")
+    p_edit_group = Permission(resource_type="group", resource_id="*", action="edit")
+    p_edit_group_uwe = Permission(
+        resource_type="group", resource_id="123", action="edit"
     )
+
+    RS.grant_permission(role="user", permission=p_view_group, db=db)
+    RS.grant_permission(role="user[Uwe]", permission=p_edit_group_uwe, db=db)
+    RS.grant_permission(role="admin", permission=p_edit_group, db=db)
+
     assert Counter(
         SS.actions_on_resource(
-            subject="Uwe", resource_type="event", resource_id="123", db=db
+            subject="Alex",
+            resource_type="group",
+            resource_id="*",
+            inherited=False,
+            db=db,
         )
     ) == Counter(["edit"])
+    assert Counter(
+        SS.actions_on_resource(
+            subject="Alex",
+            resource_type="group",
+            resource_id="123",
+            inherited=False,
+            db=db,
+        )
+    ) == Counter(["edit"])
+
+    assert Counter(
+        SS.actions_on_resource(
+            subject="Uwe",
+            resource_type="group",
+            resource_id="*",
+            inherited=False,
+            db=db,
+        )
+    ) == Counter(["view"])
+    assert Counter(
+        SS.actions_on_resource(
+            subject="Uwe",
+            resource_type="group",
+            resource_id="123",
+            inherited=False,
+            db=db,
+        )
+    ) == Counter(["view", "edit"])
 
 
 @pytest.mark.xfail(reason="Not implemented")

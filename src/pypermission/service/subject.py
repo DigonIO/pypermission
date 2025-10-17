@@ -183,15 +183,26 @@ class SubjectService(metaclass=FrozenClass):
         PyPermissionError
             If the target Subject does not exist.
         """
-        # TODO raise IntegrityError if subject is unknown and if possible via ORM
-
         if include_ascendant_roles:
-            # TODO add recursive ascendant Role lookup for ANSI
-            raise NotImplementedError()
+            root_cte = (
+                select(MemberORM.role_id)
+                .where(MemberORM.subject_id == subject)
+                .cte(recursive=True)
+            )
+            traversing_cte = root_cte.alias()
+            relations_cte = root_cte.union_all(
+                select(HierarchyORM.parent_role_id).join(
+                    traversing_cte,
+                    HierarchyORM.child_role_id == traversing_cte.c.role_id,
+                )
+            )
+            selection = select(relations_cte)
+            roles = db.scalars(selection).unique().all()
+        else:
+            roles = db.scalars(
+                select(MemberORM.role_id).where(MemberORM.subject_id == subject)
+            ).all()
 
-        roles = db.scalars(
-            select(MemberORM.role_id).where(MemberORM.subject_id == subject)
-        ).all()
         if len(roles) == 0 and db.get(SubjectORM, subject) is None:
             raise PyPermissionError(f"Subject '{subject}' does not exist!")
         return tuple(roles)
@@ -365,10 +376,47 @@ class SubjectService(metaclass=FrozenClass):
         subject: str,
         resource_type: str,
         resource_id: str,
+        inherited: bool = True,
         db: Session,
     ) -> tuple[str, ...]:
-        raise NotImplementedError()
-        return tuple()
+        if inherited:
+            root_cte = (
+                select(MemberORM.role_id)
+                .where(MemberORM.subject_id == subject)
+                .cte(recursive=True)
+            )
+            traversing_cte = root_cte.alias()
+            relations_cte = root_cte.union_all(
+                select(HierarchyORM.parent_role_id).join(
+                    traversing_cte,
+                    HierarchyORM.child_role_id == traversing_cte.c.role_id,
+                )
+            )
+            actions = (
+                db.scalars(
+                    select(PolicyORM.action, PolicyORM.role_id)
+                    .join(relations_cte, PolicyORM.role_id == relations_cte.c.role_id)
+                    .where(
+                        PolicyORM.resource_type == resource_type,
+                        PolicyORM.resource_id.in_((resource_id, "*")),
+                    )
+                )
+                .unique()
+                .all()
+            )
+            tuple(actions)
+        else:
+            selection = (
+                select(PolicyORM.action, PolicyORM.role_id)
+                .join(MemberORM, MemberORM.role_id == PolicyORM.role_id)
+                .where(
+                    MemberORM.subject_id == subject,
+                    PolicyORM.resource_type == resource_type,
+                    PolicyORM.resource_id.in_((resource_id, "*")),
+                )
+            )
+            actions = db.scalars(selection).unique().all()
+        return tuple(actions)
 
 
 ################################################################################
