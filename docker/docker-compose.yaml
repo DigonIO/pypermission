@@ -1,7 +1,7 @@
 services:
   database:
     image: "postgres@${DIGEST_POSTGRES}"
-    container_name: pypermission_database
+    container_name: rbac_database
     environment:
       POSTGRES_USER: ${DB_USERNAME}
       POSTGRES_PASSWORD: ${DB_PASSWORD}

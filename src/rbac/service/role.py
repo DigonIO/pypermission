@@ -4,7 +4,7 @@ from sqlalchemy.sql import select
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
 
-from pypermission.models import (
+from rbac.models import (
     Permission,
     RoleORM,
     HierarchyORM,
@@ -13,9 +13,9 @@ from pypermission.models import (
     MemberORM,
     Policy,
 )
-from pypermission.exc import (
-    PyPermissionError,
-    PyPermissionNotGrantedError,
+from rbac.exc import (
+    RBACError,
+    RBACNotGrantedError,
     process_policy_integrity_error,
 )
 
@@ -49,7 +49,7 @@ class RoleService(metaclass=FrozenClass):
             db.flush()
         except IntegrityError:
             db.rollback()
-            raise PyPermissionError(f"Role '{role}' already exists!")
+            raise RBACError(f"Role '{role}' already exists!")
 
     @classmethod
     def delete(cls, *, role: str, db: Session) -> None:
@@ -70,7 +70,7 @@ class RoleService(metaclass=FrozenClass):
         """
         role_orm = db.get(RoleORM, role)
         if role_orm is None:
-            raise PyPermissionError(f"Role '{role}' does not exist!")
+            raise RBACError(f"Role '{role}' does not exist!")
         db.delete(role_orm)
         db.flush()
 
@@ -115,18 +115,16 @@ class RoleService(metaclass=FrozenClass):
             If the hierarchy already exists.
         """
         if parent_role == child_role:
-            raise PyPermissionError(f"RoleIDs must not be equal: '{parent_role}'!")
+            raise RBACError(f"RoleIDs must not be equal: '{parent_role}'!")
 
         roles = db.scalars(
             select(RoleORM.id).where(RoleORM.id.in_([parent_role, child_role]))
         ).all()
         if len(roles) == 1:
             missing_role = child_role if parent_role in roles else parent_role
-            raise PyPermissionError(f"Role '{missing_role}' does not exist!")
+            raise RBACError(f"Role '{missing_role}' does not exist!")
         elif len(roles) == 0:
-            raise PyPermissionError(
-                f"Roles '{parent_role}' and '{child_role}' do not exist!"
-            )
+            raise RBACError(f"Roles '{parent_role}' and '{child_role}' do not exist!")
 
         root_cte = (
             select(HierarchyORM)
@@ -146,7 +144,7 @@ class RoleService(metaclass=FrozenClass):
         ).all()
 
         if critical_leaf_relations:
-            raise PyPermissionError("Desired hierarchy would create a cycle!")
+            raise RBACError("Desired hierarchy would create a cycle!")
 
         try:
             hierarchy_orm = HierarchyORM(
@@ -156,9 +154,7 @@ class RoleService(metaclass=FrozenClass):
             db.flush()
         except IntegrityError as err:
             db.rollback()
-            raise PyPermissionError(
-                f"Hierarchy '{parent_role}' -> '{child_role}' exists!"
-            )
+            raise RBACError(f"Hierarchy '{parent_role}' -> '{child_role}' exists!")
 
     @classmethod
     def remove_hierarchy(
@@ -184,7 +180,7 @@ class RoleService(metaclass=FrozenClass):
             If the hierarchy does not exist.
         """
         if parent_role == child_role:
-            raise PyPermissionError(f"RoleIDs must not be equal: '{parent_role}'!")
+            raise RBACError(f"RoleIDs must not be equal: '{parent_role}'!")
 
         hierarchy_orm = db.get(HierarchyORM, (parent_role, child_role))
         if hierarchy_orm is None:
@@ -193,13 +189,13 @@ class RoleService(metaclass=FrozenClass):
             ).all()
             if len(roles) == 1:
                 missing_role = child_role if parent_role in roles else parent_role
-                raise PyPermissionError(f"Role '{missing_role}' does not exist!")
+                raise RBACError(f"Role '{missing_role}' does not exist!")
             elif len(roles) == 0:
-                raise PyPermissionError(
+                raise RBACError(
                     f"Roles '{parent_role}' and '{child_role}' do not exist!"
                 )
             else:
-                raise PyPermissionError(
+                raise RBACError(
                     f"Hierarchy '{parent_role}' -> '{child_role}' does not exist!"
                 )
 
@@ -234,7 +230,7 @@ class RoleService(metaclass=FrozenClass):
             )
         ).all()
         if len(parents) == 0 and db.get(RoleORM, role) is None:
-            raise PyPermissionError(f"Role '{role}' does not exist!")
+            raise RBACError(f"Role '{role}' does not exist!")
         return tuple(parents)
 
     @classmethod
@@ -265,7 +261,7 @@ class RoleService(metaclass=FrozenClass):
             )
         ).all()
         if len(children) == 0 and db.get(RoleORM, role) is None:
-            raise PyPermissionError(f"Role '{role}' does not exist!")
+            raise RBACError(f"Role '{role}' does not exist!")
         return tuple(children)
 
     @classmethod
@@ -308,7 +304,7 @@ class RoleService(metaclass=FrozenClass):
         )
 
         if len(ancestor_relations) == 0 and db.get(RoleORM, role) is None:
-            raise PyPermissionError(f"Role '{role}' does not exist!")
+            raise RBACError(f"Role '{role}' does not exist!")
         return tuple(ancestor_relations)
 
     @classmethod
@@ -351,7 +347,7 @@ class RoleService(metaclass=FrozenClass):
         )
 
         if len(descendant_relations) == 0 and db.get(RoleORM, role) is None:
-            raise PyPermissionError(f"Role '{role}' does not exist!")
+            raise RBACError(f"Role '{role}' does not exist!")
         return tuple(descendant_relations)
 
     @classmethod
@@ -408,7 +404,7 @@ class RoleService(metaclass=FrozenClass):
             ).all()
 
         if len(subjects) == 0 and db.get(RoleORM, role) is None:
-            raise PyPermissionError(f"Role '{role}' does not exist!")
+            raise RBACError(f"Role '{role}' does not exist!")
         return tuple(subjects)
 
     @classmethod
@@ -485,10 +481,8 @@ class RoleService(metaclass=FrozenClass):
         if policy_orm is None:
             role_orm = db.get(RoleORM, role)
             if role_orm:
-                raise PyPermissionError(
-                    f"Permission '{str(permission)}' does not exist!"
-                )
-            raise PyPermissionError(f"Role '{role}' does not exist!")
+                raise RBACError(f"Permission '{str(permission)}' does not exist!")
+            raise RBACError(f"Role '{role}' does not exist!")
 
         db.delete(policy_orm)
         db.flush()
@@ -548,7 +542,7 @@ class RoleService(metaclass=FrozenClass):
         if len(policy_orms) == 0:
             role_orm = db.get(RoleORM, role)
             if role_orm is None:
-                raise PyPermissionError(f"Role '{role}' does not exist!")
+                raise RBACError(f"Role '{role}' does not exist!")
             return False
         return True
 
@@ -580,7 +574,7 @@ class RoleService(metaclass=FrozenClass):
             If the target Role does not exist.
         """
         if not cls.check_permission(role=role, permission=permission, db=db):
-            raise PyPermissionNotGrantedError(
+            raise RBACNotGrantedError(
                 f"Permission '{permission}' is not granted for Role '{role}'!"
             )
 
@@ -618,7 +612,7 @@ class RoleService(metaclass=FrozenClass):
         if len(policy_orms) == 0:
             role_orm = db.get(RoleORM, role)
             if role_orm is None:
-                raise PyPermissionError(f"Role '{role}' does not exist!")
+                raise RBACError(f"Role '{role}' does not exist!")
 
         return tuple(
             Permission(
@@ -664,7 +658,7 @@ class RoleService(metaclass=FrozenClass):
         if len(policy_orms) == 0:
             role_orm = db.get(RoleORM, role)
             if role_orm is None:
-                raise PyPermissionError(f"Role '{role}' does not exist!")
+                raise RBACError(f"Role '{role}' does not exist!")
 
         return tuple(
             Policy(
@@ -722,7 +716,7 @@ class RoleService(metaclass=FrozenClass):
         if len(result) == 0:
             role_orm = db.get(RoleORM, role)
             if role_orm is None:
-                raise PyPermissionError(f"Role '{role}' does not exist!")
+                raise RBACError(f"Role '{role}' does not exist!")
         return tuple(result)
 
 

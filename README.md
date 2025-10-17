@@ -1,20 +1,19 @@
-![alt text](./assets/logo_name.svg "Title")
+![alt text](./assets/logo_font_path.svg "Title")
 
 The python `RBAC` library for projects where `SQLAlchemy` is a valid option.
 
-[![repository](https://img.shields.io/badge/src-GitLab-orange)](https://gitlab.com/DigonIO/pypermission)
-[![mirror](https://img.shields.io/badge/mirror-GitHub-orange)](https://github.com/DigonIO/pypermission)
+[![repository](https://img.shields.io/badge/src-GitLab-orange)](https://gitlab.com/DigonIO/rbac)
+[![mirror](https://img.shields.io/badge/mirror-GitHub-orange)](https://github.com/DigonIO/rbac)
 [![License: SUL-1.0](assets/badges/license.svg)](https://spdx.org/licenses/SUL-1.0.html)
-[![pipeline status](https://gitlab.com/DigonIO/pypermission/badges/master/pipeline.svg)](https://gitlab.com/DigonIO/pypermission/-/pipelines)
-[![coverage report](https://gitlab.com/DigonIO/pypermission/badges/master/coverage.svg)](https://gitlab.com/DigonIO/pypermission/-/pipelines)
-[![Documentation Status](https://readthedocs.org/projects/python-pypermission/badge/?version=latest)](https://pypermission.readthedocs.io/en/latest/?badge=latest)
+[![pipeline status](https://gitlab.com/DigonIO/rbac/badges/master/pipeline.svg)](https://gitlab.com/DigonIO/rbac/-/pipelines)
+[![coverage report](https://gitlab.com/DigonIO/rbac/badges/master/coverage.svg)](https://gitlab.com/DigonIO/rbac/-/pipelines)
 [![Code style: black](assets/badges/black.svg)](https://github.com/psf/black)
 [![Imports: isort](assets/badges/isort.svg)](https://pycqa.github.io/isort/)
 
-[![pkgversion](https://img.shields.io/pypi/v/pypermission)](https://pypi.org/project/pypermission/)
-[![versionsupport](https://img.shields.io/pypi/pyversions/pypermission)](https://pypi.org/project/pypermission/)
-[![Downloads Week](https://pepy.tech/badge/pypermission/week)](https://pepy.tech/project/pypermission)
-[![Downloads Total](https://pepy.tech/badge/pypermission)](https://pepy.tech/project/pypermission)
+[![pkgversion](https://img.shields.io/pypi/v/rbac)](https://pypi.org/project/rbac/)
+[![versionsupport](https://img.shields.io/pypi/pyversions/rbac)](https://pypi.org/project/rbac/)
+[![Downloads Week](https://pepy.tech/badge/rbac/week)](https://pepy.tech/project/rbac)
+[![Downloads Total](https://pepy.tech/badge/rbac)](https://pepy.tech/project/rbac)
 
 ---
 
@@ -25,10 +24,13 @@ If you find the RBAC library beneficial, please consider supporting the project 
 # Python RBAC with SQLAlchemy
 
 + Authorization for pythonistas [(Quick Start)](TODO)
-+ RBAC with NIST level 2
 + Persistency via SQLAlchemy
-    + Postgresql (psycopg)
+    + SQLite
+    + PostgreSQL (psycopg)
 + Full integration guide [(Guide)](TODO)
++ RBAC State Analysis
+    + Export the RBAC DAG as NetworkX DiGraph
+    + Visualize the RBAC DAG via Plotly
 + Online documentation [(Full doc)](TODO)
 
 ## Installation
@@ -42,7 +44,7 @@ from sqlalchemy.orm import sessionmaker
 engine = create_engine("sqlite:///:memory:", future=True)
 db_factory = sessionmaker(bind=engine, autoflush=False, autocommit=False)
 
-from pypermission import RBAC, Permission, create_rbac_database_table
+from rbac import RBAC, Permission, create_rbac_database_table
 
 create_rbac_database_table(engine=engine)
 

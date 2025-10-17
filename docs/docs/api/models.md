@@ -2,16 +2,16 @@
 
 ## Data Structs
 
-::: pypermission.Policy
+::: rbac.Policy
     handler: python
 
-::: pypermission.Permission
+::: rbac.Permission
     handler: python
 
 ## Exceptions
 
-::: pypermission.PyPermissionError
+::: rbac.RBACError
     handler: python
 
-::: pypermission.PyPermissionNotGrantedError
+::: rbac.RBACNotGrantedError
     handler: python

@@ -1,7 +1,7 @@
 import networkx as nx
 import plotly.graph_objects as go
 
-from pypermission.exc import PyPermissionError
+from rbac.exc import RBACError
 
 
 def plot_factory(
@@ -26,7 +26,7 @@ def plot_factory(
     """
 
     if not len(dag):
-        raise PyPermissionError("RBAC system is empty. Nothing to plot!")
+        raise RBACError("RBAC system is empty. Nothing to plot!")
 
     fig = _build_plotly_figure(dag=dag)
     fig.write_html(file_path, auto_open=auto_open)

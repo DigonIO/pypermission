@@ -1,4 +1,4 @@
-# PyPermission - Formal Definitions
+# rbac - Formal Definitions
 
 We define the core concepts of our RBAC model as follows:
 
@@ -10,7 +10,7 @@ We define the core concepts of our RBAC model as follows:
 | **ResourceID** | A unique identifier for a specific instance of a resource (e.g. filename, INT or UUID). |
 | **Action** | An operation that can be performed on a resource (e.g., create, edit or delete). |
 
-Each type in the table inherits from `str`, meaning they only exist as string representations through the PyPermission API. The **ResourceID** feature allows the value `*` to act as a wildcard representing all potential **ResourceID** values.
+Each type in the table inherits from `str`, meaning they only exist as string representations through the rbac API. The **ResourceID** feature allows the value `*` to act as a wildcard representing all potential **ResourceID** values.
 
 Formally **Resource**, **Permission** and **Policy** can be defined as following:
 

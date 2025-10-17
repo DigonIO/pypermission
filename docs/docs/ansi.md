@@ -25,9 +25,9 @@ The ANSI standard additionally defines a Static Separation of Duty (SSD) Relatio
 | `ROLES`                                        | `Role` as `str`                                        |
 | `OBJS` (objects)                               | `Resource` as tuple of `ResourceType` and `ResourceID` |
 | `OPS` (operations)                             | `Action` as `str`                                      |
-| `PRMS = OPS x OBJS` (`Permission`)             | `pypermission.models.Permission`                       |
-| `PA ⊆ PERMS x ROLES`  (`PermissionAssignment`) | `pypermission.models.Policy`                           |
-| `UA ⊆ USERS x ROLES` (`UserAssignment`)        | `pypermission.models.MemberORM`                        |
+| `PRMS = OPS x OBJS` (`Permission`)             | `rbac.models.Permission`                       |
+| `PA ⊆ PERMS x ROLES`  (`PermissionAssignment`) | `rbac.models.Policy`                           |
+| `UA ⊆ USERS x ROLES` (`UserAssignment`)        | `rbac.models.MemberORM`                        |
 | `SESSIONS`                                     | _N/A_                                                  |
 | `USER_SESSIONS ⊆ USERS x SESSIONS`             | _N/A_                                                  |
 | `SESSION_ROLES ⊆ SESSION x ROLES`              | _N/A_                                                  |
@@ -42,7 +42,7 @@ The ANSI standard additionally defines a Static Separation of Duty (SSD) Relatio
 
 !!! tip
 
-    You should not need to use any of the `ORM` models yourself. The `pypermission.RBAC` class provides a clean interface to all functionality managing database objects.
+    You should not need to use any of the `ORM` models yourself. The `rbac.RBAC` class provides a clean interface to all functionality managing database objects.
 
 ### 5.2 Hierarchical RBAC
 
@@ -50,7 +50,7 @@ The ANSI standard additionally defines a Static Separation of Duty (SSD) Relatio
 
 | ANSI Entity set                        | This library                       |
 | -------------------------------------- | ---------------------------------- |
-| `RH ⊆ ROLES x ROLES` (`RoleHierarchy`) | `pypermission.models.HierarchyORM` |
+| `RH ⊆ ROLES x ROLES` (`RoleHierarchy`) | `rbac.models.HierarchyORM` |
 
 | ANSI Method                                          | This library            |
 | ---------------------------------------------------- | ----------------------- |

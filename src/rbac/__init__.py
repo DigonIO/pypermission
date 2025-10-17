@@ -9,15 +9,15 @@ __author__ = "Jendrik A. Potyka, Fabian A. Preiss"
 
 from typing import Final
 
-from pypermission.service.role import RoleService
-from pypermission.service.subject import SubjectService
-from pypermission.models import (
+from rbac.service.role import RoleService
+from rbac.service.subject import SubjectService
+from rbac.models import (
     Policy,
     Permission,
     FrozenClass,
     create_rbac_database_table,
 )
-from pypermission.exc import PyPermissionError, PyPermissionNotGrantedError
+from rbac.exc import RBACError, RBACNotGrantedError
 
 
 class RBAC(metaclass=FrozenClass):
@@ -41,6 +41,6 @@ __all__ = [
     "Policy",
     "Permission",
     "create_rbac_database_table",
-    "PyPermissionError",
-    "PyPermissionNotGrantedError",
+    "RBACError",
+    "RBACNotGrantedError",
 ]

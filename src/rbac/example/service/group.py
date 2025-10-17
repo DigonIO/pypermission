@@ -2,54 +2,60 @@ from typing import Sequence
 
 from sqlalchemy.sql import select
 
-from pypermission import RBAC, Policy, Permission
-from pypermission.example.models import UserORM, Context, ExampleError, State
+from rbac import RBAC, Policy, Permission
+from rbac.example.models import UserORM, GroupORM, Context, ExampleError, State
 
 ################################################################################
 #### UserService
 ################################################################################
 
 
-class UserService:
+class GroupService:
+
     @classmethod
     def create(
         cls,
         *,
-        username: str,
-        email: str,
-        role: str = "guest",
+        groupname: str,
+        description: str = "A new group.",
+        owner: str,
         ctx: Context,
         rbac: bool = True,
-    ) -> UserORM:
-
-        match rbac, ctx.username:
-            case True, str():
+    ) -> GroupORM:
+        match rbac, owner, ctx.username:
+            case True, str(), str():
                 # NOTE Only needed, because no real authentication is present.
                 if ctx.db.get(UserORM, ctx.username) is None:
                     raise ExampleError(f"Unknown user '{ctx.username}' in context!")
 
+                if ctx.username != owner:
+                    raise ExampleError(
+                        f"User '{ctx.username}' cannot create a group on behalf of '{owner}'."
+                    )
+
                 if not RBAC.subject.check_permission(
                     subject=ctx.username,
                     permission=Permission(
-                        resource_type="base", resource_id="", action="user:create"
+                        resource_type="base",
+                        resource_id="",
+                        action="group:create",
                     ),
                     db=ctx.db,
                 ):
                     raise ExampleError("Permission not granted!")
-            case False, None:
-                ...
-            case False, str():
-                ...
-            case True, None:
+            case True, str(), None:
                 raise ExampleError("No user in context!")
+            case False, str(), None:
+                ...
+            case False, str(), str():
+                ...
+            case _:
+                raise ExampleError("Invalid combination of arguments!")
 
-        user_orm = UserORM(username=username, email=email, role=role)
-        ctx.db.add(user_orm)
-        ctx.db.flush()
-
-        cls._create_role_and_policies(username=username, role=role, ctx=ctx)
-
-        return user_orm
+        group_orm = GroupORM(groupname=groupname, description=description, owner=owner)
+        ctx.db.add(group_orm)
+        cls._create_group_role_and_policies(groupname=groupname, owner=owner, ctx=ctx)
+        return group_orm
 
     @classmethod
     def list(
@@ -57,7 +63,7 @@ class UserService:
         *,
         ctx: Context,
         rbac: bool = True,
-    ) -> Sequence[UserORM]:
+    ) -> Sequence[GroupORM]:
 
         match rbac, ctx.username:
             case True, str():
@@ -68,7 +74,7 @@ class UserService:
                 if not RBAC.subject.check_permission(
                     subject=ctx.username,
                     permission=Permission(
-                        resource_type="user", resource_id="*", action="access"
+                        resource_type="group", resource_id="*", action="access"
                     ),
                     db=ctx.db,
                 ):
@@ -80,16 +86,16 @@ class UserService:
             case True, None:
                 raise ExampleError("No user in context!")
 
-        return ctx.db.scalars(select(UserORM)).all()
+        return ctx.db.scalars(select(GroupORM)).all()
 
     @classmethod
     def get(
         cls,
         *,
-        username: str,
+        groupname: str,
         ctx: Context,
         rbac: bool = True,
-    ) -> UserORM:
+    ) -> GroupORM:
 
         match rbac, ctx.username:
             case True, str():
@@ -100,7 +106,7 @@ class UserService:
                 if not RBAC.subject.check_permission(
                     subject=ctx.username,
                     permission=Permission(
-                        resource_type="user", resource_id=username, action="access"
+                        resource_type="group", resource_id=groupname, action="access"
                     ),
                     db=ctx.db,
                 ):
@@ -112,20 +118,20 @@ class UserService:
             case True, None:
                 raise ExampleError("No user in context!")
 
-        user_orm = ctx.db.get(UserORM, username)
-        if user_orm is None:
-            raise ExampleError(f"Unknown user '{username}'!")
-        return user_orm
+        group_orm = ctx.db.get(GroupORM, groupname)
+        if group_orm is None:
+            raise ExampleError(f"Unknown group '{groupname}'!")
+        return group_orm
 
     @classmethod
-    def set_email(
+    def set_description(
         cls,
         *,
-        username: str,
-        email: str,
+        groupname: str,
+        description: str,
         ctx: Context,
         rbac: bool = True,
-    ) -> UserORM:
+    ) -> GroupORM:
 
         match rbac, ctx.username:
             case True, str():
@@ -136,7 +142,7 @@ class UserService:
                 if not RBAC.subject.check_permission(
                     subject=ctx.username,
                     permission=Permission(
-                        resource_type="user", resource_id=username, action="edit"
+                        resource_type="group", resource_id=groupname, action="edit"
                     ),
                     db=ctx.db,
                 ):
@@ -148,22 +154,22 @@ class UserService:
             case True, None:
                 raise ExampleError("No user in context!")
 
-        user_orm = ctx.db.get(UserORM, username)
-        if user_orm is None:
-            raise ExampleError(f"Unknown user '{username}'!")
-        user_orm.email = email
+        group_orm = ctx.db.get(GroupORM, groupname)
+        if group_orm is None:
+            raise ExampleError(f"Unknown group '{groupname}'!")
+        group_orm.description = description
         ctx.db.flush()
-        return user_orm
+        return group_orm
 
     @classmethod
     def set_state(
         cls,
         *,
-        username: str,
+        groupname: str,
         state: State,
         ctx: Context,
         rbac: bool = True,
-    ) -> UserORM:
+    ) -> GroupORM:
 
         match rbac, ctx.username:
             case True, str():
@@ -174,7 +180,9 @@ class UserService:
                 if not RBAC.subject.check_permission(
                     subject=ctx.username,
                     permission=Permission(
-                        resource_type="user", resource_id=username, action="deactivate"
+                        resource_type="group",
+                        resource_id=groupname,
+                        action="deactivate",
                     ),
                     db=ctx.db,
                 ):
@@ -186,21 +194,21 @@ class UserService:
             case True, None:
                 raise ExampleError("No user in context!")
 
-        user_orm = ctx.db.get(UserORM, username)
-        if user_orm is None:
-            raise ExampleError(f"Unknown user '{username}'!")
-        user_orm.state = state
+        group_orm = ctx.db.get(GroupORM, groupname)
+        if group_orm is None:
+            raise ExampleError(f"Unknown group '{groupname}'!")
+        group_orm.state = state
         ctx.db.flush()
-        return user_orm
+        return group_orm
 
     @classmethod
     def delete(
         cls,
         *,
-        username: str,
+        groupname: str,
         ctx: Context,
         rbac: bool = True,
-    ) -> UserORM:
+    ) -> GroupORM:
 
         match rbac, ctx.username:
             case True, str():
@@ -211,7 +219,7 @@ class UserService:
                 if not RBAC.subject.check_permission(
                     subject=ctx.username,
                     permission=Permission(
-                        resource_type="user", resource_id=username, action="delete"
+                        resource_type="group", resource_id=groupname, action="delete"
                     ),
                     db=ctx.db,
                 ):
@@ -223,59 +231,43 @@ class UserService:
             case True, None:
                 raise ExampleError("No user in context!")
 
-        user_orm = ctx.db.get(UserORM, username)
-        if user_orm is None:
-            raise ExampleError(f"Unknown user '{username}'!")
+        group_orm = ctx.db.get(GroupORM, groupname)
+        if group_orm is None:
+            raise ExampleError(f"Unknown group '{groupname}'!")
 
-        USER_ROLE = f"user[{username}]"
-        RBAC.role.delete(role=USER_ROLE, db=ctx.db)
-        RBAC.subject.delete(subject=username, db=ctx.db)
+        GROUP_ROLE__OWNER = f"group[{groupname}]:owner"
+        RBAC.role.delete(role=GROUP_ROLE__OWNER, db=ctx.db)
 
-        for group_orm in user_orm.group_orms:
-            GROUP_ROLE__OWNER = f"group[{group_orm.groupname}]:owner"
-            RBAC.role.delete(role=GROUP_ROLE__OWNER, db=ctx.db)
-
-        ctx.db.delete(user_orm)
+        ctx.db.delete(group_orm)
         ctx.db.flush()
-
-        return user_orm
+        return group_orm
 
     ################################################################################
     #### Util
     ################################################################################
 
     @classmethod
-    def _create_role_and_policies(cls, username: str, role: str, ctx: Context) -> None:
-        RBAC.subject.create(subject=username, db=ctx.db)
-        RBAC.subject.assign_role(role=role, subject=username, db=ctx.db)
-
-        USER_ROLE = f"user[{username}]"
-        RBAC.role.create(role=USER_ROLE, db=ctx.db)
-        RBAC.subject.assign_role(subject=username, role=USER_ROLE, db=ctx.db)
+    def _create_group_role_and_policies(
+        cls, groupname: str, owner: str, ctx: Context
+    ) -> None:
+        GROUP_ROLE__OWNER = f"group[{groupname}]:owner"
+        RBAC.role.create(role=GROUP_ROLE__OWNER, db=ctx.db)
+        RBAC.subject.assign_role(subject=owner, role=GROUP_ROLE__OWNER, db=ctx.db)
 
         RBAC.policy.create(
             policy=Policy(
-                role=USER_ROLE,
+                role=GROUP_ROLE__OWNER,
                 permission=Permission(
-                    resource_type="user", resource_id=username, action="access"
+                    resource_type="group", resource_id=groupname, action="edit"
                 ),
             ),
             db=ctx.db,
         )
         RBAC.policy.create(
             policy=Policy(
-                role=USER_ROLE,
+                role=GROUP_ROLE__OWNER,
                 permission=Permission(
-                    resource_type="user", resource_id=username, action="edit"
-                ),
-            ),
-            db=ctx.db,
-        )
-        RBAC.policy.create(
-            policy=Policy(
-                role=USER_ROLE,
-                permission=Permission(
-                    resource_type="user", resource_id=username, action="deactivate"
+                    resource_type="group", resource_id=groupname, action="deactivate"
                 ),
             ),
             db=ctx.db,

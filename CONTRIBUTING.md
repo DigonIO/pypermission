@@ -1,4 +1,4 @@
-# HowTo: Contribute to pypermission
+# HowTo: Contribute to rbac
 
 ## Development setup
 
@@ -20,7 +20,7 @@ docker compose up
 ### Standard tests
 
 ```console
-uv run pytest --cov=src/pypermission/ tests
+uv run pytest --cov=src/rbac/ tests
 ```
 
 ### Doc tests

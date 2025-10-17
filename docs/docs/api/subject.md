@@ -1,4 +1,4 @@
 # API Reference - Subject
 
-::: pypermission.service.subject.SubjectService
+::: rbac.service.subject.SubjectService
     handler: python

@@ -6,7 +6,7 @@ from _pytest.fixtures import FixtureRequest
 from sqlalchemy.engine import Engine, create_engine
 from sqlalchemy.orm import sessionmaker, Session
 
-from pypermission.models import BaseORM
+from rbac.models import BaseORM
 
 from sqlalchemy.event import listen
 from sqlite3 import Connection

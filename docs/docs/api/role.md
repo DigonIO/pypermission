@@ -1,4 +1,4 @@
 # API Reference - Role
 
-::: pypermission.service.role.RoleService
+::: rbac.service.role.RoleService
     handler: python

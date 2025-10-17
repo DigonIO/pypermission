@@ -1,4 +1,4 @@
-# PyPermission - Quick Start
+# rbac - Quick Start
 
 To get started with a basic RBAC example, first set up an SQLAlchemy environment.
 In this example, we use an in-memory SQLite database (you can also use PostgreSQL via `psycopg`). After setting up the database, we need to create the required RBAC tables.
@@ -12,19 +12,19 @@ db_factory = sessionmaker(bind=engine, autoflush=False, autocommit=False)
 ```
 
 ```{.python continuation}
-from pypermission import create_rbac_database_table
+from rbac import create_rbac_database_table
 
 create_rbac_database_table(engine=engine)
 ```
 
-pypermission organizes its core functionality into three main services:
+rbac organizes its core functionality into three main services:
 `RoleService`, `SubjectService`, and `PolicyService`.
 These services are accessible through the main RBAC class, which provides a unified interface for managing Roles, Subjects, and Policies. The examples below demonstrates basic usage.
 
 Create a _user_ and an _admin_ Role and create a relation such that the _admin_ Role inherits all permissions of the _user_ Role and potential ascendant Permissions.
 
 ```{.python continuation}
-from pypermission import RBAC
+from rbac import RBAC
 
 with db_factory() as db:
     RBAC.role.create(role="user", db=db)
@@ -63,7 +63,7 @@ with db_factory() as db:
 Next, assign Permissions to the Roles. In this simple example, we define who can edit which user. Every user with the Role _user_ is allowed to view all users, but can only edit their own account. Users with the Role _admin_ are allowed to edit any user.
 
 ```{.python continuation}
-from pypermission import Permission
+from rbac import Permission
 
 with db_factory() as db:
     RBAC.role.grant_permission(
@@ -129,7 +129,7 @@ with db_factory() as db:
 ```
 
 ```{.python continuation}
-from pypermission import PyPermissionNotGrantedError
+from rbac import RBACNotGrantedError
 with db_factory() as db:
     RBAC.subject.assert_permission(
         subject="Max",
@@ -146,7 +146,7 @@ with db_factory() as db:
             ),
             db=db,
         )
-    except PyPermissionNotGrantedError as err:
+    except RBACNotGrantedError as err:
         # Raises because the user 'Max' has not the required Permission
         ...
 ```

@@ -2,7 +2,7 @@ from sqlalchemy.sql import select
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
 from collections.abc import Sequence
-from pypermission.models import (
+from rbac.models import (
     Policy,
     Permission,
     RoleORM,
@@ -12,9 +12,9 @@ from pypermission.models import (
     PolicyORM,
     FrozenClass,
 )
-from pypermission.exc import (
-    PyPermissionError,
-    PyPermissionNotGrantedError,
+from rbac.exc import (
+    RBACError,
+    RBACNotGrantedError,
     process_subject_role_integrity_error,
 )
 
@@ -49,7 +49,7 @@ class SubjectService(metaclass=FrozenClass):
             db.flush()
         except IntegrityError:
             db.rollback()
-            raise PyPermissionError(f"Subject '{subject}' already exists!")
+            raise RBACError(f"Subject '{subject}' already exists!")
 
     @classmethod
     def delete(cls, *, subject: str, db: Session) -> None:
@@ -70,7 +70,7 @@ class SubjectService(metaclass=FrozenClass):
         """
         subject_orm = db.get(SubjectORM, subject)
         if subject_orm is None:
-            raise PyPermissionError(f"Subject '{subject}' does not exist!")
+            raise RBACError(f"Subject '{subject}' does not exist!")
         db.delete(subject_orm)
         db.flush()
 
@@ -147,13 +147,11 @@ class SubjectService(metaclass=FrozenClass):
         if member_orm is None:
             subject_orm = db.get(SubjectORM, subject)
             if subject_orm is None:
-                raise PyPermissionError(f"Subject '{subject}' does not exist!")
+                raise RBACError(f"Subject '{subject}' does not exist!")
             role_orm = db.get(RoleORM, role)
             if role_orm is None:
-                raise PyPermissionError(f"Role '{role}' does not exist!")
-            raise PyPermissionError(
-                f"Role '{role}' is not assigned to Subject '{subject}'!"
-            )
+                raise RBACError(f"Role '{role}' does not exist!")
+            raise RBACError(f"Role '{role}' is not assigned to Subject '{subject}'!")
         db.delete(member_orm)
         db.flush()
 
@@ -204,7 +202,7 @@ class SubjectService(metaclass=FrozenClass):
             ).all()
 
         if len(roles) == 0 and db.get(SubjectORM, subject) is None:
-            raise PyPermissionError(f"Subject '{subject}' does not exist!")
+            raise RBACError(f"Subject '{subject}' does not exist!")
         return tuple(roles)
 
     @classmethod
@@ -265,7 +263,7 @@ class SubjectService(metaclass=FrozenClass):
             return True
         subject_orm = db.get(SubjectORM, subject)
         if subject_orm is None:
-            raise PyPermissionError(f"Subject '{subject}' does not exist!")
+            raise RBACError(f"Subject '{subject}' does not exist!")
         return False
 
     @classmethod
@@ -296,7 +294,7 @@ class SubjectService(metaclass=FrozenClass):
             If the target Subject does not exist.
         """
         if not cls.check_permission(subject=subject, permission=permission, db=db):
-            raise PyPermissionNotGrantedError(
+            raise RBACNotGrantedError(
                 f"Permission '{permission}' is not granted for Subject '{subject}'!"
             )
 
@@ -417,7 +415,7 @@ class SubjectService(metaclass=FrozenClass):
             )
             actions = db.scalars(selection).unique().all()
         if len(actions) == 0 and db.get(SubjectORM, subject) is None:
-            raise PyPermissionError(f"Subject '{subject}' does not exist!")
+            raise RBACError(f"Subject '{subject}' does not exist!")
         return tuple(actions)
 
 
@@ -429,7 +427,7 @@ class SubjectService(metaclass=FrozenClass):
 def _get_policy_orms_for_subject(*, subject: str, db: Session) -> Sequence[PolicyORM]:
     subject_orm = db.get(SubjectORM, subject)
     if not subject_orm:
-        raise PyPermissionError(f"Subject '{subject}' does not exist!")
+        raise RBACError(f"Subject '{subject}' does not exist!")
     root_cte = (
         select(MemberORM.role_id)
         .where(MemberORM.subject_id == subject)

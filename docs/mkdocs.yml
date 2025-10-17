@@ -24,7 +24,7 @@ plugins:
       html_report_dir: htmlcov
 
 nav:
-  - README: readme_symlink.md
+  - README: index.md
   - Quick Start: quick_start.md
   - Definitions: definitions.md
   - Permission Design Guide: permission_design_guide.md
