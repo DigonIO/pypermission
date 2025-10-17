@@ -20,7 +20,6 @@ Next ID: `17`
 * `10` Doc - Compare to NIST
 * `9` Doc - Finalize README
 * `8` Doc - Add CHANGELOG
-* `6` Add Postgres as explicit dependency group
 * `3` Decide for a seo optimal package name
 * `2` Setup Doc hosting environment
 * `1` CI/CD Pipeline
@@ -31,6 +30,7 @@ Next ID: `17`
 
 ## Done Tasks
 
+* `6` Add Postgres as explicit dependency group
 * `12` Add missing functionality
     * [x] `RBAC.role.subjects` (`include_descendant_subjects` support)
     * [x] `RBAC.subject.roles` (`include_ascendant_roles` support)
