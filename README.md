@@ -16,11 +16,20 @@ A python `RBAC` library for projects where `SQLAlchemy` is a valid option.
 [![Downloads Week](https://pepy.tech/badge/pypermission/week)](https://pepy.tech/project/pypermission)
 [![Downloads Total](https://pepy.tech/badge/pypermission)](https://pepy.tech/project/pypermission)
 
+---
+
+If you find the RBAC library beneficial, please consider supporting the project by [starring it on GitHub](https://github.com/DigonIO/scheduler).
+
+[![GitHub Repo stars](https://img.shields.io/github/stars/digonio/scheduler)](https://github.com/DigonIO/scheduler)
+
 # Python RBAC with SQLAlchemy
 
-+ RBAC with NIST Level 2
++ Authorization for pythonistas [(Quick Start)](TODO)
++ RBAC with NIST level 2
 + Persistency via SQLAlchemy
   + Postgresql (psycopg)
++ Full integration guide [(Guide)](TODO)
++ Online documentation [(Full doc)](TODO)
 
 ## Installation
 
@@ -72,7 +81,16 @@ with sqla_session_factory() as db:
 
 ## Documentation
 
++ [Online documentation](TODO)
++ [API reference](TODO)
+
 ## Sponsor
+
+![Digon.IO GmbH Logo](./assets/logo_digon.io_gmbh.png "Digon.IO GmbH")
+
+Fine-Tuned AI services for developers.
+
+Digon.IO provides end-to-end consulting and development for SMEs and software companies building data-driven solutions - with a focus on supply chain optimization and text processing. [(Website)](https://digon.io) [(Technical Blog)](https://digon.io/en/blog)
 
 ## License
 

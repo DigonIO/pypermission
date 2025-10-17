@@ -22,6 +22,7 @@ plugins:
 
 nav:
   - README: readme_symlink.md
+  - Quick Start: quick_start.md
   - Guide:
       - Start: guide/index.md
   - Comparison to ANSI: ansi.md
