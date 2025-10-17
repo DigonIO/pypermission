@@ -6,9 +6,19 @@ from sqlalchemy.sql.schema import ForeignKey
 class BaseORM(DeclarativeBase): ...
 
 
+################################################################################
+#### RoleORM
+################################################################################
+
+
 class RoleORM(BaseORM):
     __tablename__ = "pp_role_table"
     id: Mapped[str] = mapped_column(String, primary_key=True)
+
+
+################################################################################
+#### HierarchyORM
+################################################################################
 
 
 class HierarchyORM(BaseORM):
@@ -21,9 +31,19 @@ class HierarchyORM(BaseORM):
     )
 
 
+################################################################################
+#### SubjectORM
+################################################################################
+
+
 class SubjectORM(BaseORM):
     __tablename__ = "pp_subject_table"
     id: Mapped[str] = mapped_column(String, primary_key=True)
+
+
+################################################################################
+#### MemberORM
+################################################################################
 
 
 class MemberORM(BaseORM):
@@ -34,6 +54,11 @@ class MemberORM(BaseORM):
     subject_id: Mapped[str] = mapped_column(
         String, ForeignKey("pp_subject_table.id", ondelete="CASCADE"), primary_key=True
     )
+
+
+################################################################################
+#### PolicyORM
+################################################################################
 
 
 class PolicyORM(BaseORM):

@@ -13,6 +13,10 @@ from pypermission.models import (
 )
 from pypermission.exc import PyPermissionError
 
+################################################################################
+#### Types
+################################################################################
+
 
 class Permission:
     resource_type: str
@@ -40,6 +44,11 @@ class Policy:
 
     def __str__(self) -> str:
         return f"{self.role}:{self.permission}"
+
+
+################################################################################
+#### RBAC
+################################################################################
 
 
 class RBAC:
@@ -372,36 +381,3 @@ class RBAC:
             )
             for policy_orm in policy_orms
         )
-
-
-# def assign_role(self, *, parent_role_id: str, child_role_id: str) -> None: ...
-#
-# def deassign_role(self, *, parent_role_id: str, child_role_id: str) -> None: ...
-#
-# def add_subject(self, *, subject_id: str) -> None: ...
-#
-# def delete_subject(self, *, subject_id: str) -> None: ...
-#
-# def assign_subject(self, *, role_id: str, subject_id: str) -> None: ...
-#
-# def deassign_subject(self, *, role_id: str, subject_id: str) -> None: ...
-#
-# def grant_permission(
-#     self,
-#     *,
-#     role_id: str,
-#     resource_type: str,
-#     resource_id: str,
-#     action: str,
-#     db: Session,
-# ) -> None: ...
-#
-# def revoke_permission(
-#     self,
-#     *,
-#     role_id: str,
-#     resource_type: str,
-#     resource_id: str,
-#     action: str,
-#     db: Session,
-# ) -> None: ...
