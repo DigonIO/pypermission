@@ -43,37 +43,4 @@ dev = [
     "pytest>=8.4.2",
     "pytest-cov>=7.0.0",
 ]
-util = [
-    "dash>=3.2.0",
-    "matplotlib>=3.10.6",
-    "nbformat>=5.10.4",
-    "networkx>=3.5",
-    "plotly>=6.3.1",
-    "scipy>=1.16.2",
-    "Typing :: Typed",
-]
-requires-python = ">=3.13"
-dependencies = ["sqlalchemy>=2.0.43"]
-
-[build-system]
-requires = ["hatchling"]
-build-backend = "hatchling.build"
-
-[dependency-groups]
-dev = [
-    "coverage>=7.10.7",
-    "ipykernel>=6.30.1",
-    "mkdocs>=1.6.1",
-    "mkdocs-coverage>=2.0.0",
-    "mkdocs-material>=9.6.21",
-    "mkdocstrings[python]>=0.30.1",
-    "pdbpp>=0.11.7",
-    "plotly-stubs>=0.0.6",
-    "psycopg>=3.2.10",
-    "pytest>=8.4.2",
-    "pytest-cov>=7.0.0",
-    "pytest-markdown-docs>=0.9.0",
-    "sqlalchemy[mypy]>=2.0.43",
-    "types-networkx>=3.5.0.20251001",
-]
 util = ["networkx>=3.5", "plotly>=6.3.1"]

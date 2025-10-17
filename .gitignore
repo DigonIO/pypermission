@@ -11,5 +11,6 @@ wheels/
 *.ipynb
 .coverage
 htmlcov/
+notebooks/
 .mypy_cache/
 .pytest_cache/
