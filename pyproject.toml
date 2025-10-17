@@ -1,10 +1,29 @@
 [project]
 name = "pypermission"
 version = "0.1.0"
-description = "Add your description here"
+description = "A python RBAC library for projects where SQLAlchemy is a valid option."
 readme = "README.md"
-authors = [{ name = "Jendrik Potyka", email = "jpotyka@digon.io" }]
+authors = [
+    { name = "Jendrik A. Potyka", email = "jpotyka@digon.io" },
+    { name = "Fabian A. Preiss", email = "fpreiss@digon.io" },
+]
+maintainers = [
+    { name = "Jendrik A. Potyka", email = "jpotyka@digon.io" },
+    { name = "Fabian A. Preiss", email = "fpreiss@digon.io" },
+]
 license = "SUL-1.0"
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "License :: Free To Use But Restricted",
+    "License :: Free for non-commercial use",
+    "License :: Other/Proprietary License",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: Implementation :: CPython",
+    "Topic :: Software Development :: Libraries",
+    "Operating System :: OS Independent",
+    "Typing :: Typed",
+]
 requires-python = ">=3.13"
 dependencies = ["sqlalchemy>=2.0.43"]
 
@@ -14,11 +33,14 @@ build-backend = "uv_build"
 
 [dependency-groups]
 dev = [
+    "coverage>=7.10.7",
     "ipykernel>=6.30.1",
     "mkdocs>=1.6.1",
     "mkdocs-material>=9.6.21",
     "mkdocstrings[python]>=0.30.1",
     "psycopg>=3.2.10",
+    "pytest>=8.4.2",
+    "pytest-cov>=7.0.0",
 ]
 util = [
     "dash>=3.2.0",
@@ -27,4 +49,30 @@ util = [
     "networkx>=3.5",
     "plotly>=6.3.1",
     "scipy>=1.16.2",
+    "Typing :: Typed",
 ]
+requires-python = ">=3.13"
+dependencies = ["sqlalchemy>=2.0.43"]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[dependency-groups]
+dev = [
+    "coverage>=7.10.7",
+    "ipykernel>=6.30.1",
+    "mkdocs>=1.6.1",
+    "mkdocs-coverage>=2.0.0",
+    "mkdocs-material>=9.6.21",
+    "mkdocstrings[python]>=0.30.1",
+    "pdbpp>=0.11.7",
+    "plotly-stubs>=0.0.6",
+    "psycopg>=3.2.10",
+    "pytest>=8.4.2",
+    "pytest-cov>=7.0.0",
+    "pytest-markdown-docs>=0.9.0",
+    "sqlalchemy[mypy]>=2.0.43",
+    "types-networkx>=3.5.0.20251001",
+]
+util = ["networkx>=3.5", "plotly>=6.3.1"]

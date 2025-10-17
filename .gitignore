@@ -6,8 +6,8 @@ dist/
 wheels/
 *.egg-info
 
-# Virtual environments
+# Development tooling
 .venv
-
-# Notebooks
 *.ipynb
+.coverage
+htmlcov/
