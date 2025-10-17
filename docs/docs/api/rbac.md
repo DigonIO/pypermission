@@ -1,4 +1,4 @@
-# API Reference
+# API Reference - RBAC
 
 ::: rbac.RBAC
     handler: python

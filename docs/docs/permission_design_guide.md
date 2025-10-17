@@ -1,4 +1,4 @@
-# Permission Design Guide
+# RBAC for Python - Permission Design Guide
 
 This guide explains how permissions can be designed in RBAC systems. There are two different approaches to structuring permissions, each with its own trade-offs:
 

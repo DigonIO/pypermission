@@ -1,4 +1,4 @@
-site_name: Python RBAC Docs
+site_name: RBAC for Python with SQLAlchemy
 
 theme:
   name: material
@@ -32,6 +32,7 @@ nav:
       - Start: guide/index.md
   - Comparison to ANSI: ansi.md
   - Roadmap: roadmap.md
+  - FAQ: faq.md
   - API Reference:
       - RBAC: api/rbac.md
       - Role service: api/role.md
@@ -43,7 +44,11 @@ nav:
 markdown_extensions:
   - footnotes
   - pymdownx.highlight
-  - pymdownx.superfences
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
   - pymdownx.tasklist:
       custom_checkbox: true
   - admonition

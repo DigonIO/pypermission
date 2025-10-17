@@ -1,4 +1,4 @@
-# Comparison to ANSI
+# RBAC for Python - Comparison to ANSI
 
 The RBAC standard published by ANSI/INCITs [^1] [^2] expands on the NIST RBAC model.
 Note that other authors have identified significant problems with the ANSI standard[^3] [^4] [^5], which makes 1:1 conformance to the standard impractical. In "A formal validation of the RBAC ANSI 2012 standard using B"[^3] the authors suggest a number of corrections to the standard. The following comparison is based on the corrections instead of the original standard and we took the freedom to use `snake_case` notation for all functions defined in the standard.

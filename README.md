@@ -33,7 +33,19 @@ If you find the RBAC library beneficial, please consider supporting the project 
     + Visualize the RBAC DAG via Plotly
 + Online documentation [(Full doc)](TODO)
 
-## Installation
+## Installing `rbac` with pip
+
+The `rbac` library can be installed directly from the PyPI repositories with:
+
+```console
+pip install rbac
+```
+
+If you want to use PostgreSQL, you need to install the `postgres` dependency group:
+
+```console
+pip install 'rbac[postgres]'
+```
 
 ## Example
 

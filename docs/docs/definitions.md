@@ -1,4 +1,4 @@
-# rbac - Formal Definitions
+# RBAC for Python - Formal Definitions
 
 We define the core concepts of our RBAC model as follows:
 

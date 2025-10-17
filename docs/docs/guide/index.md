@@ -1,1 +1,1 @@
-# Guide: _GroupUp - An example application_
+# RBAC for Python - _MeetDown: An example application_

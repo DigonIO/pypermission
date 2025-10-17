@@ -13,9 +13,6 @@ Next ID: `17`
 * `16` Do not allow empty strings for `subject`, `role`, `action` and `resource_type` (`resource_id` is allowed to be empty)
 * `15` Tests: Cover more than just next neighbor in role hierarchy tests.
 * `14` Doc - Declare how we differentiate between ascendants/parents & descendants/children
-* `13` Doc - Start with FAQ
-    * [ ] Why not Sessions?
-    * [ ] How can I implement Feature Flagging?
 * `11` Doc - Compare to ANSI
 * `10` Doc - Compare to NIST
 * `9` Doc - Finalize README
@@ -30,6 +27,9 @@ Next ID: `17`
 
 ## Done Tasks
 
+* `13` Doc - Start with FAQ
+    * [x] Why we developed the library
+    * [x] Can I implement Feature Flagging?
 * `6` Add Postgres as explicit dependency group
 * `12` Add missing functionality
     * [x] `RBAC.role.subjects` (`include_descendant_subjects` support)
