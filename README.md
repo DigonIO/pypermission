@@ -2,15 +2,25 @@
 
 A python `RBAC` library for projects where `SQLAlchemy` is a valid option.
 
+[![repository](https://img.shields.io/badge/src-GitLab-orange)](https://gitlab.com/DigonIO/pypermission)
+[![mirror](https://img.shields.io/badge/mirror-GitHub-orange)](https://github.com/DigonIO/pypermission)
 [![License: SUL-1.0](assets/badges/license.svg)](https://spdx.org/licenses/SUL-1.0.html)
+[![pipeline status](https://gitlab.com/DigonIO/pypermission/badges/master/pipeline.svg)](https://gitlab.com/DigonIO/pypermission/-/pipelines)
+[![coverage report](https://gitlab.com/DigonIO/pypermission/badges/master/coverage.svg)](https://gitlab.com/DigonIO/pypermission/-/pipelines)
+[![Documentation Status](https://readthedocs.org/projects/python-pypermission/badge/?version=latest)](https://pypermission.readthedocs.io/en/latest/?badge=latest)
 [![Code style: black](assets/badges/black.svg)](https://github.com/psf/black)
 [![Imports: isort](assets/badges/isort.svg)](https://pycqa.github.io/isort/)
 
-## Python RBAC with SQLAlchemy
+[![pkgversion](https://img.shields.io/pypi/v/pypermission)](https://pypi.org/project/pypermission/)
+[![versionsupport](https://img.shields.io/pypi/pyversions/pypermission)](https://pypi.org/project/pypermission/)
+[![Downloads Week](https://pepy.tech/badge/pypermission/week)](https://pepy.tech/project/pypermission)
+[![Downloads Total](https://pepy.tech/badge/pypermission)](https://pepy.tech/project/pypermission)
+
+# Python RBAC with SQLAlchemy
 
 + RBAC with NIST Level 2
 + Persistency via SQLAlchemy
-    + Postgresql (psycopg)
+  + Postgresql (psycopg)
 
 ## Installation
 
