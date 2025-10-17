@@ -1,7 +1,14 @@
 # RBAC for Python - Quick Start
 
-To get started with a basic RBAC example, first set up an SQLAlchemy environment.
-In this example, we use an in-memory SQLite database (you can also use PostgreSQL via `psycopg`). After setting up the database, we need to create the required RBAC tables.
+The `rbac` library can be installed directly from the PyPI repositories with:
+
+**WARNING** There is no release of this library available on PyPI yet.
+
+```console
+pip install rbac
+```
+
+For the following example we initialize an in-memory SQLite database with the required tables using `SQLAlchemy` (We also provide PostgreSQL support with the `'rbac[postgres]'` dependency group).
 
 ```python
 from sqlalchemy.engine import create_engine

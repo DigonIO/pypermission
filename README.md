@@ -21,19 +21,25 @@ If you find the RBAC library beneficial, please consider supporting the project 
 
 [![GitHub Repo stars](https://img.shields.io/github/stars/digonio/scheduler)](https://github.com/DigonIO/scheduler)
 
-# Python RBAC with SQLAlchemy
+# RBAC for Python with SQLAlchemy
+
+## Features
 
 + Authorization for pythonistas [(Quick Start)](TODO)
 + Persistency via SQLAlchemy
     + SQLite
     + PostgreSQL (psycopg)
 + Full integration guide [(Guide)](TODO)
-+ RBAC State Analysis
++ RBAC state analysis (optional)
     + Export the RBAC DAG as NetworkX DiGraph
     + Visualize the RBAC DAG via Plotly
++ Lightweight
++ High test coverage
 + Online documentation [(Full doc)](TODO)
 
 ## Installing `rbac` with pip
+
+**WARNING** There is no release of this library available on PyPI yet.
 
 The `rbac` library can be installed directly from the PyPI repositories with:
 

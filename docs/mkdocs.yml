@@ -31,7 +31,6 @@ nav:
   - Implementation Guide:
       - Start: guide/index.md
   - Comparison to ANSI: ansi.md
-  - Roadmap: roadmap.md
   - FAQ: faq.md
   - API Reference:
       - RBAC: api/rbac.md
