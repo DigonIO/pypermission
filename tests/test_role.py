@@ -411,7 +411,6 @@ def test_revoke_permission__success(*, db: Session) -> None:
     RS.revoke_permission(role="admin", permission=permission, db=db)
 
 
-@pytest.mark.xfail(reason="Error cause detection not implemented yet")
 def test_revoke_permission__unknown_permission(*, db: Session) -> None:
     permission = Permission(resource_type="event", resource_id="*", action="edit")
 
@@ -420,7 +419,7 @@ def test_revoke_permission__unknown_permission(*, db: Session) -> None:
         RS.revoke_permission(role="admin", permission=permission, db=db)
 
     assert (
-        ERR_MSG.permission_exists.format(permission_str=str(permission))
+        ERR_MSG.non_existent_permission.format(permission_str=str(permission))
         == err.value.message
     )
 
@@ -481,7 +480,6 @@ def test_check_permission__success(*, db: Session) -> None:
     assert RS.check_permission(role="user[124]", permission=p_edit_123, db=db) is False
 
 
-@pytest.mark.xfail(reason="Error Cause Not implemented")
 def test_check_permission__unknown_role(db: Session) -> None:
     p_view_all = Permission(resource_type="event", resource_id="*", action="view")
 
@@ -558,7 +556,6 @@ def test_permissions__success(*, db: Session) -> None:
     )
 
 
-@pytest.mark.xfail(reason="Error Cause Not implemented")
 def test_permissions__unknown_role(db: Session) -> None:
     with pytest.raises(PyPermissionError) as err:
         RS.permissions(role="unknown", db=db)
@@ -596,7 +593,6 @@ def test_policies__success(*, db: Session) -> None:
     )
 
 
-@pytest.mark.xfail(reason="Error Cause Not implemented")
 def test_policies__unknown_role(db: Session) -> None:
     with pytest.raises(PyPermissionError) as err:
         RS.policies(role="unknown", db=db)
@@ -703,7 +699,6 @@ def test_actions_on_resource_not_inherited__success(*, db: Session) -> None:
     ) == Counter(["edit"])
 
 
-@pytest.mark.xfail(reason="Not implemented")
 def test_actions_on_resource__unknown_role(*, db: Session) -> None:
     with pytest.raises(PyPermissionError) as err:
         RS.actions_on_resource(

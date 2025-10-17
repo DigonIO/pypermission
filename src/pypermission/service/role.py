@@ -483,7 +483,11 @@ class RoleService(metaclass=FrozenClass):
             policy_tuple,
         )
         if policy_orm is None:
-            # TODO check the error cause
+            role_orm = db.get(RoleORM, role)
+            if role_orm:
+                raise PyPermissionError(
+                    f"Permission '{str(permission)}' does not exist!"
+                )
             raise PyPermissionError(f"Role '{role}' does not exist!")
 
         db.delete(policy_orm)
@@ -517,7 +521,7 @@ class RoleService(metaclass=FrozenClass):
         Raises
         ------
         PyPermissionError
-            If the target Role does not exist. TODO
+            If the target Role does not exist.
         """
         root_cte = (
             select(RoleORM.id.label("role_id"))
@@ -541,7 +545,12 @@ class RoleService(metaclass=FrozenClass):
             )
         ).all()
 
-        return len(policy_orms) > 0
+        if len(policy_orms) == 0:
+            role_orm = db.get(RoleORM, role)
+            if role_orm is None:
+                raise PyPermissionError(f"Role '{role}' does not exist!")
+            return False
+        return True
 
     @classmethod
     def assert_permission(
@@ -606,6 +615,10 @@ class RoleService(metaclass=FrozenClass):
             If the target Role does not exist.
         """
         policy_orms = _get_policy_orms_for_role(role=role, inherited=inherited, db=db)
+        if len(policy_orms) == 0:
+            role_orm = db.get(RoleORM, role)
+            if role_orm is None:
+                raise PyPermissionError(f"Role '{role}' does not exist!")
 
         return tuple(
             Permission(
@@ -647,6 +660,11 @@ class RoleService(metaclass=FrozenClass):
             If the target Role does not exist.
         """
         policy_orms = _get_policy_orms_for_role(role=role, inherited=inherited, db=db)
+
+        if len(policy_orms) == 0:
+            role_orm = db.get(RoleORM, role)
+            if role_orm is None:
+                raise PyPermissionError(f"Role '{role}' does not exist!")
 
         return tuple(
             Policy(
@@ -700,6 +718,11 @@ class RoleService(metaclass=FrozenClass):
                 PolicyORM.resource_id.in_((resource_id, "*")),
             )
         result = db.scalars(selection).all()
+
+        if len(result) == 0:
+            role_orm = db.get(RoleORM, role)
+            if role_orm is None:
+                raise PyPermissionError(f"Role '{role}' does not exist!")
         return tuple(result)
 
 

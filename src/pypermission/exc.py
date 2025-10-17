@@ -48,7 +48,7 @@ class PyPermissionNotGrantedError(PyPermissionError):
 
 
 def process_subject_role_integrity_error(
-    *, err: IntegrityError, subject: str = "", role: str = ""
+    *, err: IntegrityError, subject: str | None = None, role: str | None = None
 ) -> Never:
     match err:
         case IntegrityError(
@@ -64,13 +64,13 @@ def process_subject_role_integrity_error(
             ):
                 raise PyPermissionError(f"Subject '{subject}' does not exist!")
         case IntegrityError(orig=Sqlite3IntegrityError()):
-            if subject and role:
+            if subject is not None and role is not None:
                 raise PyPermissionError(
                     f"Subject '{subject}' or Role '{role}' does not exist!"
                 )
-            if subject:
+            if subject is not None:
                 raise PyPermissionError(f"Subject '{subject}' does not exist!")
-            if role:
+            if role is not None:
                 raise PyPermissionError(f"Role '{role}' does not exist!")
         case _:
             ...
@@ -128,6 +128,7 @@ class ERR_MSG:
     non_existent_role_assignment = (
         "Role '{role}' is not assigned to Subject '{subject}'!"
     )
+    non_existent_permission = "Permission '{permission_str}' does not exist!"
 
     permission_not_granted_for_role = (
         "Permission '{permission_str}' is not granted for Role '{role}'!"
