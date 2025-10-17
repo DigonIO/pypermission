@@ -416,6 +416,8 @@ class SubjectService(metaclass=FrozenClass):
                 )
             )
             actions = db.scalars(selection).unique().all()
+        if len(actions) == 0 and db.get(SubjectORM, subject) is None:
+            raise PyPermissionError(f"Subject '{subject}' does not exist!")
         return tuple(actions)
 
 

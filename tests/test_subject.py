@@ -496,7 +496,6 @@ def test_actions_on_resource_not_inherited(*, db: Session) -> None:
     ) == Counter(["view", "edit"])
 
 
-@pytest.mark.xfail(reason="Not implemented")
 def test_actions_on_resource__unknown_subject(db: Session) -> None:
     subject = "unknown"
     with pytest.raises(PyPermissionError) as err:

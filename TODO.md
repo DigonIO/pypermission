@@ -6,10 +6,11 @@
 * `xxxx.` Normal
 * `xxxx!` Critical
 
-Next ID: `16`
+Next ID: `17`
 
 ## Open Tasks
 
+* `16` Do not allow empty strings for `subject`, `role`, `action` and `resource_type` (`resource_id` is allowed to be empty)
 * `15` Tests: Cover more than just next neighbor in role hierarchy tests.
 * `14` Doc - Declare how we differentiate between ascendants/parents & descendants/children
 * `13` Doc - Start with FAQ

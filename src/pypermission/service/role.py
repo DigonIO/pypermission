@@ -13,7 +13,11 @@ from pypermission.models import (
     MemberORM,
     Policy,
 )
-from pypermission.exc import PyPermissionError, PyPermissionNotGrantedError
+from pypermission.exc import (
+    PyPermissionError,
+    PyPermissionNotGrantedError,
+    process_policy_integrity_error,
+)
 
 ################################################################################
 #### RoleService
@@ -442,8 +446,7 @@ class RoleService(metaclass=FrozenClass):
             db.flush()
         except IntegrityError as err:
             db.rollback()
-            # TODO check the error cause
-            raise PyPermissionError(f"Role '{role}' does not exist!")
+            process_policy_integrity_error(err=err, role=role, permission=permission)
 
     @classmethod
     def revoke_permission(

@@ -4,7 +4,9 @@ from sqlite3 import IntegrityError as Sqlite3IntegrityError
 from psycopg.errors import (
     ForeignKeyViolation as PsycopgForeignKeyViolation,
     Diagnostic as PsycopgDiagnostic,
+    UniqueViolation as PsycopgUniqueViolation,
 )
+from pypermission.models import Permission
 
 ################################################################################
 #### Generic Errors
@@ -74,9 +76,38 @@ def process_subject_role_integrity_error(
             ...
     raise PyPermissionError("Unexpected IntegrityError")
 
-    ################################################################################
-    #### Testing only:
-    ################################################################################
+
+def process_policy_integrity_error(
+    *,
+    err: IntegrityError,
+    role: str,
+    permission: Permission,
+) -> Never:
+    match err:
+        case IntegrityError(orig=PsycopgUniqueViolation()):
+            raise PyPermissionError(
+                f"Permission '{str(permission)}' does already exist!"
+            )
+        case IntegrityError(orig=PsycopgForeignKeyViolation()):
+            raise PyPermissionError(f"Role '{role}' does not exist!")
+        case IntegrityError(
+            orig=Sqlite3IntegrityError(sqlite_errorname="SQLITE_CONSTRAINT_PRIMARYKEY")
+        ):
+            raise PyPermissionError(
+                f"Permission '{str(permission)}' does already exist!"
+            )
+        case IntegrityError(
+            orig=Sqlite3IntegrityError(sqlite_errorname="SQLITE_CONSTRAINT_FOREIGNKEY")
+        ):
+            raise PyPermissionError(f"Role '{role}' does not exist!")
+        case _:
+            ...
+    raise PyPermissionError("Unexpected IntegrityError")
+
+
+################################################################################
+#### Testing only:
+################################################################################
 
 
 class ERR_MSG:

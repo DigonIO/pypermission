@@ -363,7 +363,6 @@ def test_subjects_include_descendants__unknown_role(*, db: Session) -> None:
 ################################################################################
 
 
-# TODO: test if access granted
 def test_grant_permission__success(*, db: Session) -> None:
     role = "admin"
     permission = Permission(resource_type="event", resource_id="*", action="edit")
@@ -373,7 +372,6 @@ def test_grant_permission__success(*, db: Session) -> None:
     RS.assert_permission(role=role, permission=permission, db=db)
 
 
-@pytest.mark.xfail(reason="Error cause detection not implemented yet")
 def test_grant_permission__duplication(*, db: Session) -> None:
     role = "admin"
     permission = Permission(resource_type="event", resource_id="*", action="edit")
