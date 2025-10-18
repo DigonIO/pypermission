@@ -250,7 +250,7 @@ class GroupService:
     def _create_group_role_and_policies(
         cls, groupname: str, owner: str, ctx: Context
     ) -> None:
-        GROUP_ROLE__OWNER = f"group[{groupname}]:owner"
+        GROUP_ROLE__OWNER = f"group[{groupname}]_owner"
         RBAC.role.create(role=GROUP_ROLE__OWNER, db=ctx.db)
         RBAC.subject.assign_role(subject=owner, role=GROUP_ROLE__OWNER, db=ctx.db)
 
