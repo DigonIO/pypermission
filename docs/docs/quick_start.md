@@ -36,11 +36,11 @@ from rbac import create_rbac_database_table
 create_rbac_database_table(engine=engine)
 ```
 
-The rbac library organizes its core functionality into two main services - `RoleService` and `SubjectService`. These services are accessible through the main RBAC class, which provides a unified interface for managing Roles, Subjects, and Policies. The examples below demonstrates basic usage.
+The `rbac` library organizes its core functionality into two main services - **RoleService** and **SubjectService**. These services are accessible through the main **RBAC** class, which provides a unified interface for managing **Roles**, **Subjects**, and **Policies**. The examples below demonstrates basic usage.
 
 ## Manage Subjects and Roles
 
-Start by creating a `user` and an `admin` Role:
+Start by creating a `user` and an `admin` **Role**:
 
 ```{.python continuation}
 from rbac import RBAC
@@ -51,7 +51,7 @@ with db_factory() as db:
     db.commit()
 ```
 
-We want the `admin` Role to inherit all permissions of the `user` Role, therefore we model the `admin` Role as a child of the `user` role in our Role hierarchy:
+We want the `admin` **Role** to inherit all permissions of the `user` **Role**, therefore we model the `admin` **Role** as a child of the `user` **Role** in our **Role** hierarchy:
 
 ```{.python continuation}
 with db_factory() as db:
@@ -63,7 +63,7 @@ with db_factory() as db:
     db.commit()
 ```
 
-Next, create two Subjects: `Alex` and `Ursula` who we respectively assign the `admin` and `user` Roles.
+Next, create two **Subjects** - `Alex` and `Ursula` and assign the `admin` and `user` **Roles** respectively.
 
 ```{.python continuation}
 with db_factory() as db:
@@ -78,9 +78,11 @@ with db_factory() as db:
 
 ## Basic Permission handling
 
-When creating a `Permission`, you can use the wildcard string `"*"` for the `resource_id` to indicate that all resources of the given `resource_type` and `action` can be granted via this `Permission`.
+When creating a **Permission**, using the wildcard string `"*"` for the `resource_id` specifies that all resources of the given `resource_type` and `action` can be granted via this **Permission**.
 
-In this example, we want everyone with the `user` Role to be able to `view` every `event` in the system. This corresponds to `Permission(resource_type="event", resource_id="*", action="view")`, representable as `"event[*]:view"`. Likewise we assign the `"event[*]:edit"` `Permission` to the `admin` Role to allow the `edit` action for the `admin` on all `event` resources.
+In this example, everyone with the `user` **Role** may `view` every `event` in the system. This corresponds to `Permission(resource_type="event", resource_id="*", action="view")`, representable as `"event[*]:view"`.
+
+We also assign the `"event[*]:edit"` **Permission** to the `admin` **Role** so that the `admin` can edit any `event`.
 
 ```{.python continuation}
 from rbac import Permission
@@ -100,73 +102,61 @@ with db_factory() as db:
         ),
         db=db,
     )
+
+    db.commit()
 ```
 
-!!! warning
+!!! note "Note – ResourceIDs & Wildcards"
 
-    The following part of this guide is incomplete.
+    **ResourceID** is typically the ID of an application resource (e.g. a User ID, an INT, a UUID...). For use with this library you must cast the value to a string.
 
-!!! note
+    * The asterisk `*` is a wildcard and matches all **ResourceID**s for the corresponding **ResourceType**.
+    * The same rule also applies when checking whether a subject has a given **Permission**
+    * Depending on your requirements it can be helpful to indicate a scope within the **ResourceID** (e.g. "group:123"). For more details, see the [Permission Design Guide](permission_design_guide.md).
 
-    The ResourceID is typically the ID of an application resource. For example, it could be the UserID, which is typically an `int`, a `UUID` or a `string`. For use with this library, you have to cast the value to a string. The asterisk `*` can be used as a wildcard and matches all ResourceIDs for the corresponding ResourceType.This also applies when checking whether a subject has a given Permission. ResourceIDs can also include a scope, for more details, see the [Permission Design Guide](permission_design_guide.md).
-
-Now check permission access.
+Being granted the `user` **Role**, `Ursula` can `view` her own and `Alex`'s events.
 
 ```{.python continuation}
 with db_factory() as db:
-    RBAC.subject.assert_permission(
+    assert RBAC.subject.check_permission(
         subject="Ursula",
-        permission=Permission(
-            resource_type="user", resource_id="Ursula", action="view"
-        ),
+        permission=Permission(resource_type="event", resource_id="Ursula", action="view"),
         db=db,
-    )
+    ) is True
+    # or alternatively (recommended):
     RBAC.subject.assert_permission(
         subject="Ursula",
-        permission=Permission(
-            resource_type="user", resource_id="Alex", action="view"
-        ),
+        permission=Permission(resource_type="event", resource_id="Alex", action="view"),
         db=db,
     )
 ```
+
+Confirm that `Ursula` cannot edit her own event while `Alex` (as `admin`) can:
 
 ```{.python continuation}
 from rbac import RBACNotGrantedError
+
 with db_factory() as db:
-    RBAC.subject.assert_permission(
-        subject="Ursula",
-        permission=Permission(
-            resource_type="user", resource_id="Ursula", action="edit"
-        ),
-        db=db,
-    )
     try:
         RBAC.subject.assert_permission(
             subject="Ursula",
-            permission=Permission(
-                resource_type="user", resource_id="Alex", action="edit"
-            ),
+            permission=Permission(resource_type="event", resource_id="Ursula", action="edit"),
             db=db,
         )
     except RBACNotGrantedError as err:
-        # Raises because the user 'Ursula' has not the required Permission
-        ...
-```
+        assert err.message == "Permission 'event[Ursula]:edit' is not granted for Subject 'Ursula'!"
 
-```{.python continuation}
-with db_factory() as db:
+    # Alex can edit any event, including Ursula’s
     RBAC.subject.assert_permission(
         subject="Alex",
-        permission=Permission(
-            resource_type="user", resource_id="Ursula", action="edit"
-        ),
+        permission=Permission(resource_type="event", resource_id="Ursula", action="edit"),
         db=db,
     )
 ```
 
-Some applications require Subject-specific permissions.
-For each Subject, a dedicated Role is created to store Subject-specific Permissions.
-These Roles are then assigned alongside the shared `user` and `admin` Roles.
+## Subject‑specific roles
+
+Create a dedicated **Role** for each **Subject** and assign it alongside the shared **Role**:
 
 ```{.python continuation}
 with db_factory() as db:
@@ -179,23 +169,127 @@ with db_factory() as db:
     db.commit()
 ```
 
-```py
+Give `Ursula` the ability to `edit` her own `event`s only:
+
+```{.python continuation}
 with db_factory() as db:
     RBAC.role.grant_permission(
-        role="user[Alex]",
-        permission=Permission(
-            resource_type="user", resource_id="Alex", action="edit"
-
-        ),
+        role="user[Ursula]",
+        permission=Permission(resource_type="event", resource_id="Ursula", action="edit"),
         db=db,
     )
-    RBAC.role.grant_permission(
+    db.commit()
+```
+
+Verify that Ursula can now edit her own event:
+
+```{.python continuation}
+with db_factory() as db:
+    RBAC.subject.assert_permission(
+        subject="Ursula",
+        permission=Permission(resource_type="event", resource_id="Ursula", action="edit"),
+        db=db,
+    )
+```
+
+## Inspect roles, subjects and permissions
+
+List current roles, subjects, and permissions:
+
+```{.python continuation}
+with db_factory() as db:
+    assert set(RBAC.role.list(db=db)) == {"user", "admin", "user[Alex]", "user[Ursula]"}
+    assert set(RBAC.subject.list(db=db)) == {"Alex", "Ursula"}
+
+    # The only "regular" user is Ursula
+    assert {"Ursula"} == set(
+        RBAC.role.subjects(role="user", include_descendant_subjects=False, db=db)
+    )
+
+    # Alex has the admin role and his user-specific role
+    assert {"admin", "user[Alex]"} == set(
+        RBAC.subject.roles(subject="Alex", include_ascendant_roles=False, db=db)
+    )
+
+    # The admin role gains user permissions in addition to its directly assigned ones
+    assert {
+        "event[*]:edit",
+        "event[*]:view",  # (permission is inherited)
+    } == {str(p) for p in RBAC.role.permissions(role="admin", inherited=True, db=db)}
+
+    # Permissions visible to Alex (admin + user[Alex])
+    alex_perms = RBAC.subject.permissions(subject="Alex", db=db)
+    assert {"event[*]:view", "event[*]:edit"} == {str(p) for p in alex_perms}
+
+    # Permissions visible to Ursula (user + user[Ursula])
+    ursula_perms = RBAC.subject.permissions(subject="Ursula", db=db)
+    assert {"event[*]:view", "event[Ursula]:edit"} == {str(p) for p in ursula_perms}
+```
+
+## Inspect policies and actions
+
+Inspect **Policies** and **Actions** on a **Role**‑level:
+
+```{.python continuation}
+with db_factory() as db:
+    # Policies granted to the admin role
+    assert {
+        "admin:event[*]:edit",
+        "user:event[*]:view",  # (policy is inherited)
+    } == {str(p) for p in RBAC.role.policies(role="admin", inherited=True, db=db)}
+
+    # Available actions on a group resource for the admin role
+    assert set(
+        RBAC.role.actions_on_resource(
+            role="admin",
+            resource_type="event",
+            resource_id="*",
+            inherited=True,
+            db=db,
+        )
+    ) == {"view", "edit"}
+```
+
+Inspect **Policies** and **Actions** on a **Subject**‑level:
+
+```{.python continuation}
+with db_factory() as db:
+    # Policies collected from all roles assigned to Ursula
+    assert {
+        "user:event[*]:view",
+        "user[Ursula]:event[Ursula]:edit",
+    } == {str(p) for p in RBAC.subject.policies(subject="Ursula", db=db)}
+
+    # Actions Ursula can perform on all events
+    assert set(
+        RBAC.subject.actions_on_resource(
+            subject="Ursula",
+            resource_type="event",
+            resource_id="*",
+            inherited=True,
+            db=db,
+        )
+    ) == {"view"}
+```
+
+## Delete a role, a subject, and a hierarchy entry
+
+```{.python continuation}
+with db_factory() as db:
+    # Revoke a permission
+    RBAC.role.revoke_permission(
         role="user[Ursula]",
         permission=Permission(
-            resource_type="user", resource_id="Ursula", action="edit"
+            resource_type="event", resource_id="Ursula", action="edit"
         ),
         db=db,
     )
+    # Delete a role
+    RBAC.role.delete(role="user[Ursula]", db=db)
+    # Remove a subject
+    RBAC.subject.delete(subject="Alex", db=db)
 
+    # Remove the admin hierarchy (admin no longer inherits from user)
+    RBAC.role.remove_hierarchy(parent_role="user", child_role="admin", db=db)
     db.commit()
 ```
