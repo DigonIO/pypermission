@@ -1,15 +1,15 @@
 # RBAC for Python - Permission Design Guide
 
-This guide explains how permissions can be designed in RBAC systems. There are two different approaches to structuring permissions, each with its own trade-offs:
+In this Guide, we will discuss the following two approaches how you can choose the right Resource Identification for your Permission Model.
 
-+ **Container permissions**
-+ **Instance permissions**
++ **Container permissions** - Groups all contained resources under one identifier
++ **Instance permissions** - Treats each resource instance individually
 
-In some cases, a hybrid approach combining both methods can also be applied. The goal of this guide is to provide a clear overview of these approaches and help design flexible, maintainable permission structures.
+Each of these come with their own trade-offs and a hybrid approach might just be the choice for you. In the following Szenario about the fictional platform _MeetDown_ we'll illustrate the two approaches.
 
 ## Szenario - MeetDown
 
-We use the fictional platform _MeetDown_ to illustrate the two permission design approaches. In _MeetDown_, users can create Groups and publish Events within them.
+In _MeetDown_, users can create Groups and publish Events within them.
 
 In this guide, Group and Event are application-level resources, not RBAC system objects. Each Group has at least one owner, and all other users are members.
 
@@ -31,13 +31,13 @@ When a new Group is created (for example, with ID 1), the required Roles (`group
 
     In this example the `group[1]_owner` Role would be a child Role of `group[1]_member`. So every subject of the owner Role will be granted access to the member permissions as well.
 
-### Pro Container permissions
+### ✅ Pro Container permissions
 
 + Role hierarchy is straightforward, allowing owner Roles to automatically inherit member Permissions.
 + Only a few Policies are needed to represent the complete business logic.
 + To verify if a user can view the Event list, the GroupID can be used in the ResourceID.
 
-### Contra Container permissions
+### ❌ Contra Container permissions
 
 + All contained Events inherit the same Policies, which can be limiting if exceptions are required for individual Events.
 + Checking access for specific Events requires getting the Event from DB to get it's GroupID.
@@ -61,13 +61,13 @@ The Policies that apply to Events, except for the `Create` Action, can only be c
 | `group[2]_member` | `Event`      | `5`        | `RSVP`   | Members of Group 2 can RSVP for Event 5.      |
 | `group[2]_member` | `Event`      | `5`        | `Rate`   | Members of Group 2 can rate the past Event 5. |
 
-### Pro Instance permissions
+### ✅ Pro Instance permissions
 
 + Fine-grained control through event-specific policies, avoiding over-permission.
 + Precise audits and access checks for each Event instance.
 + Checking access for a specific Event is straightforward: the EventID can be used directly.
 
-### Contra Instance permissions
+### ❌ Contra Instance permissions
 
 + More policies need to be created and maintained.
 + Role hierarchy is less straightforward at the instance level, especially if custom roles are needed for individual Events.
