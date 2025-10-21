@@ -42,6 +42,27 @@ def test_delete__unknown_role(*, db: Session) -> None:
     assert ERR_MSG.non_existent_role.format(role=role) == err.value.message
 
 
+def test_delete_cleanup(*, db: Session) -> None:
+    SS.create(subject="Max", db=db)
+    RS.create(role="user[Max]", db=db)
+    SS.assign_role(subject="Max", role="user[Max]", db=db)
+    RS.grant_permission(
+        role="user[Max]",
+        permission=Permission(resource_type="event", resource_id="*", action="remove"),
+        db=db,
+    )
+    db.commit()
+    assert Counter(RS.list(db=db)) == Counter({"user[Max]": 1})
+
+    RS.delete(role="user[Max]", db=db)
+    db.commit()
+    assert Counter(RS.list(db=db)) == Counter()
+
+    with pytest.raises(RBACError) as err:
+        _s = RS.subjects(role="user[Max]", include_descendant_subjects=False, db=db)
+    assert ERR_MSG.non_existent_role.format(role="user[Max]") == err.value.message
+
+
 ################################################################################
 #### Test role list
 ################################################################################

@@ -28,6 +28,18 @@ engine = create_engine("sqlite:///:memory:", future=True)
 db_factory = sessionmaker(bind=engine, autoflush=False, autocommit=False)
 ```
 
+!!! warning
+
+    The `rbac` library utilizes and requires constraint checking with the `FOREIGN KEY` syntax. SQLite does not have this feature enabled by default. If you want to use SQLite, make sure your instance fulfills the [necessary prerequisites](https://docs.sqlalchemy.org/en/20/dialects/sqlite.html#foreign-key-support) and use the provided event listener for all database connections.
+
+    ```{.python notest}
+    from rbac import create_rbac_database_table, set_sqlite_pragma
+    from sqlalchemy.event import listen
+
+    listen(engine, "connect", set_sqlite_pragma)
+    create_rbac_database_table(engine=engine)
+    ```
+
 Create the required tables in the database:
 
 ```{.python continuation}

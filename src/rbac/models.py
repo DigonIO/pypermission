@@ -3,6 +3,10 @@ from sqlalchemy.sql.sqltypes import String
 from sqlalchemy.sql.schema import ForeignKey
 from sqlalchemy.engine.base import Engine
 from typing import Never
+from sqlite3 import Connection
+from sqlalchemy.pool.base import (
+    _ConnectionRecord,  # pyright: ignore[reportPrivateUsage]
+)
 
 
 class BaseORM(DeclarativeBase): ...
@@ -197,3 +201,20 @@ def create_rbac_database_table(*, engine: Engine) -> None:
 
     """
     BaseORM.metadata.create_all(bind=engine)
+
+
+# https://docs.sqlalchemy.org/en/20/dialects/sqlite.html#foreign-key-support
+def set_sqlite_pragma(
+    dbapi_connection: Connection, _connection_record: _ConnectionRecord
+) -> None:
+    # the sqlite3 driver will not set PRAGMA foreign_keys
+    # if autocommit=False; set to True temporarily
+    ac = dbapi_connection.autocommit
+    dbapi_connection.autocommit = True
+
+    cursor = dbapi_connection.cursor()
+    cursor.execute("PRAGMA foreign_keys=ON")
+    cursor.close()
+
+    # restore previous autocommit setting
+    dbapi_connection.autocommit = ac

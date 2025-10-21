@@ -16,6 +16,7 @@ from rbac.models import (
     Permission,
     FrozenClass,
     create_rbac_database_table,
+    set_sqlite_pragma,
 )
 from rbac.exc import RBACError, RBACNotGrantedError
 
@@ -41,6 +42,7 @@ __all__ = [
     "Policy",
     "Permission",
     "create_rbac_database_table",
+    "set_sqlite_pragma",
     "RBACError",
     "RBACNotGrantedError",
 ]
