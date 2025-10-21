@@ -1,21 +1,27 @@
 # RBAC for Python - Permission Design Guide
 
-In this Guide, we will discuss the following two approaches how you can choose the right Resource Identification for your Permission Model.
+This guide explores how to design permissions in Role-Based Access Control (RBAC) systems, focusing on two primary approaches: Container Permissions and Instance Permissions. Each approach defines how permissions are assigned to resources, and each has distinct trade-offs.
 
-+ **Container permissions** - Groups all contained resources under one identifier
-+ **Instance permissions** - Treats each resource instance individually
+The key distinction lies in how the Resource is scoped in the RBAC policy:
 
-Each of these come with their own trade-offs and a hybrid approach might just be the choice for you. In the following Szenario about the fictional platform _MeetDown_ we'll illustrate the two approaches.
++ **Container permissions** - Permissions are tied to a _container_ (e.g., a Group), and apply to all resources within that container (e.g., all Events in a Group).
++ **Instance permissions** - Permissions are tied to _individual instances_ (e.g., Event ID 5), allowing fine-grained control over each resource.
 
-## Szenario - MeetDown
+In some cases, a hybrid approach combining both methods can offer the best of both worlds. This guide will help you evaluate these options and choose the most appropriate design for your use case.
 
-In _MeetDown_, users can create Groups and publish Events within them.
+## Szenario: MeetDown
 
-In this guide, Group and Event are application-level resources, not RBAC system objects. Each Group has at least one owner, and all other users are members.
+We use the fictional platform _MeetDown_ to illustrate the two permission design approaches. In _MeetDown_, users can create Groups and publish Events within them.
+
++ **Group** and **Event** are application-level resources, not RBAC system objects.
++ Each Group has at least one owner, and all other users are members.
++ Owners have full control over the Group and its Events; members can RSVP and rate Events.
 
 ## Container permissions
 
-When a new Group is created (for example, with ID 1), the required Roles (`group[1]_owner`, `group[1]_member`) are automatically generated, leading to the following exemplary Policies:
+In this approach, permissions are defined at the **container level** (e.g., Group). When a new Group is created (e.g., ID 1), Roles like `group[1]_owner` and `group[1]_member` are automatically generated. Policies are then assigned to these Roles, with ResourceIDs referencing the container (e.g., `Group:1`), meaning the permissions apply to all resources _within_ that container.
+
+### Example Policies for Group 1
 
 | Role              | ResourceType | ResourceID | Action   | Note                                                          |
 | ----------------- | ------------ | ---------- | -------- | ------------------------------------------------------------- |
@@ -29,54 +35,64 @@ When a new Group is created (for example, with ID 1), the required Roles (`group
 
 !!! note Role hierarchy
 
-    In this example the `group[1]_owner` Role would be a child Role of `group[1]_member`. So every subject of the owner Role will be granted access to the member permissions as well.
+    The `group[1]_owner` Role inherits permissions from `group[1]_member`. This allows owners to perform all member actions automatically.
 
-### ✅ Pro Container permissions
+### ✅ Pros of Container Permissions
 
-+ Role hierarchy is straightforward, allowing owner Roles to automatically inherit member Permissions.
-+ Only a few Policies are needed to represent the complete business logic.
-+ To verify if a user can view the Event list, the GroupID can be used in the ResourceID.
++ **Simple role hierarchy**: Owner roles naturally inherit member permissions.
++ **Fewer policies**: One set of policies applies to all instances within a container.
++ **Efficient list access**: To check access to a list of Events, only the GroupID is needed. Individual Event IDs don't need to be resolved.
 
-### ❌ Contra Container permissions
+### ❌ Cons of Container Permissions
 
-+ All contained Events inherit the same Policies, which can be limiting if exceptions are required for individual Events.
-+ Checking access for specific Events requires getting the Event from DB to get it's GroupID.
++ **Lack of granularity**: All Events in a Group inherit the same permissions. No exceptions can be made for individual Events.
++ **Indirect access checks**: To verify access to a specific Event, you must first retrieve the Event from the database to get its GroupID.
 
 ## Instance permissions
 
-When a new Group is created (for example, with ID 2), the required Roles (`group[2]_owner`, `group[2]_member`) are automatically generated, leading to the following exemplary Policies:
+In this approach, permissions are defined at the **instance level** (e.g., Event ID 5). When a Group is created (e.g., ID 2), Roles like `group[2]_owner` and `group[2]_member` are generated. However, policies for Events are only created **after** the Event instance exists, and each policy references the specific Event ID.
 
-| Role             | ResourceType | ResourceID | Action   | Note                                                   |
-| ---------------- | ------------ | ---------- | -------- | ------------------------------------------------------ |
-| `group[2]_owner` | `Group`      | `2`        | `Edit`   | Owners of Group 2 can edit the Group.                  |
-| `group[2]_owner` | `Group`      | `2`        | `Delete` | Owners of Group 2 can delete the Group.                |
-| `group[2]_owner` | `Event`      | `Group:2`  | `Create` | Owners of Group 2 can create new Events for the Group. |
+### Example Policies for Group 2 (Before Event Creation)
 
-The Policies that apply to Events, except for the `Create` Action, can only be created once the actual Event instance exists. The table below shows the Policies that are generated after the Event 5 instance has been created.
+| Role             | ResourceType | ResourceID | Action   | Note                                              |
+|------------------|--------------|------------|----------|---------------------------------------------------|
+| `group[2]_owner` | `Group`      | `2`        | `Edit`   | Owners can edit Group 2.                          |
+| `group[2]_owner` | `Group`      | `2`        | `Delete` | Owners can delete Group 2.                        |
+| `group[2]_owner` | `Event`      | `Group:2`  | `Create` | Owners can create Events in Group 2.              |
 
-| Role              | ResourceType | ResourceID | Action   | Note                                          |
-| ----------------- | ------------ | ---------- | -------- | --------------------------------------------- |
-| `group[2]_owner`  | `Event`      | `5`        | `Edit`   | Owners of Group 2 can edit Event 5.           |
-| `group[2]_owner`  | `Event`      | `5`        | `Delete` | Owners of Group 2 can delete Event 5.         |
-| `group[2]_member` | `Event`      | `5`        | `RSVP`   | Members of Group 2 can RSVP for Event 5.      |
-| `group[2]_member` | `Event`      | `5`        | `Rate`   | Members of Group 2 can rate the past Event 5. |
+!!! note
 
-### ✅ Pro Instance permissions
+    Policies for `Edit`, `Delete`, `RSVP`, and `Rate` on Events are **not created until the Event instance is created**.
 
-+ Fine-grained control through event-specific policies, avoiding over-permission.
-+ Precise audits and access checks for each Event instance.
-+ Checking access for a specific Event is straightforward: the EventID can be used directly.
+### Example Policies After Creating Event 5
 
-### ❌ Contra Instance permissions
+| Role             | ResourceType | ResourceID | Action   | Note                                              |
+|------------------|--------------|------------|----------|---------------------------------------------------|
+| `group[2]_owner` | `Event`      | `5`        | `Edit`   | Owners can edit Event 5.                          |
+| `group[2]_owner` | `Event`      | `5`        | `Delete` | Owners can delete Event 5.                        |
+| `group[2]_member`| `Event`      | `5`        | `RSVP`   | Members can RSVP to Event 5.                      |
+| `group[2]_member`| `Event`      | `5`        | `Rate`   | Members can rate Event 5.                         |
 
-+ More policies need to be created and maintained.
-+ Role hierarchy is less straightforward at the instance level, especially if custom roles are needed for individual Events.
-+ Listing all Events of a Group requires a lookup of all accessible Event instances in the RBAC system before pagination and returning results in the application.
+### ✅ Pros of Instance Permissions
+
++ **Fine-grained control**: Permissions can be customized per Event (e.g., restrict RSVP for a specific Event).
++ **Precise audits**: Access logs and checks are tied to specific resource instances.
++ **Direct access checks**: To verify access to Event 5, use EventID directly, no need to resolve GroupID.
+
+### ❌ Cons of Instance Permissions
+
++ **More policies**: Each Event requires its own set of policies, increasing maintenance overhead.
++ **Complex role hierarchy**: Custom roles per Event may break simple inheritance patterns.
++ **Inefficient list access**: To list all Events a user can access, you must query the RBAC system for all accessible Event instances, potentially impacting performance.
+
+!!! tip
+
+    You can prevent inefficient permission checks on individual list items by querying all Permissions assigned to a Subject/Resource at once using the `RBAC.subject.permissions(subject: str, db: Session)` and `RBAC.role.permissions(subject: str, db: Session)` methods.
 
 ## When to Use Which Approach
 
-**Container permissions** are generally easier to design and implement. For simpler applications, they are often sufficient. However, it is important to carefully consider the application’s business logic to ensure they meet your requirements.
+**Container permissions** are ideal for simpler applications or when most operations involve listing or accessing resources within a container (e.g., all Events in a Group). They are easier to design, require fewer policies, and are more efficient for list-based access.
 
-**Instance permissions** are primarily useful when fine-grained control over individual resources is required, for example, for auditing or compliance purposes.
+**Instance permissions** are better suited when you need fine-grained control over individual resources - such as for auditing, compliance, or when exceptions are common. They offer precision but come with higher maintenance and performance overhead.
 
-For very large applications with performance considerations, it is important to analyze the types of requests: if most requests are for Resource lists, **Container permissions** are likely more suitable. If requests are mostly for individual resources, **Instance permissions** may be the better choice. In many cases, it also makes sense to consider a **hybrid** approach, combining both methods to optimize for performance and maintainability.
+In many cases, a **hybrid approach** - using container permissions as the default and adding instance policies only where needed provides a good balance.
