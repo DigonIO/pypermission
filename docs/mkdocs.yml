@@ -31,6 +31,7 @@ nav:
   - Implementation Guide:
       - Start: guide/index.md
   - Comparison to ANSI: ansi.md
+  - Comparison to NIST: nist.md
   - FAQ: faq.md
   - API Reference:
       - RBAC: api/rbac.md
