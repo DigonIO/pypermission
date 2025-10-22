@@ -2,7 +2,7 @@ from typing import Sequence
 
 from sqlalchemy.sql import select
 
-from rbac import RBAC, Policy, Permission
+from rbac import RBAC, Permission
 from rbac.example.models import UserORM, GroupORM, Context, ExampleError, State
 
 ################################################################################
@@ -254,21 +254,17 @@ class GroupService:
         RBAC.role.create(role=GROUP_ROLE__OWNER, db=ctx.db)
         RBAC.subject.assign_role(subject=owner, role=GROUP_ROLE__OWNER, db=ctx.db)
 
-        RBAC.policy.create(
-            policy=Policy(
-                role=GROUP_ROLE__OWNER,
-                permission=Permission(
-                    resource_type="group", resource_id=groupname, action="edit"
-                ),
+        RBAC.role.grant_permission(
+            role=GROUP_ROLE__OWNER,
+            permission=Permission(
+                resource_type="group", resource_id=groupname, action="edit"
             ),
             db=ctx.db,
         )
-        RBAC.policy.create(
-            policy=Policy(
-                role=GROUP_ROLE__OWNER,
-                permission=Permission(
-                    resource_type="group", resource_id=groupname, action="deactivate"
-                ),
+        RBAC.role.grant_permission(
+            role=GROUP_ROLE__OWNER,
+            permission=Permission(
+                resource_type="group", resource_id=groupname, action="deactivate"
             ),
             db=ctx.db,
         )

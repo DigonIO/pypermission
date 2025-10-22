@@ -6,10 +6,11 @@
 * `xxxx.` Normal
 * `xxxx!` Critical
 
-Next ID: `17`
+Next ID: `18`
 
 ## Open Tasks
 
+* `17!` Ensure that optional dependencies (`psycopg`) are really optional
 * `16` Do not allow empty strings for `subject`, `role`, `action` and `resource_type` (`resource_id` is allowed to be empty)
 * `15` Tests: Cover more than just next neighbor in role hierarchy tests.
 * `11` Doc - Compare to ANSI

@@ -2,7 +2,7 @@ from typing import Sequence
 
 from sqlalchemy.sql import select
 
-from rbac import RBAC, Policy, Permission
+from rbac import RBAC, Permission
 from rbac.example.models import UserORM, Context, ExampleError, State
 
 ################################################################################
@@ -253,30 +253,24 @@ class UserService:
         RBAC.role.create(role=USER_ROLE, db=ctx.db)
         RBAC.subject.assign_role(subject=username, role=USER_ROLE, db=ctx.db)
 
-        RBAC.policy.create(
-            policy=Policy(
-                role=USER_ROLE,
-                permission=Permission(
-                    resource_type="user", resource_id=username, action="access"
-                ),
+        RBAC.role.grant_permission(
+            role=USER_ROLE,
+            permission=Permission(
+                resource_type="user", resource_id=username, action="access"
             ),
             db=ctx.db,
         )
-        RBAC.policy.create(
-            policy=Policy(
-                role=USER_ROLE,
-                permission=Permission(
-                    resource_type="user", resource_id=username, action="edit"
-                ),
+        RBAC.role.grant_permission(
+            role=USER_ROLE,
+            permission=Permission(
+                resource_type="user", resource_id=username, action="edit"
             ),
             db=ctx.db,
         )
-        RBAC.policy.create(
-            policy=Policy(
-                role=USER_ROLE,
-                permission=Permission(
-                    resource_type="user", resource_id=username, action="deactivate"
-                ),
+        RBAC.role.grant_permission(
+            role=USER_ROLE,
+            permission=Permission(
+                resource_type="user", resource_id=username, action="deactivate"
             ),
             db=ctx.db,
         )

@@ -51,7 +51,7 @@ class ExampleApp:
         self._create_moderator_role_policies(ctx=ctx)
         self._create_admin_role_policies(ctx=ctx)
 
-        ctx.db.commit()
+        ctx.db.flush()
 
         self.user.create(
             username="Alex",
@@ -103,121 +103,102 @@ class ExampleApp:
             ctx=ctx,
             rbac=False,
         )
+        ctx.db.flush()
 
     def _create_guest_role_policies(self, ctx: Context) -> None:
-        RBAC.policy.create(
-            policy=Policy(
-                role="guest",
-                permission=Permission(
-                    resource_type="group",
-                    resource_id="*",
-                    action="access",
-                ),
+        RBAC.role.grant_permission(
+            role="guest",
+            permission=Permission(
+                resource_type="group",
+                resource_id="*",
+                action="access",
             ),
             db=ctx.db,
         )
 
     def _create_user_role_policies(self, ctx: Context) -> None:
-        RBAC.policy.create(
-            policy=Policy(
-                role="user",
-                permission=Permission(
-                    resource_type="base",
-                    resource_id="",
-                    action="group:create",
-                ),
+        RBAC.role.grant_permission(
+            role="user",
+            permission=Permission(
+                resource_type="base",
+                resource_id="",
+                action="group:create",
             ),
             db=ctx.db,
         )
 
     def _create_moderator_role_policies(self, ctx: Context) -> None:
-        RBAC.policy.create(
-            policy=Policy(
-                role="moderator",
-                permission=Permission(
-                    resource_type="base",
-                    resource_id="",
-                    action="user:create",
-                ),
+        RBAC.role.grant_permission(
+            role="moderator",
+            permission=Permission(
+                resource_type="base",
+                resource_id="",
+                action="user:create",
             ),
             db=ctx.db,
         )
-        RBAC.policy.create(
-            policy=Policy(
-                role="moderator",
-                permission=Permission(
-                    resource_type="user",
-                    resource_id="*",
-                    action="access",
-                ),
+        RBAC.role.grant_permission(
+            role="moderator",
+            permission=Permission(
+                resource_type="user",
+                resource_id="*",
+                action="access",
             ),
             db=ctx.db,
         )
-        RBAC.policy.create(
-            policy=Policy(
-                role="moderator",
-                permission=Permission(
-                    resource_type="user",
-                    resource_id="*",
-                    action="edit",
-                ),
+        RBAC.role.grant_permission(
+            role="moderator",
+            permission=Permission(
+                resource_type="user",
+                resource_id="*",
+                action="edit",
             ),
             db=ctx.db,
         )
-        RBAC.policy.create(
-            policy=Policy(
-                role="moderator",
-                permission=Permission(
-                    resource_type="user",
-                    resource_id="*",
-                    action="deactivate",
-                ),
+        RBAC.role.grant_permission(
+            role="moderator",
+            permission=Permission(
+                resource_type="user",
+                resource_id="*",
+                action="deactivate",
             ),
             db=ctx.db,
         )
-        RBAC.policy.create(
-            policy=Policy(
-                role="moderator",
-                permission=Permission(
-                    resource_type="group",
-                    resource_id="*",
-                    action="deactivate",
-                ),
+        RBAC.role.grant_permission(
+            role="moderator",
+            permission=Permission(
+                resource_type="group",
+                resource_id="*",
+                action="deactivate",
             ),
             db=ctx.db,
         )
 
     def _create_admin_role_policies(self, ctx: Context) -> None:
-        RBAC.policy.create(
-            policy=Policy(
-                role="admin",
-                permission=Permission(
-                    resource_type="base",
-                    resource_id="",
-                    action="rbac",
-                ),
+        RBAC.role.grant_permission(
+            role="admin",
+            permission=Permission(
+                resource_type="base",
+                resource_id="",
+                action="rbac",
             ),
             db=ctx.db,
         )
-        RBAC.policy.create(
-            policy=Policy(
-                role="admin",
-                permission=Permission(
-                    resource_type="user",
-                    resource_id="*",
-                    action="delete",
-                ),
+        RBAC.role.grant_permission(
+            role="admin",
+            permission=Permission(
+                resource_type="user",
+                resource_id="*",
+                action="delete",
             ),
             db=ctx.db,
         )
-        RBAC.policy.create(
-            policy=Policy(
-                role="admin",
-                permission=Permission(
-                    resource_type="group",
-                    resource_id="*",
-                    action="delete",
-                ),
+        RBAC.role.grant_permission(
+            role="admin",
+            permission=Permission(
+                resource_type="group",
+                resource_id="*",
+                action="delete",
             ),
             db=ctx.db,
         )
