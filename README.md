@@ -10,11 +10,6 @@ The python `RBAC` library for projects where `SQLAlchemy` is a valid option.
 [![Code style: black](assets/badges/black.svg)](https://github.com/psf/black)
 [![Imports: isort](assets/badges/isort.svg)](https://pycqa.github.io/isort/)
 
-[![pkgversion](https://img.shields.io/pypi/v/rbac)](https://pypi.org/project/rbac/)
-[![versionsupport](https://img.shields.io/pypi/pyversions/rbac)](https://pypi.org/project/rbac/)
-[![Downloads Week](https://pepy.tech/badge/rbac/week)](https://pepy.tech/project/rbac)
-[![Downloads Total](https://pepy.tech/badge/rbac)](https://pepy.tech/project/rbac)
-
 ---
 
 If you find the RBAC library beneficial, please consider supporting the project by [starring it on GitHub](https://github.com/DigonIO/scheduler).
