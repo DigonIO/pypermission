@@ -51,10 +51,16 @@ Build the documentation.
 uv run mkdocs build -f docs/mkdocs.yml
 ```
 
-## Static Type analysis
+## Static analysis
 
 Run mypy with:
 
 ```console
 uv run mypy src
+```
+
+Run ruff with:
+
+```console
+uv run ruff check src
 ```
