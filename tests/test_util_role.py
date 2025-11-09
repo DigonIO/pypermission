@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 
 from pypermission.service.role import RoleService as RS
 from pypermission.service.subject import SubjectService as SS
-from pypermission.exc import RBACError
+from pypermission.exc import PyPermissionError
 from pypermission.models import Permission
 from pypermission.util.role import role_dag
 
@@ -48,13 +48,13 @@ def test_role_dag_constrained__success(db: Session) -> None:
 
 def test_role_dag_constrained__unknown(db: Session) -> None:
 
-    with pytest.raises(RBACError) as err:
+    with pytest.raises(PyPermissionError) as err:
         dag = role_dag(
             root_roles={"mod"}, include_subjects=False, include_permissions=False, db=db
         )
     assert r"Requested role does not exist: {'mod'}!" == err.value.message
 
-    with pytest.raises(RBACError) as err:
+    with pytest.raises(PyPermissionError) as err:
         dag = role_dag(
             root_roles={"mod", "admin"},
             include_subjects=False,

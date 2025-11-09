@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy.sql import select
 
 from pypermission.models import RoleORM, HierarchyORM, MemberORM, PolicyORM
-from pypermission.exc import RBACError
+from pypermission.exc import PyPermissionError
 
 ################################################################################
 #### Role dag tools
@@ -82,9 +82,9 @@ def _get_roles_and_hierarchies(
 
     if unknown_roles := root_roles ^ roles:
         if len(unknown_roles) == 1:
-            raise RBACError(f"Requested role does not exist: {unknown_roles}!")
+            raise PyPermissionError(f"Requested role does not exist: {unknown_roles}!")
         else:
-            raise RBACError(f"Requested roles do not exist: {unknown_roles}!")
+            raise PyPermissionError(f"Requested roles do not exist: {unknown_roles}!")
 
     root_cte = (
         select(HierarchyORM)

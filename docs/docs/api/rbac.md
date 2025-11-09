@@ -1,7 +1,7 @@
-# API Reference - RBAC
+# PyPermission - API Reference
 
-::: rbac.RBAC
+::: pypermission.RBAC
     handler: python
 
-::: rbac.create_rbac_database_table
+::: pypermission.create_rbac_database_table
     handler: python

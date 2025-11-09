@@ -13,8 +13,8 @@ from pypermission.models import (
     FrozenClass,
 )
 from pypermission.exc import (
-    RBACError,
-    RBACNotGrantedError,
+    PyPermissionError,
+    PermissionNotGrantedError,
     process_subject_role_integrity_error,
 )
 
@@ -49,7 +49,7 @@ class SubjectService(metaclass=FrozenClass):
             db.flush()
         except IntegrityError:
             db.rollback()
-            raise RBACError(f"Subject '{subject}' already exists!")
+            raise PyPermissionError(f"Subject '{subject}' already exists!")
 
     @classmethod
     def delete(cls, *, subject: str, db: Session) -> None:
@@ -70,7 +70,7 @@ class SubjectService(metaclass=FrozenClass):
         """
         subject_orm = db.get(SubjectORM, subject)
         if subject_orm is None:
-            raise RBACError(f"Subject '{subject}' does not exist!")
+            raise PyPermissionError(f"Subject '{subject}' does not exist!")
         db.delete(subject_orm)
         db.flush()
 
@@ -147,11 +147,13 @@ class SubjectService(metaclass=FrozenClass):
         if member_orm is None:
             subject_orm = db.get(SubjectORM, subject)
             if subject_orm is None:
-                raise RBACError(f"Subject '{subject}' does not exist!")
+                raise PyPermissionError(f"Subject '{subject}' does not exist!")
             role_orm = db.get(RoleORM, role)
             if role_orm is None:
-                raise RBACError(f"Role '{role}' does not exist!")
-            raise RBACError(f"Role '{role}' is not assigned to Subject '{subject}'!")
+                raise PyPermissionError(f"Role '{role}' does not exist!")
+            raise PyPermissionError(
+                f"Role '{role}' is not assigned to Subject '{subject}'!"
+            )
         db.delete(member_orm)
         db.flush()
 
@@ -202,7 +204,7 @@ class SubjectService(metaclass=FrozenClass):
             ).all()
 
         if len(roles) == 0 and db.get(SubjectORM, subject) is None:
-            raise RBACError(f"Subject '{subject}' does not exist!")
+            raise PyPermissionError(f"Subject '{subject}' does not exist!")
         return tuple(roles)
 
     @classmethod
@@ -263,7 +265,7 @@ class SubjectService(metaclass=FrozenClass):
             return True
         subject_orm = db.get(SubjectORM, subject)
         if subject_orm is None:
-            raise RBACError(f"Subject '{subject}' does not exist!")
+            raise PyPermissionError(f"Subject '{subject}' does not exist!")
         return False
 
     @classmethod
@@ -294,7 +296,7 @@ class SubjectService(metaclass=FrozenClass):
             If the target Subject does not exist.
         """
         if not cls.check_permission(subject=subject, permission=permission, db=db):
-            raise RBACNotGrantedError(
+            raise PermissionNotGrantedError(
                 f"Permission '{permission}' is not granted for Subject '{subject}'!"
             )
 
@@ -415,7 +417,7 @@ class SubjectService(metaclass=FrozenClass):
             )
             actions = db.scalars(selection).unique().all()
         if len(actions) == 0 and db.get(SubjectORM, subject) is None:
-            raise RBACError(f"Subject '{subject}' does not exist!")
+            raise PyPermissionError(f"Subject '{subject}' does not exist!")
         return tuple(actions)
 
 
@@ -427,7 +429,7 @@ class SubjectService(metaclass=FrozenClass):
 def _get_policy_orms_for_subject(*, subject: str, db: Session) -> Sequence[PolicyORM]:
     subject_orm = db.get(SubjectORM, subject)
     if not subject_orm:
-        raise RBACError(f"Subject '{subject}' does not exist!")
+        raise PyPermissionError(f"Subject '{subject}' does not exist!")
     root_cte = (
         select(MemberORM.role_id)
         .where(MemberORM.subject_id == subject)

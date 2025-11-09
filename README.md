@@ -1,12 +1,12 @@
 ![alt text](./assets/logo_font_path.svg "Title")
 
-The python `RBAC` library for projects where `SQLAlchemy` is a valid option.
+`PyPermission` - The python RBAC library for projects where `SQLAlchemy` is a valid option.
 
-[![repository](https://img.shields.io/badge/src-GitLab-orange)](https://gitlab.com/DigonIO/rbac)
-[![mirror](https://img.shields.io/badge/mirror-GitHub-orange)](https://github.com/DigonIO/rbac)
+[![repository](https://img.shields.io/badge/src-GitLab-orange)](https://gitlab.com/DigonIO/pypermission)
+[![mirror](https://img.shields.io/badge/mirror-GitHub-orange)](https://github.com/DigonIO/pypermission)
 [![License: LGPLv3](assets/badges/license.svg)](https://spdx.org/licenses/LGPL-3.0-only.html)
-[![pipeline status](https://gitlab.com/DigonIO/rbac/badges/master/pipeline.svg)](https://gitlab.com/DigonIO/rbac/-/pipelines)
-[![coverage report](https://gitlab.com/DigonIO/rbac/badges/master/coverage.svg)](https://gitlab.com/DigonIO/rbac/-/pipelines)
+[![pipeline status](https://gitlab.com/DigonIO/pypermission/badges/master/pipeline.svg)](https://gitlab.com/DigonIO/pypermission/-/pipelines)
+[![coverage report](https://gitlab.com/DigonIO/pypermission/badges/master/coverage.svg)](https://gitlab.com/DigonIO/pypermission/-/pipelines)
 [![Code style: black](assets/badges/black.svg)](https://github.com/psf/black)
 [![Imports: isort](assets/badges/isort.svg)](https://pycqa.github.io/isort/)
 

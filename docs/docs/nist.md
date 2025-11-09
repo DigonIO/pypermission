@@ -1,4 +1,4 @@
-# RBAC for Python - Comparison to NIST
+# Comparing PyPermission with NIST
 
 The original NIST RBAC model[^1] defines 4 feature levels and distinguishes level
 2, 3 and 4 further depending on the support for either a) arbitrary or b) limited
@@ -6,7 +6,7 @@ hierarchies. Level L.2a is closest to our implementation.
 
 !!! warning
 
-    This library is not compliant with the RBAC NIST standard, as the session concept is not implemented.
+    PyPermission is not compliant with the RBAC NIST standard, as the session concept is not implemented.
 
 The section numberings used below map 1:1 to the NIST standard sections for simple cross-referencing.
 
@@ -59,9 +59,9 @@ A visual comparison between the NIST RBAC model and our database tables shows a 
 
 NIST Hierarchical RBAC model[^1]
 
-![python-RBAC database model](./assets/RBAC_python.png)
+![PyPermission database model](./assets/RBAC_python.png)
 
-python-RBAC database model
+PyPermission database model
 
 #### L.2b Restricted Hierarchical RBAC
 
@@ -80,7 +80,7 @@ python-RBAC database model
     * roles within a linear ordering cannot at the same time have a containment relationship
 * Constrain conflicting roles
     * When trying to assign users to conflicting roles
-    * When trying to add a contrain, that would currently be violated by either existing
+    * When trying to add a constrain, that would currently be violated by either existing
     users or by an existing role ordering
     * Dynamically adding containment relationships might make management difficult on an existing structure. Possible Mitigations:
         * Warn when attempted assignment/addition introduces a conflict (ignore with `-f` flag),

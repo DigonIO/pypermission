@@ -1,5 +1,5 @@
 """
-The python `RBAC` library for projects where `sqlalchemy` is a valid option.
+`PyPermission` - The python RBAC library for projects where `sqlalchemy` is a valid option.
 
 Author: Jendrik A. Potyka, Fabian A. Preiss
 """
@@ -18,7 +18,7 @@ from pypermission.models import (
     create_rbac_database_table,
     set_sqlite_pragma,
 )
-from pypermission.exc import RBACError, RBACNotGrantedError
+from pypermission.exc import PyPermissionError, PermissionNotGrantedError
 
 
 class RBAC(metaclass=FrozenClass):
@@ -43,6 +43,6 @@ __all__ = [
     "Permission",
     "create_rbac_database_table",
     "set_sqlite_pragma",
-    "RBACError",
-    "RBACNotGrantedError",
+    "PyPermissionError",
+    "PermissionNotGrantedError",
 ]

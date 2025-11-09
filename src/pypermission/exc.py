@@ -13,7 +13,7 @@ from pypermission.models import Permission
 ################################################################################
 
 
-class RBACError(Exception):
+class PyPermissionError(Exception):
     """
     PyPermissionError is the standard error of PyPermission.
 
@@ -29,9 +29,9 @@ class RBACError(Exception):
         self.message = message
 
 
-class RBACNotGrantedError(RBACError):
+class PermissionNotGrantedError(PyPermissionError):
     """
-    PyPermissionNotGrantedError will be thrown if an `assert_permission()` fails!
+    PermissionNotGrantedError will be thrown if an `assert_permission()` fails!
 
     Attributes
     ----------
@@ -57,22 +57,24 @@ def process_subject_role_integrity_error(
             )
         ):
             if f"Key (role_id)=({role}) is not present in table" in message_detail:
-                raise RBACError(f"Role '{role}' does not exist!")
+                raise PyPermissionError(f"Role '{role}' does not exist!")
             if (
                 f"Key (subject_id)=({subject}) is not present in table"
                 in message_detail
             ):
-                raise RBACError(f"Subject '{subject}' does not exist!")
+                raise PyPermissionError(f"Subject '{subject}' does not exist!")
         case IntegrityError(orig=Sqlite3IntegrityError()):
             if subject is not None and role is not None:
-                raise RBACError(f"Subject '{subject}' or Role '{role}' does not exist!")
+                raise PyPermissionError(
+                    f"Subject '{subject}' or Role '{role}' does not exist!"
+                )
             if subject is not None:
-                raise RBACError(f"Subject '{subject}' does not exist!")
+                raise PyPermissionError(f"Subject '{subject}' does not exist!")
             if role is not None:
-                raise RBACError(f"Role '{role}' does not exist!")
+                raise PyPermissionError(f"Role '{role}' does not exist!")
         case _:
             ...
-    raise RBACError("Unexpected IntegrityError")
+    raise PyPermissionError("Unexpected IntegrityError")
 
 
 def process_policy_integrity_error(
@@ -83,20 +85,24 @@ def process_policy_integrity_error(
 ) -> Never:
     match err:
         case IntegrityError(orig=PsycopgUniqueViolation()):
-            raise RBACError(f"Permission '{str(permission)}' does already exist!")
+            raise PyPermissionError(
+                f"Permission '{str(permission)}' does already exist!"
+            )
         case IntegrityError(orig=PsycopgForeignKeyViolation()):
-            raise RBACError(f"Role '{role}' does not exist!")
+            raise PyPermissionError(f"Role '{role}' does not exist!")
         case IntegrityError(
             orig=Sqlite3IntegrityError(sqlite_errorname="SQLITE_CONSTRAINT_PRIMARYKEY")
         ):
-            raise RBACError(f"Permission '{str(permission)}' does already exist!")
+            raise PyPermissionError(
+                f"Permission '{str(permission)}' does already exist!"
+            )
         case IntegrityError(
             orig=Sqlite3IntegrityError(sqlite_errorname="SQLITE_CONSTRAINT_FOREIGNKEY")
         ):
-            raise RBACError(f"Role '{role}' does not exist!")
+            raise PyPermissionError(f"Role '{role}' does not exist!")
         case _:
             ...
-    raise RBACError("Unexpected IntegrityError")
+    raise PyPermissionError("Unexpected IntegrityError")
 
 
 ################################################################################

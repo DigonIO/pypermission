@@ -1,4 +1,4 @@
-# HowTo: Contribute to rbac
+# HowTo: Contribute to PyPermission
 
 ## Development setup
 

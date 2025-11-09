@@ -1,6 +1,6 @@
-# RBAC for Python - Formal Definitions
+# PyPermission - Formal Definitions
 
-We define the core concepts of our Role Based Access Control (**RBAC**) model as follows:
+In PyPermission, the core concepts for Role Based Access Control (**RBAC**) are defined as follows:
 
 | Type | Description |
 | - | - |

@@ -1,4 +1,4 @@
-# RBAC for Python - Quick Start
+# PyPermission - Quick Start
 
 !!! info
 
@@ -8,17 +8,17 @@
     2. [Permission design guide](./permission_design_guide.md)
     3. [Implementation guide](./guide/index.md)
 
-The `rbac` library can be installed directly from the PyPI repositories with:
+The `PyPermission` library can be installed directly from the PyPI repositories with:
 
 !!! warning
 
     There is no release of this library available on PyPI yet.
 
 ```console
-pip install rbac
+pip install pypermission
 ```
 
-For the following example we initialize an in-memory SQLite database using `SQLAlchemy` (we also provide PostgreSQL support with the `'rbac[postgres]'` dependency group).
+For the following example we initialize an in-memory SQLite database using `SQLAlchemy` (we also provide PostgreSQL support with the `'PyPermission[postgres]'` dependency group).
 
 ```python
 from sqlalchemy.engine import create_engine
@@ -30,10 +30,10 @@ db_factory = sessionmaker(bind=engine, autoflush=False, autocommit=False)
 
 !!! warning
 
-    The `rbac` library utilizes and requires constraint checking with the `FOREIGN KEY` syntax. SQLite does not have this feature enabled by default. If you want to use SQLite, make sure your instance fulfills the [necessary prerequisites](https://docs.sqlalchemy.org/en/20/dialects/sqlite.html#foreign-key-support) and use the provided event listener for all database connections.
+    The `PyPermission` library utilizes and requires constraint checking with the `FOREIGN KEY` syntax. SQLite does not have this feature enabled by default. If you want to use SQLite, make sure your instance fulfills the [necessary prerequisites](https://docs.sqlalchemy.org/en/20/dialects/sqlite.html#foreign-key-support) and use the provided event listener for all database connections.
 
     ```{.python notest}
-    from rbac import create_rbac_database_table, set_sqlite_pragma
+    from pypermission import create_rbac_database_table, set_sqlite_pragma
     from sqlalchemy.event import listen
 
     listen(engine, "connect", set_sqlite_pragma)
@@ -43,19 +43,19 @@ db_factory = sessionmaker(bind=engine, autoflush=False, autocommit=False)
 Create the required tables in the database:
 
 ```{.python continuation}
-from rbac import create_rbac_database_table
+from pypermission import create_rbac_database_table
 
 create_rbac_database_table(engine=engine)
 ```
 
-The `rbac` library organizes its core functionality into two main services - **RoleService** and **SubjectService**. These services are accessible through the main **RBAC** class, which provides a unified interface for managing **Roles**, **Subjects**, and **Policies**. The examples below demonstrates basic usage.
+The `PyPermission` library organizes its core functionality into two main services - **RoleService** and **SubjectService**. These services are accessible through the main **RBAC** class, which provides a unified interface for managing **Roles**, **Subjects**, and **Policies**. The examples below demonstrates basic usage.
 
 ## Manage Subjects and Roles
 
 Start by creating a `user` and an `admin` **Role**:
 
 ```{.python continuation}
-from rbac import RBAC
+from pypermission import RBAC
 
 with db_factory() as db:
     RBAC.role.create(role="user", db=db)
@@ -97,7 +97,7 @@ In this example, everyone with the `user` **Role** may `view` every `event` in t
 We also assign the `"event[*]:edit"` **Permission** to the `admin` **Role** so that the `admin` can edit any `event`.
 
 ```{.python continuation}
-from rbac import Permission
+from pypermission import Permission
 
 with db_factory() as db:
     RBAC.role.grant_permission(
@@ -146,7 +146,7 @@ with db_factory() as db:
 Confirm that `Ursula` cannot edit her own event while `Alex` (as `admin`) can:
 
 ```{.python continuation}
-from rbac import RBACNotGrantedError
+from pypermission import PermissionNotGrantedError
 
 with db_factory() as db:
     try:
@@ -155,7 +155,7 @@ with db_factory() as db:
             permission=Permission(resource_type="event", resource_id="Ursula", action="edit"),
             db=db,
         )
-    except RBACNotGrantedError as err:
+    except PermissionNotGrantedError as err:
         assert err.message == "Permission 'event[Ursula]:edit' is not granted for Subject 'Ursula'!"
 
     # Alex can edit any event, including Ursula’s

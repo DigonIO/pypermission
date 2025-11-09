@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session
 from pypermission.service.role import RoleService as RS
 from pypermission.service.subject import SubjectService as SS
 from pypermission.models import Permission
-from pypermission.exc import RBACError, RBACNotGrantedError, ERR_MSG
+from pypermission.exc import PyPermissionError, PermissionNotGrantedError, ERR_MSG
 from collections import Counter
 
 ################################################################################
@@ -19,7 +19,7 @@ def test_create__success(db: Session) -> None:
 def test_create__duplicate_subject(*, db: Session) -> None:
     subject = "Alex"
     SS.create(subject=subject, db=db)
-    with pytest.raises(RBACError) as err:
+    with pytest.raises(PyPermissionError) as err:
         SS.create(subject=subject, db=db)
 
     assert ERR_MSG.subject_exists.format(subject=subject) == err.value.message
@@ -40,7 +40,7 @@ def test_delete__success(db: Session) -> None:
 
 def test_delete__unknown_subject(db: Session) -> None:
     subject = "Alex"
-    with pytest.raises(RBACError) as err:
+    with pytest.raises(PyPermissionError) as err:
         SS.delete(subject=subject, db=db)
 
     assert ERR_MSG.non_existent_subject.format(subject=subject) == err.value.message
@@ -76,7 +76,7 @@ def test_assign_role__unknown_subject(db: Session) -> None:
     subject = "unknown"
     role = "admin"
     RS.create(role=role, db=db)
-    with pytest.raises(RBACError) as err:
+    with pytest.raises(PyPermissionError) as err:
         SS.assign_role(subject=subject, role=role, db=db)
 
     assert db.bind is not None
@@ -99,7 +99,7 @@ def test_assign_role__unknown_role(db: Session) -> None:
     subject = "Alex"
     role = "unknown"
     SS.create(subject=subject, db=db)
-    with pytest.raises(RBACError) as err:
+    with pytest.raises(PyPermissionError) as err:
         SS.assign_role(subject=subject, role="unknown", db=db)
 
     assert db.bind is not None
@@ -140,7 +140,7 @@ def test_deassign_role__unknown_subject(db: Session) -> None:
     subject = "unknown"
     RS.create(role=role, db=db)
 
-    with pytest.raises(RBACError) as err:
+    with pytest.raises(PyPermissionError) as err:
         SS.deassign_role(subject=subject, role=role, db=db)
     assert ERR_MSG.non_existent_subject.format(subject=subject) == err.value.message
 
@@ -150,7 +150,7 @@ def test_deassign_role__unknown_role(db: Session) -> None:
     role = "unknown"
     SS.create(subject=subject, db=db)
 
-    with pytest.raises(RBACError) as err:
+    with pytest.raises(PyPermissionError) as err:
         SS.deassign_role(subject=subject, role=role, db=db)
 
     assert ERR_MSG.non_existent_role.format(role=role) == err.value.message
@@ -162,7 +162,7 @@ def test_deassign_role__role_not_assigned(db: Session) -> None:
     SS.create(subject=subject, db=db)
     RS.create(role=role, db=db)
 
-    with pytest.raises(RBACError) as err:
+    with pytest.raises(PyPermissionError) as err:
         SS.deassign_role(subject=subject, role=role, db=db)
 
     assert (
@@ -234,7 +234,7 @@ def test_roles_include_ascendant_n2n_neighbor__success(db: Session) -> None:
 
 def test_roles__unknown_subject(db: Session) -> None:
     subject = "Alex"
-    with pytest.raises(RBACError) as err:
+    with pytest.raises(PyPermissionError) as err:
         SS.roles(subject=subject, db=db)
     assert ERR_MSG.non_existent_subject.format(subject=subject) == err.value.message
 
@@ -274,7 +274,7 @@ def test_check_assert_permission__success(db: Session) -> None:
     assert SS.check_permission(subject=subject, permission=edit_123, db=db) == True
     assert SS.check_permission(subject=subject, permission=del_123, db=db) == True
 
-    with pytest.raises(RBACNotGrantedError) as err:
+    with pytest.raises(PermissionNotGrantedError) as err:
         SS.assert_permission(subject=subject, permission=view_all, db=db)
     assert (
         ERR_MSG.permission_not_granted_for_subject.format(
@@ -284,7 +284,7 @@ def test_check_assert_permission__success(db: Session) -> None:
     )
     assert SS.check_permission(subject=subject, permission=view_all, db=db) == False
 
-    with pytest.raises(RBACNotGrantedError) as err:
+    with pytest.raises(PermissionNotGrantedError) as err:
         SS.assert_permission(subject=subject, permission=view_123, db=db)
 
     assert (
@@ -298,7 +298,7 @@ def test_check_assert_permission__success(db: Session) -> None:
 
 def test_check_permission__unknown_subject(db: Session) -> None:
     subject = "unknown"
-    with pytest.raises(RBACError) as err:
+    with pytest.raises(PyPermissionError) as err:
         SS.check_permission(
             subject=subject,
             permission=Permission(
@@ -344,7 +344,7 @@ def test_permissions__success(*, db: Session) -> None:
 
 def test_permissions__unknown_subject(db: Session) -> None:
     subject = "unknown"
-    with pytest.raises(RBACError) as err:
+    with pytest.raises(PyPermissionError) as err:
         SS.permissions(subject=subject, db=db)
     assert ERR_MSG.non_existent_subject.format(subject=subject) == err.value.message
 
@@ -376,7 +376,7 @@ def test_policies__success(*, db: Session) -> None:
 
 def test_policies__unknown_subject(db: Session) -> None:
     subject = "unknown"
-    with pytest.raises(RBACError) as err:
+    with pytest.raises(PyPermissionError) as err:
         SS.policies(subject=subject, db=db)
     assert ERR_MSG.non_existent_subject.format(subject=subject) == err.value.message
 
@@ -498,7 +498,7 @@ def test_actions_on_resource_not_inherited(*, db: Session) -> None:
 
 def test_actions_on_resource__unknown_subject(db: Session) -> None:
     subject = "unknown"
-    with pytest.raises(RBACError) as err:
+    with pytest.raises(PyPermissionError) as err:
         SS.actions_on_resource(
             subject=subject, resource_type="event", resource_id="*", db=db
         )
