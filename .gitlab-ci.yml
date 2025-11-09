@@ -10,13 +10,13 @@ before_script:
   - uv sync --all-groups
 
 variables:
-  # 0.9.8-python3.13-bookworm-slim
-  # https://github.com/astral-sh/uv/pkgs/container/uv/569901695?tag=0.9.8-python3.13-bookworm-slim
-  PYTHON_UV_3_13_SLIM: "ghcr.io/astral-sh/uv@sha256:6b8ac7bb76766ffe9f6cc20f56789755d539e8d0e605d8983131227c5c8b87a1 "
+  # 0.9.8-python3.13-bookworm
+  # https://github.com/astral-sh/uv/pkgs/container/uv/569901622?tag=0.9.8-python3.13-bookworm
+  PYTHON_UV_3_13: "ghcr.io/astral-sh/uv@sha256:529aecc5695da163c5badbd8ea8d6fb27ed3276d40ebc1c754d50d0fb27a8245"
 
-  # 0.9.8-python3.14-bookworm-slim
-  # https://github.com/astral-sh/uv/pkgs/container/uv/569901834?tag=0.9.8-python3.14-bookworm-slim
-  PYTHON_UV_3_14_SLIM: "ghcr.io/astral-sh/uv@sha256:c3693840096d60c1352c4ce1f32d9cf500127c8e4af3bbe04de314f76ff85eb9"
+  # 0.9.8-python3.14-bookworm
+  # https://github.com/astral-sh/uv/pkgs/container/uv/569901911?tag=0.9.8-python3.14-bookworm
+  PYTHON_UV_3_14: "ghcr.io/astral-sh/uv@sha256:cd33eb64e2c434b4d5cd843192ef55e7d7a21e0dd590586550d1e44eab672456"
 
 ####################################################################################################
 ### Analysis Stage
@@ -24,14 +24,14 @@ variables:
 
 ruff:
   stage: analysis
-  image: $PYTHON_UV_3_14_SLIM
+  image: $PYTHON_UV_3_14
   script:
     - uv run ruff check src
   allow_failure: true
 
 mypy:
   stage: analysis
-  image: $PYTHON_UV_3_14_SLIM
+  image: $PYTHON_UV_3_14
   script:
     - uv run mypy src
   allow_failure: true
@@ -42,7 +42,7 @@ mypy:
 
 pytest_3_14:
   stage: test
-  image: $PYTHON_UV_3_14_SLIM
+  image: $PYTHON_UV_3_14
   script:
     - uv run pytest --cov=src/pypermission/ tests
   artifacts:
@@ -51,19 +51,19 @@ pytest_3_14:
 
 pydoctest_3_14:
   stage: test
-  image: $PYTHON_UV_3_14_SLIM
+  image: $PYTHON_UV_3_14
   script:
     - uv run pytest --markdown-docs --markdown-docs-syntax=superfences docs/docs
 
 pytest_3_13:
   stage: test
-  image: $PYTHON_UV_3_13_SLIM
+  image: $PYTHON_UV_3_13
   script:
     - uv run pytest --cov=src/pypermission/ tests
 
 pydoctest_3_13:
   stage: test
-  image: $PYTHON_UV_3_13_SLIM
+  image: $PYTHON_UV_3_13
   script:
     - uv run pytest --markdown-docs --markdown-docs-syntax=superfences docs/docs
 
@@ -73,7 +73,7 @@ pydoctest_3_13:
 
 doc:
   stage: documentation
-  image: $PYTHON_UV_3_14_SLIM
+  image: $PYTHON_UV_3_14
   script:
     - uv run coverage html
     - uv run mkdocs build -f docs/mkdocs.yml
