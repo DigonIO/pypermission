@@ -19,7 +19,7 @@ hierarchies.
 
 * assign user to role - `user-role` (many-to-many relation)
 * assign permission to role - `permission-role` (many-to-many relation)
-* users can simultaniously exercise permissions of multiple roles
+* users can simultaneously exercise permissions of multiple roles
 * `user-role` review
   * list roles a specific user can take
   * list users that can take a specific role

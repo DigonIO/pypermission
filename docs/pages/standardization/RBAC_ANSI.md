@@ -11,9 +11,9 @@ and behaviour compared to the PyPermission library.
 
 .. warning::
 
-   * `role_get_permissions` and `subject_get_permissions` don't return a set of permissions, like the `RolePermissions` and `UserPermissions` functions, but a NodeMap (`dict[PermissionNode, set[str]]`)
-   * `RoleOperationsOnObject` and `UserOperationsOnObject` are left open in the standard concerning their behaviour (direct relation/inherited relation/active role).
-   * `authorized_users` depends on the role-hierarchy, whereas `role_get_subjects` does not
+* `role_get_permissions` and `subject_get_permissions` don't return a set of permissions, like the `RolePermissions` and `UserPermissions` functions, but a NodeMap (`dict[PermissionNode, set[str]]`)
+* `RoleOperationsOnObject` and `UserOperationsOnObject` are left open in the standard concerning their behaviour (direct relation/inherited relation/active role).
+* `authorized_users` depends on the role-hierarchy, whereas `role_get_subjects` does not
 
 Definitions Core RBAC:
 
@@ -31,6 +31,7 @@ Definitions Core RBAC:
 * `assigned_permissions(r: ROLES) -> 2^PRMS`
 * `session_roles(s: SESSIONS) -> 2^ROLES`
 * `assigned_users(r: ROLES) -> 2^USERS`
+* `assigned_roles(r: USER) -> 2^ROLES`
 * `CheckAccess(s: SESSIONS, p: PRMS) -> bool`
 
 Definitions Hierarchical RBAC:

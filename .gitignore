@@ -70,3 +70,4 @@ target/
 # PyTest
 .pytest_cache/
 pp_test.db
+*.pdf
