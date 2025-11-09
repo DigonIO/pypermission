@@ -1,0 +1,87 @@
+stages:
+  - analysis
+  - test
+  - documentation
+  - release
+
+before_script:
+  - python --version
+  - python ci/secrets.py
+  - uv sync --all-groups
+
+variables:
+  # 0.9.8-python3.13-bookworm-slim
+  # https://github.com/astral-sh/uv/pkgs/container/uv/569901695?tag=0.9.8-python3.13-bookworm-slim
+  PYTHON_UV_3_13_SLIM: "ghcr.io/astral-sh/sha256:6b8ac7bb76766ffe9f6cc20f56789755d539e8d0e605d8983131227c5c8b87a1 "
+
+  # 0.9.8-python3.14-bookworm-slim
+  # https://github.com/astral-sh/uv/pkgs/container/uv/569901834?tag=0.9.8-python3.14-bookworm-slim
+  PYTHON_UV_3_14_SLIM: "ghcr.io/astral-sh/uv@sha256:c3693840096d60c1352c4ce1f32d9cf500127c8e4af3bbe04de314f76ff85eb9"
+
+####################################################################################################
+### Analysis Stage
+####################################################################################################
+
+pylint:
+  stage: analysis
+  image: $PYTHON_UV_3_14_SLIM
+  script:
+    - uv run ruff src
+  allow_failure: true
+
+mypy:
+  stage: analysis
+  image: $PYTHON_UV_3_14_SLIM
+  script:
+    - uv run mypy src
+  allow_failure: true
+
+####################################################################################################
+### Test Stage
+####################################################################################################
+
+pytest_3_14:
+  stage: test
+  image: $PYTHON_UV_3_14_SLIM
+  script:
+    - uv run pytest --cov=src/pypermission/ tests
+  artifacts:
+    paths:
+      - .coverage
+
+pydoctest_3_14:
+  stage: test
+  image: $PYTHON_UV_3_14_SLIM
+  script:
+    - uv run pytest --markdown-docs --markdown-docs-syntax=superfences docs/docs
+
+pytest_3_13:
+  stage: test
+  image: $PYTHON_UV_3_13_SLIM
+  script:
+    - uv run pytest --cov=src/pypermission/ tests
+
+pydoctest_3_13:
+  stage: test
+  image: $PYTHON_UV_3_13_SLIM
+  script:
+    - uv run pytest --markdown-docs --markdown-docs-syntax=superfences docs/docs
+
+####################################################################################################
+### Documentation Stage
+####################################################################################################
+
+doc:
+  stage: documentation
+  image: $PYTHON_UV_3_14_SLIM
+  script:
+    - uv run coverage html
+    - uv run mkdocs build -f docs/mkdocs.yml
+  artifacts:
+    paths:
+      - docs/site
+
+
+####################################################################################################
+### Release Stage
+####################################################################################################
