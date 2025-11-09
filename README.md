@@ -4,7 +4,7 @@ The python `RBAC` library for projects where `SQLAlchemy` is a valid option.
 
 [![repository](https://img.shields.io/badge/src-GitLab-orange)](https://gitlab.com/DigonIO/rbac)
 [![mirror](https://img.shields.io/badge/mirror-GitHub-orange)](https://github.com/DigonIO/rbac)
-[![License: SUL-1.0](assets/badges/license.svg)](https://spdx.org/licenses/SUL-1.0.html)
+[![License: LGPLv3](assets/badges/license.svg)](https://spdx.org/licenses/LGPL-3.0-only.html)
 [![pipeline status](https://gitlab.com/DigonIO/rbac/badges/master/pipeline.svg)](https://gitlab.com/DigonIO/rbac/-/pipelines)
 [![coverage report](https://gitlab.com/DigonIO/rbac/badges/master/coverage.svg)](https://gitlab.com/DigonIO/rbac/-/pipelines)
 [![Code style: black](assets/badges/black.svg)](https://github.com/psf/black)
@@ -113,5 +113,5 @@ _The sponsor logo is the property of Digon.IO GmbH. Standard trademark and copyr
 
 ## License
 
-+ **Library source code:** Licensed under SUL-1.0.
++ **Library source code:** Licensed under [LGPLv3](https://spdx.org/licenses/LGPL-3.0-only.html).
 + **Library logo:**  The library logo is a trademark of the project (unregistered). You are permitted to use the logo **only** in contexts that directly reference, document, or promote this library. For example, in a dependent project or in a blog post discussing this library. Any other use is prohibited.

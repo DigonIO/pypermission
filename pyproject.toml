@@ -11,13 +11,11 @@ maintainers = [
     { name = "Jendrik A. Potyka", email = "jpotyka@digon.io" },
     { name = "Fabian A. Preiss", email = "fpreiss@digon.io" },
 ]
-license = "SUL-1.0"
+license = "LGPL-3.0-only"
 classifiers = [
     "Development Status :: 4 - Beta",
     "Intended Audience :: Developers",
-    "License :: Free To Use But Restricted",
-    "License :: Free for non-commercial use",
-    "License :: Other/Proprietary License",
+    "License :: OSI Approved :: GNU Lesser General Public License v3 (LGPLv3)",
     "Programming Language :: Python :: 3.13",
     "Programming Language :: Python :: Implementation :: CPython",
     "Topic :: Software Development :: Libraries",
