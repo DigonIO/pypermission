@@ -12,11 +12,11 @@ The python `RBAC` library for projects where `SQLAlchemy` is a valid option.
 
 ---
 
-If you find the RBAC library beneficial, please consider supporting the project by [starring it on GitHub](https://github.com/DigonIO/scheduler).
+If you find the PyPermission library beneficial, please consider supporting the project by [starring it on GitHub](https://github.com/DigonIO/pypermission).
 
-[![GitHub Repo stars](https://img.shields.io/github/stars/digonio/scheduler)](https://github.com/DigonIO/scheduler)
+[![GitHub Repo stars](https://img.shields.io/github/stars/digonio/pypermission)](https://github.com/DigonIO/pypermission)
 
-# RBAC for Python with SQLAlchemy
+# PyPermission - RBAC for Python with SQLAlchemy
 
 ## Features
 
@@ -32,20 +32,18 @@ If you find the RBAC library beneficial, please consider supporting the project 
 + High test coverage
 + Online documentation [(Full doc)](TODO)
 
-## Installing `rbac` with pip
+## Installing `PyPermission` with pip
 
-**WARNING** There is no release of this library available on PyPI yet.
-
-The `rbac` library can be installed directly from the PyPI repositories with:
+The `PyPermission` library can be installed directly from the PyPI repositories with:
 
 ```console
-pip install rbac
+pip install PyPermission
 ```
 
 If you want to use PostgreSQL, you need to install the `postgres` dependency group:
 
 ```console
-pip install 'rbac[postgres]'
+pip install 'PyPermission[postgres]'
 ```
 
 ## Example
@@ -57,7 +55,7 @@ from sqlalchemy.orm import sessionmaker
 engine = create_engine("sqlite:///:memory:", future=True)
 db_factory = sessionmaker(bind=engine, autoflush=False, autocommit=False)
 
-from rbac import RBAC, Permission, create_rbac_database_table
+from pypermission import RBAC, Permission, create_rbac_database_table
 
 create_rbac_database_table(engine=engine)
 
@@ -98,8 +96,8 @@ with db_factory() as db:
 
 ## Documentation
 
-+ [Online documentation](TODO)
-+ [API reference](TODO)
++ [Online documentation](https://pypermission.docs.digon.io)
++ [API reference](https://pypermission.docs.digon.io/)
 
 ## Sponsor
 

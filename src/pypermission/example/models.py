@@ -6,7 +6,7 @@ from sqlalchemy.sql.sqltypes import Enum as SqlEnum
 from sqlalchemy.sql.schema import ForeignKey
 
 
-from rbac.models import BaseORM
+from pypermission.models import BaseORM
 
 ################################################################################
 #### Types

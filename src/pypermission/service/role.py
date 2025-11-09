@@ -4,7 +4,7 @@ from sqlalchemy.sql import select
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
 
-from rbac.models import (
+from pypermission.models import (
     Permission,
     RoleORM,
     HierarchyORM,
@@ -13,7 +13,7 @@ from rbac.models import (
     MemberORM,
     Policy,
 )
-from rbac.exc import (
+from pypermission.exc import (
     RBACError,
     RBACNotGrantedError,
     process_policy_integrity_error,

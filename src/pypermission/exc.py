@@ -6,7 +6,7 @@ from psycopg.errors import (
     Diagnostic as PsycopgDiagnostic,
     UniqueViolation as PsycopgUniqueViolation,
 )
-from rbac.models import Permission
+from pypermission.models import Permission
 
 ################################################################################
 #### Generic Errors

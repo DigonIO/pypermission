@@ -1,4 +1,4 @@
-site_name: RBAC for Python with SQLAlchemy
+site_name: PyPermission - RBAC for Python with SQLAlchemy
 
 theme:
   name: material

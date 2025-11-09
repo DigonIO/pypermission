@@ -2,7 +2,7 @@ from sqlalchemy.sql import select
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
 from collections.abc import Sequence
-from rbac.models import (
+from pypermission.models import (
     Policy,
     Permission,
     RoleORM,
@@ -12,7 +12,7 @@ from rbac.models import (
     PolicyORM,
     FrozenClass,
 )
-from rbac.exc import (
+from pypermission.exc import (
     RBACError,
     RBACNotGrantedError,
     process_subject_role_integrity_error,

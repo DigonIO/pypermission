@@ -1,11 +1,11 @@
 import pytest
 from sqlalchemy.orm import Session
 
-from rbac.service.role import RoleService as RS
-from rbac.service.subject import SubjectService as SS
-from rbac.exc import RBACError
-from rbac.models import Permission
-from rbac.util.role import role_dag
+from pypermission.service.role import RoleService as RS
+from pypermission.service.subject import SubjectService as SS
+from pypermission.exc import RBACError
+from pypermission.models import Permission
+from pypermission.util.role import role_dag
 
 ################################################################################
 #### Test util role_dag

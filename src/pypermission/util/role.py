@@ -4,8 +4,8 @@ import plotly.graph_objects as go
 from sqlalchemy.orm import Session
 from sqlalchemy.sql import select
 
-from rbac.models import RoleORM, HierarchyORM, MemberORM, PolicyORM
-from rbac.exc import RBACError
+from pypermission.models import RoleORM, HierarchyORM, MemberORM, PolicyORM
+from pypermission.exc import RBACError
 
 ################################################################################
 #### Role dag tools

@@ -1,6 +1,6 @@
 [project]
-name = "rbac"
-version = "0.1.0"
+name = "PyPermission"
+version = "0.2.0"
 description = "The python RBAC library for projects where SQLAlchemy is a valid option."
 readme = "README.md"
 authors = [

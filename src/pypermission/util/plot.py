@@ -1,7 +1,7 @@
 import networkx as nx
 import plotly.graph_objects as go
 
-from rbac.exc import RBACError
+from pypermission.exc import RBACError
 
 
 def plot_factory(

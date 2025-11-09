@@ -9,16 +9,16 @@ __author__ = "Jendrik A. Potyka, Fabian A. Preiss"
 
 from typing import Final
 
-from rbac.service.role import RoleService
-from rbac.service.subject import SubjectService
-from rbac.models import (
+from pypermission.service.role import RoleService
+from pypermission.service.subject import SubjectService
+from pypermission.models import (
     Policy,
     Permission,
     FrozenClass,
     create_rbac_database_table,
     set_sqlite_pragma,
 )
-from rbac.exc import RBACError, RBACNotGrantedError
+from pypermission.exc import RBACError, RBACNotGrantedError
 
 
 class RBAC(metaclass=FrozenClass):

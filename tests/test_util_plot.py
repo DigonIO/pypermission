@@ -1,10 +1,10 @@
 from sqlalchemy.orm import Session
 
-from rbac.service.role import RoleService as RS
-from rbac.service.subject import SubjectService as SS
-from rbac.models import Permission
-from rbac.util.role import role_dag
-from rbac.util.plot import plot_factory
+from pypermission.service.role import RoleService as RS
+from pypermission.service.subject import SubjectService as SS
+from pypermission.models import Permission
+from pypermission.util.role import role_dag
+from pypermission.util.plot import plot_factory
 
 ################################################################################
 #### Test util plot_factory
