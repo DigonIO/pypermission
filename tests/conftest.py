@@ -1,3 +1,4 @@
+import os
 from typing import Generator
 
 import pytest
@@ -40,7 +41,10 @@ def engine(request: FixtureRequest) -> Generator[Engine, None, None]:
             engine = create_engine(url, future=True)
             listen(engine, "connect", set_sqlite_pragma)
         case "psql":
-            url = "postgresql+psycopg://username:password@127.0.0.1:23000/database"
+            if os.getenv("CI") is None:
+                url = "postgresql+psycopg://username:password@127.0.0.1:23000/database"
+            else:
+                url = "postgresql+psycopg://username:password@postgres:5432/database"
             engine = create_engine(url, future=True)
         case _:
             raise ValueError()

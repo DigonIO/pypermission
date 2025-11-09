@@ -18,6 +18,14 @@ variables:
   # https://github.com/astral-sh/uv/pkgs/container/uv/569901911?tag=0.9.8-python3.14-bookworm
   PYTHON_UV_3_14: "ghcr.io/astral-sh/uv@sha256:cd33eb64e2c434b4d5cd843192ef55e7d7a21e0dd590586550d1e44eab672456"
 
+  # postgres:18.0-trixie
+  # https://hub.docker.com/layers/library/postgres/18.0-trixie/images/sha256-192a387c789cac29fcc7ac9a3a99060642a052fa293fd1953954c0956ebb3aed
+  POSTGRES_18: "postgres@sha256:41fc5342eefba6cc2ccda736aaf034bbbb7c3df0fdb81516eba1ba33f360162c"
+
+  POSTGRES_DB: database
+  POSTGRES_USER: username
+  POSTGRES_PASSWORD: password
+
 ####################################################################################################
 ### Analysis Stage
 ####################################################################################################
@@ -48,6 +56,8 @@ pytest_3_14:
   artifacts:
     paths:
       - .coverage
+  services:
+    - name: $POSTGRES_18
 
 pydoctest_3_14:
   stage: test
@@ -60,6 +70,8 @@ pytest_3_13:
   image: $PYTHON_UV_3_13
   script:
     - uv run pytest --cov=src/pypermission/ tests
+  services:
+    - name: $POSTGRES_18
 
 pydoctest_3_13:
   stage: test
@@ -80,8 +92,6 @@ doc:
   artifacts:
     paths:
       - docs/site
-
-
 ####################################################################################################
 ### Release Stage
 ####################################################################################################
