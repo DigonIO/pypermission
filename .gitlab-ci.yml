@@ -155,6 +155,6 @@ doc_release:
     entrypoint: [""]
   script:
     - source ci/setup_kubectl.sh
-    - envsubst < k8s.yaml | kubectl apply -f -
+    - envsubst < docs/k8s.yaml | kubectl apply -f -
   rules:
     - if: $CI_COMMIT_REF_NAME == "main"
