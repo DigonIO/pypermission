@@ -19,7 +19,7 @@ spec:
             - containerPort: 80
               name: http
       imagePullSecrets:
-        - name: CoRegSec
+        - name: co-reg-sec
 ---
 apiVersion: v1
 kind: Service
