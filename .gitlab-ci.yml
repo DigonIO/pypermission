@@ -16,7 +16,7 @@ variables:
 
   # debug
   # https://console.cloud.google.com/artifacts/docker/go-containerregistry/us/gcr.io/crane/sha256:fbdf6d55c5ae90d9ae637b9bd9f10119496fdf18a3b5f9cd3078ae6044161c18
-  IMG_CRANE: "gcr.io/crane@sha256:fbdf6d55c5ae90d9ae637b9bd9f10119496fdf18a3b5f9cd3078ae6044161c18"
+  IMG_CRANE: "gcr.io/go-containerregistry/crane@sha256:fbdf6d55c5ae90d9ae637b9bd9f10119496fdf18a3b5f9cd3078ae6044161c18"
 
   IMG_ARCH_LINUX: archlinux:base-20250511.0.348143
 
