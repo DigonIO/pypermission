@@ -3,6 +3,7 @@ stages:
   - test
   - build_1
   - build_2
+  - upload
   - release
 
 variables:
@@ -10,13 +11,14 @@ variables:
   # https://console.cloud.google.com/artifacts/docker/kaniko-project/us/gcr.io/executor/sha256:2562c4fe551399514277ffff7dcca9a3b1628c4ea38cb017d7286dc6ea52f4cd
   IMG_KANIKO: "gcr.io/kaniko-project/executor@sha256:2562c4fe551399514277ffff7dcca9a3b1628c4ea38cb017d7286dc6ea52f4cd"
 
+  # https://hub.docker.com/layers/bitnamilegacy/kubectl/1.32.4/images/sha256-1f0f5615c70c3570a8ff585f7603626b8daa46dfd905d86c6662139f189522de
+  IMG_KUBECTL: bitnamilegacy/kubectl:1.32.4
+
   # debug
   # https://console.cloud.google.com/artifacts/docker/go-containerregistry/us/gcr.io/crane/sha256:fbdf6d55c5ae90d9ae637b9bd9f10119496fdf18a3b5f9cd3078ae6044161c18
   IMG_CRANE: "gcr.io/crane@sha256:fbdf6d55c5ae90d9ae637b9bd9f10119496fdf18a3b5f9cd3078ae6044161c18"
 
-  # bitnami/kubectl:latest
-  # https://hub.docker.com/layers/bitnami/kubectl/latest/images/sha256-89b1e0458edfe9fbd386eaf041b848429e79105214e053660576bef1fac138af
-  IMG_KUBECTL: "bitnami/kubectl@sha256:dc0ac251cb8c38095f763f4e9b9244ba7f6b9afc887967ce789794c1e597f52e"
+  IMG_ARCH_LINUX: archlinux:base-20250511.0.348143
 
   # 0.9.8-python3.13-bookworm
   # https://github.com/astral-sh/uv/pkgs/container/uv/569901622?tag=0.9.8-python3.13-bookworm
@@ -34,9 +36,7 @@ variables:
   POSTGRES_USER: username
   POSTGRES_PASSWORD: password
 
-  IMG_DOC: ${URL_CONTAINER_REGISTRY}/pypermission-doc:${CI_COMMIT_SHORT_SHA}
-  # CRANE_TARGET_IMG: ${CRANE_URL_IMAGES}/pypermission-doc:${CI_COMMIT_SHORT_SHA}"
-
+  IMG_DOC: ${CONTAINER_REGISTRY_URL}/pypermission-doc:${CI_COMMIT_SHORT_SHA}
 
 ####################################################################################################
 ### Analysis Stage
@@ -128,22 +128,33 @@ doc_image:
   artifacts:
     paths:
       - app_image.tar
+
 ####################################################################################################
-#### Stage - publish
+#### Stage - upload
 ####################################################################################################
 
-# publish_job:
-#   stage: publish
-#   image:
-#     name: ${IMG_CRANE}
-#     entrypoint: [""]
-#   script:
-#     - source scripts/cicd/publish_job_init.sh
-#     - crane auth login -u ${CRANE_USER_REGISTRY} -p ${CRANE_PW_REGISTRY} ${CRANE_URL_IMAGES}
-#     - crane push app_image.tar ${CRANE_TARGET_IMG}
-#   rules:
-#     - if: $CI_COMMIT_REF_NAME == "prd"
-#     - if: $CI_COMMIT_REF_NAME == "stg"
+doc_upload:
+  stage: upload
+  image:
+    name: ${IMG_CRANE}
+    entrypoint: [""]
+  script:
+    - crane auth login -u ${CONTAINER_REGISTRY_USER} -p ${CONTAINER_REGISTRY_PW} ${CONTAINER_REGISTRY_URL}
+    - crane push app_image.tar ${IMG_DOC}
+  rules:
+    - if: $CI_COMMIT_REF_NAME == "main"
+
 ####################################################################################################
 ### Release Stage
 ####################################################################################################
+
+doc_release:
+  stage: release
+  image:
+    name: ${IMG_KUBECTL}
+    entrypoint: [""]
+  script:
+    - source ci/setup_kubectl.sh
+    - envsubst < k8s.yaml | kubectl apply -f -
+  rules:
+    - if: $CI_COMMIT_REF_NAME == "main"

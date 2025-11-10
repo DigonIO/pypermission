@@ -1,0 +1,34 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pypermission-doc
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: pypermission-doc
+  template:
+    metadata:
+      labels:
+        app: pypermission-doc
+    spec:
+      containers:
+        - name: pypermission-doc
+          image: ${IMG_DOC}
+          ports:
+            - containerPort: 80
+              name: http
+      imagePullSecrets:
+        - name: CoRegSec
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: pypermission-doc
+spec:
+  type: NodePort
+  ports:
+    - targetPort: 80
+      nodePort: ${NODE_PORT}
+  selector:
+    app: pypermission-doc
