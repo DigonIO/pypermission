@@ -5,11 +5,6 @@ stages:
   - build_2
   - release
 
-before_script:
-  - python --version
-  - python ci/secrets.py
-  - uv sync --all-groups
-
 variables:
   # v1.24.0-debug
   # https://console.cloud.google.com/artifacts/docker/kaniko-project/us/gcr.io/executor/sha256:2562c4fe551399514277ffff7dcca9a3b1628c4ea38cb017d7286dc6ea52f4cd
@@ -51,6 +46,7 @@ ruff:
   stage: analysis
   image: $IMG_PYTHON_UV_3_14
   script:
+    - uv sync --all-groups
     - uv run ruff check src
   allow_failure: true
 
@@ -58,6 +54,7 @@ mypy:
   stage: analysis
   image: $IMG_PYTHON_UV_3_14
   script:
+    - uv sync --all-groups
     - uv run mypy src
   allow_failure: true
 
@@ -69,6 +66,7 @@ pytest_3_14:
   stage: test
   image: $IMG_PYTHON_UV_3_14
   script:
+    - uv sync --all-groups
     - uv run pytest --cov=src/pypermission/ tests
   artifacts:
     paths:
@@ -80,12 +78,14 @@ pydoctest_3_14:
   stage: test
   image: $IMG_PYTHON_UV_3_14
   script:
+    - uv sync --all-groups
     - uv run pytest --markdown-docs --markdown-docs-syntax=superfences docs/docs
 
 pytest_3_13:
   stage: test
   image: $IMG_PYTHON_UV_3_13
   script:
+    - uv sync --all-groups
     - uv run pytest --cov=src/pypermission/ tests
   services:
     - name: $IMG_POSTGRES_18
@@ -94,6 +94,7 @@ pydoctest_3_13:
   stage: test
   image: $IMG_PYTHON_UV_3_13
   script:
+    - uv sync --all-groups
     - uv run pytest --markdown-docs --markdown-docs-syntax=superfences docs/docs
 
 ####################################################################################################
@@ -104,6 +105,7 @@ doc_site:
   stage: build_1
   image: $IMG_PYTHON_UV_3_14
   script:
+    - uv sync --all-groups
     - uv run coverage html
     - uv run mkdocs build -f docs/mkdocs.yml
   artifacts:
