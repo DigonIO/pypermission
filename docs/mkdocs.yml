@@ -1,7 +1,11 @@
 site_name: PyPermission - RBAC for Python with SQLAlchemy
+repo_url: https://gitlab.com/DigonIO/pypermission
+repo_name: DigonIO/pypermission
+copyright: Copyright © 2025 Jendrik Potyka & Fabian Preiss
 
 theme:
   name: material
+  custom_dir: overrides
   palette:
     primary: teal
     scheme: slate
@@ -55,6 +59,21 @@ markdown_extensions:
   - pymdownx.details
   - pymdownx.arithmatex:
       generic: true
+
+extra:
+  analytics:
+    provider: custom
+    url: matomo.digon.io
+  footer_links:
+    - text: "Imprint"
+      href: "https://digon.io/en/impress"
+    - text: "Privacy Policy"
+      href: "https://digon.io/en/privacy"
+  social:
+    - link: https://gitlab.com/DigonIO/pypermission
+      icon: fontawesome/brands/gitlab
+    - link: https://github.com/DigonIO/pypermission
+      icon: fontawesome/brands/github
 
 extra_javascript:
   - javascripts/katex.js
