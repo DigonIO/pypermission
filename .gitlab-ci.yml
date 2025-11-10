@@ -33,13 +33,15 @@ variables:
 
   # postgres:18.0-trixie
   # https://hub.docker.com/layers/library/postgres/18.0-trixie/images/sha256-192a387c789cac29fcc7ac9a3a99060642a052fa293fd1953954c0956ebb3aed
-  IMG_IMG_POSTGRES_18: "postgres@sha256:41fc5342eefba6cc2ccda736aaf034bbbb7c3df0fdb81516eba1ba33f360162c"
+  IMG_POSTGRES_18: "postgres@sha256:41fc5342eefba6cc2ccda736aaf034bbbb7c3df0fdb81516eba1ba33f360162c"
 
   POSTGRES_DB: database
   POSTGRES_USER: username
   POSTGRES_PASSWORD: password
 
   IMG_DOC: ${URL_CONTAINER_REGISTRY}/pypermission-doc:${CI_COMMIT_SHORT_SHA}
+  # CRANE_TARGET_IMG: ${CRANE_URL_IMAGES}/pypermission-doc:${CI_COMMIT_SHORT_SHA}"
+
 
 ####################################################################################################
 ### Analysis Stage
