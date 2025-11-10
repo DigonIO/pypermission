@@ -28,7 +28,8 @@ metadata:
 spec:
   type: NodePort
   ports:
-    - targetPort: 80
+    - port: 80
+      targetPort: 80
       nodePort: ${NODE_PORT}
   selector:
     app: pypermission-doc
