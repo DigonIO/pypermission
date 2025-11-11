@@ -56,12 +56,14 @@ pip install 'PyPermission[postgres]'
 ```python title="my_project.main.py"
 from sqlalchemy.engine import create_engine
 from sqlalchemy.orm import sessionmaker
+from sqlalchemy.event import listen
 
 engine = create_engine("sqlite:///:memory:", future=True)
 db_factory = sessionmaker(bind=engine, autoflush=False, autocommit=False)
 
-from pypermission import RBAC, Permission, create_rbac_database_table
+from pypermission import RBAC, Permission, create_rbac_database_table, set_sqlite_pragma
 
+listen(engine, "connect", set_sqlite_pragma) # needed for foreign key constraints (sqlite only)
 create_rbac_database_table(engine=engine)
 
 with db_factory() as db:
