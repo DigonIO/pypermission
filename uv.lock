@@ -1,5 +1,5 @@
 version = 1
-revision = 2
+revision = 3
 requires-python = ">=3.13"
 
 [[package]]
@@ -984,10 +984,19 @@ wheels = [
 
 [[package]]
 name = "pypermission"
-version = "0.2.0"
+version = "0.2.1"
 source = { editable = "." }
 dependencies = [
     { name = "sqlalchemy" },
+]
+
+[package.optional-dependencies]
+postgres = [
+    { name = "psycopg" },
+]
+util = [
+    { name = "networkx" },
+    { name = "plotly" },
 ]
 
 [package.dev-dependencies]
@@ -1016,7 +1025,13 @@ util = [
 ]
 
 [package.metadata]
-requires-dist = [{ name = "sqlalchemy", specifier = ">=2.0.43" }]
+requires-dist = [
+    { name = "networkx", marker = "extra == 'util'", specifier = ">=3.5" },
+    { name = "plotly", marker = "extra == 'util'", specifier = ">=6.3.1" },
+    { name = "psycopg", marker = "extra == 'postgres'", specifier = ">=3.2.10" },
+    { name = "sqlalchemy", specifier = ">=2.0.43" },
+]
+provides-extras = ["postgres", "util"]
 
 [package.metadata.requires-dev]
 dev = [
