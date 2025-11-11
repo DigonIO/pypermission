@@ -15,7 +15,7 @@ The `PyPermission` library can be installed directly from the PyPI repositories 
     There is no release of this library available on PyPI yet.
 
 ```console
-pip install pypermission
+pip install PyPermission
 ```
 
 For the following example we initialize an in-memory SQLite database using `SQLAlchemy` (we also provide PostgreSQL support with the `'PyPermission[postgres]'` dependency group).
