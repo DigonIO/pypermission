@@ -126,24 +126,24 @@ with db_factory() as db:
     * The same rule also applies when checking whether a subject has a given **Permission**
     * Depending on your requirements it can be helpful to indicate a scope within the **ResourceID** (e.g. "group:123"). For more details, see the [Permission Design Guide](permission_design_guide.md).
 
-Being granted the `user` **Role**, `Ursula` can `view` her own and `Alex`'s events.
+Being granted the `user` **Role**, `Ursula` can `view` `event` with ID `19` and all `event`s of the `group` with ID `123`.
 
 ```{.python continuation}
 with db_factory() as db:
     assert RBAC.subject.check_permission(
         subject="Ursula",
-        permission=Permission(resource_type="event", resource_id="Ursula", action="view"),
+        permission=Permission(resource_type="event", resource_id="19", action="view"),
         db=db,
     ) is True
-    # or alternatively (recommended):
+    # or alternatively (recommended over python's assert):
     RBAC.subject.assert_permission(
         subject="Ursula",
-        permission=Permission(resource_type="event", resource_id="Alex", action="view"),
+        permission=Permission(resource_type="event", resource_id="group:123", action="view"),
         db=db,
     )
 ```
 
-Confirm that `Ursula` cannot edit her own event while `Alex` (as `admin`) can:
+Confirm that `Ursula` cannot edit any event while `Alex` (as `admin`) can. See how this holds for the `event` with ID `19`:
 
 ```{.python continuation}
 from pypermission import PermissionNotGrantedError
@@ -152,16 +152,15 @@ with db_factory() as db:
     try:
         RBAC.subject.assert_permission(
             subject="Ursula",
-            permission=Permission(resource_type="event", resource_id="Ursula", action="edit"),
+            permission=Permission(resource_type="event", resource_id="19", action="edit"),
             db=db,
         )
     except PermissionNotGrantedError as err:
-        assert err.message == "Permission 'event[Ursula]:edit' is not granted for Subject 'Ursula'!"
+        assert err.message == "Permission 'event[19]:edit' is not granted for Subject 'Ursula'!"
 
-    # Alex can edit any event, including Ursula’s
     RBAC.subject.assert_permission(
         subject="Alex",
-        permission=Permission(resource_type="event", resource_id="Ursula", action="edit"),
+        permission=Permission(resource_type="event", resource_id="19", action="edit"),
         db=db,
     )
 ```
@@ -181,25 +180,25 @@ with db_factory() as db:
     db.commit()
 ```
 
-Give `Ursula` the ability to `edit` her own `event`s only:
+Give `Ursula` the ability to `edit` `event` `19` only:
 
 ```{.python continuation}
 with db_factory() as db:
     RBAC.role.grant_permission(
         role="user[Ursula]",
-        permission=Permission(resource_type="event", resource_id="Ursula", action="edit"),
+        permission=Permission(resource_type="event", resource_id="19", action="edit"),
         db=db,
     )
     db.commit()
 ```
 
-Verify that Ursula can now edit her own event:
+Verify that Ursula can now `edit` `event` `19`:
 
 ```{.python continuation}
 with db_factory() as db:
     RBAC.subject.assert_permission(
         subject="Ursula",
-        permission=Permission(resource_type="event", resource_id="Ursula", action="edit"),
+        permission=Permission(resource_type="event", resource_id="19", action="edit"),
         db=db,
     )
 ```
@@ -235,7 +234,7 @@ with db_factory() as db:
 
     # Permissions visible to Ursula (user + user[Ursula])
     ursula_perms = RBAC.subject.permissions(subject="Ursula", db=db)
-    assert {"event[*]:view", "event[Ursula]:edit"} == {str(p) for p in ursula_perms}
+    assert {"event[*]:view", "event[19]:edit"} == {str(p) for p in ursula_perms}
 ```
 
 ## Inspect policies and actions
@@ -269,7 +268,7 @@ with db_factory() as db:
     # Policies collected from all roles assigned to Ursula
     assert {
         "user:event[*]:view",
-        "user[Ursula]:event[Ursula]:edit",
+        "user[Ursula]:event[19]:edit",
     } == {str(p) for p in RBAC.subject.policies(subject="Ursula", db=db)}
 
     # Actions Ursula can perform on all events
@@ -292,7 +291,7 @@ with db_factory() as db:
     RBAC.role.revoke_permission(
         role="user[Ursula]",
         permission=Permission(
-            resource_type="event", resource_id="Ursula", action="edit"
+            resource_type="event", resource_id="19", action="edit"
         ),
         db=db,
     )

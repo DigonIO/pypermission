@@ -64,3 +64,25 @@ Run ruff with:
 ```console
 uv run ruff check src
 ```
+
+## Style Guide
+
+### Docs
+
+When describing the library for example in the following permission check:
+
+```py
+RBAC.subject.assert_permission(
+        subject="Ursula",
+        permission=Permission(resource_type="event", resource_id="group:123", action="view"),
+        db=db,
+    )
+```
+
+The documentation should use the following markup in descriptions:
+
+* Library types and classes should be written in `PascalCase` and bold (for example `**Permission**` -> **Permission**)
+* Definitional types (those that do not have a corresponding class or type in the library, such as **Role** or **Subject**) should be written in `PascalCase` and bold (just like Library types)
+* values should be written in code blocks (for example `Alex`, `19`, `view` or `group:123`)
+* application level types (like `event` or `group`) should be treated as values
+* attributes should be written in code blocks and in `snake_case` (for example `resource_type`, `resource_id`)
