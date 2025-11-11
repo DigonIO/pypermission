@@ -11,6 +11,8 @@ theme:
     scheme: slate
   features:
     - content.code.copy
+  logo: assets/logo.svg
+  favicon: assets/favicon.svg
 
 plugins:
   - search
