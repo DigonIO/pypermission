@@ -20,17 +20,17 @@ If you find the PyPermission library beneficial, please consider supporting the 
 
 ## Features
 
-+ Authorization for pythonistas [(Quick Start)](TODO)
++ Authorization for pythonistas [(Quick Start)](https://pypermission.digon.io/quick_start/)
 + Persistency via SQLAlchemy
     + SQLite
     + PostgreSQL (psycopg)
-+ Full integration guide [(Guide)](TODO)
++ Full integration guide [(Guide)](https://pypermission.digon.io/guide/)
 + RBAC state analysis (optional)
     + Export the RBAC DAG as NetworkX DiGraph
     + Visualize the RBAC DAG via Plotly
 + Lightweight
 + High test coverage
-+ Online documentation [(Full doc)](TODO)
++ Online documentation [(Full doc)](https://pypermission.digon.io/)
 
 ## Installing `PyPermission` with pip
 
@@ -96,8 +96,8 @@ with db_factory() as db:
 
 ## Documentation
 
-+ [Online documentation](https://pypermission.docs.digon.io)
-+ [API reference](https://pypermission.docs.digon.io/)
++ [Online documentation](https://pypermission.digon.io/)
++ [API reference](https://pypermission.digon.io/api/rbac/)
 
 ## Sponsor
 
