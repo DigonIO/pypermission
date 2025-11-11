@@ -30,6 +30,12 @@ dependencies = ["sqlalchemy>=2.0.43"]
 postgres = ["psycopg>=3.2.10"]
 util = ["networkx>=3.5", "plotly>=6.3.1"]
 
+[project.urls]
+Documentation = "https://pypermission.digon.io"
+Repository = "https://gitlab.com/DigonIO/pypermission"
+Issues = "https://gitlab.com/DigonIO/pypermission/-/issues"
+Changelog = "https://gitlab.com/DigonIO/pypermission/-/blob/main/CHANGELOG.md"
+
 [build-system]
 requires = ["uv_build>=0.9.3,<0.10.0"]
 build-backend = "uv_build"

@@ -5,8 +5,8 @@
 [![repository](https://img.shields.io/badge/src-GitLab-orange)](https://gitlab.com/DigonIO/pypermission)
 [![mirror](https://img.shields.io/badge/mirror-GitHub-orange)](https://github.com/DigonIO/pypermission)
 [![License: LGPLv3](assets/badges/license.svg)](https://spdx.org/licenses/LGPL-3.0-only.html)
-[![pipeline status](https://gitlab.com/DigonIO/pypermission/badges/master/pipeline.svg)](https://gitlab.com/DigonIO/pypermission/-/pipelines)
-[![coverage report](https://gitlab.com/DigonIO/pypermission/badges/master/coverage.svg)](https://gitlab.com/DigonIO/pypermission/-/pipelines)
+[![pipeline status](https://gitlab.com/DigonIO/pypermission/badges/main/pipeline.svg)](https://gitlab.com/DigonIO/pypermission/-/pipelines)
+[![coverage report](https://gitlab.com/DigonIO/pypermission/badges/main/coverage.svg)](https://gitlab.com/DigonIO/pypermission/-/pipelines)
 [![Code style: black](assets/badges/black.svg)](https://github.com/psf/black)
 [![Imports: isort](assets/badges/isort.svg)](https://pycqa.github.io/isort/)
 
@@ -27,15 +27,15 @@ If you find the PyPermission library beneficial, please consider supporting the 
 
 - Authorization for pythonistas [(Quick Start)](https://pypermission.digon.io/quick_start/)
 - Persistency via SQLAlchemy
-  - SQLite
-  - PostgreSQL (psycopg)
-- Full integration guide [(Guide)](https://pypermission.digon.io/guide/)
+    - SQLite
+    - PostgreSQL (psycopg)
+- Full integration guide [(Guide WIP)](https://pypermission.digon.io/guide/)
 - RBAC state analysis (optional)
-  - Export the RBAC DAG as NetworkX DiGraph
-  - Visualize the RBAC DAG via Plotly
+    - Export the RBAC DAG as NetworkX DiGraph
+    - Visualize the RBAC DAG via Plotly
 - Lightweight
 - High test coverage
-- Online documentation [(Full doc)](https://pypermission.digon.io/)
+- [Online documentation](https://pypermission.digon.io/)
 
 ## Installing `PyPermission` with pip
 

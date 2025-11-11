@@ -5,13 +5,15 @@ Note that other authors have identified significant problems with the ANSI stand
 
 The standard makes use of z-notation [^6] and defines entities in set notation. The overview below declares the ANSI methods signature using familiar python type annotation syntax. If there is no instance of an entity prior to a function call, we use the placeholder `Name` in the function signature. Further whenever the ANSI standard combines the `Object` and `Operation` in a function signature, we substitute this with the equivalent `Permission` type.
 
-The section numberings used below map 1:1 to the ANSI standard sections for simple cross-referencing.
-
 !!! warning
 
     PyPermission is not compliant with the Core RBAC ANSI standard, as the session concept is not implemented. Types and methods without correspondence in PyPermissionthis l are denoted with "_N/A_"
 
 The ANSI standard additionally defines a Static Separation of Duty (SSD) Relationship as well as Dynamic Separation of Duties (DSD) Relations. These relationships are defined as a constraint to prevent certain roles from being assigned to the same Subject. As PyPermission does not support this feature, the tables below will skip all definitions and sections concerning Separation of Duty Relations.
+
+!!! info
+
+    The section numberings used below map 1:1 to the ANSI standard sections for simple cross-referencing.
 
 ## 5 RBAC Reference Model
 

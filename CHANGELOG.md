@@ -4,6 +4,8 @@
 
 ### Bugfixes
 
+- FIX: Correctly manage optional postgres and util dependencies
+
 ### Misc
 
 - README: Add PyPI and pepy.tech badges.
