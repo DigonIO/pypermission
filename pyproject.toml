@@ -1,6 +1,6 @@
 [project]
 name = "PyPermission"
-version = "0.2.0"
+version = "0.2.1"
 description = "The python RBAC library for projects where SQLAlchemy is a valid option."
 readme = "README.md"
 authors = [
@@ -17,6 +17,7 @@ classifiers = [
     "Intended Audience :: Developers",
     "License :: OSI Approved :: GNU Lesser General Public License v3 (LGPLv3)",
     "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
     "Programming Language :: Python :: Implementation :: CPython",
     "Topic :: Software Development :: Libraries",
     "Operating System :: OS Independent",
@@ -24,6 +25,16 @@ classifiers = [
 ]
 requires-python = ">=3.13"
 dependencies = ["sqlalchemy>=2.0.43"]
+
+[project.optional-dependencies]
+postgres = ["psycopg>=3.2.10"]
+util = ["networkx>=3.5", "plotly>=6.3.1"]
+
+[project.urls]
+Documentation = "https://pypermission.digon.io"
+Repository = "https://gitlab.com/DigonIO/pypermission"
+Issues = "https://gitlab.com/DigonIO/pypermission/-/issues"
+Changelog = "https://gitlab.com/DigonIO/pypermission/-/blob/main/CHANGELOG.md"
 
 [build-system]
 requires = ["uv_build>=0.9.3,<0.10.0"]

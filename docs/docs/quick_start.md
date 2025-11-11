@@ -10,10 +10,6 @@
 
 The `PyPermission` library can be installed directly from the PyPI repositories with:
 
-!!! warning
-
-    There is no release of this library available on PyPI yet.
-
 ```console
 pip install PyPermission
 ```

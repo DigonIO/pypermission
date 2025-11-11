@@ -1,14 +1,19 @@
 ![alt text](./assets/logo_font_path.svg "Title")
 
-`PyPermission` - The python RBAC library for projects where `SQLAlchemy` is a valid option.
+`PyPermission` - The python RBAC library for projects where SQLAlchemy is a valid option.
 
 [![repository](https://img.shields.io/badge/src-GitLab-orange)](https://gitlab.com/DigonIO/pypermission)
 [![mirror](https://img.shields.io/badge/mirror-GitHub-orange)](https://github.com/DigonIO/pypermission)
 [![License: LGPLv3](assets/badges/license.svg)](https://spdx.org/licenses/LGPL-3.0-only.html)
-[![pipeline status](https://gitlab.com/DigonIO/pypermission/badges/master/pipeline.svg)](https://gitlab.com/DigonIO/pypermission/-/pipelines)
-[![coverage report](https://gitlab.com/DigonIO/pypermission/badges/master/coverage.svg)](https://gitlab.com/DigonIO/pypermission/-/pipelines)
+[![pipeline status](https://gitlab.com/DigonIO/pypermission/badges/main/pipeline.svg)](https://gitlab.com/DigonIO/pypermission/-/pipelines)
+[![coverage report](https://gitlab.com/DigonIO/pypermission/badges/main/coverage.svg)](https://gitlab.com/DigonIO/pypermission/-/pipelines)
 [![Code style: black](assets/badges/black.svg)](https://github.com/psf/black)
 [![Imports: isort](assets/badges/isort.svg)](https://pycqa.github.io/isort/)
+
+[![pkgversion](https://img.shields.io/pypi/v/pypermission)](https://pypi.org/project/pypermission/)
+[![versionsupport](https://img.shields.io/pypi/pyversions/pypermission)](https://pypi.org/project/pypermission/)
+[![Downloads Week](https://pepy.tech/badge/pypermission/week)](https://pepy.tech/project/pypermission)
+[![Downloads Total](https://pepy.tech/badge/pypermission)](https://pepy.tech/project/pypermission)
 
 ---
 
@@ -20,17 +25,17 @@ If you find the PyPermission library beneficial, please consider supporting the 
 
 ## Features
 
-+ Authorization for pythonistas [(Quick Start)](https://pypermission.digon.io/quick_start/)
-+ Persistency via SQLAlchemy
-    + SQLite
-    + PostgreSQL (psycopg)
-+ Full integration guide [(Guide)](https://pypermission.digon.io/guide/)
-+ RBAC state analysis (optional)
-    + Export the RBAC DAG as NetworkX DiGraph
-    + Visualize the RBAC DAG via Plotly
-+ Lightweight
-+ High test coverage
-+ Online documentation [(Full doc)](https://pypermission.digon.io/)
+- Authorization for pythonistas [(Quick Start)](https://pypermission.digon.io/quick_start/)
+- Persistency via SQLAlchemy
+    - SQLite
+    - PostgreSQL (psycopg)
+- Full integration guide [(Guide WIP)](https://pypermission.digon.io/guide/)
+- RBAC state analysis (optional)
+    - Export the RBAC DAG as NetworkX DiGraph
+    - Visualize the RBAC DAG via Plotly
+- Lightweight
+- High test coverage
+- [Online documentation](https://pypermission.digon.io/)
 
 ## Installing `PyPermission` with pip
 
@@ -96,8 +101,8 @@ with db_factory() as db:
 
 ## Documentation
 
-+ [Online documentation](https://pypermission.digon.io/)
-+ [API reference](https://pypermission.digon.io/api/rbac/)
+- [Online documentation](https://pypermission.digon.io/)
+- [API reference](https://pypermission.digon.io/api/rbac/)
 
 ## Sponsor
 
@@ -111,5 +116,5 @@ _The sponsor logo is the property of Digon.IO GmbH. Standard trademark and copyr
 
 ## License
 
-+ **Library source code:** Licensed under [LGPLv3](https://spdx.org/licenses/LGPL-3.0-only.html).
-+ **Library logo:**  The library logo is a trademark of the project (unregistered). You are permitted to use the logo **only** in contexts that directly reference, document, or promote this library. For example, in a dependent project or in a blog post discussing this library. Any other use is prohibited.
+- **Library source code:** Licensed under [LGPLv3](https://spdx.org/licenses/LGPL-3.0-only.html).
+- **Library logo:** The library logo is a trademark of the project (unregistered). You are permitted to use the logo **only** in contexts that directly reference, document, or promote this library. For example, in a dependent project or in a blog post discussing this library. Any other use is prohibited.
