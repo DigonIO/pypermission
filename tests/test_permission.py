@@ -22,14 +22,12 @@ def test_permission__str(
     assert str(p) == str_representation
 
 
-@pytest.mark.xfail(reason="Validation not implemented")
 def test_permission__empty_resource_type() -> None:
     with pytest.raises(PyPermissionError) as err:
         _p = Permission(resource_type="", resource_id="", action="view")
     assert ERR_MSG.empty_resource_type == err.value.message
 
 
-@pytest.mark.xfail(reason="Validation not implemented")
 def test_permission__empty_action() -> None:
     with pytest.raises(PyPermissionError) as err:
         _p = Permission(resource_type="user", resource_id="", action="")

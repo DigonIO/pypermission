@@ -7,6 +7,7 @@ from sqlite3 import Connection
 from sqlalchemy.pool.base import (
     _ConnectionRecord,  # pyright: ignore[reportPrivateUsage]
 )
+from pypermission.exc import PyPermissionError
 
 
 class BaseORM(DeclarativeBase): ...
@@ -48,6 +49,11 @@ class Permission:
         action : str
             The action allowed on the resource (e.g., "read", "write", "delete").
         """
+        if resource_type == "":
+            raise PyPermissionError("Resource type cannot be empty!")
+        if action == "":
+            raise PyPermissionError("Action cannot be empty!")
+
         self.resource_type = resource_type
         self.resource_id = resource_id
         self.action = action

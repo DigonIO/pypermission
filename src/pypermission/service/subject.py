@@ -15,9 +15,8 @@ from pypermission.models import (
 from pypermission.exc import (
     PyPermissionError,
     PermissionNotGrantedError,
-    process_subject_role_integrity_error,
 )
-
+from pypermission.util.exception_handling import process_subject_role_integrity_error
 
 ################################################################################
 #### SubjectService
@@ -41,8 +40,10 @@ class SubjectService(metaclass=FrozenClass):
         Raises
         ------
         PyPermissionError
-            If a Subject with the given SubjectID already exists.
+            If a Subject with the given SubjectID already exists or `subject` is empty string.
         """
+        if subject == "":
+            raise PyPermissionError("Subject name cannot be empty!")
         try:
             subject_orm = SubjectORM(id=subject)
             db.add(subject_orm)
@@ -66,8 +67,10 @@ class SubjectService(metaclass=FrozenClass):
         Raises
         ------
         PyPermissionError
-            If a Subject with the given SubjectID does not exist.
+            If a Subject with the given SubjectID does not exist  or `subject` is empty string.
         """
+        if subject == "":
+            raise PyPermissionError("Subject name cannot be empty!")
         subject_orm = db.get(SubjectORM, subject)
         if subject_orm is None:
             raise PyPermissionError(f"Subject '{subject}' does not exist!")
@@ -109,10 +112,16 @@ class SubjectService(metaclass=FrozenClass):
         Raises
         ------
         PyPermissionError
+            If `subject` is empty string.
+            If `role` is empty string.
             If the Subject does not exist.
             If the Role does not exist.
             If the Subject was assigned to Role before. TODO
         """
+        if role == "":
+            raise PyPermissionError("Role name cannot be empty!")
+        if subject == "":
+            raise PyPermissionError("Subject name cannot be empty!")
         try:
             member_orm = MemberORM(role_id=role, subject_id=subject)
             db.add(member_orm)
@@ -138,10 +147,16 @@ class SubjectService(metaclass=FrozenClass):
         Raises
         ------
         PyPermissionError
+            If `subject` is empty string.
+            If `role` is empty string.
             If the Subject does not exist.
             If the Role does not exist.
             If the Subject is not assigned to the Role. TODO
         """
+        if role == "":
+            raise PyPermissionError("Role name cannot be empty!")
+        if subject == "":
+            raise PyPermissionError("Subject name cannot be empty!")
         # TODO raise IntegrityError if subject or role is unknown and if possible via ORM
         member_orm = db.get(MemberORM, (role, subject))
         if member_orm is None:
@@ -181,8 +196,11 @@ class SubjectService(metaclass=FrozenClass):
         Raises
         ------
         PyPermissionError
+            If `subject` is empty string.
             If the target Subject does not exist.
         """
+        if subject == "":
+            raise PyPermissionError("Subject name cannot be empty!")
         if include_ascendant_roles:
             root_cte = (
                 select(MemberORM.role_id)
@@ -235,10 +253,12 @@ class SubjectService(metaclass=FrozenClass):
         Raises
         ------
         PyPermissionError
+            If `subject` is empty string.
             If the target Subject does not exist. TODO
         """
         # TODO raise IntegrityError if subject is unknown and if possible via ORM
-
+        if subject == "":
+            raise PyPermissionError("Subject name cannot be empty!")
         root_cte = (
             select(MemberORM.role_id)
             .where(MemberORM.subject_id == subject)
@@ -293,6 +313,7 @@ class SubjectService(metaclass=FrozenClass):
         PyPermissionNotGrantedError
             If the Permission is not granted.
         PyPermissionError
+            If `subject` is empty string.
             If the target Subject does not exist.
         """
         if not cls.check_permission(subject=subject, permission=permission, db=db):
@@ -320,8 +341,11 @@ class SubjectService(metaclass=FrozenClass):
         Raises
         ------
         PyPermissionError
+            If `subject` is empty string.
             If the target Subject does not exist.
         """
+        if subject == "":
+            raise PyPermissionError("Subject name cannot be empty!")
         policy_orms = _get_policy_orms_for_subject(subject=subject, db=db)
 
         return tuple(
@@ -353,8 +377,11 @@ class SubjectService(metaclass=FrozenClass):
         Raises
         ------
         PyPermissionError
+            If `subject` is empty string.
             If the target Role does not exist.
         """
+        if subject == "":
+            raise PyPermissionError("Subject name cannot be empty!")
         policy_orms = _get_policy_orms_for_subject(subject=subject, db=db)
 
         return tuple(
@@ -379,6 +406,10 @@ class SubjectService(metaclass=FrozenClass):
         inherited: bool = True,
         db: Session,
     ) -> tuple[str, ...]:
+        if subject == "":
+            raise PyPermissionError("Subject name cannot be empty!")
+        if resource_type == "":
+            raise PyPermissionError("Resource type cannot be empty!")
         if inherited:
             root_cte = (
                 select(MemberORM.role_id)

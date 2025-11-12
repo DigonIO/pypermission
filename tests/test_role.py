@@ -16,7 +16,6 @@ def test_create__success(db: Session) -> None:
     RS.create(role="user", db=db)
 
 
-@pytest.mark.xfail(reason="Validation not implemented")
 def test_create__empty_role(*, db: Session) -> None:
     with pytest.raises(PyPermissionError) as err:
         RS.create(role="", db=db)
@@ -43,7 +42,6 @@ def test_delete__success(*, db: Session) -> None:
     RS.delete(role=role, db=db)
 
 
-@pytest.mark.xfail(reason="Validation not implemented")
 def test_delete__empty_role(*, db: Session) -> None:
     with pytest.raises(PyPermissionError) as err:
         RS.delete(role="", db=db)
@@ -105,7 +103,6 @@ def test_add_hierarchy__success(*, db: Session) -> None:
     RS.add_hierarchy(parent_role="user", child_role="admin", db=db)
 
 
-@pytest.mark.xfail(reason="Validation not implemented")
 def test_add_hierarchy__empty_parent_role(*, db: Session) -> None:
     RS.create(role="admin", db=db)
     with pytest.raises(PyPermissionError) as err:
@@ -114,7 +111,6 @@ def test_add_hierarchy__empty_parent_role(*, db: Session) -> None:
     assert ERR_MSG.empty_parent_role == err.value.message
 
 
-@pytest.mark.xfail(reason="Validation not implemented")
 def test_add_hierarchy__empty_child_role(*, db: Session) -> None:
     RS.create(role="user", db=db)
     with pytest.raises(PyPermissionError) as err:
@@ -203,6 +199,22 @@ def test_remove_hierarchy__equal(*, db: Session) -> None:
     assert ERR_MSG.conflicting_role_ids.format(role="user") == err.value.message
 
 
+def test_remove_hierarchy__empty_parent_role(*, db: Session) -> None:
+    RS.create(role="admin", db=db)
+    with pytest.raises(PyPermissionError) as err:
+        RS.remove_hierarchy(parent_role="", child_role="admin", db=db)
+
+    assert ERR_MSG.empty_parent_role == err.value.message
+
+
+def test_remove_hierarchy__empty_child_role(*, db: Session) -> None:
+    RS.create(role="user", db=db)
+    with pytest.raises(PyPermissionError) as err:
+        RS.remove_hierarchy(parent_role="user", child_role="", db=db)
+
+    assert ERR_MSG.empty_child_role == err.value.message
+
+
 def test_remove_hierarchy__unknown_hierarchy(*, db: Session) -> None:
     RS.create(role="user", db=db)
     RS.create(role="admin", db=db)
@@ -268,7 +280,6 @@ def test_parents__success(*, db: Session) -> None:
     assert Counter(user=1, user_v2=1) == Counter(RS.parents(role="admin", db=db))
 
 
-@pytest.mark.xfail(reason="Validation not implemented")
 def test_parents__empty_role(*, db: Session) -> None:
     with pytest.raises(PyPermissionError) as err:
         RS.parents(role="", db=db)
@@ -298,7 +309,6 @@ def test_children__success(*, db: Session) -> None:
     assert Counter(("mod", "mod_v2")) == Counter((RS.children(role="user", db=db)))
 
 
-@pytest.mark.xfail(reason="Validation not implemented")
 def test_children__empty_role(*, db: Session) -> None:
     with pytest.raises(PyPermissionError) as err:
         RS.children(role="", db=db)
@@ -335,7 +345,6 @@ def test_ancestors__success(*, db: Session) -> None:
     )
 
 
-@pytest.mark.xfail(reason="Validation not implemented")
 def test_ancestors__empty_role(*, db: Session) -> None:
     with pytest.raises(PyPermissionError) as err:
         RS.ancestors(role="", db=db)
@@ -372,7 +381,6 @@ def test_descendants__success(*, db: Session) -> None:
     )
 
 
-@pytest.mark.xfail(reason="Validation not implemented")
 def test_descendants__empty_role(*, db: Session) -> None:
     with pytest.raises(PyPermissionError) as err:
         RS.descendants(role="", db=db)
@@ -433,7 +441,6 @@ def test_subjects_include_descendants__success(*, db: Session) -> None:
     )
 
 
-@pytest.mark.xfail(reason="Validation not implemented")
 def test_subjects_include_descendants__empty_role(*, db: Session) -> None:
     with pytest.raises(PyPermissionError) as err:
         RS.subjects(role="", include_descendant_subjects=True, db=db)
@@ -487,7 +494,6 @@ def test_grant_permission__duplication(*, db: Session) -> None:
     )
 
 
-@pytest.mark.xfail(reason="Validation not implemented")
 def test_grant_permission__empty_role(*, db: Session) -> None:
     permission = Permission(resource_type="event", resource_id="*", action="edit")
 
@@ -589,7 +595,6 @@ def test_check_permission__success(*, db: Session) -> None:
     assert RS.check_permission(role="user[124]", permission=p_edit_123, db=db) is False
 
 
-@pytest.mark.xfail(reason="Validation not implemented")
 def test_check_permission__empty_role(db: Session) -> None:
     p_view_all = Permission(resource_type="event", resource_id="*", action="view")
 
@@ -644,7 +649,6 @@ def test_assert_permission__success(*, db: Session) -> None:
     )
 
 
-@pytest.mark.xfail(reason="Validation not implemented")
 def test_assert_permission__empty_role(*, db: Session) -> None:
     p_view_all = Permission(resource_type="event", resource_id="*", action="view")
     with pytest.raises(PyPermissionError) as err:
@@ -729,7 +733,6 @@ def test_policies__success(*, db: Session) -> None:
     )
 
 
-@pytest.mark.xfail(reason="Validation not implemented")
 def test_policies__empty_role(db: Session) -> None:
     with pytest.raises(PyPermissionError) as err:
         RS.policies(role="", db=db)
@@ -843,7 +846,6 @@ def test_actions_on_resource_not_inherited__success(*, db: Session) -> None:
     ) == Counter(["edit"])
 
 
-@pytest.mark.xfail(reason="Validation not implemented")
 def test_actions_on_resource__empty_role(*, db: Session) -> None:
     with pytest.raises(PyPermissionError) as err:
         RS.actions_on_resource(role="", resource_type="group", resource_id="123", db=db)
