@@ -1,4 +1,4 @@
-![alt text](./assets/logo_font_path.svg "Title")
+![Logo: PyPermission - RBAC for Python](./assets/logo_font_path.svg "PyPermission Logo")
 
 `PyPermission` - The python RBAC library for projects where SQLAlchemy is a valid option.
 
@@ -101,10 +101,12 @@ with db_factory() as db:
     )
 ```
 
-## Documentation
+## Resources
 
 - [Online documentation](https://pypermission.digon.io/)
 - [API reference](https://pypermission.digon.io/api/rbac/)
+- [Changelog](https://gitlab.com/DigonIO/pypermission/-/blob/main/CHANGELOG.md)
+- [How to contribute](https://gitlab.com/DigonIO/pypermission/-/blob/main/CONTRIBUTING.md)
 
 ## Sponsor
 
