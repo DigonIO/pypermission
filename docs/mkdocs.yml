@@ -47,6 +47,7 @@ nav:
       - Subject service: api/subject.md
       - Models: api/models.md
       - Util: api/util.md
+  - Changelog: changelog.md
   - Coverage Report: coverage.md
 
 hooks:
