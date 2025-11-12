@@ -16,6 +16,8 @@ Next ID: `24`
 - `19` Provide json/yaml import/export utility function
 - `18` Provide FastAPI standalone service with RBAC functionality via REST API
 - `16` Do not allow empty strings for `subject`, `role`, `action` and `resource_type` (`resource_id` is allowed to be empty)
+    - [x] Implement tests
+    - [ ] Implement validation logic
 - `15` Tests: Cover more than just next neighbor in role hierarchy tests.
 - `11` Doc - Compare to ANSI (fix section 6/7 TODO)
 - `10` Doc - Compare to NIST
