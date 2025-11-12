@@ -49,6 +49,9 @@ nav:
       - Util: api/util.md
   - Coverage Report: coverage.md
 
+hooks:
+  - hooks.py
+
 markdown_extensions:
   - footnotes
   - pymdownx.highlight
