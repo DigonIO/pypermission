@@ -10,7 +10,6 @@ Next ID: `24`
 
 ## Open Tasks
 
-- `23` Doc - SEO and social description
 - `22` Doc - write [integration guide](https://pypermission.digon.io/)guide/
 - `21` Doc - Include external dependencies in build instead of using CDN
 - `19` Provide json/yaml import/export utility function
@@ -24,6 +23,7 @@ Next ID: `24`
 
 ## Done Tasks
 
+- `23` Doc - SEO and social description
 - `20` Doc - Include mkdocs socical card
 - `9` Doc - Finalize README
 - `8` Doc - Add CHANGELOG

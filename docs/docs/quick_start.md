@@ -1,3 +1,7 @@
+---
+description: "PyPermission - The python RBAC library. Step-by-step examples show how to initialize the database, create roles, assign permissions, and check access."
+---
+
 # PyPermission - Quick Start
 
 !!! info

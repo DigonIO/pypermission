@@ -3,7 +3,7 @@ from mkdocs.structure.pages import Page
 from mkdocs.structure.files import Files
 
 DESCRIPTIONS: dict[str, str] = {
-    "index.md": "The python RBAC library for projects where SQLAlchemy is a valid option.",
+    "index.md": "PyPermission - The python RBAC authorization library for projects where SQLAlchemy is a valid option.",
 }
 
 

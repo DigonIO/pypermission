@@ -1,3 +1,7 @@
+---
+description: "PyPermission - The python RBAC library. FAQ on design decisions, implementation details, and more about authorization in general."
+---
+
 # PyPermission - FAQ
 
 ## Why we developed the `PyPermission` library?

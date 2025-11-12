@@ -1,7 +1,7 @@
 [project]
 name = "PyPermission"
 version = "0.2.1"
-description = "The python RBAC library for projects where SQLAlchemy is a valid option."
+description = "The python RBAC authorization library for projects where SQLAlchemy is a valid option."
 readme = "README.md"
 authors = [
     { name = "Jendrik A. Potyka", email = "jpotyka@digon.io" },
@@ -20,6 +20,7 @@ classifiers = [
     "Programming Language :: Python :: 3.14",
     "Programming Language :: Python :: Implementation :: CPython",
     "Topic :: Software Development :: Libraries",
+    "Topic :: Security",
     "Operating System :: OS Independent",
     "Typing :: Typed",
 ]

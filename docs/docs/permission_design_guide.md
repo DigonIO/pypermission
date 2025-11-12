@@ -1,3 +1,7 @@
+---
+description: "PyPermission - The python RBAC library. Compare container vs. instance permissions and learn how to structure authorization the right way."
+---
+
 # PyPermission - Permission Design Guide
 
 This guide explores how to design permissions in Role-Based Access Control (RBAC) systems, focusing on two primary approaches: Container Permissions and Instance Permissions. Each approach defines how permissions are assigned to resources, and each has distinct trade-offs.

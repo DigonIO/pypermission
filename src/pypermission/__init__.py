@@ -1,5 +1,5 @@
 """
-`PyPermission` - The python RBAC library for projects where `sqlalchemy` is a valid option.
+`PyPermission` - The python RBAC authorization library for projects where `sqlalchemy` is a valid option.
 
 Author: Jendrik A. Potyka, Fabian A. Preiss
 """

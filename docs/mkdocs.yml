@@ -1,4 +1,4 @@
-site_name: PyPermission - RBAC for Python with SQLAlchemy
+site_name: PyPermission - Python RBAC Authorization
 site_url: https://pypermission.digon.io
 repo_url: https://gitlab.com/DigonIO/pypermission
 repo_name: DigonIO/pypermission

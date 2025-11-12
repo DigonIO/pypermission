@@ -1,3 +1,7 @@
+---
+description: "PyPermission - The python RBAC library. Comparison of PyPermission’s design and features with the ANSI RBAC standard, including noted deviations."
+---
+
 # Comparing PyPermission with ANSI RBAC
 
 The RBAC standard published by ANSI/INCITs [^1] [^2] expands on the NIST RBAC model.
@@ -7,7 +11,7 @@ The standard makes use of z-notation [^6] and defines entities in set notation. 
 
 !!! warning
 
-    PyPermission is not compliant with the Core RBAC ANSI standard, as the session concept is not implemented. Types and methods without correspondence in PyPermissionthis l are denoted with "_N/A_"
+    PyPermission is not compliant with the Core RBAC ANSI standard, as we decided against implementing the session concept. Types and methods without correspondence in PyPermission are denoted with "_N/A_"
 
 The ANSI standard additionally defines a Static Separation of Duty (SSD) Relationship as well as Dynamic Separation of Duties (DSD) Relations. These relationships are defined as a constraint to prevent certain roles from being assigned to the same Subject. As PyPermission does not support this feature, the tables below will skip all definitions and sections concerning Separation of Duty Relations.
 
