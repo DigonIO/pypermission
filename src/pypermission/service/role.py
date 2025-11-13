@@ -732,6 +732,34 @@ class RoleService(metaclass=FrozenClass):
         inherited: bool = True,
         db: Session,
     ) -> tuple[str, ...]:
+        """
+        Get all **Actions** granted on a **Resource** for a **Role**.
+
+        Parameters
+        ----------
+        role : str
+            The target **RoleID**.
+        resource_type : str
+            The **ResourceType** to check.
+        resource_id : str
+            The **ResourceID** to check.
+        inherited : bool
+            Includes all **Actions** inherited by ancestor **Roles**.
+        db : Session
+            The SQLAlchemy session.
+
+        Returns
+        -------
+        tuple[str, ...]
+            A tuple containing all granted action IDs.
+
+        Raises
+        ------
+        PyPermissionError
+            If `role` is empty string.
+            If `resource_type` is empty string.
+            If the target **Role** does not exist.
+        """
         if role == "":
             raise PyPermissionError("Role name cannot be empty!")
         if resource_type == "":

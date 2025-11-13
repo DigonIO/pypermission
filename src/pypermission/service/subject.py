@@ -406,6 +406,34 @@ class SubjectService(metaclass=FrozenClass):
         inherited: bool = True,
         db: Session,
     ) -> tuple[str, ...]:
+        """
+        Get all Actions granted to a **Subject** on a specific **Resource**.
+
+        Parameters
+        ----------
+        subject : str
+            The target **SubjectID**.
+        resource_type : str
+            The **ResourceType** of the **Resource**.
+        resource_id : str
+            The **ResourceID** of the **Resource**.
+        inherited : bool
+            Whether to include inherited **Actions** from **Role** hierarchies.
+        db : Session
+            The SQLAlchemy session.
+
+        Returns
+        -------
+        tuple[str, ...]
+            A tuple containing all granted **Action** values.
+
+        Raises
+        ------
+        PyPermissionError
+            If `subject` is empty string.
+            If `resource_type` is empty string.
+            If the target **Subject** does not exist.
+        """
         if subject == "":
             raise PyPermissionError("Subject name cannot be empty!")
         if resource_type == "":
