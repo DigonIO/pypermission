@@ -12,17 +12,21 @@ Next ID: `26`
 
 - `25` Add missing docstrings:
     - [ ] `subject.actions_on_resource`, `role.actions_on_resource`
-- `24` Improve handling of psycopg errors in `process_subject_role_integrity_error` and `process_policy_integrity_error`
+
 - `22` Doc - write [integration guide](https://pypermission.digon.io/)guide/
 - `21` Doc - Include external dependencies in build instead of using CDN
 - `19` Provide json/yaml import/export utility function
 - `18` Provide FastAPI standalone service with RBAC functionality via REST API
-- `15` Tests: Cover more than just next neighbor in role hierarchy tests.
+- `15` Tests:
+    - [ ] Cover more than just next neighbor in role hierarchy tests.
+    - [ ] Test `Permission.__eq__` and `Permission.__neq__` methods method
+    - [ ] Test `Policy.__eq__` and `Policy.__neq__` methods method
 - `11` Doc - Compare to ANSI (fix section 6/7 TODO)
 - `10` Doc - Compare to NIST
 
 ## Done Tasks
 
+- `24` Improve handling of psycopg errors in `process_subject_role_integrity_error` and `process_policy_integrity_error`
 - `16` Do not allow empty strings for `subject`, `role`, `action` and `resource_type` (`resource_id` is allowed to be empty)
     - [x] Implement tests
     - [x] Implement validation logic

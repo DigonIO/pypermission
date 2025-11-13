@@ -1,8 +1,31 @@
-from typing import Never
+from typing import Never, TYPE_CHECKING
+
 from sqlalchemy.exc import IntegrityError
 from sqlite3 import IntegrityError as Sqlite3IntegrityError
 from pypermission.models import Permission
 from pypermission.exc import PyPermissionError
+
+if TYPE_CHECKING:
+    from psycopg.errors import (
+        ForeignKeyViolation as PsycopgForeignKeyViolation,
+        UniqueViolation as PsycopgUniqueViolation,
+        Diagnostic as PsycopgDiagnostic,
+    )
+else:
+    try:
+        from psycopg.errors import (
+            ForeignKeyViolation as PsycopgForeignKeyViolation,
+            UniqueViolation as PsycopgUniqueViolation,
+            Diagnostic as PsycopgDiagnostic,
+        )
+    except ModuleNotFoundError:
+
+        class PsycopgForeignKeyViolation(Exception): ...
+
+        class PsycopgUniqueViolation(Exception): ...
+
+        class PsycopgDiagnostic: ...
+
 
 ################################################################################
 #### Error Utilities
@@ -22,12 +45,14 @@ def process_subject_role_integrity_error(
                 raise PyPermissionError(f"Subject '{subject}' does not exist!")
             if role is not None:
                 raise PyPermissionError(f"Role '{role}' does not exist!")
-        case IntegrityError(orig=orig) if (
-            str(orig.__class__) == "<class 'psycopg.errors.ForeignKeyViolation'>"
+        case IntegrityError(
+            orig=PsycopgForeignKeyViolation(
+                diag=PsycopgDiagnostic(message_detail=str(msg))
+            )
         ):
-            if f"Key (role_id)=({role}) is not present in table" in str(orig):
+            if f"Key (role_id)=({role}) is not present in table" in msg:
                 raise PyPermissionError(f"Role '{role}' does not exist!")
-            if f"Key (subject_id)=({subject}) is not present in table" in str(orig):
+            if f"Key (subject_id)=({subject}) is not present in table" in msg:
                 raise PyPermissionError(f"Subject '{subject}' does not exist!")
         case _:
             ...
@@ -51,14 +76,18 @@ def process_policy_integrity_error(
             orig=Sqlite3IntegrityError(sqlite_errorname="SQLITE_CONSTRAINT_FOREIGNKEY")
         ):
             raise PyPermissionError(f"Role '{role}' does not exist!") from err
-        case IntegrityError(orig=orig) if (
-            str(orig.__class__) == "<class 'psycopg.errors.UniqueViolation'>"
+        case IntegrityError(
+            orig=PsycopgUniqueViolation(
+                diag=PsycopgDiagnostic(message_detail=str(_msg))
+            )
         ):
             raise PyPermissionError(
                 f"Permission '{str(permission)}' does already exist!"
             ) from err
-        case IntegrityError(orig=orig) if (
-            str(orig.__class__) == "<class 'psycopg.errors.ForeignKeyViolation'>"
+        case IntegrityError(
+            orig=PsycopgForeignKeyViolation(
+                diag=PsycopgDiagnostic(message_detail=str(_msg))
+            )
         ):
             raise PyPermissionError(f"Role '{role}' does not exist!") from err
         case _:
