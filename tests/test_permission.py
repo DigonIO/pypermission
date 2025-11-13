@@ -9,7 +9,7 @@ from pypermission.exc import PyPermissionError, ERR_MSG
 
 
 @pytest.mark.parametrize(
-    "resource_type,resource_id,action, str_representation",
+    "resource_type, resource_id, action, str_representation",
     [
         ("user", "18", "read", "user[18]:read"),
         ("admin", "", "write", "admin:write"),
@@ -20,6 +20,64 @@ def test_permission__str(
 ) -> None:
     p = Permission(resource_type=resource_type, resource_id=resource_id, action=action)
     assert str(p) == str_representation
+
+
+@pytest.mark.parametrize(
+    "resource_type, resource_id, action",
+    [
+        ("admin", "18", "read"),
+        ("owner", "18", "view"),
+        ("owner", "19", "read"),
+        ("owner", "", "read"),
+    ],
+)
+def test_permission__eq(*, resource_type: str, resource_id: str, action: str) -> None:
+    p1 = Permission(resource_type=resource_type, resource_id=resource_id, action=action)
+    p2 = Permission(resource_type=resource_type, resource_id=resource_id, action=action)
+    assert p1 == p2
+    assert p2 == p1
+    assert not (p1 != p2)
+    assert not (p2 != p1)
+
+
+@pytest.mark.parametrize(
+    "resource_type, resource_id, action",
+    [
+        ("admin", "18", "read"),
+        ("owner", "18", "view"),
+        ("owner", "19", "read"),
+        ("owner", "", "read"),
+    ],
+)
+def test_permission__neq(*, resource_type: str, resource_id: str, action: str) -> None:
+    p1 = Permission(resource_type="owner", resource_id="18", action="read")
+    p2 = Permission(resource_type=resource_type, resource_id=resource_id, action=action)
+
+    assert not (p1 == p2)
+    assert not (p2 == p1)
+    assert p1 != p2
+    assert p2 != p1
+
+    other: object
+    for other in [  # pyright: ignore[reportUnknownVariableType]
+        None,
+        True,
+        False,
+        6,
+        -3.1,
+        "",
+        "5",
+        [],
+        {},
+        set(),
+        tuple(),
+        object(),
+    ]:
+        assert not (p2 == other)
+        assert not (other == p2)
+
+        assert other != p2
+        assert p2 != other
 
 
 def test_permission__empty_resource_type() -> None:
