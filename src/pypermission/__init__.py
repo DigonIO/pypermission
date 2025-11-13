@@ -15,9 +15,8 @@ from pypermission.models import (
     Policy,
     Permission,
     FrozenClass,
-    create_rbac_database_table,
-    set_sqlite_pragma,
 )
+from pypermission.db import create_rbac_database_table, set_sqlite_pragma
 from pypermission.exc import PyPermissionError, PermissionNotGrantedError
 
 
@@ -33,8 +32,8 @@ class RBAC(metaclass=FrozenClass):
         Shorthand for all SubjectService functions.
     """
 
-    role: Final = RoleService
-    subject: Final = SubjectService
+    role: Final[type[RoleService]] = RoleService
+    subject: Final[type[SubjectService]] = SubjectService
 
 
 __all__ = [

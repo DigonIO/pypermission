@@ -1,12 +1,8 @@
 from sqlalchemy.orm import Mapped, mapped_column, DeclarativeBase
 from sqlalchemy.sql.sqltypes import String
 from sqlalchemy.sql.schema import ForeignKey
-from sqlalchemy.engine.base import Engine
 from typing import Never
-from sqlite3 import Connection
-from sqlalchemy.pool.base import (
-    _ConnectionRecord,  # pyright: ignore[reportPrivateUsage]
-)
+
 from pypermission.exc import PyPermissionError
 
 
@@ -103,6 +99,8 @@ class Policy:
         permission : Permission
             The target Permission.
         """
+        if role == "":
+            raise PyPermissionError("Role name cannot be empty!")
         self.role = role
         self.permission = permission
 
@@ -122,7 +120,7 @@ class Policy:
 class FrozenClass(type):
     def __setattr__(cls, key: str, value: Never) -> None:
         if key in cls.__dict__:
-            raise AttributeError(f"FrozenClass attributes cannot be overwrite!")
+            raise AttributeError("Frozen attributes cannot be modified!")
         super().__setattr__(key, value)
 
 
@@ -189,38 +187,3 @@ class PolicyORM(BaseORM):
     resource_type: Mapped[str] = mapped_column(String, primary_key=True)
     resource_id: Mapped[str] = mapped_column(String, primary_key=True)
     action: Mapped[str] = mapped_column(String, primary_key=True)
-
-
-################################################################################
-#### Util
-################################################################################
-
-
-def create_rbac_database_table(*, engine: Engine) -> None:
-    """
-    Create all required database tables via. SQLAlchemy for PyPermission.
-
-    Parameters
-    ----------
-    engine : Engine
-        The SQLAlchemy engine.
-
-    """
-    BaseORM.metadata.create_all(bind=engine)
-
-
-# https://docs.sqlalchemy.org/en/20/dialects/sqlite.html#foreign-key-support
-def set_sqlite_pragma(
-    dbapi_connection: Connection, _connection_record: _ConnectionRecord
-) -> None:
-    # the sqlite3 driver will not set PRAGMA foreign_keys
-    # if autocommit=False; set to True temporarily
-    ac = dbapi_connection.autocommit
-    dbapi_connection.autocommit = True
-
-    cursor = dbapi_connection.cursor()
-    cursor.execute("PRAGMA foreign_keys=ON")
-    cursor.close()
-
-    # restore previous autocommit setting
-    dbapi_connection.autocommit = ac

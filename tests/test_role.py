@@ -539,6 +539,14 @@ def test_revoke_permission__unknown_permission(*, db: Session) -> None:
     )
 
 
+def test_revoke_permission__empty_role(*, db: Session) -> None:
+    permission = Permission(resource_type="event", resource_id="*", action="edit")
+    with pytest.raises(PyPermissionError) as err:
+        RS.revoke_permission(role="", permission=permission, db=db)
+
+    assert ERR_MSG.empty_role == err.value.message
+
+
 def test_revoke_permission__unknown_role(*, db: Session) -> None:
     permission = Permission(resource_type="event", resource_id="*", action="edit")
     with pytest.raises(PyPermissionError) as err:
@@ -696,6 +704,12 @@ def test_permissions__success(*, db: Session) -> None:
     )
 
 
+def test_permissions__empty_role(db: Session) -> None:
+    with pytest.raises(PyPermissionError) as err:
+        RS.permissions(role="", db=db)
+
+    assert ERR_MSG.empty_role == err.value.message
+
 def test_permissions__unknown_role(db: Session) -> None:
     with pytest.raises(PyPermissionError) as err:
         RS.permissions(role="unknown", db=db)
@@ -851,6 +865,15 @@ def test_actions_on_resource__empty_role(*, db: Session) -> None:
         RS.actions_on_resource(role="", resource_type="group", resource_id="123", db=db)
 
     assert ERR_MSG.empty_role == err.value.message
+
+
+def test_actions_on_resource__empty_resource_type(*, db: Session) -> None:
+    with pytest.raises(PyPermissionError) as err:
+        RS.actions_on_resource(
+            role="unknown", resource_type="", resource_id="123", db=db
+        )
+
+    assert ERR_MSG.empty_resource_type == err.value.message
 
 
 def test_actions_on_resource__unknown_role(*, db: Session) -> None:

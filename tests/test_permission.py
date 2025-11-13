@@ -11,8 +11,8 @@ from pypermission.exc import PyPermissionError, ERR_MSG
 @pytest.mark.parametrize(
     "resource_type, resource_id, action, str_representation",
     [
-        ("user", "18", "read", "user[18]:read"),
-        ("admin", "", "write", "admin:write"),
+        ("event", "18", "read", "event[18]:read"),
+        ("group", "", "write", "group:write"),
     ],
 )
 def test_permission__str(
@@ -25,10 +25,10 @@ def test_permission__str(
 @pytest.mark.parametrize(
     "resource_type, resource_id, action",
     [
-        ("admin", "18", "read"),
-        ("owner", "18", "view"),
-        ("owner", "19", "read"),
-        ("owner", "", "read"),
+        ("group", "18", "read"),
+        ("event", "18", "edit"),
+        ("event", "19", "read"),
+        ("event", "", "read"),
     ],
 )
 def test_permission__eq(*, resource_type: str, resource_id: str, action: str) -> None:
@@ -43,14 +43,14 @@ def test_permission__eq(*, resource_type: str, resource_id: str, action: str) ->
 @pytest.mark.parametrize(
     "resource_type, resource_id, action",
     [
-        ("admin", "18", "read"),
-        ("owner", "18", "view"),
-        ("owner", "19", "read"),
-        ("owner", "", "read"),
+        ("group", "18", "read"),
+        ("event", "18", "edit"),
+        ("event", "19", "read"),
+        ("event", "", "read"),
     ],
 )
 def test_permission__neq(*, resource_type: str, resource_id: str, action: str) -> None:
-    p1 = Permission(resource_type="owner", resource_id="18", action="read")
+    p1 = Permission(resource_type="event", resource_id="18", action="read")
     p2 = Permission(resource_type=resource_type, resource_id=resource_id, action=action)
 
     assert not (p1 == p2)
@@ -82,11 +82,11 @@ def test_permission__neq(*, resource_type: str, resource_id: str, action: str) -
 
 def test_permission__empty_resource_type() -> None:
     with pytest.raises(PyPermissionError) as err:
-        _p = Permission(resource_type="", resource_id="", action="view")
+        _p = Permission(resource_type="", resource_id="", action="edit")
     assert ERR_MSG.empty_resource_type == err.value.message
 
 
 def test_permission__empty_action() -> None:
     with pytest.raises(PyPermissionError) as err:
-        _p = Permission(resource_type="user", resource_id="", action="")
+        _p = Permission(resource_type="event", resource_id="", action="")
     assert ERR_MSG.empty_action == err.value.message

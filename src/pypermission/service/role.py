@@ -784,9 +784,6 @@ def _get_policy_orms_for_role(
     *, role: str, inherited: bool = True, db: Session
 ) -> Sequence[PolicyORM]:
     # TODO raise IntegrityError if role is unknown and if possible via ORM
-    if role == "":
-        raise PyPermissionError("Role name cannot be empty!")
-
     if inherited:
         root_cte = (
             select(RoleORM.id.label("role_id"))

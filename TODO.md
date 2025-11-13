@@ -19,7 +19,7 @@ Next ID: `26`
 - `15` Tests:
     - [ ] Cover more than just next neighbor in role hierarchy tests.
     - [x] Test `Permission.__eq__` and `Permission.__neq__` methods method
-    - [ ] Test `Policy.__eq__` and `Policy.__neq__` methods method
+    - [x] Test `Policy.__eq__` and `Policy.__neq__` methods method
 - `11` Doc - Compare to ANSI (fix section 6/7 TODO)
 - `10` Doc - Compare to NIST
 

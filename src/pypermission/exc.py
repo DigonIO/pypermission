@@ -79,3 +79,8 @@ class ERR_MSG:
 
     # other
     unexpected_integrity = "Unexpected IntegrityError!"
+    foreign_keys_pragma_not_set = (
+        "Foreign keys pragma appears to not be set! Please use the 'set_sqlite_pragma' function"
+        " on your SQLite engine before interacting with the database!"
+    )
+    frozen_attributes_cannot_be_modified = "Frozen attributes cannot be modified!"
