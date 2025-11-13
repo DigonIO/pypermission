@@ -1,6 +1,6 @@
 ![Logo: PyPermission - RBAC for Python](./assets/logo_font_path.svg "PyPermission Logo")
 
-`PyPermission` - The python RBAC authorization authorization library for projects where SQLAlchemy is a valid option.
+**PyPermission** - The python RBAC authorization authorization library for projects where SQLAlchemy is a valid option.
 
 [![repository](https://img.shields.io/badge/src-GitLab-orange)](https://gitlab.com/DigonIO/pypermission)
 [![mirror](https://img.shields.io/badge/mirror-GitHub-orange)](https://github.com/DigonIO/pypermission)
@@ -39,7 +39,7 @@ If you find the PyPermission library beneficial, please consider supporting the 
 
 ## Installing `PyPermission` with pip
 
-The `PyPermission` library can be installed directly from the PyPI repositories with:
+The **PyPermission** library can be installed directly from the PyPI repositories with:
 
 ```console
 pip install PyPermission
