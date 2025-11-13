@@ -1,5 +1,4 @@
 import networkx as nx
-import plotly.graph_objects as go
 
 from sqlalchemy.orm import Session
 from sqlalchemy.sql import select

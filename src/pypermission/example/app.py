@@ -3,7 +3,8 @@ from typing import Final
 from sqlalchemy.engine.base import Engine
 
 from pypermission import RBAC
-from pypermission.models import Policy, Permission, create_rbac_database_table
+from pypermission.models import Permission
+from pypermission.db import create_rbac_database_table
 from pypermission.example.models import Context
 from pypermission.example.service.user import UserService
 from pypermission.example.service.group import GroupService
