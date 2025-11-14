@@ -1,11 +1,13 @@
 from sqlite3 import Connection
-from sqlalchemy.pool.base import (
-    _ConnectionRecord,  # pyright: ignore[reportPrivateUsage]
-)
+
 from sqlalchemy.engine.base import Engine
-from pypermission.models import BaseORM
 from sqlalchemy.event import contains
+from sqlalchemy.pool.base import (
+    _ConnectionRecord,
+)  # pyright: ignore[reportPrivateUsage]
+
 from pypermission.exc import PyPermissionError
+from pypermission.models import BaseORM
 
 
 def create_rbac_database_table(*, engine: Engine) -> None:

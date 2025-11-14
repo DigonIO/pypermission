@@ -1,6 +1,7 @@
 import pytest
+
+from pypermission.exc import ERR_MSG, PyPermissionError
 from pypermission.models import Permission, Policy
-from pypermission.exc import PyPermissionError, ERR_MSG
 
 ################################################################################
 #### Test Policy

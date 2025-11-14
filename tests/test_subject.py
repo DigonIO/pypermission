@@ -1,11 +1,12 @@
+from collections import Counter
+
 import pytest
 from sqlalchemy.orm import Session
 
+from pypermission.exc import ERR_MSG, PermissionNotGrantedError, PyPermissionError
+from pypermission.models import Permission
 from pypermission.service.role import RoleService as RS
 from pypermission.service.subject import SubjectService as SS
-from pypermission.models import Permission
-from pypermission.exc import PyPermissionError, PermissionNotGrantedError, ERR_MSG
-from collections import Counter
 
 ################################################################################
 #### Test subject creation

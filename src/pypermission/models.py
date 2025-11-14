@@ -1,7 +1,8 @@
-from sqlalchemy.orm import Mapped, mapped_column, DeclarativeBase
-from sqlalchemy.sql.sqltypes import String
-from sqlalchemy.sql.schema import ForeignKey
 from typing import Never
+
+from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
+from sqlalchemy.sql.schema import ForeignKey
+from sqlalchemy.sql.sqltypes import String
 
 from pypermission.exc import PyPermissionError
 

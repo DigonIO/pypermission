@@ -3,15 +3,12 @@ from typing import Generator
 
 import pytest
 from _pytest.fixtures import FixtureRequest
-
 from sqlalchemy.engine import Engine, create_engine
-from sqlalchemy.orm import sessionmaker, Session
-
-from pypermission.models import BaseORM
-from pypermission.db import set_sqlite_pragma
-
 from sqlalchemy.event import listen
+from sqlalchemy.orm import Session, sessionmaker
 
+from pypermission.db import set_sqlite_pragma
+from pypermission.models import BaseORM
 
 
 @pytest.fixture(params=["sqlite", "psql"])

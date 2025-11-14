@@ -1,20 +1,19 @@
-from sqlalchemy.sql import select
-from sqlalchemy.orm import Session
-from sqlalchemy.exc import IntegrityError
 from collections.abc import Sequence
+
+from sqlalchemy.exc import IntegrityError
+from sqlalchemy.orm import Session
+from sqlalchemy.sql import select
+
+from pypermission.exc import PermissionNotGrantedError, PyPermissionError
 from pypermission.models import (
-    Policy,
-    Permission,
-    RoleORM,
-    HierarchyORM,
-    SubjectORM,
-    MemberORM,
-    PolicyORM,
     FrozenClass,
-)
-from pypermission.exc import (
-    PyPermissionError,
-    PermissionNotGrantedError,
+    HierarchyORM,
+    MemberORM,
+    Permission,
+    Policy,
+    PolicyORM,
+    RoleORM,
+    SubjectORM,
 )
 from pypermission.util.exception_handling import process_subject_role_integrity_error
 

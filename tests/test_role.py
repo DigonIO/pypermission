@@ -1,11 +1,12 @@
+from collections import Counter
+
 import pytest
 from sqlalchemy.orm import Session
 
+from pypermission.exc import ERR_MSG, PermissionNotGrantedError, PyPermissionError
+from pypermission.models import Permission
 from pypermission.service.role import RoleService as RS
 from pypermission.service.subject import SubjectService as SS
-from pypermission.exc import PyPermissionError, PermissionNotGrantedError, ERR_MSG
-from pypermission.models import Permission
-from collections import Counter
 
 ################################################################################
 #### Test role creation
@@ -647,7 +648,6 @@ def test_assert_permission__success(*, db: Session) -> None:
 
     RS.add_hierarchy(parent_role="user", child_role="mod", db=db)
     RS.add_hierarchy(parent_role="mod", child_role="admin", db=db)
-
 
     RS.assert_permission(role="admin", permission=view_all, db=db)
     RS.assert_permission(role="admin", permission=edit_all, db=db)

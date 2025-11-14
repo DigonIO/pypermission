@@ -1,10 +1,9 @@
 from enum import StrEnum
 
-from sqlalchemy.orm import Mapped, mapped_column, relationship, Session
-from sqlalchemy.sql.sqltypes import String
-from sqlalchemy.sql.sqltypes import Enum as SqlEnum
+from sqlalchemy.orm import Mapped, Session, mapped_column, relationship
 from sqlalchemy.sql.schema import ForeignKey
-
+from sqlalchemy.sql.sqltypes import Enum as SqlEnum
+from sqlalchemy.sql.sqltypes import String
 
 from pypermission.models import BaseORM
 

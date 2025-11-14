@@ -1,13 +1,13 @@
 import pytest
 from sqlalchemy.engine import create_engine
-from sqlalchemy.orm import sessionmaker
 from sqlalchemy.event import listen
+from sqlalchemy.orm import sessionmaker
 
 from pypermission import RBAC, Permission, create_rbac_database_table, set_sqlite_pragma
+from pypermission.exc import ERR_MSG, PyPermissionError
 from pypermission.service.role import RoleService
-from pypermission.service.subject import SubjectService
 from pypermission.service.role import RoleService as RS
-from pypermission.exc import PyPermissionError, ERR_MSG
+from pypermission.service.subject import SubjectService
 
 
 def test_rbac_service_imports() -> None:

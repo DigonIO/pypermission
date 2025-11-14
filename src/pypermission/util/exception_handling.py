@@ -1,23 +1,20 @@
-from typing import Never, TYPE_CHECKING
+from sqlite3 import IntegrityError as Sqlite3IntegrityError
+from typing import TYPE_CHECKING, Never
 
 from sqlalchemy.exc import IntegrityError
-from sqlite3 import IntegrityError as Sqlite3IntegrityError
-from pypermission.models import Permission
+
 from pypermission.exc import PyPermissionError
+from pypermission.models import Permission
 
 if TYPE_CHECKING:
-    from psycopg.errors import (
-        ForeignKeyViolation as PsycopgForeignKeyViolation,
-        UniqueViolation as PsycopgUniqueViolation,
-        Diagnostic as PsycopgDiagnostic,
-    )
+    from psycopg.errors import Diagnostic as PsycopgDiagnostic
+    from psycopg.errors import ForeignKeyViolation as PsycopgForeignKeyViolation
+    from psycopg.errors import UniqueViolation as PsycopgUniqueViolation
 else:
     try:
-        from psycopg.errors import (
-            ForeignKeyViolation as PsycopgForeignKeyViolation,
-            UniqueViolation as PsycopgUniqueViolation,
-            Diagnostic as PsycopgDiagnostic,
-        )
+        from psycopg.errors import Diagnostic as PsycopgDiagnostic
+        from psycopg.errors import ForeignKeyViolation as PsycopgForeignKeyViolation
+        from psycopg.errors import UniqueViolation as PsycopgUniqueViolation
     except ModuleNotFoundError:
 
         class PsycopgForeignKeyViolation(Exception): ...

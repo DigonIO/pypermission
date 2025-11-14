@@ -1,10 +1,9 @@
 import networkx as nx
-
 from sqlalchemy.orm import Session
 from sqlalchemy.sql import select
 
-from pypermission.models import RoleORM, HierarchyORM, MemberORM, PolicyORM, Permission
 from pypermission.exc import PyPermissionError
+from pypermission.models import HierarchyORM, MemberORM, Permission, PolicyORM, RoleORM
 
 ################################################################################
 #### Role dag tools
