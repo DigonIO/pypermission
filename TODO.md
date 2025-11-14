@@ -6,7 +6,7 @@
 - `xxxx.` Normal
 - `xxxx!` Critical
 
-Next ID: `33`
+Next ID: `34`
 
 ## Open Tasks
 
@@ -25,6 +25,7 @@ Next ID: `33`
 
 ## Done Tasks
 
+- `33.` CI - Include isort + black job
 - `15.` Tests:
     - [x] Cover more than just next neighbor in role hierarchy tests.
         - [x] `role.ancestors`

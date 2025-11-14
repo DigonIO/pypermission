@@ -3,8 +3,8 @@ from sqlite3 import Connection
 from sqlalchemy.engine.base import Engine
 from sqlalchemy.event import contains
 from sqlalchemy.pool.base import (
-    _ConnectionRecord,
-)  # pyright: ignore[reportPrivateUsage]
+    _ConnectionRecord,  # pyright: ignore[reportPrivateUsage]
+)
 
 from pypermission.exc import PyPermissionError
 from pypermission.models import BaseORM
