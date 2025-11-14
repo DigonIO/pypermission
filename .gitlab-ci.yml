@@ -58,6 +58,22 @@ mypy:
     - uv run mypy src
   allow_failure: true
 
+isort:
+  stage: analysis
+  image: $IMG_PYTHON_UV_3_14
+  script:
+    - uv sync --all-groups
+    - uv run isort --check-only src tests
+  allow_failure: false
+
+black:
+  stage: analysis
+  image: $IMG_PYTHON_UV_3_14
+  script:
+    - uv sync --all-groups
+    - uv run black --check src tests
+  allow_failure: false
+
 ####################################################################################################
 ### Test Stage
 ####################################################################################################

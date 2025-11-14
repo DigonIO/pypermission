@@ -1,14 +1,14 @@
-![alt text](./assets/logo_font_path.svg "Title")
+![Logo: PyPermission - RBAC for Python](https://gitlab.com/DigonIO/pypermission/-/raw/main/assets/logo_font_path.svg "PyPermission Logo")
 
-`PyPermission` - The python RBAC library for projects where SQLAlchemy is a valid option.
+**PyPermission** - The python RBAC authorization authorization library for projects where SQLAlchemy is a valid option.
 
 [![repository](https://img.shields.io/badge/src-GitLab-orange)](https://gitlab.com/DigonIO/pypermission)
 [![mirror](https://img.shields.io/badge/mirror-GitHub-orange)](https://github.com/DigonIO/pypermission)
-[![License: LGPLv3](assets/badges/license.svg)](https://spdx.org/licenses/LGPL-3.0-only.html)
+[![License: LGPLv3](https://gitlab.com/DigonIO/pypermission/-/raw/main/assets/badges/license.svg)](https://spdx.org/licenses/LGPL-3.0-only.html)
 [![pipeline status](https://gitlab.com/DigonIO/pypermission/badges/main/pipeline.svg)](https://gitlab.com/DigonIO/pypermission/-/pipelines)
 [![coverage report](https://gitlab.com/DigonIO/pypermission/badges/main/coverage.svg)](https://gitlab.com/DigonIO/pypermission/-/pipelines)
-[![Code style: black](assets/badges/black.svg)](https://github.com/psf/black)
-[![Imports: isort](assets/badges/isort.svg)](https://pycqa.github.io/isort/)
+[![Code style: black](https://gitlab.com/DigonIO/pypermission/-/raw/main/assets/badges/black.svg)](https://github.com/psf/black)
+[![Imports: isort](https://gitlab.com/DigonIO/pypermission/-/raw/main/assets/badges/isort.svg)](https://pycqa.github.io/isort/)
 
 [![pkgversion](https://img.shields.io/pypi/v/pypermission)](https://pypi.org/project/pypermission/)
 [![versionsupport](https://img.shields.io/pypi/pyversions/pypermission)](https://pypi.org/project/pypermission/)
@@ -21,7 +21,7 @@ If you find the PyPermission library beneficial, please consider supporting the 
 
 [![GitHub Repo stars](https://img.shields.io/github/stars/digonio/pypermission)](https://github.com/DigonIO/pypermission)
 
-# PyPermission - RBAC for Python with SQLAlchemy
+# Python RBAC authorization with SQLAlchemy
 
 ## Features
 
@@ -39,7 +39,7 @@ If you find the PyPermission library beneficial, please consider supporting the 
 
 ## Installing `PyPermission` with pip
 
-The `PyPermission` library can be installed directly from the PyPI repositories with:
+The **PyPermission** library can be installed directly from the PyPI repositories with:
 
 ```console
 pip install PyPermission
@@ -56,12 +56,14 @@ pip install 'PyPermission[postgres]'
 ```python title="my_project.main.py"
 from sqlalchemy.engine import create_engine
 from sqlalchemy.orm import sessionmaker
+from sqlalchemy.event import listen
 
 engine = create_engine("sqlite:///:memory:", future=True)
 db_factory = sessionmaker(bind=engine, autoflush=False, autocommit=False)
 
-from pypermission import RBAC, Permission, create_rbac_database_table
+from pypermission import RBAC, Permission, create_rbac_database_table, set_sqlite_pragma
 
+listen(engine, "connect", set_sqlite_pragma) # needed for foreign key constraints (sqlite only)
 create_rbac_database_table(engine=engine)
 
 with db_factory() as db:
@@ -99,14 +101,16 @@ with db_factory() as db:
     )
 ```
 
-## Documentation
+## Resources
 
 - [Online documentation](https://pypermission.digon.io/)
 - [API reference](https://pypermission.digon.io/api/rbac/)
+- [Changelog](https://gitlab.com/DigonIO/pypermission/-/blob/main/CHANGELOG.md)
+- [How to contribute](https://gitlab.com/DigonIO/pypermission/-/blob/main/CONTRIBUTING.md)
 
 ## Sponsor
 
-![Digon.IO GmbH Logo](./assets/logo_digon.io_gmbh.png "Digon.IO GmbH")
+![Digon.IO GmbH Logo](https://gitlab.com/DigonIO/pypermission/-/raw/main/assets/logo_digon.io_gmbh.png "Digon.IO GmbH")
 
 Fine-Tuned AI services for developers.
 

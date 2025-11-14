@@ -83,6 +83,14 @@ The documentation should use the following markup in descriptions:
 
 * Library types and classes should be written in `PascalCase` and bold (for example `**Permission**` -> **Permission**)
 * Definitional types (those that do not have a corresponding class or type in the library, such as **Role** or **Subject**) should be written in `PascalCase` and bold (just like Library types)
+* Stay close to the definitions in `docs/docs/definitions.md` (e.g. **ResourceType** instead of "resource type",
+  **ResourceID** instead of "resource ID"). Infer from the definitions, that for consistency reasons **RoleID** should be preferred over "role id" even though not explicitly stated.
 * values should be written in code blocks (for example `Alex`, `19`, `view` or `group:123`)
 * application level types (like `event` or `group`) should be treated as values
 * attributes should be written in code blocks and in `snake_case` (for example `resource_type`, `resource_id`)
+
+Examples:
+
+<https://pypermission.digon.io/definitions/>
+
+* "ResourceType" instead of "Resource type"

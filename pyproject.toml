@@ -1,7 +1,7 @@
 [project]
 name = "PyPermission"
-version = "0.2.1"
-description = "The python RBAC library for projects where SQLAlchemy is a valid option."
+version = "0.3.0"
+description = "The python RBAC authorization library for projects where SQLAlchemy is a valid option."
 readme = "README.md"
 authors = [
     { name = "Jendrik A. Potyka", email = "jpotyka@digon.io" },
@@ -20,6 +20,7 @@ classifiers = [
     "Programming Language :: Python :: 3.14",
     "Programming Language :: Python :: Implementation :: CPython",
     "Topic :: Software Development :: Libraries",
+    "Topic :: Security",
     "Operating System :: OS Independent",
     "Typing :: Typed",
 ]
@@ -42,11 +43,13 @@ build-backend = "uv_build"
 
 [dependency-groups]
 dev = [
+    "black>=25.11.0",
     "coverage>=7.10.7",
     "ipykernel>=6.30.1",
+    "isort>=7.0.0",
     "mkdocs>=1.6.1",
     "mkdocs-coverage>=2.0.0",
-    "mkdocs-material>=9.6.21",
+    "mkdocs-material[imaging]>=9.6.21",
     "mkdocstrings[python]>=0.30.1",
     "pdbpp>=0.11.7",
     "plotly-stubs>=0.0.6",
@@ -59,3 +62,18 @@ dev = [
 ]
 postgres = ["psycopg>=3.2.10"]
 util = ["networkx>=3.5", "plotly>=6.3.1"]
+
+[tool.black]
+target-version = ['py313']
+
+[tool.isort]
+py_version = 313
+profile = "black"
+
+[tool.mypy]
+python_version = "3.13"
+strict = true
+warn_return_any = true
+warn_unused_configs = true
+disallow_any_generics = true
+disallow_subclassing_any = true

@@ -1,3 +1,7 @@
+---
+description: "PyPermission - The python RBAC library. Core concepts and formal model of roles, permissions, resources, and actions for structured access control."
+---
+
 # PyPermission - Formal Definitions
 
 In PyPermission, the core concepts for Role Based Access Control (**RBAC**) are defined as follows:

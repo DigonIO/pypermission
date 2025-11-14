@@ -1,3 +1,8 @@
+---
+description: "PyPermission - The python RBAC library. Technical mapping of PyPermission to NIST RBAC levels, explaining hierarchy handling and design differences."
+---
+
+
 # Comparing PyPermission with NIST
 
 The original NIST RBAC model[^1] defines 4 feature levels and distinguishes level
@@ -6,7 +11,7 @@ hierarchies. Level L.2a is closest to our implementation.
 
 !!! warning
 
-    PyPermission is not compliant with the RBAC NIST standard, as the session concept is not implemented.
+    PyPermission is not compliant with the RBAC NIST standard, as we decided against implementing the session concept.
 
 The section numberings used below map 1:1 to the NIST standard sections for simple cross-referencing.
 

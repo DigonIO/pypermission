@@ -1,4 +1,5 @@
-site_name: PyPermission - RBAC for Python with SQLAlchemy
+site_name: PyPermission - Python RBAC Authorization
+site_url: https://pypermission.digon.io
 repo_url: https://gitlab.com/DigonIO/pypermission
 repo_name: DigonIO/pypermission
 copyright: Copyright © 2025 Jendrik Potyka & Fabian Preiss
@@ -16,6 +17,12 @@ theme:
 
 plugins:
   - search
+  - social
+  - privacy:
+      assets_include:
+        - unpkg.com/*
+        - fonts.gstatic.com/*
+        - fonts.googleapis.com/*
   - mkdocstrings:
       handlers:
         python:
@@ -45,7 +52,11 @@ nav:
       - Subject service: api/subject.md
       - Models: api/models.md
       - Util: api/util.md
+  - Changelog: changelog.md
   - Coverage Report: coverage.md
+
+hooks:
+  - hooks.py
 
 markdown_extensions:
   - footnotes

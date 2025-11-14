@@ -1,3 +1,7 @@
+---
+description: "PyPermission - The python RBAC library. FAQ on design decisions, implementation details, and more about authorization in general."
+---
+
 # PyPermission - FAQ
 
 ## Why we developed the `PyPermission` library?
@@ -6,7 +10,7 @@ While many experimental Python packages exist, none offered the robustness and p
 
 We tried to adopt **ory kratos**, a popular open-source RBAC software, but found its configuration and deployment experience cumbersome, especially within our development environment.
 
-In one of our projects we realized a custom RBAC system on top of **SQLAlchemy**. Rather than keeping that logic tangled with business code, we extracted it into a standalone package. This not only allowed us to reuse the same, authorization engine across multiple projects, but also gave us an opportunity to share it with the broader Python community. The result is the `PyPermission` library you see today.
+In one of our projects we realized a custom RBAC system on top of **SQLAlchemy**. Rather than keeping that logic tangled with business code, we extracted it into a standalone package. This not only allowed us to reuse the same, authorization engine across multiple projects, but also gave us an opportunity to share it with the broader Python community. The result is the **PyPermission** library you see today.
 
 ## Can I implement feature flagging with the `PyPermission` library?
 

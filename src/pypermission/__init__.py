@@ -1,24 +1,19 @@
 """
-`PyPermission` - The python RBAC library for projects where `sqlalchemy` is a valid option.
+`PyPermission` - The python RBAC authorization library for projects where `sqlalchemy` is a valid option.
 
 Author: Jendrik A. Potyka, Fabian A. Preiss
 """
 
-__version__ = "0.2.1"
+__version__ = "0.3.0"
 __author__ = "Jendrik A. Potyka, Fabian A. Preiss"
 
 from typing import Final
 
+from pypermission.db import create_rbac_database_table, set_sqlite_pragma
+from pypermission.exc import PermissionNotGrantedError, PyPermissionError
+from pypermission.models import FrozenClass, Permission, Policy
 from pypermission.service.role import RoleService
 from pypermission.service.subject import SubjectService
-from pypermission.models import (
-    Policy,
-    Permission,
-    FrozenClass,
-    create_rbac_database_table,
-    set_sqlite_pragma,
-)
-from pypermission.exc import PyPermissionError, PermissionNotGrantedError
 
 
 class RBAC(metaclass=FrozenClass):
@@ -33,8 +28,8 @@ class RBAC(metaclass=FrozenClass):
         Shorthand for all SubjectService functions.
     """
 
-    role: Final = RoleService
-    subject: Final = SubjectService
+    role: Final[type[RoleService]] = RoleService
+    subject: Final[type[SubjectService]] = SubjectService
 
 
 __all__ = [

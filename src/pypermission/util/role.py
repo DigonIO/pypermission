@@ -1,11 +1,9 @@
 import networkx as nx
-import plotly.graph_objects as go
-
 from sqlalchemy.orm import Session
 from sqlalchemy.sql import select
 
-from pypermission.models import RoleORM, HierarchyORM, MemberORM, PolicyORM
 from pypermission.exc import PyPermissionError
+from pypermission.models import HierarchyORM, MemberORM, Permission, PolicyORM, RoleORM
 
 ################################################################################
 #### Role dag tools
@@ -135,8 +133,12 @@ def _get_permissions_and_polices(
     policies = set(
         (
             policy_orm.role_id,
-            _permission_to_str(
-                policy_orm.resource_type, policy_orm.resource_id, policy_orm.action
+            str(
+                Permission(
+                    resource_type=policy_orm.resource_type,
+                    resource_id=policy_orm.resource_id,
+                    action=policy_orm.action,
+                )
             ),
         )
         for policy_orm in policy_orms
@@ -145,9 +147,3 @@ def _get_permissions_and_polices(
     permissions = set(policy[1] for policy in policies)
 
     return permissions, policies
-
-
-def _permission_to_str(resource_type: str, resource_id: str, action: str) -> str:
-    if not resource_id:
-        return f"{resource_type}:{action}"
-    return f"{resource_type}[{resource_id}]:{action}"

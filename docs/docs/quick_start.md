@@ -1,3 +1,7 @@
+---
+description: "PyPermission - The python RBAC library. Step-by-step examples show how to initialize the database, create roles, assign permissions, and check access."
+---
+
 # PyPermission - Quick Start
 
 !!! info
@@ -8,13 +12,13 @@
     2. [Permission design guide](./permission_design_guide.md)
     3. [Implementation guide](./guide/index.md)
 
-The `PyPermission` library can be installed directly from the PyPI repositories with:
+The **PyPermission** library can be installed directly from the [PyPI repositories](https://pypi.org/project/PyPermission/) with:
 
 ```console
 pip install PyPermission
 ```
 
-For the following example we initialize an in-memory SQLite database using `SQLAlchemy` (we also provide PostgreSQL support with the `'PyPermission[postgres]'` dependency group).
+For the following example we initialize an in-memory [SQLite database](https://sqlite.org/) using [SQLAlchemy](https://www.sqlalchemy.org/) (we also provide [PostgreSQL](https://www.postgresql.org/) support with the `'PyPermission[postgres]'` dependency group).
 
 ```python
 from sqlalchemy.engine import create_engine
@@ -26,25 +30,21 @@ db_factory = sessionmaker(bind=engine, autoflush=False, autocommit=False)
 
 !!! warning
 
-    The `PyPermission` library utilizes and requires constraint checking with the `FOREIGN KEY` syntax. SQLite does not have this feature enabled by default. If you want to use SQLite, make sure your instance fulfills the [necessary prerequisites](https://docs.sqlalchemy.org/en/20/dialects/sqlite.html#foreign-key-support) and use the provided event listener for all database connections.
+    The **PyPermission** library utilizes and requires constraint checking with the `FOREIGN KEY` syntax. **SQLite** does not have this feature enabled by default. If you want to use SQLite, make sure your instance fulfills the [necessary prerequisites](https://docs.sqlalchemy.org/en/20/dialects/sqlite.html#foreign-key-support) and use the provided event listener for all database connections.
 
-    ```{.python notest}
-    from pypermission import create_rbac_database_table, set_sqlite_pragma
-    from sqlalchemy.event import listen
-
-    listen(engine, "connect", set_sqlite_pragma)
-    create_rbac_database_table(engine=engine)
-    ```
+    When using **PostgreSQL** you do not need to set additional listeners.
 
 Create the required tables in the database:
 
 ```{.python continuation}
-from pypermission import create_rbac_database_table
+from pypermission import create_rbac_database_table, set_sqlite_pragma
+from sqlalchemy.event import listen
 
+listen(engine, "connect", set_sqlite_pragma) # not needed with PostgreSQL
 create_rbac_database_table(engine=engine)
 ```
 
-The `PyPermission` library organizes its core functionality into two main services - **RoleService** and **SubjectService**. These services are accessible through the main **RBAC** class, which provides a unified interface for managing **Roles**, **Subjects**, and **Policies**. The examples below demonstrates basic usage.
+The **PyPermission** library organizes its core functionality into two main services - **RoleService** and **SubjectService**. These services are accessible through the main **RBAC** class, which provides a unified interface for managing **Roles**, **Subjects**, and **Policies**. The examples below demonstrates basic usage.
 
 ## Manage Subjects and Roles
 
