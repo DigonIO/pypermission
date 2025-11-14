@@ -378,7 +378,7 @@ class SubjectService(metaclass=FrozenClass):
         ------
         PyPermissionError
             If `subject` is empty string.
-            If the target Role does not exist.
+            If the target Subject does not exist.
         """
         if subject == "":
             raise PyPermissionError("Subject name cannot be empty!")
@@ -486,6 +486,26 @@ class SubjectService(metaclass=FrozenClass):
 
 
 def _get_policy_orms_for_subject(*, subject: str, db: Session) -> Sequence[PolicyORM]:
+    """
+    Get all PolicyORM objects associated to a Subject via its Role hierarchy.
+
+    Parameters
+    ----------
+    subject : str
+        The target SubjectID.
+    db : Session
+        The SQLAlchemy session.
+
+    Returns
+    -------
+    Sequence[PolicyORM]
+        A Sequence containing all associated PolicyORM objects.
+
+    Raises
+    ------
+    PyPermissionError
+        If the target Subject does not exist.
+    """
     subject_orm = db.get(SubjectORM, subject)
     if not subject_orm:
         raise PyPermissionError(f"Subject '{subject}' does not exist!")

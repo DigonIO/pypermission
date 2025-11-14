@@ -699,6 +699,7 @@ class RoleService(metaclass=FrozenClass):
         Raises
         ------
         PyPermissionError
+            If `role` is empty string.
             If the target Role does not exist.
         """
         if role == "":

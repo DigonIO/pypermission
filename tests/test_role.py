@@ -420,23 +420,28 @@ def test_subjects_include_descendants__success(*, db: Session) -> None:
     SS.create(subject="Oscar", db=db)
     SS.create(subject="Charlie", db=db)
     SS.create(subject="Mike", db=db)
+    SS.create(subject="Alex", db=db)
 
     RS.create(role="user", db=db)
     RS.create(role="moderator", db=db)
+    RS.create(role="admin", db=db)
     RS.add_hierarchy(parent_role="user", child_role="moderator", db=db)
+    RS.add_hierarchy(parent_role="moderator", child_role="admin", db=db)
 
     SS.assign_role(subject="Oscar", role="user", db=db)
     SS.assign_role(subject="Mike", role="user", db=db)
     SS.assign_role(subject="Charlie", role="moderator", db=db)
     SS.assign_role(subject="Mike", role="moderator", db=db)
+    SS.assign_role(subject="Alex", role="admin", db=db)
 
     assert Counter(("Oscar", "Mike")) == Counter(RS.subjects(role="user", db=db))
     assert Counter(("Charlie", "Mike")) == Counter(RS.subjects(role="moderator", db=db))
+    assert Counter(("Alex",)) == Counter(RS.subjects(role="admin", db=db))
 
-    assert Counter(("Oscar", "Charlie", "Mike")) == Counter(
+    assert Counter(("Oscar", "Charlie", "Mike", "Alex")) == Counter(
         RS.subjects(role="user", include_descendant_subjects=True, db=db)
     )
-    assert Counter(("Charlie", "Mike")) == Counter(
+    assert Counter(("Charlie", "Mike", "Alex")) == Counter(
         RS.subjects(role="moderator", include_descendant_subjects=True, db=db)
     )
 
@@ -627,31 +632,34 @@ def test_check_permission__unknown_role(db: Session) -> None:
 
 
 def test_assert_permission__success(*, db: Session) -> None:
-    r_user = "user"
-    r_mod = "mod"
-    p_view_all = Permission(resource_type="event", resource_id="*", action="view")
-    p_edit_all = Permission(resource_type="event", resource_id="*", action="edit")
-    p_edit_123 = Permission(resource_type="event", resource_id="123", action="edit")
-    p_del_all = Permission(resource_type="event", resource_id="*", action="del")
+    view_all = Permission(resource_type="event", resource_id="*", action="view")
+    edit_all = Permission(resource_type="event", resource_id="*", action="edit")
+    edit_123 = Permission(resource_type="event", resource_id="123", action="edit")
+    del_all = Permission(resource_type="event", resource_id="*", action="del")
 
-    # Generic roles
-    RS.create(role=r_user, db=db)
-    RS.create(role=r_mod, db=db)
-    RS.grant_permission(role=r_user, permission=p_view_all, db=db)
-    RS.grant_permission(role=r_mod, permission=p_edit_all, db=db)
+    RS.create(role="user", db=db)
+    RS.create(role="mod", db=db)
+    RS.create(role="admin", db=db)
 
-    RS.add_hierarchy(parent_role=r_user, child_role=r_mod, db=db)
+    RS.grant_permission(role="user", permission=view_all, db=db)
+    RS.grant_permission(role="mod", permission=edit_all, db=db)
+    RS.grant_permission(role="admin", permission=del_all, db=db)
 
-    RS.assert_permission(role=r_mod, permission=p_view_all, db=db)
-    RS.assert_permission(role=r_mod, permission=p_edit_all, db=db)
-    RS.assert_permission(role=r_mod, permission=p_edit_123, db=db)
+    RS.add_hierarchy(parent_role="user", child_role="mod", db=db)
+    RS.add_hierarchy(parent_role="mod", child_role="admin", db=db)
+
+
+    RS.assert_permission(role="admin", permission=view_all, db=db)
+    RS.assert_permission(role="admin", permission=edit_all, db=db)
+    RS.assert_permission(role="admin", permission=edit_123, db=db)
+    RS.assert_permission(role="admin", permission=del_all, db=db)
 
     with pytest.raises(PermissionNotGrantedError) as err:
-        RS.assert_permission(role=r_mod, permission=p_del_all, db=db)
+        RS.assert_permission(role="mod", permission=del_all, db=db)
 
     assert (
         ERR_MSG.permission_not_granted_for_role.format(
-            permission_str=str(p_del_all), role=r_mod
+            permission_str=str(del_all), role="mod"
         )
         == err.value.message
     )
@@ -665,10 +673,10 @@ def test_assert_permission__empty_role(*, db: Session) -> None:
 
 
 def test_assert_permission__unknown_role(db: Session) -> None:
-    p_view_all = Permission(resource_type="event", resource_id="*", action="view")
+    view_all = Permission(resource_type="event", resource_id="*", action="view")
 
     with pytest.raises(PyPermissionError) as err:
-        RS.assert_permission(role="unknown", permission=p_view_all, db=db)
+        RS.assert_permission(role="unknown", permission=view_all, db=db)
 
     assert ERR_MSG.non_existent_role.format(role="unknown") == err.value.message
 
@@ -679,28 +687,30 @@ def test_assert_permission__unknown_role(db: Session) -> None:
 
 
 def test_permissions__success(*, db: Session) -> None:
-    p_view_all = Permission(resource_type="event", resource_id="*", action="view")
-    p_edit_all = Permission(resource_type="event", resource_id="*", action="edit")
+    view_all = Permission(resource_type="event", resource_id="*", action="view")
+    edit_all = Permission(resource_type="event", resource_id="*", action="edit")
 
     RS.create(role="user", db=db)
     RS.create(role="mod", db=db)
+    RS.create(role="admin", db=db)
 
-    RS.grant_permission(role="user", permission=p_view_all, db=db)
-    RS.grant_permission(role="mod", permission=p_edit_all, db=db)
+    RS.grant_permission(role="user", permission=view_all, db=db)
+    RS.grant_permission(role="admin", permission=edit_all, db=db)
 
     RS.add_hierarchy(parent_role="user", child_role="mod", db=db)
+    RS.add_hierarchy(parent_role="mod", child_role="admin", db=db)
 
-    assert Counter((str(p_view_all),)) == Counter(
+    assert Counter((str(view_all),)) == Counter(
         str(permission) for permission in RS.permissions(role="user", db=db)
     )
 
-    assert Counter((str(p_view_all), str(p_edit_all))) == Counter(
-        str(permission) for permission in RS.permissions(role="mod", db=db)
+    assert Counter((str(view_all), str(edit_all))) == Counter(
+        str(permission) for permission in RS.permissions(role="admin", db=db)
     )
 
-    assert Counter((str(p_edit_all),)) == Counter(
+    assert Counter((str(edit_all),)) == Counter(
         str(permission)
-        for permission in RS.permissions(role="mod", inherited=False, db=db)
+        for permission in RS.permissions(role="admin", inherited=False, db=db)
     )
 
 
@@ -709,6 +719,7 @@ def test_permissions__empty_role(db: Session) -> None:
         RS.permissions(role="", db=db)
 
     assert ERR_MSG.empty_role == err.value.message
+
 
 def test_permissions__unknown_role(db: Session) -> None:
     with pytest.raises(PyPermissionError) as err:
@@ -723,27 +734,29 @@ def test_permissions__unknown_role(db: Session) -> None:
 
 
 def test_policies__success(*, db: Session) -> None:
-    p_view_all = Permission(resource_type="event", resource_id="*", action="view")
-    p_edit_all = Permission(resource_type="event", resource_id="*", action="edit")
+    view_all = Permission(resource_type="event", resource_id="*", action="view")
+    edit_all = Permission(resource_type="event", resource_id="*", action="edit")
 
     RS.create(role="user", db=db)
     RS.create(role="mod", db=db)
-
-    RS.grant_permission(role="user", permission=p_view_all, db=db)
-    RS.grant_permission(role="mod", permission=p_edit_all, db=db)
+    RS.create(role="admin", db=db)
 
     RS.add_hierarchy(parent_role="user", child_role="mod", db=db)
+    RS.add_hierarchy(parent_role="mod", child_role="admin", db=db)
 
-    assert Counter((f"user:{p_view_all}",)) == Counter(
-        str(policies) for policies in RS.policies(role="user", db=db)
+    RS.grant_permission(role="user", permission=view_all, db=db)
+    RS.grant_permission(role="admin", permission=edit_all, db=db)
+
+    assert Counter((f"user:{view_all}",)) == Counter(
+        str(policy) for policy in RS.policies(role="user", db=db)
     )
 
-    assert Counter((f"user:{p_view_all}", f"mod:{p_edit_all}")) == Counter(
-        str(policies) for policies in RS.policies(role="mod", db=db)
+    assert Counter((f"user:{view_all}", f"admin:{edit_all}")) == Counter(
+        str(policy) for policy in RS.policies(role="admin", db=db)
     )
 
-    assert Counter((f"mod:{p_edit_all}",)) == Counter(
-        str(policies) for policies in RS.policies(role="mod", inherited=False, db=db)
+    assert Counter((f"admin:{edit_all}",)) == Counter(
+        str(policy) for policy in RS.policies(role="admin", inherited=False, db=db)
     )
 
 
@@ -767,13 +780,14 @@ def test_policies__unknown_role(db: Session) -> None:
 
 
 def test_actions_on_resource_inherited__success(*, db: Session) -> None:
-    RS.create(role="admin", db=db)
     RS.create(role="user", db=db)
     RS.create(role="user[Uwe]", db=db)
+    RS.create(role="moderator", db=db)
+    RS.create(role="admin", db=db)
 
-    RS.add_hierarchy(parent_role="user", child_role="admin", db=db)
+    RS.add_hierarchy(parent_role="user", child_role="moderator", db=db)
+    RS.add_hierarchy(parent_role="moderator", child_role="admin", db=db)
 
-    # Grant permissions
     p_view_group = Permission(resource_type="group", resource_id="*", action="view")
     p_edit_group = Permission(resource_type="group", resource_id="*", action="edit")
     p_edit_event = Permission(resource_type="event", resource_id="124", action="edit")
@@ -795,17 +809,6 @@ def test_actions_on_resource_inherited__success(*, db: Session) -> None:
 
     assert Counter(
         RS.actions_on_resource(
-            role="admin", resource_type="group", resource_id="*", db=db
-        )
-    ) == Counter(["view", "edit"])
-    assert Counter(
-        RS.actions_on_resource(
-            role="admin", resource_type="group", resource_id="123", db=db
-        )
-    ) == Counter(["view", "edit"])
-
-    assert Counter(
-        RS.actions_on_resource(
             role="user[Uwe]", resource_type="event", resource_id="*", db=db
         )
     ) == Counter([])
@@ -815,18 +818,33 @@ def test_actions_on_resource_inherited__success(*, db: Session) -> None:
         )
     ) == Counter(["edit"])
 
+    assert Counter(
+        RS.actions_on_resource(
+            role="admin", resource_type="group", resource_id="*", db=db
+        )
+    ) == Counter(["view", "edit"])
+    assert Counter(
+        RS.actions_on_resource(
+            role="admin", resource_type="group", resource_id="123", db=db
+        )
+    ) == Counter(["view", "edit"])
+
 
 def test_actions_on_resource_not_inherited__success(*, db: Session) -> None:
-    RS.create(role="admin", db=db)
     RS.create(role="user", db=db)
     RS.create(role="user[Uwe]", db=db)
+    RS.create(role="moderator", db=db)
+    RS.create(role="admin", db=db)
 
-    RS.add_hierarchy(parent_role="user", child_role="admin", db=db)
+    RS.add_hierarchy(parent_role="user", child_role="moderator", db=db)
+    RS.add_hierarchy(parent_role="moderator", child_role="admin", db=db)
 
     p_view_group = Permission(resource_type="group", resource_id="*", action="view")
     p_edit_group = Permission(resource_type="group", resource_id="*", action="edit")
+    p_edit_event = Permission(resource_type="event", resource_id="124", action="edit")
 
     RS.grant_permission(role="user", permission=p_view_group, db=db)
+    RS.grant_permission(role="user[Uwe]", permission=p_edit_event, db=db)
     RS.grant_permission(role="admin", permission=p_edit_group, db=db)
 
     assert Counter(
@@ -843,6 +861,25 @@ def test_actions_on_resource_not_inherited__success(*, db: Session) -> None:
             db=db,
         )
     ) == Counter(["view"])
+
+    assert Counter(
+        RS.actions_on_resource(
+            role="user[Uwe]",
+            resource_type="event",
+            resource_id="*",
+            inherited=False,
+            db=db,
+        )
+    ) == Counter([])
+    assert Counter(
+        RS.actions_on_resource(
+            role="user[Uwe]",
+            resource_type="event",
+            resource_id="124",
+            inherited=False,
+            db=db,
+        )
+    ) == Counter(["edit"])
 
     assert Counter(
         RS.actions_on_resource(
