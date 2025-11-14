@@ -4,7 +4,7 @@
 Author: Jendrik A. Potyka, Fabian A. Preiss
 """
 
-__version__ = "0.2.1"
+__version__ = "0.3.0"
 __author__ = "Jendrik A. Potyka, Fabian A. Preiss"
 
 from typing import Final
