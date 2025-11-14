@@ -18,6 +18,11 @@ theme:
 plugins:
   - search
   - social
+  - privacy:
+      assets_include:
+        - unpkg.com/*
+        - fonts.gstatic.com/*
+        - fonts.googleapis.com/*
   - mkdocstrings:
       handlers:
         python:

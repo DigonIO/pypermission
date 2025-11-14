@@ -16,13 +16,13 @@ Next ID: `34`
 - `27.` Doc - Add Auditing Guide
 - `26?` Doc - Ensure closer alignment to style guide
 - `22.` Doc - write [integration guide](https://pypermission.digon.io/guide/)
-- `21.` Doc - Include external dependencies in build instead of using CDN
 - `19.` Provide json/yaml import/export utility function
 - `18.` Provide FastAPI standalone service with RBAC functionality via REST API
 - `10.` Doc - Compare to NIST
 
 ## Done Tasks
 
+- `21.` Doc - Include external dependencies in build instead of using CDN
 - `11.` Doc - Compare to ANSI (fix section 6/7 TODO)
 - `30!` README some SVGs are not available on PyPI, replace the relative path with URL to GitLab (main branch)
 - `33.` CI - Include isort + black job
