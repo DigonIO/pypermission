@@ -11,7 +11,6 @@ Next ID: `34`
 ## Open Tasks
 
 - `32.` Doc - Some docstrings do not list all possible reasons for raising an exception
-- `30!` README some SVGs are not available on PyPI, replace the relative path with URL to GitLab (main branch)
 - `29.` Doc Permission Design Guide -> As a subsection of RBAC system design
 - `28.` Doc - Design Rationale: Reasoning for certain design decisions
 - `27.` Doc - Add Auditing Guide
@@ -25,6 +24,7 @@ Next ID: `34`
 
 ## Done Tasks
 
+- `30!` README some SVGs are not available on PyPI, replace the relative path with URL to GitLab (main branch)
 - `33.` CI - Include isort + black job
 - `15.` Tests:
     - [x] Cover more than just next neighbor in role hierarchy tests.

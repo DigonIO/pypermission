@@ -1,14 +1,14 @@
-![Logo: PyPermission - RBAC for Python](./assets/logo_font_path.svg "PyPermission Logo")
+![Logo: PyPermission - RBAC for Python](https://gitlab.com/DigonIO/pypermission/-/raw/main/assets/logo_font_path.svg "PyPermission Logo")
 
 **PyPermission** - The python RBAC authorization authorization library for projects where SQLAlchemy is a valid option.
 
 [![repository](https://img.shields.io/badge/src-GitLab-orange)](https://gitlab.com/DigonIO/pypermission)
 [![mirror](https://img.shields.io/badge/mirror-GitHub-orange)](https://github.com/DigonIO/pypermission)
-[![License: LGPLv3](assets/badges/license.svg)](https://spdx.org/licenses/LGPL-3.0-only.html)
+[![License: LGPLv3](https://gitlab.com/DigonIO/pypermission/-/raw/main/assets/badges/license.svg)](https://spdx.org/licenses/LGPL-3.0-only.html)
 [![pipeline status](https://gitlab.com/DigonIO/pypermission/badges/main/pipeline.svg)](https://gitlab.com/DigonIO/pypermission/-/pipelines)
 [![coverage report](https://gitlab.com/DigonIO/pypermission/badges/main/coverage.svg)](https://gitlab.com/DigonIO/pypermission/-/pipelines)
-[![Code style: black](assets/badges/black.svg)](https://github.com/psf/black)
-[![Imports: isort](assets/badges/isort.svg)](https://pycqa.github.io/isort/)
+[![Code style: black](https://gitlab.com/DigonIO/pypermission/-/raw/main/assets/badges/black.svg)](https://github.com/psf/black)
+[![Imports: isort](https://gitlab.com/DigonIO/pypermission/-/raw/main/assets/badges/isort.svg)](https://pycqa.github.io/isort/)
 
 [![pkgversion](https://img.shields.io/pypi/v/pypermission)](https://pypi.org/project/pypermission/)
 [![versionsupport](https://img.shields.io/pypi/pyversions/pypermission)](https://pypi.org/project/pypermission/)
@@ -110,7 +110,7 @@ with db_factory() as db:
 
 ## Sponsor
 
-![Digon.IO GmbH Logo](./assets/logo_digon.io_gmbh.png "Digon.IO GmbH")
+![Digon.IO GmbH Logo](https://gitlab.com/DigonIO/pypermission/-/raw/main/assets/logo_digon.io_gmbh.png "Digon.IO GmbH")
 
 Fine-Tuned AI services for developers.
 
