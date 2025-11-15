@@ -94,7 +94,7 @@ with db_factory() as db:
         subject="Alex",
         permission=Permission(
             resource_type="user",
-            resource_id="123",
+            resource_id="Max",
             action="edit",
         ),
         db=db,
