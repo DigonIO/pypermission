@@ -3,7 +3,7 @@ from enum import StrEnum
 from sqlalchemy.orm import Mapped, Session, mapped_column, relationship
 from sqlalchemy.sql.schema import ForeignKey
 from sqlalchemy.sql.sqltypes import Enum as SqlEnum
-from sqlalchemy.sql.sqltypes import String
+from sqlalchemy.sql.sqltypes import String, Boolean
 
 from pypermission.models import BaseORM
 
@@ -38,7 +38,7 @@ class UserORM(BaseORM):
     __tablename__ = "app_user_table"
     username: Mapped[str] = mapped_column(String, primary_key=True)
     email: Mapped[str] = mapped_column(String)
-    role: Mapped[str] = mapped_column(String)
+    is_admin: Mapped[bool] = mapped_column(Boolean)
     state: Mapped[State] = mapped_column(
         SqlEnum(State, name="UserORM.State"), default=State.ACTIVE
     )

@@ -41,8 +41,8 @@ nav:
   - Quick Start: quick_start.md
   - Definitions: definitions.md
   - Permission Design Guide: permission_design_guide.md
-  - Implementation Guide:
-      - Start: guide/index.md
+  - Integration Guide:
+      - Introduction: guide/index.md
   - Comparison to ANSI: ansi.md
   - Comparison to NIST: nist.md
   - FAQ: faq.md
