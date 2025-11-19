@@ -1,8 +1,6 @@
-# The PyPermission Reference Integration
+# 1. Integration Guide - Introduction
 
-## Introduction
-
-This example demonstrates a reference integration of the **PyPermission** RBAC library in an exemplary backend service layer for a fictive "MeetDown" SaaS application.
+This integration guide demonstrates a reference integration of the **PyPermission** RBAC library in an exemplary backend service layer for a fictive "MeetDown" SaaS application.
 
 !!! warning
 
@@ -21,11 +19,11 @@ The MeetDown application showcases a simplified version of a community event org
 
 The MeetDown application structures its features into three core services, each encapsulating a distinct domain of functionality. These services are designed to reflect the underlying data model while also emphasizing the functionality on a feature basis. The following table describes the core service domains:
 
-| Domain | Description                                                                                    |
-| ------ | ---------------------------------------------------------------------------------------------- |
-| `User`   | Represents individual `User` accounts within the platform.                                       |
-| `Group`  | Represents community spaces managed by `User`s. `Group`s act as containers for members and events. |
-| `Event`  | Represents scheduled activities within a `Group`.                                                |
+| Domain  | Description                                                                                        |
+| ------- | -------------------------------------------------------------------------------------------------- |
+| `User`  | Represents individual `User` accounts within the platform.                                         |
+| `Group` | Represents community spaces managed by `User`s. `Group`s act as containers for members and events. |
+| `Event` | Represents scheduled activities within a `Group`.                                                  |
 
 ## RBAC Roles
 
@@ -33,7 +31,7 @@ The following **Roles** are defined in the RBAC system:
 
 | **Role**    | Description                                                                                        |
 | ----------- | -------------------------------------------------------------------------------------------------- |
-| `guest`     | Represents unauthenticated  `User`s (not logged in). Guests can only view public content.          |
+| `guest`     | Represents unauthenticated `User`s (not logged in). Guests can only view public content.           |
 | `user`      | Authenticated `User`s who can participate in `Group`s and `Event`s and manage their own account.   |
 | `moderator` | Moderators can manage `User`s, `Group`s and `Event`s. They can not participate like normal `User`. |
 | `admin`     | Admins can create, modify, and delete any resource.                                                |
@@ -80,4 +78,3 @@ The following table outlines the **Policies** for `Event` resources. `Event`s ar
 | `set_title()` |       | if group owner |           | yes   |
 | `set_state()` |       | if group owner | yes       | yes   |
 | `delete()`    |       | if group owner |           | yes   |
-

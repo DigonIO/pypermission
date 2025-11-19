@@ -10,7 +10,7 @@ description: "PyPermission - The python RBAC library. Step-by-step examples show
 
     1. [Definitions](./definitions.md)
     2. [Permission design guide](./permission_design_guide.md)
-    3. [Implementation guide](./guide/index.md)
+    3. [Implementation guide](./integration_guide/1_introduction.md)
 
 The **PyPermission** library can be installed directly from the [PyPI repositories](https://pypi.org/project/PyPermission/) with:
 
