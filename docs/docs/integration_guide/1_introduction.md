@@ -44,37 +44,37 @@ The following subsections describe which **Roles** have access to which service 
 
 The following table outlines the **Policies** for managing `User` profiles, including email and state updates. Only `admin`s can fully modify or delete a `User` resource, while the **Role** `moderator` and `user` may update only their own profile.
 
-| Actions       | guest | user | moderator                 | admin |
-| ------------- | ----- | ---- | ------------------------- | ----- |
-| `create()`    |       |      | yes                       | yes   |
-| `get()`       |       | yes  | yes                       | yes   |
-| `list()`      |       | yes  | yes                       | yes   |
-| `set_email()` |       | self | if not moderator or admin | yes   |
-| `set_state()` |       | self | if not moderator or admin | yes   |
-| `delete()`    |       |      |                           | yes   |
+| Actions       | guest | user                | moderator                                                | admin |
+| ------------- | ----- | ------------------- | -------------------------------------------------------- | ----- |
+| `create()`    |       |                     | ✓                                                       | ✓    |
+| `get()`       |       | ✓                  | ✓                                                       | ✓    |
+| `list()`      |       | ✓                  | ✓                                                       | ✓    |
+| `set_email()` |       | ✓ (on own profile) | ✓ (except for other `moderator` or `admin` **Members**) | ✓    |
+| `set_state()` |       | ✓ (on own profile) | ✓ (except for other `moderator` or `admin` **Members**) | ✓    |
+| `delete()`    |       |                     |                                                          | ✓    |
 
 ### Group service
 
 The following table outlines the **Policies** for `Group` resources. Authenticated `User`s are allowed to create and manage their communities. Group owners have full control over `Group` settings, while `moderator`s can assist in managing content and state.
 
-| Actions       | guest | user     | moderator | admin |
-| ------------- | ----- | -------- | --------- | ----- |
-| `create()`    |       | yes      |           | yes   |
-| `get()`       | yes   | yes      | yes       | yes   |
-| `list()`      | yes   | yes      | yes       | yes   |
-| `set_title()` |       | if owner |           | yes   |
-| `set_state()` |       | if owner | yes       | yes   |
-| `delete()`    |       | if owner |           | yes   |
+| Actions       | guest | user                | moderator | admin |
+| ------------- | ----- | ------------------- | --------- | ----- |
+| `create()`    |       | ✓                  |           | ✓    |
+| `get()`       | ✓    | ✓                  | ✓        | ✓    |
+| `list()`      | ✓    | ✓                  | ✓        | ✓    |
+| `set_title()` |       | ✓ (if group owner) |           | ✓    |
+| `set_state()` |       | ✓ (if group owner) | ✓        | ✓    |
+| `delete()`    |       | ✓ (if group owner) |           | ✓    |
 
 ### Event service
 
 The following table outlines the **Policies** for `Event` resources. `Event`s are managed within `Group`s and follow access rules similar to `Group`s. Only owners or `admin`s can make changes to `Event`s, with `moderator`s having additional moderation privileges.
 
-| Actions       | guest | user           | moderator | admin |
-| ------------- | ----- | -------------- | --------- | ----- |
-| `create()`    |       | if group owner |           | yes   |
-| `get()`       | yes   | yes            | yes       | yes   |
-| `list()`      | yes   | yes            | yes       | yes   |
-| `set_title()` |       | if group owner |           | yes   |
-| `set_state()` |       | if group owner | yes       | yes   |
-| `delete()`    |       | if group owner |           | yes   |
+| Actions       | guest | user                | moderator | admin |
+| ------------- | ----- | ------------------- | --------- | ----- |
+| `create()`    |       | ✓ (if group owner) |           | ✓    |
+| `get()`       | ✓    | ✓                  | ✓        | ✓    |
+| `list()`      | ✓    | ✓                  | ✓        | ✓    |
+| `set_title()` |       | ✓ (if group owner) |           | ✓    |
+| `set_state()` |       | ✓ (if group owner) | ✓        | ✓    |
+| `delete()`    |       | ✓ (if group owner) |           | ✓    |
