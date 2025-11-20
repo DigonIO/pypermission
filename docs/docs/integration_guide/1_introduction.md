@@ -1,19 +1,20 @@
 # 1. Integration Guide - Introduction
 
-This integration guide demonstrates a reference integration of the **PyPermission** RBAC library in an exemplary backend service layer for a fictive "MeetDown" SaaS application.
-
-!!! warning
-
-    This page is under development.
-
-The MeetDown application showcases a simplified version of a community event organizing platform where users can join groups and manage events. It illustrates both a theoretical foundation for designing an RBAC system for a SaaS platform like "meetup" and a practical walkthrough of how these concepts are implemented in the accompanying backend Python code.
-
 !!! info
 
     Before continuing the reference integration guide we recommend going through the documentation in the following order:
 
     1. [Definitions](../definitions.md)
     2. [Permission design guide](../permission_design_guide.md)
+
+
+This integration guide demonstrates a reference integration of the **PyPermission** RBAC library in an exemplary backend service layer for a fictive "MeetDown" SaaS application.
+
+The MeetDown application showcases a simplified version of a community event organizing platform where users can join groups and manage events. It illustrates both a theoretical foundation for designing an RBAC system for a SaaS platform like "meetup" and a practical walkthrough of how these concepts are implemented in the accompanying backend Python code.
+
+!!! info
+
+    The complete fictional MeetDown application is included in the **PyPermission** package. The corresponding Python source code can be found in the library repository in the folder [`src/pypermission/example`](https://gitlab.com/DigonIO/pypermission/-/tree/main/src/pypermission/example).
 
 ## Features
 
@@ -81,4 +82,4 @@ The following table outlines the **Policies** for `Event` resources. `Event`s ar
 
 This was the first part of the integration guide, which covered which features the fictitious MeetDown application provides and how these are divided into the corresponding service functions, as well as which `User` `Group` has access to which functionality.
 
-In the second part, we continue with how to implement these requirements in an RBAC system and specifically - which **Roles** and **Permissions** are explicitly required. [Here we continue...](./2_rbac_system_design.md)
+In the second part, we continue with how to implement these requirements in an RBAC system and specifically - which **Roles** and **Permissions** are explicitly required. [Continue...](./2_rbac_system_design.md)

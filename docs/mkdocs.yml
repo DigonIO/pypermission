@@ -44,7 +44,7 @@ nav:
   - Integration Guide:
       - 1. Introduction: integration_guide/1_introduction.md
       - 2. RBAC System Design: integration_guide/2_rbac_system_design.md
-      - 3. Code Architecture Design:  integration_guide/3_code_architecture_design.md
+      - 3. Practical Integration:  integration_guide/3_code_architecture_design.md
   - Comparison to ANSI: ansi.md
   - Comparison to NIST: nist.md
   - FAQ: faq.md
