@@ -34,47 +34,71 @@ Moderators receive additional **Permissions** like `User[*]:edit` and `Group[*]:
 
 #### **Permissions** of **Role** `guest`
 
-| **Permissions**   | Description                             |
-| ----------------- | --------------------------------------- |
-| `Group[*]:access` | All `Group`s may be viewed.             |
-| `Event[*]:access` | All `Event`s may be viewed.             |
+| **Permissions**   | Description                 |
+| ----------------- | --------------------------- |
+| `Group[*]:access` | All `Group`s may be viewed. |
+| `Event[*]:access` | All `Event`s may be viewed. |
 
 #### **Permissions** of **Role** `user`
 
-| **Permissions**   | Description                             |
-| ----------------- | --------------------------------------- |
-| `User[*]:access`  | All `User`s may be viewed.              |
-| `Group[*]:access` | All `Group`s may be viewed.             |
-| `Event[*]:access` | All `Event`s may be viewed.             |
+| **Permissions**   | Description                 |
+| ----------------- | --------------------------- |
+| `User[*]:access`  | All `User`s may be viewed.  |
+| `Group[*]:access` | All `Group`s may be viewed. |
+| `Event[*]:access` | All `Event`s may be viewed. |
 
 #### **Permissions** of **Role** `moderator`
 
 | **Permissions**       | Description                                                                                      |
 | --------------------- | ------------------------------------------------------------------------------------------------ |
-| `User:create`         | New `User`s may be created.                                                                           |
-| `User[*]:access`      | All `User`s may be viewed.                                                                            |
-| `User[*]:edit`        | All `User` emails may be edited (except for other `moderator` or `admin` **Members**).                |
-| `User[*]:deactivate`  | All `User`s may be deactivated (except for other `moderator` or `admin` **Members**).                 |
-| `Group[*]:access`     | All `Group`s may be viewed.                                                                           |
-| `Group[*]:deactivate` | All `Group`s may be deactivated.                                                                      |
-| `Event[*]:access`     | All `Event`s may be viewed.                                                                           |
-| `Event[*]:deactivate` | All `Event`s may be deactivated.                                                                      |
+| `User:create`         | New `User`s may be created.                                                                      |
+| `User[*]:access`      | All `User`s may be viewed.                                                                       |
+| `User[*]:edit`        | All `User`s may be edited (e.g. username) (except for other `moderator` or `admin` **Members**). |
+| `User[*]:deactivate`  | All `User`s may be deactivated (except for other `moderator` or `admin` **Members**).            |
+| `Group[*]:access`     | All `Group`s may be viewed.                                                                      |
+| `Group[*]:deactivate` | All `Group`s may be deactivated.                                                                 |
+| `Event[*]:access`     | All `Event`s may be viewed.                                                                      |
+| `Event[*]:deactivate` | All `Event`s may be deactivated.                                                                 |
 
 ### Dynamic **Roles**
 
+Dynamic **Roles** werden in laufzeit created und deleted. Im folgenden werden alle dynamischen **Roles** erläutert.
+
 #### **Permissions** of **Role** `User[<UserID>]`
 
-When a new `User` is created in the application logic, a new **Role** `User[<UserID>]` must also be created. In the actual implementation of this example, the variable `<UserID>` is replaced by the `username` and links the `User` object to the `User[<UserID>]` **Role**. This **Role** is exclusive to this single `User` and allows them to use classic features such as managing their own profile. If the `User` is deleted, this exclusive **Role** is also deleted.
+When a new `User` is created in the application logic, a new **Role** `User[<UserID>]` must also be created. In the actual implementation of this example, the variable `<UserID>` is replaced by a UUID and links the `User` object to the `User[<UserID>]` **Role**. This **Role** is exclusive to this single `User` and allows them to use classic features such as managing their own profile. If the `User` is deleted, this exclusive **Role** is also deleted.
 
-| **Permissions**       | Description                                                                                      |
-| --------------------- | ------------------------------------------------------------------------------------------------ |
-| `User[<UserID>]:edit`        | The email of the `User` with the `<UserID>` may be edited (except for other `moderator` or `admin` **Members**).                |
-| `User[<UserID>]:deactivate`  | The `User` with the `<UserID>` may be deactivated (except for other `moderator` or `admin` **Members**).                 |
+| **Permissions**             | Description                                                                                                         |
+| --------------------------- | ------------------------------------------------------------------------------------------------------------------- |
+| `User[<UserID>]:edit`       | The `User` with the `<UserID>` may be edited (e.g. username) (except for other `moderator` or `admin` **Members**). |
+| `User[<UserID>]:deactivate` | The `User` with the `<UserID>` may be deactivated (except for other `moderator` or `admin` **Members**).            |
 
+#### **Permissions** of **Role** `Group[<GroupID>]_organizer`
 
+When a `User` creates a new `Group`, a corresponding **Role** `Group[<GroupID>]_organizer` must be created. In the actual implementation of this example, the variable `<GroupID>` is replaced by the `groupname` and links the `Group` object to the `Group[<GroupID>]_organizer` **Role**.
+
+This **Role** is required to grant administrative **Permissions** on the `Group`. Therefore, the creator of the `Group` must be assigned to this **Role**.
+
+!!! note
+
+    In the fictional MeetDown application used in this implementation guide, only the **Role** `Group[<GroupID>]_organizer` is created. In reality, additional **Roles** would of course be required, for example, a **Role** like `Group[<GroupID>]_member`, which would be assigned to all `User`s who join the `Group`. Furthermore, a **Role** such as `Group[<GroupID>]_co_organizer` would be useful to support moderation tasks within the `Group`.
+
+| **Permissions**                     | Description                                                          |
+| ----------------------------------- | -------------------------------------------------------------------- |
+| `Group[<GroupID>]:edit`             | The `Group` with `<GroupID>` may be edited (e.g. title).             |
+| `Group[<GroupID>]:deactivate`       | The `Group` with `<GroupID>` may be deactivated.                     |
+| `Group[<GroupID>]:delete`           | The `Group` with `<GroupID>` may be deleted.                         |
+| `Event[Group:<GroupID>]:create`     | New `Event`s may be created inside the `Group` with `<GroupID>`.     |
+| `Event[Group:<GroupID>]:edit`       | All `Event`s inside the `Group` with `<GroupID>` may be edited.      |
+| `Event[Group:<GroupID>]:deactivate` | All `Event`s inside the `Group` with `<GroupID>` may be deactivated. |
+| `Event[Group:<GroupID>]:delete`     | All `Event`s inside the `Group` with `<GroupID>` may be deleted.     |
 
 !!! tip
 
     For RBAC **Roles**, the same principle applies as in software design: composition over inheritance!
 
     Nevertheless, inheritance can still be useful, you just need to carefully consider when **Permissions** should be inherited and when they should not.
+
+This was the second part of the integration guide, which explained how the RBAC system of the fictitious MeetDown application is designed, how **Roles** are structured, and which explicit **Permissions** are required to implement the feature access rules defined in the first part.
+
+In the third part, we continue with the practical integration of **PyPermission** into a Python backend code. Here the focus is on how to implement **Role** and **Policy** creation, **Permission** checks and how to structure service-layer authorization. [Here we continue...](./3_code_architecture_design.md)

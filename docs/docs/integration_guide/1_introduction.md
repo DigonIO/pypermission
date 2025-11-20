@@ -44,14 +44,14 @@ The following subsections describe which **Roles** have access to which service 
 
 The following table outlines the **Policies** for managing `User` profiles, including email and state updates. Only `admin`s can fully modify or delete a `User` resource, while the **Role** `moderator` and `user` may update only their own profile.
 
-| Actions       | guest | user                | moderator                                                | admin |
-| ------------- | ----- | ------------------- | -------------------------------------------------------- | ----- |
-| `create()`    |       |                     | ✓                                                       | ✓    |
-| `get()`       |       | ✓                  | ✓                                                       | ✓    |
-| `list()`      |       | ✓                  | ✓                                                       | ✓    |
-| `set_email()` |       | ✓ (on own profile) | ✓ (except for other `moderator` or `admin` **Members**) | ✓    |
-| `set_state()` |       | ✓ (on own profile) | ✓ (except for other `moderator` or `admin` **Members**) | ✓    |
-| `delete()`    |       |                     |                                                          | ✓    |
+| Actions          | guest | user                | moderator                                                | admin |
+| ---------------- | ----- | ------------------- | -------------------------------------------------------- | ----- |
+| `create()`       |       |                     | ✓                                                       | ✓    |
+| `get()`          |       | ✓                  | ✓                                                       | ✓    |
+| `list()`         |       | ✓                  | ✓                                                       | ✓    |
+| `set_username()` |       | ✓ (on own profile) | ✓ (except for other `moderator` or `admin` **Members**) | ✓    |
+| `set_state()`    |       | ✓ (on own profile) | ✓ (except for other `moderator` or `admin` **Members**) | ✓    |
+| `delete()`       |       |                     |                                                          | ✓    |
 
 ### Group service
 
@@ -78,3 +78,7 @@ The following table outlines the **Policies** for `Event` resources. `Event`s ar
 | `set_title()` |       | ✓ (if group owner) |           | ✓    |
 | `set_state()` |       | ✓ (if group owner) | ✓        | ✓    |
 | `delete()`    |       | ✓ (if group owner) |           | ✓    |
+
+This was the first part of the integration guide, which covered which features the fictitious MeetDown application provides and how these are divided into the corresponding service functions, as well as which `User` `Group` has access to which functionality.
+
+In the second part, we continue with how to implement these requirements in an RBAC system and specifically - which **Roles** and **Permissions** are explicitly required. [Here we continue...](./2_rbac_system_design.md)
