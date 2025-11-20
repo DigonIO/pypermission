@@ -1,4 +1,4 @@
-# 2. Integration Guide – RBAC System Design
+# 2. Integration Guide - RBAC System Design
 
 The second part of the integration guide covers the RBAC system design of the MeetDown application. Its goal is to explain how **Roles** are designed, which **Permissions** are granted per **Role**, and explicitly which features these permissions apply to.
 
@@ -26,14 +26,20 @@ A short refresher (for more detailed information, see the [Permission design gui
 
     Instance **Permissions** must always be dynamically granted and revoked together with the corresponding Instances. An exception is an instance **Permission** that uses the wildcard `*`, since it directly represents all Instances at once.
 
-### **Permissions** of **Role** `guest`
+### Static **Roles**
+
+Static **Roles** are predefined during application initialization and assigned wildcard **Permissions** to define baseline access. For example, `guest` has `Group[*]:access` and `Event[*]:access` to view all `Group`s and `Event`s, while `user` **Role** adds `User[*]:access` to view all `User`s.
+
+Moderators receive additional **Permissions** like `User[*]:edit` and `Group[*]:deactivate` to manage `User`s and `Group`s across all instances. These can be assigned directly to the **Role**.
+
+#### **Permissions** of **Role** `guest`
 
 | **Permissions**   | Description                             |
 | ----------------- | --------------------------------------- |
 | `Group[*]:access` | All `Group`s may be viewed.             |
 | `Event[*]:access` | All `Event`s may be viewed.             |
 
-### **Permissions** of **Role** `user`
+#### **Permissions** of **Role** `user`
 
 | **Permissions**   | Description                             |
 | ----------------- | --------------------------------------- |
@@ -41,7 +47,7 @@ A short refresher (for more detailed information, see the [Permission design gui
 | `Group[*]:access` | All `Group`s may be viewed.             |
 | `Event[*]:access` | All `Event`s may be viewed.             |
 
-### **Permissions** of **Role** `moderator`
+#### **Permissions** of **Role** `moderator`
 
 | **Permissions**       | Description                                                                                      |
 | --------------------- | ------------------------------------------------------------------------------------------------ |
@@ -53,6 +59,19 @@ A short refresher (for more detailed information, see the [Permission design gui
 | `Group[*]:deactivate` | All `Group`s may be deactivated.                                                                      |
 | `Event[*]:access`     | All `Event`s may be viewed.                                                                           |
 | `Event[*]:deactivate` | All `Event`s may be deactivated.                                                                      |
+
+### Dynamic **Roles**
+
+#### **Permissions** of **Role** `User[<UserID>]`
+
+When a new `User` is created in the application logic, a new **Role** `User[<UserID>]` must also be created. In the actual implementation of this example, the variable `<UserID>` is replaced by the `username` and links the `User` object to the `User[<UserID>]` **Role**. This **Role** is exclusive to this single `User` and allows them to use classic features such as managing their own profile. If the `User` is deleted, this exclusive **Role** is also deleted.
+
+| **Permissions**       | Description                                                                                      |
+| --------------------- | ------------------------------------------------------------------------------------------------ |
+| `User[<UserID>]:edit`        | The email of the `User` with the `<UserID>` may be edited (except for other `moderator` or `admin` **Members**).                |
+| `User[<UserID>]:deactivate`  | The `User` with the `<UserID>` may be deactivated (except for other `moderator` or `admin` **Members**).                 |
+
+
 
 !!! tip
 
