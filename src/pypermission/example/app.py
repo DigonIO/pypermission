@@ -31,11 +31,10 @@ class MeetDownApp:
     def event(self) -> type[EventService]:
         return self._event
 
-    def populate_scenario(self, *, ctx: Context) -> None:
-        RBAC.role.create(role="admin", db=ctx.db)
-        RBAC.role.create(role="moderator", db=ctx.db)
-        RBAC.role.create(role="user", db=ctx.db)
+    def populate(self, *, ctx: Context) -> None:
         RBAC.role.create(role="guest", db=ctx.db)
+        RBAC.role.create(role="user", db=ctx.db)
+        RBAC.role.create(role="moderator", db=ctx.db)
 
         RBAC.role.add_hierarchy(
             parent_role="guest",
@@ -45,11 +44,6 @@ class MeetDownApp:
         RBAC.role.add_hierarchy(
             parent_role="user",
             child_role="moderator",
-            db=ctx.db,
-        )
-        RBAC.role.add_hierarchy(
-            parent_role="moderator",
-            child_role="admin",
             db=ctx.db,
         )
 

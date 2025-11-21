@@ -1,3 +1,4 @@
+from uuid import UUID
 from enum import StrEnum
 
 from sqlalchemy.orm import Mapped, Session, mapped_column, relationship
@@ -11,11 +12,11 @@ class ExampleError(Exception): ...
 
 
 class Context:
-    username: str | None
+    user_id: UUID | None
     db: Session
 
-    def __init__(self, *, user: str | None = None, db: Session):
-        self.username = user
+    def __init__(self, *, user_id: UUID | None = None, db: Session):
+        self.user_id = user_id
         self.db = db
 
 
