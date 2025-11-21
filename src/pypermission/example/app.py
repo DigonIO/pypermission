@@ -4,15 +4,17 @@ from sqlalchemy.engine.base import Engine
 
 from pypermission import RBAC
 from pypermission.db import create_rbac_database_table
-from pypermission.example.models import Context
-from pypermission.example.service.group import GroupService
+from pypermission.example.types import Context
 from pypermission.example.service.user import UserService
+from pypermission.example.service.group import GroupService
+from pypermission.example.service.event import EventService
 from pypermission.models import Permission
 
 
-class ExampleApp:
+class MeetDownApp:
     _user: Final = UserService
     _group: Final = GroupService
+    _event: Final = EventService
 
     def __init__(self, *, engine: Engine) -> None:
         create_rbac_database_table(engine=engine)
@@ -25,11 +27,14 @@ class ExampleApp:
     def group(self) -> type[GroupService]:
         return self._group
 
-    def populate_example(self, *, ctx: Context) -> None:
-        RBAC.role.create(role="admin", db=ctx.db)
-        RBAC.role.create(role="moderator", db=ctx.db)
-        RBAC.role.create(role="user", db=ctx.db)
+    @property
+    def event(self) -> type[EventService]:
+        return self._event
+
+    def populate(self, *, ctx: Context) -> None:
         RBAC.role.create(role="guest", db=ctx.db)
+        RBAC.role.create(role="user", db=ctx.db)
+        RBAC.role.create(role="moderator", db=ctx.db)
 
         RBAC.role.add_hierarchy(
             parent_role="guest",
@@ -39,11 +44,6 @@ class ExampleApp:
         RBAC.role.add_hierarchy(
             parent_role="user",
             child_role="moderator",
-            db=ctx.db,
-        )
-        RBAC.role.add_hierarchy(
-            parent_role="moderator",
-            child_role="admin",
             db=ctx.db,
         )
 

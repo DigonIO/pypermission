@@ -21,18 +21,19 @@ If you find the PyPermission library beneficial, please consider supporting the 
 
 [![GitHub Repo stars](https://img.shields.io/github/stars/digonio/pypermission)](https://github.com/DigonIO/pypermission)
 
-# Python RBAC authorization with SQLAlchemy
+# PyPermission - RBAC for Python & Pythonistas
 
 ## Features
 
-- Authorization for pythonistas [(Quick Start)](https://pypermission.digon.io/quick_start/)
+- RBAC for Python [(Quick Start)](https://pypermission.digon.io/quick_start/)
+    - Subjects, Roles, Hierarchies, Permissions, Policies & Auditing
+    - Supports NIST Level 2a & some Level 4 review functions
 - Persistency via SQLAlchemy
-    - SQLite
-    - PostgreSQL (psycopg)
+    - SQLite & PostgreSQL (psycopg)
 - Full integration guide [(Guide WIP)](https://pypermission.digon.io/guide/)
-- RBAC state analysis (optional)
-    - Export the RBAC DAG as NetworkX DiGraph
-    - Visualize the RBAC DAG via Plotly
+- Advanced auditing
+    - Export a RBAC DAG as NetworkX DiGraph
+    - Visualize a RBAC DAG via Plotly
 - Lightweight
 - High test coverage
 - [Online documentation](https://pypermission.digon.io/)
