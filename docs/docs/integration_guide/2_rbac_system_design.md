@@ -95,9 +95,9 @@ This **Role** is required to grant administrative **Permissions** on the `Group`
 
 !!! tip
 
-    For RBAC **Roles**, the same principle applies as in software design: composition over inheritance!
+    In RBAC design, prefer composition over inheritance when designing **Roles** and their **Permissions**. Instead of building **Role** hierarchies, define each **Role** by explicitly composing the **Permissions** it needs. This avoids accidental privilege inheritance and keeps the system predictable.
 
-    Nevertheless, inheritance can still be useful, you just need to carefully consider when **Permissions** should be inherited and when they should not.
+    Nevertheless, **Role** inheritance can still be useful, if done intentionally.
 
 This was the second part of the integration guide, which explained how the RBAC system of the fictitious MeetDown application is designed, how **Roles** are structured, and which explicit **Permissions** are required to implement the feature access rules defined in the first part.
 

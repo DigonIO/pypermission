@@ -2,11 +2,10 @@
 
 !!! info
 
-    Before continuing the reference integration guide we recommend going through the documentation in the following order:
+    Before continuing with the reference integration guide we recommend going through the documentation in the following order:
 
     1. [Definitions](../definitions.md)
     2. [Permission design guide](../permission_design_guide.md)
-
 
 This integration guide demonstrates a reference integration of the **PyPermission** RBAC library in an exemplary backend service layer for a fictive "MeetDown" SaaS application.
 
