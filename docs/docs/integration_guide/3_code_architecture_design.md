@@ -89,10 +89,12 @@ After the **Context**, the **MeetDownApp** class is introduced. For the purposes
     This works because the example uses a single shared database. As a result, the `create_rbac_database_table()` function from **PyPermission** creates both the RBAC tables and the tables relevant to the business logic.
 
 ```python title="src/pypermission/example/app.py"
+from typing import Final
+
+from sqlalchemy.engine.base import Engine
 
 from pypermission import RBAC
 from pypermission.db import create_rbac_database_table
-
 from pypermission.example.service.user import UserService
 from pypermission.example.service.group import GroupService
 from pypermission.example.service.event import EventService
@@ -106,6 +108,11 @@ class MeetDownApp:
     def __init__(self, *, engine: Engine) -> None:
         create_rbac_database_table(engine=engine)
 
+        # TODO fix populate call
+        with replace_me:
+            populate(ctx=Context(db=db))
+
+
     @property
     def user(self) -> type[UserService]:
         return self._user
@@ -117,18 +124,57 @@ class MeetDownApp:
     @property
     def event(self) -> type[EventService]:
         return self._event
-
-    def populate(self, *, ctx: Context) -> None:
-        ...
 ```
 
 Additionally, the **MeetDownApp** class provides convenient properties that allow quick access to the feature-specific service functions. This is especially helpful when experimenting with the guide in an interactive environment such as a Jupyter notebook.
 
-The `populate()` function, which was already hinted at at the beginning of this section, is explained in detail in the next subsection.
-
 ### The Population
 
-WIP
+```python title="src/pypermission/example/app.py"
+
+def populate(self, *, ctx: Context) -> None:
+    RBAC.role.create(role="guest", db=ctx.db)
+    RBAC.role.create(role="user", db=ctx.db)
+    RBAC.role.create(role="moderator", db=ctx.db)
+
+    RBAC.role.add_hierarchy(
+        parent_role="guest",
+        child_role="user",
+        db=ctx.db,
+    )
+    RBAC.role.add_hierarchy(
+        parent_role="user",
+        child_role="moderator",
+        db=ctx.db,
+    )
+
+    _populate_guest_role_policies(ctx=ctx)
+    _populate_user_role_policies(ctx=ctx)
+    _populate_moderator_role_policies(ctx=ctx)
+```
+
+```python title="src/pypermission/example/app.py"
+
+def _populate_guest_role_policies(ctx: Context) -> None:
+    RBAC.role.grant_permission(
+        role="guest",
+        permission=Permission(
+            resource_type="group",
+            resource_id="*",
+            action="access",
+        ),
+        db=ctx.db,
+    )
+    RBAC.role.grant_permission(
+        role="guest",
+        permission=Permission(
+            resource_type="event",
+            resource_id="*",
+            action="access",
+        ),
+        db=ctx.db,
+    )
+```
 
 ## Dynamic **Roles**
 
