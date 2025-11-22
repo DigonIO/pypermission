@@ -18,10 +18,10 @@ Next ID: `34`
 - `22.` Doc - write [integration guide](https://pypermission.digon.io/guide/)
 - `19.` Provide json/yaml import/export utility function
 - `18.` Provide FastAPI standalone service with RBAC functionality via REST API
-- `10.` Doc - Compare to NIST
 
 ## Done Tasks
 
+- `10.` Doc - Compare to NIST
 - `21.` Doc - Include external dependencies in build instead of using CDN
 - `11.` Doc - Compare to ANSI (fix section 6/7 TODO)
 - `30!` README some SVGs are not available on PyPI, replace the relative path with URL to GitLab (main branch)
