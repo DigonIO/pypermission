@@ -65,6 +65,12 @@ Run ruff with:
 uv run ruff check src
 ```
 
+Rund pyright with:
+
+```console
+uv run basedpyright src
+```
+
 ## Style Guide
 
 ### Docs

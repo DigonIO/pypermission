@@ -6,10 +6,14 @@
 - `xxxx.` Normal
 - `xxxx!` Critical
 
-Next ID: `34`
+Next ID: `36`
 
 ## Open Tasks
 
+- `35.` Prevent usage of `:` within the strings in `Subject`, `Roles`, `ResourceType`, `ResourceID` and `Action`
+    - [ ] Doc/Tests: Replace `:` usage in Container Permissions and use brackets
+    - [ ] Lock down user input to disallow the `:` character
+- `34.` Allow the `*` wildcard for the action
 - `32.` Doc - Some docstrings do not list all possible reasons for raising an exception
 - `29.` Doc Permission Design Guide -> As a subsection of RBAC system design
 - `28.` Doc - Design Rationale: Reasoning for certain design decisions
