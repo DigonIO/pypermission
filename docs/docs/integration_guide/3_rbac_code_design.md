@@ -1,4 +1,4 @@
-# 3. Integration Guide - Practical Integration
+# 3. Integration Guide - RBAC Code Design
 
 This part of the guide covers how the **PyPermission** library can be integrated into the Python backend code for the fictional MeetDown application.
 
@@ -333,3 +333,19 @@ def delete(
 
     return user_orm
 ```
+
+## Initial RBAC table population
+
+The `populate()` function is intended exclusively for the initial deployment of the application. It creates the predefined **Roles**, establishes the **Role** **Hierarchy**, and assigns the baseline **Permissions**. Once this initial state has been written to the database, later startups should skip this initialization.
+
+```python
+def populate(*, ctx: Context) -> None:
+    create_roles(ctx=ctx)
+    create_hierarchies(ctx=ctx)
+
+    create_guest_role_policies(ctx=ctx)
+    create_user_role_policies(ctx=ctx)
+    create_moderator_role_policies(ctx=ctx)
+```
+
+The corresponding implementation of the called methods can be found in [`example_code.py`](https://gitlab.com/DigonIO/pypermission/-/blob/main/docs/docs/integration_guide/example_code.py).

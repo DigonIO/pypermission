@@ -99,4 +99,4 @@ This **Role** is required to grant administrative **Permissions** on the `Group`
 
 This was the second part of the integration guide, which explained how the RBAC system of the fictitious MeetDown application is designed, how **Roles** are structured, and which explicit **Permissions** are required to implement the feature access rules defined in the first part.
 
-In the third part, we continue with the practical integration of the **PyPermission** library into a Python backend code. Here the focus is on how to implement **Role** and **Policy** creation, **Permission** checks and how to structure service-layer authorization. [Continue...](./3_code_architecture_design.md)
+In the third part, we continue with the practical integration of the **PyPermission** library into a Python backend code. Here the focus is on how to implement **Role** and **Policy** creation, **Permission** checks and how to structure service-layer authorization. [Continue...](./3_rbac_code_design.md)

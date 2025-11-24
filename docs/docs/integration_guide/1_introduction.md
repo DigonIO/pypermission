@@ -11,10 +11,6 @@ This integration guide demonstrates a reference integration of the **PyPermissio
 
 The MeetDown application showcases a simplified version of a community event organizing platform where users can join groups and manage events. It illustrates both a theoretical foundation for designing an RBAC system for a SaaS platform like "meetup" and a practical walkthrough of how these concepts are implemented in the accompanying backend Python code.
 
-!!! info
-
-    The complete fictional MeetDown application is included in the **PyPermission** package. The corresponding Python source code can be found in the library repository in the folder [`src/pypermission/example`](https://gitlab.com/DigonIO/pypermission/-/tree/main/src/pypermission/example).
-
 ## Features
 
 The MeetDown application structures its features into three core services, each encapsulating a distinct domain of functionality. These services are designed to reflect the underlying data model while also emphasizing the functionality on a feature basis. The following table describes the core service domains:
