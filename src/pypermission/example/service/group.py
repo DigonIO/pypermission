@@ -3,7 +3,9 @@ from typing import Sequence
 from sqlalchemy.sql import select
 
 from pypermission import RBAC, Permission
-from pypermission.example.models import Context, ExampleError, GroupORM, State, UserORM
+
+# from pypermission.example.models import Context, ExampleError, GroupORM, State, UserORM
+from pypermission.example.types import Context
 
 ################################################################################
 #### UserService

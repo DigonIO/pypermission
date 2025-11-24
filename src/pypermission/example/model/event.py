@@ -2,20 +2,20 @@ from uuid import UUID
 
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.sql.schema import ForeignKey
-from sqlalchemy.sql.sqltypes import Enum as SqlEnum
 from sqlalchemy.sql.sqltypes import UUID as SqlUUID
+from sqlalchemy.sql.sqltypes import Enum as SqlEnum
 from sqlalchemy.sql.sqltypes import String
 
-from pypermission.models import BaseORM
-from pypermission.example.types import State
 from pypermission.example.model.group import GroupORM
+from pypermission.example.model.orm import MeetDownORM
+from pypermission.example.types import State
 
 ################################################################################
 #### EventORM
 ################################################################################
 
 
-class EventORM(BaseORM):
+class EventORM(MeetDownORM):
     __tablename__ = "app_event_table"
     id: Mapped[UUID] = mapped_column(SqlUUID, primary_key=True)
     group_id: Mapped[str] = mapped_column(

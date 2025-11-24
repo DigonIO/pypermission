@@ -1,7 +1,8 @@
-from uuid import UUID
 from enum import StrEnum
 
-from sqlalchemy.orm import Mapped, Session, mapped_column, relationship
+from sqlalchemy.orm import Session
+
+from pypermission.example.model.user import UserORM
 
 ################################################################################
 #### Types
@@ -12,11 +13,11 @@ class ExampleError(Exception): ...
 
 
 class Context:
-    user_id: UUID | None
+    user_orm: UserORM | None
     db: Session
 
-    def __init__(self, *, user_id: UUID | None = None, db: Session):
-        self.user_id = user_id
+    def __init__(self, *, user_orm: UserORM | None = None, db: Session):
+        self.user_orm = user_orm
         self.db = db
 
 

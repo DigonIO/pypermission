@@ -1,10 +1,13 @@
-from typing import Sequence
+from typing import Literal, Sequence
+from uuid import UUID
 
 from sqlalchemy.sql import select
 
 from pypermission import RBAC, Permission
-from pypermission.example.types import Context, ExampleError, State
 from pypermission.example.model.user import UserORM
+from pypermission.example.types import Context, ExampleError, State
+
+type Role = Literal["guest", "user", "moderator"]
 
 ################################################################################
 #### UserService
@@ -12,49 +15,49 @@ from pypermission.example.model.user import UserORM
 
 
 class UserService:
-    @classmethod
+    @staticmethod
     def create(
-        cls,
         *,
         username: str,
         email: str,
-        role: str = "guest",
+        role: Role = "user",
+        is_admin: bool = False,
         ctx: Context,
         rbac: bool = True,
     ) -> UserORM:
+        is_adm_or_mod = is_admin or (role == "moderator")
 
-        match rbac, ctx.username:
-            case True, str():
-                # NOTE Only needed, because no real authentication is present.
-                if ctx.db.get(UserORM, ctx.username) is None:
-                    raise ExampleError(f"Unknown user '{ctx.username}' in context!")
+        match rbac, ctx.user_orm:
+            case True, UserORM(is_admin=True):
+                ...
+            case True, UserORM():
+                subject = f"User[{ctx.user_orm.id}]"
+                permission = Permission(
+                    resource_type="User", resource_id="", action="create"
+                )
 
-                if not RBAC.subject.check_permission(
-                    subject=ctx.username,
-                    permission=Permission(
-                        resource_type="base", resource_id="", action="user:create"
-                    ),
+                if is_adm_or_mod or not RBAC.subject.check_permission(
+                    subject=subject,
+                    permission=permission,
                     db=ctx.db,
                 ):
-                    raise ExampleError("Permission not granted!")
-            case False, None:
-                ...
-            case False, str():
-                ...
+                    raise ExampleError(
+                        f"Permission '{permission}' not granted for Subject '{subject}'!"
+                    )
             case True, None:
-                raise ExampleError("No user in context!")
+                raise ExampleError("No 'user_id' in Context!")
+            case False, _:
+                ...
 
         user_orm = UserORM(username=username, email=email, role=role)
         ctx.db.add(user_orm)
         ctx.db.flush()
-
-        cls._create_role_and_policies(username=username, role=role, ctx=ctx)
+        UserService._create_role_and_policies(username=username, role=role, ctx=ctx)
 
         return user_orm
 
-    @classmethod
+    @staticmethod
     def list(
-        cls,
         *,
         ctx: Context,
         rbac: bool = True,
@@ -83,9 +86,8 @@ class UserService:
 
         return ctx.db.scalars(select(UserORM)).all()
 
-    @classmethod
+    @staticmethod
     def get(
-        cls,
         *,
         username: str,
         ctx: Context,
@@ -118,9 +120,8 @@ class UserService:
             raise ExampleError(f"Unknown user '{username}'!")
         return user_orm
 
-    @classmethod
+    @staticmethod
     def set_email(
-        cls,
         *,
         username: str,
         email: str,
@@ -156,9 +157,8 @@ class UserService:
         ctx.db.flush()
         return user_orm
 
-    @classmethod
+    @staticmethod
     def set_state(
-        cls,
         *,
         username: str,
         state: State,
@@ -194,9 +194,8 @@ class UserService:
         ctx.db.flush()
         return user_orm
 
-    @classmethod
+    @staticmethod
     def delete(
-        cls,
         *,
         username: str,
         ctx: Context,
@@ -245,12 +244,12 @@ class UserService:
     #### Util
     ################################################################################
 
-    @classmethod
-    def _create_role_and_policies(cls, username: str, role: str, ctx: Context) -> None:
-        RBAC.subject.create(subject=username, db=ctx.db)
+    @staticmethod
+    def _create_role_and_policies(username: str, role: str, ctx: Context) -> None:
+        RBAC.subject.create(subject=f"User[{user.id}]", db=ctx.db)
         RBAC.subject.assign_role(role=role, subject=username, db=ctx.db)
 
-        USER_ROLE = f"user[{username}]"
+        USER_ROLE = f"User[{user.id}]"
         RBAC.role.create(role=USER_ROLE, db=ctx.db)
         RBAC.subject.assign_role(subject=username, role=USER_ROLE, db=ctx.db)
 
