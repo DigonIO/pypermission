@@ -209,7 +209,7 @@ def create_role_and_policies(
     RBAC.subject.create(subject=USER_UUID, db=ctx.db)
 
     # Assign the application Role 'Guest' | 'User' | 'Moderator'.
-    RBAC.subject.assign_role(role=role, subject=role, db=ctx.db)
+    RBAC.subject.assign_role(subject=USER_UUID, role=role, db=ctx.db)
 
     # Create and assign the instance exclusive Role for the User.
     RBAC.role.create(role=USER_UUID, db=ctx.db)
