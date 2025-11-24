@@ -1,13 +1,13 @@
 # 3. Integration Guide - Practical Integration
 
-The third part the integration guide covers practical integration of the **PyPermission** library into the Python backend code of the fictional MeetDown application.
+This part of the guide covers how the **PyPermission** library can be integrated into the Python backend code for the fictional MeetDown application.
 
 !!! info
-    The complete fictional MeetDown application is included in the **PyPermission** package. The corresponding Python code can be found in the library repository in the folder [`src/pypermission/example`](https://gitlab.com/DigonIO/pypermission/-/tree/main/src/pypermission/example).
+    The complete demo application is included in the **PyPermission** package. The corresponding Python code can be found in the library repository within the folder [`src/pypermission/example`](https://gitlab.com/DigonIO/pypermission/-/tree/main/src/pypermission/example).
 
 ## Project Architecture
 
-At the beginning, the project architecture is explained, how the fictional backend project is structured. As usual, it is divided into the three layers: `API Layer`, `Service Layer`, and `Data Layer`.
+The project architecture is introduced first, outlining the structure of the fictional backend. As standard, it is organized into three distinct layers: `API Layer`, `Service Layer`, and `Data Layer`.
 
 ```mermaid
 flowchart LR
@@ -28,17 +28,17 @@ flowchart LR
     AuthN --> AuthZ --> Logic --> DataAccess
 ```
 
-As shown in the diagram, **authentication (AuthN)** should be implemented in the `API Layer`. The `API Layer` itself may be a REST API build with `FastAPI`, or a message-bus system with its own AuthN protocol. Because the guide focuses solely on **authorization (AuthZ)**, the `API Layer` is not discussed further.
+As shown in the diagram, **authentication (AuthN)** is implemented within the `API Layer`. This layer may consist of a REST API built with `FastAPI` or a message-bus system using its own AuthN protocol. Since the guide focuses exclusively on **authorization (AuthZ)**, the `API Layer` is not further elaborated.
 
-It is even advantageous to separate AuthN (in the `API Layer`) and AuthZ(in the `Service Layer`), as this makes it easy to replace or run multiple `API Layer` technologies in parallel. For this reason, AuthZ is grouped together with the Business Logic in the `Service Layer`.
+Separating Authentication (AuthN) in the `API Layer` from Authorization (AuthZ) in the `Service Layer` is beneficial, as it allows for easy replacement or parallel operation of multiple `API Layer` technologies. For this reason, AuthZ is co-located with the Business Logic within the `Service Layer`.
 
-The guide also covers the `Data Layer`, which for simplicity uses `SQLAlchemy`. In practice, the Business Logic does not need to use the same database technology as **PyPermission**.
+The guide also covers the `Data Layer`, which for simplicity uses `SQLAlchemy`. In practice, the Business Logic may use a different database technology than **PyPermission**.
 
 ### Files & Folders
 
-The required Python files are structured as shown below and are included in the **PyPermission** [repository](https://gitlab.com/DigonIO/pypermission/-/tree/main/src/pypermission/example). The files for the `Service Layer` are located in the `service` directory, and those for the `Data Layer` in the `model` directory. In both cases, the files are organized by feature.
+The required Python files are arranged as shown below and are part of the **PyPermission** [repository](https://gitlab.com/DigonIO/pypermission/-/tree/main/src/pypermission/example). The `Service Layer` components are located in the `service` directory, while the `Data Layer` components reside in the `model` directory. In both cases, files are grouped by feature.
 
-A fictional **MeetDownApp** class is created in `app.py`, which primarily serves to assemble the entire backend. The `types.py` file contains only utility classes.
+A fictional **MeetDownApp** class is defined in `app.py` to assemble the entire backend. The `types.py` file contains utility classes only.
 
 ```bash
 $ tree src/pypermission/example --gitignore
@@ -57,17 +57,17 @@ src/pypermission/example
 
 ## Static **Roles**
 
-As described in the [second part](./2_rbac_system_design.md) of the guide, there are both static and dynamic **Roles**. Static **Roles** can be created when the application instance is first set up, for example through a database migration script, or as shown in this guide, through a function that populate the application.
+As explained in the [second part](./2_rbac_system_design.md) of the guide, **Roles** are either static or dynamic. Static **Roles** are established at application startup - either via a database migration or, as shown here, through an initialization function that populates the system.
 
-The following sections explain all components necessary for understanding this process.
+The following sections describe the components required to understand this setup.
 
 ### The Context
 
-Before introducing the **MeetDownApp** class itself, we first describe the **Context** class. The **Context** is required to pass all metadata about the current request into the service functions. In a simple scenario, e.g. when using `FastAPI` in the `API Layer`, this means reading a cookie or bearer token from the incoming request, performing AuthN, and identifying the corresponding `User`. In more complex scenarios, requests coming from multiple `API Layer` technologies, such as a message bus or a REST API, can be unified.
+Before introducing the **MeetDownApp** class, we describe the **Context** class. The **Context** encapsulates all metadata relevant to the current request and is passed to service functions. In a simple setup - such as using `FastAPI` in the `API Layer` - this involves reading a cookie or bearer token, performing AuthN, and identifying the associated `User`. In more complex scenarios involving multiple `API Layer` technologies (e.g., message buses or REST APIs), the **Context** can unify request metadata across different entry points.
 
-Because the `API Layer` is intentionally ignored in this guide, the potential `user_id` must be manually inserted into the **Context** of the fictional request.
+As the `API Layer` is omitted in this guide, the `user_id` must be manually added to the **Context** of the fictional request.
 
-The **Context** typically carries additional meta-information about the request. In this guide, however, only the `user_id` and the database session `db` are included. This represents the minimal setup required for the examples, as the focus of the integration guide is solely on AuthZ.
+The **Context** typically contains metadata associated with the request. For the examples in this guide, only the `user_id` and the database session `db` are included - a minimal setup sufficient for demonstrating AuthZ, as the guide focuses exclusively on authorization.
 
 ```python title="src/pypermission/example/types.py"
 from uuid import UUID
@@ -83,12 +83,15 @@ class Context:
 
 ### The MeetDownApp
 
-After the **Context**, the **MeetDownApp** class is introduced. For the purposes of this guide, it is kept intentionally simple again, the focus is on explaining AuthZ. Therefore, the only task performed in the `__init__()` method, and thus the sole purpose of instantiating **MeetDownApp**, is to create the required database tables.
+After the **Context**, the **MeetDownApp** class is introduced. For the purposes of this guide, it is kept intentionally simple. The sole task performed in the `__init__()` method, and thus the only reason for instantiating **MeetDownApp**, is to create the required database tables.
 
 !!! note
-    This works because the example uses a single shared database. As a result, the `create_rbac_database_table()` function from **PyPermission** creates both the RBAC tables and the tables relevant to the business logic.
+    This works because the example uses a single shared database. As a result, the `create_rbac_database_table()` function from **PyPermission** creates both the RBAC tables and the business logic tables. This is done for simplicity reasons.
 
-```python title="src/pypermission/example/app.py"
+!!! warning
+    Using a shared database for RBAC and application data creates the risk of corrupting the RBAC tables. A developer could easily write queries that direcly modify the RBAC tables without respecting constraints enforced by the **PyPermission** API while working on a feature or migration script.
+
+```{.python notest title="src/pypermission/example/app.py"}
 from typing import Final
 
 from sqlalchemy.engine.base import Engine
@@ -101,9 +104,9 @@ from pypermission.example.service.event import EventService
 from pypermission.example.types import Context
 
 class MeetDownApp:
-    _user: Final = UserService
-    _group: Final = GroupService
-    _event: Final = EventService
+    user: Final = UserService
+    group: Final = GroupService
+    event: Final = EventService
 
     def __init__(self, *, engine: Engine) -> None:
         create_rbac_database_table(engine=engine)
@@ -111,27 +114,13 @@ class MeetDownApp:
         # TODO fix populate call
         with replace_me:
             populate(ctx=Context(db=db))
-
-
-    @property
-    def user(self) -> type[UserService]:
-        return self._user
-
-    @property
-    def group(self) -> type[GroupService]:
-        return self._group
-
-    @property
-    def event(self) -> type[EventService]:
-        return self._event
 ```
 
-Additionally, the **MeetDownApp** class provides convenient properties that allow quick access to the feature-specific service functions. This is especially helpful when experimenting with the guide in an interactive environment such as a Jupyter notebook.
+The **MeetDownApp** class includes properties that provide direct access to the service functions for each feature, simplifying interaction with the backend. This is particularly useful when testing or exploring the integration in an interactive environment such as a Jupyter notebook.
 
 ### The Population
 
 ```python title="src/pypermission/example/app.py"
-
 def populate(self, *, ctx: Context) -> None:
     RBAC.role.create(role="guest", db=ctx.db)
     RBAC.role.create(role="user", db=ctx.db)
@@ -154,7 +143,6 @@ def populate(self, *, ctx: Context) -> None:
 ```
 
 ```python title="src/pypermission/example/app.py"
-
 def _populate_guest_role_policies(ctx: Context) -> None:
     RBAC.role.grant_permission(
         role="guest",
