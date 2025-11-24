@@ -7,7 +7,7 @@ from sqlalchemy.pool.base import (
 )
 
 from pypermission.exc import PyPermissionError
-from pypermission.models import BaseORM
+from pypermission.models import PyPermissionORM
 
 
 def create_rbac_database_table(*, engine: Engine) -> None:
@@ -27,7 +27,7 @@ def create_rbac_database_table(*, engine: Engine) -> None:
             " on your SQLite engine before interacting with the database!"
         )
 
-    BaseORM.metadata.create_all(bind=engine)
+    PyPermissionORM.metadata.create_all(bind=engine)
 
 
 # https://docs.sqlalchemy.org/en/20/dialects/sqlite.html#foreign-key-support

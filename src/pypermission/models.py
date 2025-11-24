@@ -7,7 +7,7 @@ from sqlalchemy.sql.sqltypes import String
 from pypermission.exc import PyPermissionError
 
 
-class BaseORM(DeclarativeBase): ...
+class PyPermissionORM(DeclarativeBase): ...
 
 
 ################################################################################
@@ -130,7 +130,7 @@ class FrozenClass(type):
 ################################################################################
 
 
-class RoleORM(BaseORM):
+class RoleORM(PyPermissionORM):
     __tablename__ = "pp_role_table"
     id: Mapped[str] = mapped_column(String, primary_key=True)
 
@@ -140,7 +140,7 @@ class RoleORM(BaseORM):
 ################################################################################
 
 
-class HierarchyORM(BaseORM):
+class HierarchyORM(PyPermissionORM):
     __tablename__ = "pp_hierarchy_table"
     parent_role_id: Mapped[str] = mapped_column(
         String, ForeignKey("pp_role_table.id", ondelete="CASCADE"), primary_key=True
@@ -155,7 +155,7 @@ class HierarchyORM(BaseORM):
 ################################################################################
 
 
-class SubjectORM(BaseORM):
+class SubjectORM(PyPermissionORM):
     __tablename__ = "pp_subject_table"
     id: Mapped[str] = mapped_column(String, primary_key=True)
 
@@ -165,7 +165,7 @@ class SubjectORM(BaseORM):
 ################################################################################
 
 
-class MemberORM(BaseORM):
+class MemberORM(PyPermissionORM):
     __tablename__ = "pp_member_table"
     role_id: Mapped[str] = mapped_column(
         String, ForeignKey("pp_role_table.id", ondelete="CASCADE"), primary_key=True
@@ -180,7 +180,7 @@ class MemberORM(BaseORM):
 ################################################################################
 
 
-class PolicyORM(BaseORM):
+class PolicyORM(PyPermissionORM):
     __tablename__ = "pp_policy_table"
     role_id: Mapped[str] = mapped_column(
         String, ForeignKey("pp_role_table.id", ondelete="CASCADE"), primary_key=True
