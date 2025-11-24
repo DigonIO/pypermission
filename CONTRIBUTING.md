@@ -94,6 +94,7 @@ The documentation should use the following markup in descriptions:
 * values should be written in code blocks (for example `Alex`, `19`, `view` or `group:123`)
 * application level types (like `event` or `group`) should be treated as values
 * attributes should be written in code blocks and in `snake_case` (for example `resource_type`, `resource_id`)
+* prefer writing AuthN for authentication and AuthZ for authorization
 
 Examples:
 

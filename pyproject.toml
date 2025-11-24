@@ -81,3 +81,10 @@ disallow_subclassing_any = true
 
 [tool.pyright]
 typeCheckingMode = "strict"
+
+[tool.coverage.run]
+branch = true
+source = ["src/pypermission"]
+
+[tool.coverage.report]
+show_missing = true
