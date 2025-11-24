@@ -1,13 +1,12 @@
 # 2. Integration Guide - RBAC System Design
 
-The second part of the integration guide covers the RBAC system design of the MeetDown application. Its goal is to explain how **Roles** are designed, which **Permissions** are granted per **Role**, and explicitly which features these permissions apply to.
+The second part of the integration guide covers the RBAC system design of the MeetDown application. Its goal is to explain how **Roles** are designed, which **Permissions** are granted per **Role**, and explicitly which features these **Permissions** apply to.
 
 As described in the first part of the integration guide, the **Roles** are: `guest`, `user`, `moderator`, and `admin`.
 
-The first important note is that the `admin` **Role** does not need to be handled inside the RBAC system itself. Instead, a field `is_admin` is added to the **User** table. This field can be used to quickly answer permission checks without actually consulting the RBAC system, since according to our guide, the `admin` **Role** is allowed to perform **any** action.
+The first important note is that the `admin` **Role** does not need to be handled inside the RBAC system itself. Instead, a field `is_admin` is added to the **User** table. This field can be used to quickly answer **Permission** checks without actually consulting the RBAC system, since according to our guide, the `admin` **Role** is allowed to perform **any** action.
 
 !!! info
-
     Some applications introduce a distinction between an `admin` and a `superuser` **Role**.
     In such cases, the `superuser` is stored as a flag on the **User** table, similar to what is described in this guide, and is technically allowed to perform all operations. However, this `superuser` is not intended for normal operational use.
 
@@ -23,7 +22,6 @@ A short refresher (for more detailed information, see the [Permission design gui
 + "Container **Permissions**" apply to all **Resources** within a container (e.g. all `Event`s inside a `Group`).
 
 !!! note
-
     Instance **Permissions** must always be dynamically granted and revoked together with the corresponding Instances. An exception is an instance **Permission** that uses the wildcard `*`, since it directly represents all Instances at once.
 
 ### Static **Roles**
@@ -62,7 +60,7 @@ Moderators receive additional **Permissions** like `User[*]:edit` and `Group[*]:
 
 ### Dynamic **Roles**
 
-Dynamic **Roles** werden in laufzeit created und deleted. Im folgenden werden alle dynamischen **Roles** erläutert.
+Dynamic **Roles** are created and deleted at runtime. The following sections describe all dynamic **Roles**.
 
 #### **Permissions** of **Role** `User[<UserID>]`
 
@@ -83,15 +81,15 @@ This **Role** is required to grant administrative **Permissions** on the `Group`
 
     In the fictional MeetDown application used in this implementation guide, only the **Role** `Group[<GroupID>]_organizer` is created. In reality, additional **Roles** would of course be required, for example, a **Role** like `Group[<GroupID>]_member`, which would be assigned to all `User`s who join the `Group`. Furthermore, a **Role** such as `Group[<GroupID>]_co_organizer` would be useful to support moderation tasks within the `Group`.
 
-| **Permissions**                     | Description                                                          |
-| ----------------------------------- | -------------------------------------------------------------------- |
-| `Group[<GroupID>]:edit`             | The `Group` with `<GroupID>` may be edited (e.g. title).             |
-| `Group[<GroupID>]:deactivate`       | The `Group` with `<GroupID>` may be deactivated.                     |
-| `Group[<GroupID>]:delete`           | The `Group` with `<GroupID>` may be deleted.                         |
-| `Event[Group:<GroupID>]:create`     | New `Event`s may be created inside the `Group` with `<GroupID>`.     |
-| `Event[Group:<GroupID>]:edit`       | All `Event`s inside the `Group` with `<GroupID>` may be edited.      |
-| `Event[Group:<GroupID>]:deactivate` | All `Event`s inside the `Group` with `<GroupID>` may be deactivated. |
-| `Event[Group:<GroupID>]:delete`     | All `Event`s inside the `Group` with `<GroupID>` may be deleted.     |
+| **Permissions**                      | Description                                                          |
+| ------------------------------------ | -------------------------------------------------------------------- |
+| `Group[<GroupID>]:edit`              | The `Group` with `<GroupID>` may be edited (e.g. title).             |
+| `Group[<GroupID>]:deactivate`        | The `Group` with `<GroupID>` may be deactivated.                     |
+| `Group[<GroupID>]:delete`            | The `Group` with `<GroupID>` may be deleted.                         |
+| `Event[Group[<GroupID>]]:create`     | New `Event`s may be created inside the `Group` with `<GroupID>`.     |
+| `Event[Group[<GroupID>]]:edit`       | All `Event`s inside the `Group` with `<GroupID>` may be edited.      |
+| `Event[Group[<GroupID>]]:deactivate` | All `Event`s inside the `Group` with `<GroupID>` may be deactivated. |
+| `Event[Group[<GroupID>]]:delete`     | All `Event`s inside the `Group` with `<GroupID>` may be deleted.     |
 
 !!! tip
 

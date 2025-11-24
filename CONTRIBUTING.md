@@ -80,7 +80,7 @@ When describing the library for example in the following permission check:
 ```py
 RBAC.subject.assert_permission(
         subject="Ursula",
-        permission=Permission(resource_type="event", resource_id="group:123", action="view"),
+        permission=Permission(resource_type="Event", resource_id="Group[123]", action="view"),
         db=db,
     )
 ```
@@ -91,10 +91,12 @@ The documentation should use the following markup in descriptions:
 * Definitional types (those that do not have a corresponding class or type in the library, such as **Role** or **Subject**) should be written in `PascalCase` and bold (just like Library types)
 * Stay close to the definitions in `docs/docs/definitions.md` (e.g. **ResourceType** instead of "resource type",
   **ResourceID** instead of "resource ID"). Infer from the definitions, that for consistency reasons **RoleID** should be preferred over "role id" even though not explicitly stated.
-* values should be written in code blocks (for example `Alex`, `19`, `view` or `group:123`)
-* application level types (like `event` or `group`) should be treated as values
+* values should be written in code blocks (for example `Alex`, `19`, `view` or `Group[123]`)
+* application level types (like `Event` or `Group`) should be treated as values
 * attributes should be written in code blocks and in `snake_case` (for example `resource_type`, `resource_id`)
 * prefer writing AuthN for authentication and AuthZ for authorization
+* Plurals for types and classes (texts written in bold should be directly included as bold, e.g. **Subjects** or **Permissions**)
+* Plurals for values and application level types (texts written in code blocks should write the plural form outside of the code block, e.g. `view`s, `Event`s)
 
 Examples:
 

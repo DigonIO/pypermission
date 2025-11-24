@@ -2,12 +2,9 @@
 
 This part of the guide covers how the **PyPermission** library can be integrated into the Python backend code for the fictional MeetDown application.
 
-!!! info
-    The complete demo application is included in the **PyPermission** package. The corresponding Python code can be found in the library repository within the folder [`src/pypermission/example`](https://gitlab.com/DigonIO/pypermission/-/tree/main/src/pypermission/example).
+## Recommended Project Architecture
 
-## Project Architecture
-
-The project architecture is introduced first, outlining the structure of the fictional backend. As standard, it is organized into three distinct layers: `API Layer`, `Service Layer`, and `Data Layer`.
+The following outlines the typical structure of a backend - organized into three distinct layers: `API Layer`, `Service Layer`, and `Data Layer`.
 
 ```mermaid
 flowchart LR
@@ -32,138 +29,307 @@ As shown in the diagram, **authentication (AuthN)** is implemented within the `A
 
 Separating Authentication (AuthN) in the `API Layer` from Authorization (AuthZ) in the `Service Layer` is beneficial, as it allows for easy replacement or parallel operation of multiple `API Layer` technologies. For this reason, AuthZ is co-located with the Business Logic within the `Service Layer`.
 
-The guide also covers the `Data Layer`, which for simplicity uses `SQLAlchemy`. In practice, the Business Logic may use a different database technology than **PyPermission**.
-
-### Files & Folders
-
-The required Python files are arranged as shown below and are part of the **PyPermission** [repository](https://gitlab.com/DigonIO/pypermission/-/tree/main/src/pypermission/example). The `Service Layer` components are located in the `service` directory, while the `Data Layer` components reside in the `model` directory. In both cases, files are grouped by feature.
-
-A fictional **MeetDownApp** class is defined in `app.py` to assemble the entire backend. The `types.py` file contains utility classes only.
-
-```bash
-$ tree src/pypermission/example --gitignore
-src/pypermission/example
-├── app.py
-├── model
-│   ├── event.py
-│   ├── group.py
-│   └── user.py
-├── service
-│   ├── event.py
-│   ├── group.py
-│   └── user.py
-└── types.py
-```
-
-## Static **Roles**
-
-As explained in the [second part](./2_rbac_system_design.md) of the guide, **Roles** are either static or dynamic. Static **Roles** are established at application startup - either via a database migration or, as shown here, through an initialization function that populates the system.
-
-The following sections describe the components required to understand this setup.
-
-### The Context
-
-Before introducing the **MeetDownApp** class, we describe the **Context** class. The **Context** encapsulates all metadata relevant to the current request and is passed to service functions. In a simple setup - such as using `FastAPI` in the `API Layer` - this involves reading a cookie or bearer token, performing AuthN, and identifying the associated `User`. In more complex scenarios involving multiple `API Layer` technologies (e.g., message buses or REST APIs), the **Context** can unify request metadata across different entry points.
-
-As the `API Layer` is omitted in this guide, the `user_id` must be manually added to the **Context** of the fictional request.
-
-The **Context** typically contains metadata associated with the request. For the examples in this guide, only the `user_id` and the database session `db` are included - a minimal setup sufficient for demonstrating AuthZ, as the guide focuses exclusively on authorization.
-
-```python title="src/pypermission/example/types.py"
-from uuid import UUID
-
-class Context:
-    user_id: UUID | None
-    db: Session
-
-    def __init__(self, *, user_id: UUID | None = None, db: Session):
-        self.user_id = user_id
-        self.db = db
-```
-
-### The MeetDownApp
-
-After the **Context**, the **MeetDownApp** class is introduced. For the purposes of this guide, it is kept intentionally simple. The sole task performed in the `__init__()` method, and thus the only reason for instantiating **MeetDownApp**, is to create the required database tables.
-
-!!! note
-    This works because the example uses a single shared database. As a result, the `create_rbac_database_table()` function from **PyPermission** creates both the RBAC tables and the business logic tables. This is done for simplicity reasons.
-
 !!! warning
     Using a shared database for RBAC and application data creates the risk of corrupting the RBAC tables. A developer could easily write queries that direcly modify the RBAC tables without respecting constraints enforced by the **PyPermission** API while working on a feature or migration script.
 
-```{.python notest title="src/pypermission/example/app.py"}
-from typing import Final
+## The `Context` object
 
-from sqlalchemy.engine.base import Engine
+The **Context** encapsulates all metadata relevant to the current request and is passed to service functions. In a simple setup - such as using `FastAPI` in the `API Layer` - this involves reading a cookie or bearer token, performing AuthN, and identifying the associated `User`. In more complex scenarios involving multiple `API Layer` technologies (e.g., message buses or REST APIs), the **Context** can unify request metadata across different entry points.
 
-from pypermission import RBAC
-from pypermission.db import create_rbac_database_table
-from pypermission.example.service.user import UserService
-from pypermission.example.service.group import GroupService
-from pypermission.example.service.event import EventService
-from pypermission.example.types import Context
+For the examples in this guide, only the `user_orm` and the database session `db` are included - a minimal setup sufficient for demonstrating AuthZ, as the guide focuses exclusively on authorization.
 
-class MeetDownApp:
-    user: Final = UserService
-    group: Final = GroupService
-    event: Final = EventService
+The following code snippet shows the `Context` object:
 
-    def __init__(self, *, engine: Engine) -> None:
-        create_rbac_database_table(engine=engine)
+```python
+class Context:
+    user_orm: UserORM | None
+    db: Session
 
-        # TODO fix populate call
-        with replace_me:
-            populate(ctx=Context(db=db))
+    def __init__(self, *, user_orm: UserORM | None = None, db: Session):
+        self.user_orm = user_orm
+        self.db = db
 ```
 
-The **MeetDownApp** class includes properties that provide direct access to the service functions for each feature, simplifying interaction with the backend. This is particularly useful when testing or exploring the integration in an interactive environment such as a Jupyter notebook.
+Here the `UserORM` shows a minimal setup to represent a `User` in the application database:
 
-### The Population
+```python
+from sqlalchemy.orm import DeclarativeBase
+from uuid import UUID
+from enum import StrEnum
 
-```python title="src/pypermission/example/app.py"
-def populate(self, *, ctx: Context) -> None:
-    RBAC.role.create(role="guest", db=ctx.db)
-    RBAC.role.create(role="user", db=ctx.db)
-    RBAC.role.create(role="moderator", db=ctx.db)
+from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.sql.sqltypes import UUID as SqlUUID
+from sqlalchemy.sql.sqltypes import String, Boolean
 
-    RBAC.role.add_hierarchy(
-        parent_role="guest",
-        child_role="user",
-        db=ctx.db,
+class MeetDownORM(DeclarativeBase): ...
+
+class State(StrEnum):
+    ACTIVE = "active"
+    INACTIVE = "inactive"
+
+class UserORM(MeetDownORM):
+    __tablename__ = "app_user_table"
+    id: Mapped[UUID] = mapped_column(SqlUUID, primary_key=True)
+    username: Mapped[str] = mapped_column(String)
+    email: Mapped[str] = mapped_column(String)
+    is_admin: Mapped[bool] = mapped_column(Boolean)
+    state: Mapped[State] = mapped_column(
+        SqlEnum(State, name="UserORM.State"), default=State.ACTIVE
     )
-    RBAC.role.add_hierarchy(
-        parent_role="user",
-        child_role="moderator",
-        db=ctx.db,
-    )
-
-    _populate_guest_role_policies(ctx=ctx)
-    _populate_user_role_policies(ctx=ctx)
-    _populate_moderator_role_policies(ctx=ctx)
 ```
 
-```python title="src/pypermission/example/app.py"
-def _populate_guest_role_policies(ctx: Context) -> None:
+## Permission Checks
+
+### Getting a `User` object
+
+Required **Permission**: `User[<UUID>]:access` or `User[<*>]:access`, where `User[<*>]:access` acts as a wildcard **Permission** granting access to any `User` resource.
+
+Additional implementation detail: the `rbac` flag controls whether this function performs a **Permission** check itself; when it is set to `False`, the function assumes that authorization has already been handled by the caller and skips the check. Admin `User`s are treated as having all **Permissions** and therefore bypass the check automatically.
+
+```python linenums="1" hl_lines="7-32"
+def get(
+    *,
+    user_id: UUID,
+    ctx: Context,
+    rbac: bool = True,
+) -> UserORM:
+    # Permission check (check against the User in the Context).
+    match rbac, ctx.user_orm:
+        case True, UserORM(is_admin=True):
+            ...
+            # Pass the Permission check if the Context User is an admin.
+        case True, UserORM():
+            subject = f"User[{ctx.user_orm.id}]"
+            permission = Permission(
+                resource_type="User",
+                resource_id=str(user_id),
+                action="access",
+            )
+
+            if not RBAC.subject.check_permission(
+                subject=subject,
+                permission=permission,
+                db=ctx.db,
+            ):
+                raise ExampleError(
+                    f"Permission '{permission}' not granted for Subject '{subject}'!"
+                )
+        case True, None:
+            raise ExampleError("No User in Context!")
+        case False, _:
+            # Pass the Permission check if the 'rbac' flag is disabled!
+            ...
+
+    user_orm = ctx.db.get(UserORM, user_id)
+    if user_orm is None:
+        raise ExampleError(f"Unknown User with ID '{user_id}'!")
+
+    return user_orm
+```
+
+Using structural pattern matching, the **Permission** check is performed in a dedicated block, before any application-specific operations take place. For the explicit RBAC bypass path (`rbac=False`) and **Users** marked as `is_admin` this creates distinct fast-paths, while the regular **Permission** lookup via **RBAC** is performed for all other **Users**. Relying on the `match/case` construct here aids in correctly implementing exhaustive checking without missing edge cases.
+
+### Creating a `User` object
+
+Creating a `User` requires the **Permission** `User:create`. Only `admin`s may create `User`s with the **Role** `moderator` or other `admin`s, and `admin`s bypass this **Permission** check.
+
+```python linenums="1" hl_lines="12-35"
+type ApplicationRole = Literal["Guest", "User", "Moderator"]
+
+def create(
+    *,
+    username: str,
+    email: str,
+    role: ApplicationRole = "User",
+    is_admin: bool = False,
+    ctx: Context,
+    rbac: bool = True,
+) -> UserORM:
+    # Permission check (check against the User in the Context).
+    match rbac, ctx.user_orm:
+        case True, UserORM(is_admin=True):
+            # Pass the Permission check if the Context User is an admin.
+            ...
+        case True, UserORM():
+            subject = f"User[{ctx.user_orm.id}]"
+            permission = Permission(
+                resource_type="User", resource_id="", action="create"
+            )
+            is_adm_or_mod = is_admin or (role == "Moderator")
+            if is_adm_or_mod or not RBAC.subject.check_permission(
+                subject=subject,
+                permission=permission,
+                db=ctx.db,
+            ):
+                raise ExampleError(
+                    f"Permission '{permission}' not granted for Subject '{subject}'!"
+                )
+        case True, None:
+            raise ExampleError("No User in Context!")
+        case False, _:
+            # Pass the Permission check if the 'rbac' flag is disabled!
+            ...
+
+    # Create the application level Resource for the User.
+    user_orm = UserORM(username=username, email=email, role=role)
+    ctx.db.add(user_orm)
+    ctx.db.flush()
+
+    # Create all RBAC level Resources for the User.
+    create_role_and_policies(user_orm=user_orm, role=role, ctx=ctx)
+
+    return user_orm
+```
+
+In this `create()` function, the `match/case` block centralizes both the regular RBAC check and an additional business constraint that cannot be modeled as a simple **Permission**. Besides handling the fast-paths for `is_admin` and `rbac=False`, the `case True, UserORM()` branch enforces that only `admin`s may create new `moderator`s or additional `admin`s, regardless of the caller’s `User:create` **Permission**. This condition depends on attributes of the target `User` (`role`, `is_admin`) rather than just the requested **Permission**, so it is implemented explicitly in the service logic instead of the RBAC layer. Such hybrid checks (RBAC plus attribute-style conditions) are usually rare; if similar patterns appear frequently, this is a strong indicator that an alternative or complementary authorization model such as ABAC should be considered.
+
+## Creating Application & RBAC objects
+
+### Creating a `User` object
+
+Creating a `User` object triggers the creation of a corresponding RBAC `Role` with the identifier `User[<UserID>]`. This dynamic role enables the user to manage their own account **Resources**, such as editing their profile or deactivating their account, by granting them instance-specific permissions like `User[<UserID>]:edit` and `User[<UserID>]:deactivate`.
+
+```python linenums="1" hl_lines="37-43"
+type ApplicationRole = Literal["Guest", "User", "Moderator"]
+
+def create(
+    *,
+    username: str,
+    email: str,
+    role: ApplicationRole = "User",
+    is_admin: bool = False,
+    ctx: Context,
+    rbac: bool = True,
+) -> UserORM:
+    # Permission check (check against the User in the Context).
+    match rbac, ctx.user_orm:
+        case True, UserORM(is_admin=True):
+            # Pass the Permission check if the Context User is an admin.
+            ...
+        case True, UserORM():
+            subject = f"User[{ctx.user_orm.id}]"
+            permission = Permission(
+                resource_type="User", resource_id="", action="create"
+            )
+            create_adm_or_mod = is_admin or (role == "Moderator")
+            if create_adm_or_mod or not RBAC.subject.check_permission(
+                subject=subject,
+                permission=permission,
+                db=ctx.db,
+            ):
+                raise ExampleError(
+                    f"Permission '{permission}' not granted for Subject '{subject}'!"
+                )
+        case True, None:
+            raise ExampleError("No User in Context!")
+        case False, _:
+            # Pass the Permission check if the 'rbac' flag is disabled!
+            ...
+
+    # Create the application level Resource for the User.
+    user_orm = UserORM(username=username, email=email, role=role)
+    ctx.db.add(user_orm)
+    ctx.db.flush()
+
+    # Create all RBAC level Resources for the User.
+    create_role_and_policies(user_orm=user_orm, role=role, ctx=ctx)
+
+    return user_orm
+```
+
+After the `User` object is created in the application layer and persisted to the database, the application logic must establish the corresponding RBAC structure to enforce access control. This is done via the `create_role_and_policies` function, which synchronizes the application-level `User` creation with RBAC object creation. Specifically, it creates a dynamic **Role** named `User[<UserID>]` (where `<UserID>` is the UUID of the newly created user), assigns it to the `User` as a **Subject**, and grants it instance-specific **Permissions** (`User[<UserID>]:access`, `User[<UserID>]:edit`, `User[<UserID>]:deactivate`) that allow the user to manage their own profile. The function also assigns the `User`'s static application **Role** (`Guest`, `User`, or `Moderator`) to the **Subject**.
+
+```python
+def create_role_and_policies(
+    user_orm: UserORM, role: ApplicationRole, ctx: Context
+) -> None:
+    USER_UUID = f"User[{user_orm.id}]"
+
+    # Create the instance exclusive Subject for the User.
+    RBAC.subject.create(subject=USER_UUID, db=ctx.db)
+
+    # Assign the application Role 'Guest' | 'User' | 'Moderator'.
+    RBAC.subject.assign_role(role=role, subject=role, db=ctx.db)
+
+    # Create and assign the instance exclusive Role for the User.
+    RBAC.role.create(role=USER_UUID, db=ctx.db)
+    RBAC.subject.assign_role(subject=USER_UUID, role=USER_UUID, db=ctx.db)
+
+    # Grand all instance exclusive Permissions for the User.
     RBAC.role.grant_permission(
-        role="guest",
+        role=USER_UUID,
         permission=Permission(
-            resource_type="group",
-            resource_id="*",
-            action="access",
+            resource_type="User", resource_id=str(user_orm.id), action="access"
         ),
         db=ctx.db,
     )
     RBAC.role.grant_permission(
-        role="guest",
+        role=USER_UUID,
         permission=Permission(
-            resource_type="event",
-            resource_id="*",
-            action="access",
+            resource_type="User", resource_id=str(user_orm.id), action="edit"
+        ),
+        db=ctx.db,
+    )
+    RBAC.role.grant_permission(
+        role=USER_UUID,
+        permission=Permission(
+            resource_type="User", resource_id=str(user_orm.id), action="deactivate"
         ),
         db=ctx.db,
     )
 ```
 
-## Dynamic **Roles**
+### Deleting a `User` object
 
-WIP
+The RBAC-level objects associated with the `User` are deleted: the dynamic **Role&** named `User[<UserID>]` and the **Subject** with the same identifier. This is necessary because these RBAC resources are tied directly to the specific `User` instance and must be removed when the `User` is deleted to maintain data integrity in the RBAC system. Finally, the application-layer `UserORM` object is deleted from the database.
+
+```python linenums="1" hl_lines="39-46"
+def delete(
+    *,
+    user_id: UUID,
+    ctx: Context,
+    rbac: bool = True,
+) -> UserORM:
+    # Permission check (check against the User in the Context).
+    match rbac, ctx.user_orm:
+        case True, UserORM(is_admin=True, id=admin_id):
+            if admin_id == user_id:
+                raise ExampleError("An admin can't delete itself!")
+            # Pass the Permission check if the Context User is an admin.
+        case True, UserORM():
+            subject = f"User[{ctx.user_orm.id}]"
+            permission = Permission(
+                resource_type="User",
+                resource_id=str(user_id),
+                action="delete",
+            )
+
+            if not RBAC.subject.check_permission(
+                subject=subject,
+                permission=permission,
+                db=ctx.db,
+            ):
+                raise ExampleError(
+                    f"Permission '{permission}' not granted for Subject '{subject}'!"
+                )
+        case True, None:
+            raise ExampleError("No User in context!")
+        case False, _:
+            # Pass the Permission check if the 'rbac' flag is disabled!
+            ...
+
+    user_orm = ctx.db.get(UserORM, user_id)
+    if user_orm is None:
+        raise ExampleError(f"Unknown User with ID '{user_id}'!")
+
+    # Delete all RBAC level Resources for the User.
+    USER_UUID = f"User[{user_id}]"
+    RBAC.role.delete(role=USER_UUID, db=ctx.db)
+    RBAC.subject.delete(subject=USER_UUID, db=ctx.db)
+
+    # Delete the application level Resource for the User.
+    ctx.db.delete(user_orm)
+    ctx.db.flush()
+
+    return user_orm
+```
