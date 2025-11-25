@@ -91,7 +91,7 @@ In this approach, permissions are defined at the **instance level** (e.g., Event
 
 !!! tip
 
-    You can prevent inefficient permission checks on individual list items by querying all Permissions assigned to a Subject/Resource at once using the `RBAC.subject.permissions(subject: str, db: Session)` and `RBAC.role.permissions(subject: str, db: Session)` methods.
+    You can prevent inefficient permission checks on individual list items by querying all Permissions assigned to a Subject/Resource at once using the `pypermission.RBAC.subject.permissions(subject: str, db: Session)` and `pypermission.RBAC.role.permissions(subject: str, db: Session)` methods.
 
 ## When to Use Which Approach
 

@@ -79,7 +79,7 @@ class UserORM(MeetDownORM):
     )
 ```
 
-## Permission Checks
+## **Permission** Checks
 
 ### Getting a `User` object
 
@@ -134,7 +134,7 @@ Using structural pattern matching, the **Permission** check is performed in a de
 
 Creating a `User` requires the **Permission** `User:create`. Only `admin`s may create `User`s with the **Role** `moderator` or other `admin`s, and `admin`s bypass this **Permission** check.
 
-```python linenums="1" hl_lines="12-35"
+```python hl_lines="12-35"
 type ApplicationRole = Literal["Guest", "User", "Moderator"]
 
 def create(

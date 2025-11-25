@@ -45,6 +45,7 @@ nav:
       - 1. Introduction: integration_guide/1_introduction.md
       - 2. RBAC System Design: integration_guide/2_rbac_system_design.md
       - 3. RBAC Code Design: integration_guide/3_rbac_code_design.md
+  - Auditing Guide: auditing_guide.md
   - Comparison to ANSI: ansi.md
   - Comparison to NIST: nist.md
   - FAQ: faq.md

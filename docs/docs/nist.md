@@ -15,13 +15,14 @@ Flat RBAC requires the fundamental ability to assign **Subjects** (Users) to **R
 
 | NIST Requirement                             | PyPermission Implementation                                  |
 | :------------------------------------------- | :----------------------------------------------------------- |
-| **User - Role Assignment**                   | `RBAC.subject.assign_role`                                   |
-| **User - Role Revokation**                   | `RBAC.subject.deassign_role`                                 |
-| **Permission to Role Assignment**            | `RBAC.role.grant_permission`                                 |
-| **Permission Revokation**                    | `RBAC.role.revoke_permission`                                |
+| **User - Role Assignment**                   | `pypermission.RBAC.subject.assign_role`                      |
+| **User - Role Revokation**                   | `pypermission.RBAC.subject.deassign_role`                    |
+| **Permission to Role Assignment**            | `pypermission.RBAC.role.grant_permission`                    |
+| **Permission Revokation**                    | `pypermission.RBAC.role.revoke_permission`                   |
 | **Simultaneous Role Activation**             | Supported (Session-less design implies all roles are active) |
-| **User-Role Review** (List roles for a user) | `RBAC.subject.roles`                                         |
-| **Role-User Review** (List users for a role) | `RBAC.role.subjects`                                         |
+| **User-Role Review** (List roles for a user) | `pypermission.RBAC.subject.roles`                            |
+| **Role-User Review** (List users for a role) | `pypermission.RBAC.role.subjects`                            |
+
 
 In this context, **PyPermission** maps NIST entities as follows:
 
@@ -46,11 +47,11 @@ In this context, **PyPermission** maps NIST entities as follows:
 + `Senior` $\rightarrow$ **Child** (a direct descendant, more powerful **Role** than the corresponding **Parent**)
 + `Junior` $\rightarrow$ **Parent** (a direct ascendant)
 
-| NIST Requirement                           | PyPermission Implementation                              |
-| :----------------------------------------- | :------------------------------------------------------- |
-| **Add Hierarchy** (Senior/Junior relation) | `RBAC.role.add_hierarchy`                                |
-| **Delete Hierarchy**                       | `RBAC.role.remove_hierarchy`                             |
-| **Inheritance Calculation**                | Handled automatically in `RBAC.subject.check_permission` |
+| NIST Requirement                           | PyPermission Implementation                                           |
+| :----------------------------------------- | :-------------------------------------------------------------------- |
+| **Add Hierarchy** (Senior/Junior relation) | `pypermission.RBAC.role.add_hierarchy`                                |
+| **Delete Hierarchy**                       | `pypermission.RBAC.role.remove_hierarchy`                             |
+| **Inheritance Calculation**                | Handled automatically in `pypermission.RBAC.subject.check_permission` |
 
 A visual comparison between the **NIST RBAC** model and our database tables shows the close architectural resemblance:
 
@@ -77,9 +78,9 @@ Level 3 requires the enforcement of Separation of Duties (SOD), either staticall
 
 Symmetric RBAC adds requirements for **Permission**-**Role** review, ensuring administrators can determine which **Permissions** belong to a specific **Role**.
 
-| NIST Requirement           | PyPermission Implementation                                    |
-| :------------------------- | :------------------------------------------------------------- |
-| **Permission-Role Review** | `RBAC.role.permissions` (only role to permission lookup)       |
+| NIST Requirement           | PyPermission Implementation                                           |
+| :------------------------- | :-------------------------------------------------------------------- |
+| **Permission-Role Review** | `pypermission.RBAC.role.permissions` (only role to permission lookup) |
 
 ## 7 Other RBAC Attributes
 
@@ -91,6 +92,6 @@ The NIST standard leaves the definition of permissions open. **PyPermission** de
 
 ### 7.9 Role Revocation
 
-The standard discusses the immediacy of revocation. In **PyPermission**, revocation via `RBAC.role.revoke_permission` or `RBAC.subject.deassign_role` is immediate. Since there are no long-lived sessions caching permissions in the library itself, the next `check_permission` call reflects the updated state immediately.
+The standard discusses the immediacy of revocation. In **PyPermission**, revocation via `pypermission.RBAC.role.revoke_permission` or `pypermission.RBAC.subject.deassign_role` is immediate. Since there are no long-lived sessions caching permissions in the library itself, the next `check_permission` call reflects the updated state immediately.
 
 [^1]: The NIST model for role-based access control: towards a unified standard - <https://doi.org/10.1145/344287.344301>

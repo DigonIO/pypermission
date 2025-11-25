@@ -32,20 +32,20 @@ The ANSI standard additionally defines a Static Separation of Duty (SSD) Relatio
 | `ROLES`                                        | `Role` as `str`                                        |
 | `OBJS` (objects)                               | `Resource` as tuple of `ResourceType` and `ResourceID` |
 | `OPS` (operations)                             | `Action` as `str`                                      |
-| `PRMS = OPS x OBJS` (`Permission`)             | `rbac.models.Permission`                       |
-| `PA ⊆ PERMS x ROLES`  (`PermissionAssignment`) | `rbac.models.Policy`                           |
-| `UA ⊆ USERS x ROLES` (`UserAssignment`)        | `rbac.models.MemberORM`                        |
+| `PRMS = OPS x OBJS` (`Permission`)             | `pypermission.models.Permission`                       |
+| `PA ⊆ PERMS x ROLES`  (`PermissionAssignment`) | `pypermission.models.Policy`                           |
+| `UA ⊆ USERS x ROLES` (`UserAssignment`)        | `pypermission.models.MemberORM`                        |
 | `SESSIONS`                                     | _N/A_                                                  |
 | `USER_SESSIONS ⊆ USERS x SESSIONS`             | _N/A_                                                  |
 | `SESSION_ROLES ⊆ SESSION x ROLES`              | _N/A_                                                  |
 
-| ANSI Method                                        | PyPermission            |
-| -------------------------------------------------- | ----------------------- |
-| `assigned_permissions(r: Role) -> set[Permission]` | `RBAC.role.permissions` |
-| `assigned_users(r: Role) -> set[User]`             | `RBAC.role.subjects`    |
-| `user_sessions(u: User) -> set[session]`           | _N/A_                   |
-| `session_roles(s: Session) -> set[role]`           | _N/A_                   |
-| `check_access(s: Session, p: Permission) -> bool`  | _N/A_                   |
+| ANSI Method                                        | PyPermission                         |
+| -------------------------------------------------- | ------------------------------------ |
+| `assigned_permissions(r: Role) -> set[Permission]` | `pypermission.RBAC.role.permissions` |
+| `assigned_users(r: Role) -> set[User]`             | `pypermission.RBAC.role.subjects`    |
+| `user_sessions(u: User) -> set[session]`           | _N/A_                                |
+| `session_roles(s: Session) -> set[role]`           | _N/A_                                |
+| `check_access(s: Session, p: Permission) -> bool`  | _N/A_                                |
 
 !!! tip
 
@@ -57,12 +57,12 @@ The ANSI standard additionally defines a Static Separation of Duty (SSD) Relatio
 
 | ANSI Entity set                        | PyPermission                       |
 | -------------------------------------- | ---------------------------------- |
-| `RH ⊆ ROLES x ROLES` (`RoleHierarchy`) | `rbac.models.HierarchyORM` |
+| `RH ⊆ ROLES x ROLES` (`RoleHierarchy`) | `pypermission.models.HierarchyORM` |
 
-| ANSI Method                                          | PyPermission            |
-| ---------------------------------------------------- | ----------------------- |
-| `authorized_users(r: Role) -> set[User]`             | `RBAC.role.subjects`    |
-| `authorized_permissions(r: Role) -> set[Permission]` | `RBAC.role.permissions` |
+| ANSI Method                                          | PyPermission                         |
+| ---------------------------------------------------- | ------------------------------------ |
+| `authorized_users(r: Role) -> set[User]`             | `pypermission.RBAC.role.subjects`    |
+| `authorized_permissions(r: Role) -> set[Permission]` | `pypermission.RBAC.role.permissions` |
 
 !!! note
 
@@ -74,47 +74,47 @@ The ANSI standard additionally defines a Static Separation of Duty (SSD) Relatio
 
 #### 7.1.1 Administrative core commands
 
-| ANSI                                           | PyPermission                  |
-| ---------------------------------------------- | ----------------------------- |
-| `add_user(u: Name)`                            | `RBAC.subject.create`         |
-| `delete_user(u: User)`                         | `RBAC.subject.delete`         |
-| `add_role(r: Name)`                            | `RBAC.role.create`            |
-| `delete_role(r: Role)`                         | `RBAC.role.delete`            |
-| `assign_user(u: User, role: Role)`             | `RBAC.subject.assign_role`    |
-| `deassign_user(u: User, role: Role)`           | `RBAC.subject.deassign_role`  |
-| `grant_permission(p: Permission, role: Role)`  | `RBAC.role.grant_permission`  |
-| `revoke_permission(p: Permission, role: Role)` | `RBAC.role.revoke_permission` |
+| ANSI                                           | PyPermission                               |
+| ---------------------------------------------- | ------------------------------------------ |
+| `add_user(u: Name)`                            | `pypermission.RBAC.subject.create`         |
+| `delete_user(u: User)`                         | `pypermission.RBAC.subject.delete`         |
+| `add_role(r: Name)`                            | `pypermission.RBAC.role.create`            |
+| `delete_role(r: Role)`                         | `pypermission.RBAC.role.delete`            |
+| `assign_user(u: User, role: Role)`             | `pypermission.RBAC.subject.assign_role`    |
+| `deassign_user(u: User, role: Role)`           | `pypermission.RBAC.subject.deassign_role`  |
+| `grant_permission(p: Permission, role: Role)`  | `pypermission.RBAC.role.grant_permission`  |
+| `revoke_permission(p: Permission, role: Role)` | `pypermission.RBAC.role.revoke_permission` |
 
 #### 7.1.2 Supporting system functions
 
-| ANSI Method                                       | PyPermission                        |
-| ------------------------------------------------- | ----------------------------------- |
-| `check_access(s: Session, p: Permission) -> bool` | `RBAC.subject.check_permission`🔧  |
-|                                                   | `RBAC.subject.assert_permission`🔧 |
-|                                                   | `RBAC.role.check_permission`🔧     |
-|                                                   | `RBAC.role.assert_permission`🔧    |
-| `create_session(u: User, s: Name)`                | _N/A_                               |
-| `delete_session(u: User, s: Session)`             | _N/A_                               |
-| `add_active_role(u: User, s: Session, r: Role)`   | _N/A_                               |
-| `drop_active_role(u: User, s: Session, r: Role)`  | _N/A_                               |
+| ANSI Method                                       | PyPermission                                     |
+| ------------------------------------------------- | ------------------------------------------------ |
+| `check_access(s: Session, p: Permission) -> bool` | `pypermission.RBAC.subject.check_permission`🔧  |
+|                                                   | `pypermission.RBAC.subject.assert_permission`🔧 |
+|                                                   | `pypermission.RBAC.role.check_permission`🔧     |
+|                                                   | `pypermission.RBAC.role.assert_permission`🔧    |
+| `create_session(u: User, s: Name)`                | _N/A_                                            |
+| `delete_session(u: User, s: Session)`             | _N/A_                                            |
+| `add_active_role(u: User, s: Session, r: Role)`   | _N/A_                                            |
+| `drop_active_role(u: User, s: Session, r: Role)`  | _N/A_                                            |
 
 #### 7.1.3 Review functions for Core RBAC
 
 | ANSI Methods                           | PyPermission                      |
 | -------------------------------------- | --------------------------------- |
-| `assigned_users(r: Role) -> set[User]` | `RBAC.role.subjects` |
-| `assigned_roles(r: USER) -> set[Role]` | `RBAC.subject.roles` |
+| `assigned_users(r: Role) -> set[User]` | `pypermission.RBAC.role.subjects` |
+| `assigned_roles(r: USER) -> set[Role]` | `pypermission.RBAC.subject.roles` |
 
 #### 7.1.4 Advanced review functions
 
-| ANSI Methods                                                         | PyPermission                       |
-| -------------------------------------------------------------------- | ---------------------------------- |
-| `role_permissions(r: Role) -> set[Permission]`⚠️                   | `RBAC.role.permissions`🔧         |
-| `user_permissions(u: User) -> set[Permission]`⚠️                   | `RBAC.subject.permissions`🔧      |
-| `session_roles(s: Session) -> set[Role]`                             | _N/A_                              |
-| `session_permissions(s: Session) -> set[Permission]`                 | _N/A_                              |
-| `role_operations_on_object(r: Role, o: Resource) -> set[Action]`⚠️ | `RBAC.role.actions_on_resource`    |
-| `user_operations_on_object(u: User, o: Resource) -> set[Action]`⚠️ | `RBAC.subject.actions_on_resource` |
+| ANSI Methods                                                         | PyPermission                                    |
+| -------------------------------------------------------------------- | ----------------------------------------------- |
+| `role_permissions(r: Role) -> set[Permission]`⚠️                   | `pypermission.RBAC.role.permissions`🔧         |
+| `user_permissions(u: User) -> set[Permission]`⚠️                   | `pypermission.RBAC.subject.permissions`🔧      |
+| `session_roles(s: Session) -> set[Role]`                             | _N/A_                                           |
+| `session_permissions(s: Session) -> set[Permission]`                 | _N/A_                                           |
+| `role_operations_on_object(r: Role, o: Resource) -> set[Action]`⚠️ | `pypermission.RBAC.role.actions_on_resource`    |
+| `user_operations_on_object(u: User, o: Resource) -> set[Action]`⚠️ | `pypermission.RBAC.subject.actions_on_resource` |
 
 ### 7.2 Hierarchical RBAC
 
@@ -122,12 +122,12 @@ The ANSI standard additionally defines a Static Separation of Duty (SSD) Relatio
 
 ##### 7.2.1.1 Administrative Commands for General Role Hierarchies
 
-| ANSI Methods                                 | NOTE                                      | PyPermission                 |
-| -------------------------------------------- | ----------------------------------------- | ---------------------------- |
-| `add_inheritance(asc: Role, desc: Role)`⚠️ |                                           | `RBAC.role.add_hierarchy`    |
-| `delete_inheritance(asc: Role, desc: Role)`  |                                           | `RBAC.role.remove_hierarchy` |
-| `add_ascendant(asc: Name, desc: Role)`       | creates asc Role and its relation to desc |                              |
-| `add_descendant(asc: Role, desc: Name)`      | creates desc Role and its relation to asc |                              |
+| ANSI Methods                                 | NOTE                                      | PyPermission                              |
+| -------------------------------------------- | ----------------------------------------- | ----------------------------------------- |
+| `add_inheritance(asc: Role, desc: Role)`⚠️ |                                           | `pypermission.RBAC.role.add_hierarchy`    |
+| `delete_inheritance(asc: Role, desc: Role)`  |                                           | `pypermission.RBAC.role.remove_hierarchy` |
+| `add_ascendant(asc: Name, desc: Role)`       | creates asc Role and its relation to desc |                                           |
+| `add_descendant(asc: Role, desc: Name)`      | creates desc Role and its relation to asc |                                           |
 
 ##### 7.2.1.2 Supporting System Functions for General Role Hierarchies
 
@@ -138,25 +138,25 @@ The ANSI standard additionally defines a Static Separation of Duty (SSD) Relatio
 
 ##### 7.2.1.3 Review Functions for General Role Hierarchies
 
-| ANSI Methods                             | PyPermission         |
-| ---------------------------------------- | -------------------- |
-| `authorized_users(r: Role) -> set[User]` | `RBAC.role.subjects` |
-| `authorized_roles(u: User) -> set[Role]` | `RBAC.subject.roles` |
+| ANSI Methods                             | PyPermission                      |
+| ---------------------------------------- | --------------------------------- |
+| `authorized_users(r: Role) -> set[User]` | `pypermission.RBAC.role.subjects` |
+| `authorized_roles(u: User) -> set[Role]` | `pypermission.RBAC.subject.roles` |
 
 ##### 7.2.1.4 Advanced Review Functions for General Role Hierarchies
 
-| ANSI Methods                                                         | PyPermission                       |
-| -------------------------------------------------------------------- | ---------------------------------- |
-| `role_permissions(r: Role) -> set[Permission]`⚠️                   | `RBAC.role.permissions`🔧         |
-| `user_permissions(u: User) -> set[Permission]`⚠️                   | `RBAC.subject.permissions`🔧      |
-| `role_operations_on_object(r: Role, o: Resource) -> set[Action]`⚠️ | `RBAC.role.actions_on_resource`    |
-| `user_operations_on_object(u: User, o: Resource) -> set[Action]`⚠️ | `RBAC.subject.actions_on_resource` |
+| ANSI Methods                                                         | PyPermission                                    |
+| -------------------------------------------------------------------- | ----------------------------------------------- |
+| `role_permissions(r: Role) -> set[Permission]`⚠️                   | `pypermission.RBAC.role.permissions`🔧         |
+| `user_permissions(u: User) -> set[Permission]`⚠️                   | `pypermission.RBAC.subject.permissions`🔧      |
+| `role_operations_on_object(r: Role, o: Resource) -> set[Action]`⚠️ | `pypermission.RBAC.role.actions_on_resource`    |
+| `user_operations_on_object(u: User, o: Resource) -> set[Action]`⚠️ | `pypermission.RBAC.subject.actions_on_resource` |
 
 #### 7.2.2.1 Administrative Commands for Limited Role Hierarchies
 
-| ANSI Methods                                 | PyPermission                 |
-| -------------------------------------------- | ---------------------------- |
-| `add_inheritance(asc: Role, desc: Role)`⚠️ | `RBAC.role.add_hierarchy`🔧 |
+| ANSI Methods                                 | PyPermission                              |
+| -------------------------------------------- | ----------------------------------------- |
+| `add_inheritance(asc: Role, desc: Role)`⚠️ | `pypermission.RBAC.role.add_hierarchy`🔧 |
 
 ---
 
