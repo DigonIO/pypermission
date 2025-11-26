@@ -23,7 +23,6 @@ Flat RBAC requires the fundamental ability to assign **Subjects** (Users) to **R
 | **User-Role Review** (List roles for a user) | `pypermission.RBAC.subject.roles`                            |
 | **Role-User Review** (List users for a role) | `pypermission.RBAC.role.subjects`                            |
 
-
 In this context, **PyPermission** maps NIST entities as follows:
 
 + `User` $\rightarrow$ **Subject**
@@ -40,7 +39,7 @@ The standard further offers two interpretations of the role hierarchy, of which 
 
 !!! warning
 
-    Hierarchical RBAC comes with a semantic for the inferred **Permissions** that is not inherently obvious when compared to everyday language. In NIST, a **Role** inherits **Permissions** of the **Roles** its senior of, while in **PyPermission** a child **Role** has access to at least all the **Permissions** it inherits from its parent **Roles**. This is why we suggest designing **RBAC** systems using a **Roles** composition first approach. If you choose to utilize hierarchical **RBAC** make sure to check out the available auditing and review functions we support.
+    Hierarchical RBAC comes with a semantic for the inferred **Permissions** that is not inherently obvious when compared to everyday language. In NIST, a **Role** inherits **Permissions** of the **Roles** it is senior of, while in **PyPermission** a child **Role** has access to at least all the **Permissions** it inherits from its parent **Roles**. This is why we suggest designing **RBAC** systems using a **Roles** composition first approach. If you choose to utilize hierarchical **RBAC** make sure to check out the available auditing and review functions we support.
 
 In this context, **PyPermission** maps NIST entities as follows:
 

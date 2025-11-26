@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.4.0
+
+### API Changes
+
+- `pypermission.service.role.RoleService.ancestors` renamed to `pypermission.service.role.RoleService.ascendants`
+
 ## 0.3.0
 
 ### API Changes

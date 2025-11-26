@@ -15,27 +15,29 @@
 [![Downloads Week](https://pepy.tech/badge/pypermission/week)](https://pepy.tech/project/pypermission)
 [![Downloads Total](https://pepy.tech/badge/pypermission)](https://pepy.tech/project/pypermission)
 
+**PyPermission** keeps authorization simple. It avoids framework lock-ins, skips **Policy** DSL complexity, and gives developers a clean, Python-native way to express **Subjects**, **Roles**, **Resources**, and **Permissions** across any application architecture.
+
 ---
 
-If you find the PyPermission library beneficial, please consider supporting the project by [starring it on GitHub](https://github.com/DigonIO/pypermission).
+If you find the **PyPermission** library beneficial, please consider supporting the project by [starring it on GitHub](https://github.com/DigonIO/pypermission).
 
 [![GitHub Repo stars](https://img.shields.io/github/stars/digonio/pypermission)](https://github.com/DigonIO/pypermission)
 
-# PyPermission - RBAC for Python & Pythonistas
+# PyPermission - RBAC for Python
 
 ## Features
 
 - RBAC for Python [(Quick Start)](https://pypermission.digon.io/quick_start/)
     - Subjects, Roles, Hierarchies, Permissions, Policies & Auditing
-    - Supports NIST Level 2a & some Level 4 review functions
+    - Supports NIST Level 2a & some Level 4 review functions [(Details)](https://pypermission.digon.io/nist/)
 - Persistency via SQLAlchemy
     - SQLite & PostgreSQL (psycopg)
-- Full integration guide [(Guide WIP)](https://pypermission.digon.io/guide/)
-- Advanced auditing
+- [Integration Guide](https://pypermission.digon.io/integration_guide/1_introduction/)
+- [Advanced Auditing](https://pypermission.digon.io/auditing_guide/)
     - Export a RBAC DAG as NetworkX DiGraph
     - Visualize a RBAC DAG via Plotly
 - Lightweight
-- High test coverage
+- High test [Coverage](https://pypermission.digon.io/coverage/)
 - [Online documentation](https://pypermission.digon.io/)
 
 ## Installing `PyPermission` with pip

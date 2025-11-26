@@ -12,14 +12,14 @@ The PyPermission library comes with a number of review functions and visualizati
 | ----------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------- | ---------------------------------- |
 | **Subjects** of a **Role**                      | Returns all `Subject`s assigned to a `Role`. Optional inclusion of descendant `Role`s.                                    | `pypermission.RBAC.role.subjects`               |
 | **Roles** of a **Subject**                      | Returns all `Role`s assigned to a `Subject`. Optional inclusion of ascendant `Role`s.                                     | `pypermission.RBAC.subject.roles`               |
-| **Permissions** of a **Role**                   | Collects all **Permissions** directly granted to a `Role` or inherited from ancestor `Role`s.                             | `pypermission.RBAC.role.permissions`            |
+| **Permissions** of a **Role**                   | Collects all **Permissions** directly granted to a `Role` or inherited from ascendant `Role`s.                             | `pypermission.RBAC.role.permissions`            |
 | **Permissions** of a **Subject**                | Aggregates all **Permissions** available to a `Subject` through its assigned `Role`s.                                     | `pypermission.RBAC.subject.permissions`         |
 | **Policies** of a **Role**                      | Returns all **Policies** associated with a `Role`, including inherited ones if requested.                                 | `pypermission.RBAC.role.policies`               |
 | **Policies** of a **Subject**                   | Returns all **Policies** linked to a `Subject` via its assigned `Role`s.                                                  | `pypermission.RBAC.subject.policies`            |
 | **Actions** on a **Resource** for a **Role**    | Lists all `Action`s a `Role` may perform on a given `ResourceType` and `ResourceID` (including wildcard **Permissions**). | `pypermission.RBAC.role.actions_on_resource`    |
 | **Actions** on a **Resource** for a **Subject** | Lists all `Action`s a `Subject` may perform on a given `ResourceType` and `ResourceID` based on its `Role`s.              | `pypermission.RBAC.subject.actions_on_resource` |
 
-## Advanced auditing
+## Advanced RBAC auditing
 
 Install the `util` dependency group:
 
@@ -34,7 +34,7 @@ With the `util` extra installed, **PyPermission** can load the RBAC state direct
 
 ### Export the RBAC DAG with NetworkX
 
-The `role_dag` function builds an `nx.DiGraph` representation of the RBAC system directly from the database. It can optionally be scoped to a set of `root_roles`, in which case only those **Roles** and their ancestors are included. Setting `include_subjects` adds **Subject** nodes derived from **Members**, while `include_permissions` adds **Permission** nodes derived from **Policies**.
+The `role_dag` function builds an `nx.DiGraph` representation of the RBAC system directly from the database. It can optionally be scoped to a set of `root_roles`, in which case only those **Roles** and their ascendants are included. Setting `include_subjects` adds **Subject** nodes derived from **Members**, while `include_permissions` adds **Permission** nodes derived from **Policies**.
 
 ```python hl_lines="5 11" fixture:URL_TO_DB
 import networkx as nx

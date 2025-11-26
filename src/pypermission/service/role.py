@@ -297,9 +297,9 @@ class RoleService(metaclass=FrozenClass):
         return tuple(children)
 
     @classmethod
-    def ancestors(cls, *, role: str, db: Session) -> tuple[str, ...]:
+    def ascendants(cls, *, role: str, db: Session) -> tuple[str, ...]:
         """
-        Get all ancestor **Roles**.
+        Get all ascendants **Roles**.
 
         Parameters
         ----------
@@ -311,7 +311,7 @@ class RoleService(metaclass=FrozenClass):
         Returns
         -------
         tuple[str, ...]
-            A tuple containing all ancestor **RoleIDs**.
+            A tuple containing all ascendant **RoleIDs**.
 
         Raises
         ------
@@ -334,13 +334,13 @@ class RoleService(metaclass=FrozenClass):
             )
         )
 
-        ancestor_relations = (
+        ascendant_relations = (
             db.scalars(select(relations_cte.c.parent_role_id)).unique().all()
         )
 
-        if len(ancestor_relations) == 0 and db.get(RoleORM, role) is None:
+        if len(ascendant_relations) == 0 and db.get(RoleORM, role) is None:
             raise PyPermissionError(f"Role '{role}' does not exist!")
-        return tuple(ancestor_relations)
+        return tuple(ascendant_relations)
 
     @classmethod
     def descendants(cls, *, role: str, db: Session) -> tuple[str, ...]:
@@ -649,7 +649,7 @@ class RoleService(metaclass=FrozenClass):
         role : str
             The target **RoleID**.
         inherited : bool
-            Includes all **Permissions** inherited by ancestor **Roles**.
+            Includes all **Permissions** inherited by ascendant **Roles**.
         db : Session
             The SQLAlchemy session.
 
@@ -697,7 +697,7 @@ class RoleService(metaclass=FrozenClass):
         role : str
             The target **RoleID**.
         inherited : bool
-            Includes all **Policies** inherited by ancestor **Roles**.
+            Includes all **Policies** inherited by ascendant **Roles**.
         db : Session
             The SQLAlchemy session.
 
@@ -755,7 +755,7 @@ class RoleService(metaclass=FrozenClass):
         resource_id : str
             The **ResourceID** to check.
         inherited : bool
-            Includes all **Actions** inherited by ancestor **Roles**.
+            Includes all **Actions** inherited by ascendant **Roles**.
         db : Session
             The SQLAlchemy session.
 

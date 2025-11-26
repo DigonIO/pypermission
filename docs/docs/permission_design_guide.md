@@ -55,7 +55,7 @@ In this approach, **Permissions** are defined at the **container level** (e.g., 
 
 In this approach, **Permissions** are defined at the **instance level** (e.g., Event ID 5). When a Group is created (e.g., ID 2), **Roles** like `Group[2]_Owner` and `Group[2]_Member` are generated. However, **Policies** for Events are only created **after** the Event instance exists, and each policy references the specific Event ID.
 
-### Example Policies for Group 2 (Before Event Creation)
+### Example **Policies** for Group 2 (Before Event Creation)
 
 | **Role**         | **ResourceType** | **ResourceID** | Action   | Note                                 |
 | ---------------- | ---------------- | -------------- | -------- | ------------------------------------ |
@@ -64,8 +64,7 @@ In this approach, **Permissions** are defined at the **instance level** (e.g., E
 | `Group[2]_Owner` | `Event`          | `Group[2]`     | `create` | Owners can create Events in Group 2. |
 
 !!! note
-
-    Policies for `Edit`, `Delete`, `RSVP`, and `Rate` on Events are **not created until the Event instance is created**.
+    **Policies** for `edit`, `delete`, `RSVP`, and `rate` on Events are **not created until the Event instance is created**.
 
 ### Example Policies After Creating Event 5
 

@@ -325,11 +325,11 @@ def test_children__unknown_role(*, db: Session) -> None:
 
 
 ################################################################################
-#### Test role ancestors
+#### Test role ascendants
 ################################################################################
 
 
-def test_ancestors__success(*, db: Session) -> None:
+def test_ascendants__success(*, db: Session) -> None:
     RS.create(role="guest", db=db)
     RS.create(role="user", db=db)
     RS.create(role="mod", db=db)
@@ -342,20 +342,20 @@ def test_ancestors__success(*, db: Session) -> None:
     RS.add_hierarchy(parent_role="mod_v2", child_role="admin", db=db)
 
     assert Counter(("guest", "user", "mod", "mod_v2")) == Counter(
-        RS.ancestors(role="admin", db=db)
+        RS.ascendants(role="admin", db=db)
     )
 
 
-def test_ancestors__empty_role(*, db: Session) -> None:
+def test_ascendants__empty_role(*, db: Session) -> None:
     with pytest.raises(PyPermissionError) as err:
-        RS.ancestors(role="", db=db)
+        RS.ascendants(role="", db=db)
 
     assert ERR_MSG.empty_role == err.value.message
 
 
-def test_ancestors__unknown_role(*, db: Session) -> None:
+def test_ascendants__unknown_role(*, db: Session) -> None:
     with pytest.raises(PyPermissionError) as err:
-        RS.ancestors(role="user", db=db)
+        RS.ascendants(role="user", db=db)
 
     assert ERR_MSG.non_existent_role.format(role="user") == err.value.message
 

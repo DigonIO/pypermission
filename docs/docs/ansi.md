@@ -2,19 +2,18 @@
 description: "PyPermission - The python RBAC library. Comparison of PyPermission’s design and features with the ANSI RBAC standard, including noted deviations."
 ---
 
-# Comparing PyPermission with ANSI RBAC
+# Comparing **PyPermission** with ANSI RBAC
 
-The RBAC standard published by ANSI/INCITs [^1] [^2] expands on the NIST RBAC model. While not adhering entirely to the standard, the feature set of the PyPermission implementation resembles the General Hierarchical RBAC model (including the suggested advanced review functions).
+The RBAC standard published by ANSI/INCITs [^1] [^2] expands on the NIST RBAC model. While not adhering entirely to the standard, the feature set of the **PyPermission** implementation resembles the General Hierarchical RBAC model (including the suggested advanced review functions).
 
 Note that other authors have identified significant problems with the ANSI standard[^3] [^4] [^5]. In "A formal validation of the RBAC ANSI 2012 standard using B"[^3] the authors suggest a number of corrections to the standard. The following comparison is based on the corrections instead of the original standard and we took the freedom to use `snake_case` notation for all functions defined in the standard.
 
-The standard makes use of z-notation [^6] and defines entities in set notation. The overview below declares the ANSI methods signature using familiar python type annotation syntax. If there is no instance of an entity prior to a function call, we use the placeholder `Name` in the function signature. Further whenever the ANSI standard combines the `Object` and `Operation` in a function signature, we substitute this with the equivalent `Permission` type. Types and methods without correspondence in PyPermission are denoted with "_N/A_"
+The standard makes use of z-notation [^6] and defines entities in set notation. The overview below declares the ANSI methods signature using familiar python type annotation syntax. If there is no instance of an entity prior to a function call, we use the placeholder `Name` in the function signature. Further whenever the ANSI standard combines the `Object` and `Operation` in a function signature, we substitute this with the equivalent `Permission` type. Types and methods without correspondence in **PyPermission** are denoted with "_N/A_"
 
 !!! warning
+    **PyPermission** is not compliant with the Core RBAC ANSI standard, as we decided against implementing the session concept. While the original authors of the RBAC standard insist on the session concept, they nevertheless acknowledge the usefulness of a sessionless approach [^7]. We want to add that it is possible to emulate the session concept by creating temporary subjects and assigning them to subjects while the emulated session is active. The burden of managing such sessions is left to the user of **PyPermission**.
 
-    PyPermission is not compliant with the Core RBAC ANSI standard, as we decided against implementing the session concept. While the original authors of the RBAC standard insist on the session concept, they nevertheless acknowledge the usefulness of a sessionless approach [^7]. We want to add that it is possible to emulate the session concept by creating temporary subjects and assigning them to subjects while the emulated session is active. The burden of managing such sessions is left to the user of PyPermission.
-
-The ANSI standard additionally defines a Static Separation of Duty (SSD) Relationship as well as Dynamic Separation of Duties (DSD) Relations. These relationships are defined as a constraint to prevent certain roles from being assigned to the same Subject. As PyPermission does not support this feature, the tables below will skip all definitions and sections concerning Separation of Duty Relations.
+The ANSI standard additionally defines a Static Separation of Duty (SSD) Relationship as well as Dynamic Separation of Duties (DSD) Relations. These relationships are defined as a constraint to prevent certain roles from being assigned to the same Subject. As **PyPermission** does not support this feature, the tables below will skip all definitions and sections concerning Separation of Duty Relations.
 
 !!! info
 
@@ -126,8 +125,10 @@ The ANSI standard additionally defines a Static Separation of Duty (SSD) Relatio
 | -------------------------------------------- | --------------------------------------------- | ----------------------------------------- |
 | `add_inheritance(asc: Role, desc: Role)`⚠️ |                                               | `pypermission.RBAC.role.add_hierarchy`    |
 | `delete_inheritance(asc: Role, desc: Role)`  |                                               | `pypermission.RBAC.role.remove_hierarchy` |
-| `add_ascendant(asc: Name, desc: Role)`       | creates asc **Role** and its relation to desc |                                           |
-| `add_descendant(asc: Role, desc: Name)`      | creates desc **Role** and its relation to asc |                                           |
+| `add_ascendant(asc: Name, desc: Role)`       | creates asc **Role** and its relation to desc | _N/A_                                     |
+| `add_descendant(asc: Role, desc: Name)`      | creates desc **Role** and its relation to asc | _N/A_                                     |
+
+We decided against implementing a `add_ascendant` or `add_descendant` function, as the we believe that the suggested behaviour is ambiguous when taking a glance at the function name.
 
 ##### 7.2.1.2 Supporting System Functions for General **Role** Hierarchies
 
@@ -161,7 +162,7 @@ The ANSI standard additionally defines a Static Separation of Duty (SSD) Relatio
 ---
 
 * The `⚠️` symbol indicates, that the method is not uniquely defined in the standard
-* The `🔧` symbol indicates, that implementation of PyPermission is roughly based on the standard and differs in some aspects.
+* The `🔧` symbol indicates, that implementation of **PyPermission** is roughly based on the standard and differs in some aspects.
 
 [^1]: INCITS 359-2004: Information technology - Role Based Access Control - <https://profsandhu.com/journals/tissec/ANSI+INCITS+359-2004.pdf>
 [^2]: INCITS 359-2012[R2017]: Information technology - Role Based Access Control - <https://standards.incits.org/apps/group_public/project/details.php?project_id=1906>
