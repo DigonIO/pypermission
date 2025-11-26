@@ -31,14 +31,15 @@ class RoleService(metaclass=FrozenClass):
         Parameters
         ----------
         role : str
-            The RoleID of the Role to create.
+            The **RoleID** of the **Role** to create.
         db : Session
             The SQLAlchemy session.
 
         Raises
         ------
         PyPermissionError
-            If a Role with the given RoleID already exists.
+            If `role` is an empty string.
+            If a **Role** with the given **RoleID** already exists.
         """
         if role == "":
             raise PyPermissionError("Role name cannot be empty!")
@@ -58,14 +59,15 @@ class RoleService(metaclass=FrozenClass):
         Parameters
         ----------
         role : str
-            The RoleID to delete.
+            The **RoleID** to delete.
         db : Session
             The SQLAlchemy session.
 
         Raises
         ------
         PyPermissionError
-            If a Role with the given RoleID does not exist.
+            If `role` is an empty string.
+            If a **Role** with the given **RoleID** does not exist.
         """
         if role == "":
             raise PyPermissionError("Role name cannot be empty!")
@@ -101,18 +103,19 @@ class RoleService(metaclass=FrozenClass):
         Parameters
         ----------
         parent_role : str
-            The parent RoleID.
+            The parent **RoleID**.
         child_role : str
-            The child RoleID.
+            The child **RoleID**.
         db : Session
             The SQLAlchemy session.
 
         Raises
         ------
         PyPermissionError
-            If arguments `parent_role` and `child_role` are equal.
-            If one or both Roles do not exist.
-            If adding the hierarchy would create a cycle.
+            If the `parent_role` or `child_role` is an empty string.
+            If `parent_role` and `child_role` are identical.
+            If one or both **Roles** do not exist in the system.
+            If adding the hierarchy would create a cycle in the RBAC hierarchy.
             If the hierarchy already exists.
         """
         if parent_role == "":
@@ -179,17 +182,18 @@ class RoleService(metaclass=FrozenClass):
         Parameters
         ----------
         parent_role : str
-            The parent RoleID.
+            The parent **RoleID**.
         child_role : str
-            The child RoleID.
+            The child **RoleID**.
         db : Session
             The SQLAlchemy session.
 
         Raises
         ------
         PyPermissionError
-            If arguments `parent_role` and `child_role` are equal.
-            If one or both Roles do not exist.
+            If the `parent_role` or `child_role` is an empty string.
+            If `parent_role` and `child_role` are identical.
+            If one or both **Roles** do not exist in the system.
             If the hierarchy does not exist.
         """
         if parent_role == "":
@@ -232,7 +236,7 @@ class RoleService(metaclass=FrozenClass):
         Parameters
         ----------
         role : str
-            The target RoleID.
+            The target **RoleID**.
         db : Session
             The SQLAlchemy session.
 
@@ -244,7 +248,8 @@ class RoleService(metaclass=FrozenClass):
         Raises
         ------
         PyPermissionError
-            If the target Role does not exist.
+            If `role` is an empty string.
+            If the target **Role** does not exist.
         """
         if role == "":
             raise PyPermissionError("Role name cannot be empty!")
@@ -265,7 +270,7 @@ class RoleService(metaclass=FrozenClass):
         Parameters
         ----------
         role : str
-            The target RoleID.
+            The target **RoleID**.
         db : Session
             The SQLAlchemy session.
 
@@ -277,7 +282,8 @@ class RoleService(metaclass=FrozenClass):
         Raises
         ------
         PyPermissionError
-            If the target Role does not exist.
+            If `role` is an empty string.
+            If the target **Role** does not exist.
         """
         if role == "":
             raise PyPermissionError("Role name cannot be empty!")
@@ -298,7 +304,7 @@ class RoleService(metaclass=FrozenClass):
         Parameters
         ----------
         role : str
-            The target RoleID.
+            The target **RoleID**.
         db : Session
             The SQLAlchemy session.
 
@@ -310,7 +316,8 @@ class RoleService(metaclass=FrozenClass):
         Raises
         ------
         PyPermissionError
-            If the target Role does not exist.
+            If `role` is an empty string.
+            If the target **Role** does not exist.
         """
         if role == "":
             raise PyPermissionError("Role name cannot be empty!")
@@ -343,7 +350,7 @@ class RoleService(metaclass=FrozenClass):
         Parameters
         ----------
         role : str
-            The target RoleID.
+            The target **RoleID**.
         db : Session
             The SQLAlchemy session.
 
@@ -355,7 +362,8 @@ class RoleService(metaclass=FrozenClass):
         Raises
         ------
         PyPermissionError
-            If the target Role does not exist.
+            If `role` is an empty string.
+            If the target **Role** does not exist.
         """
         if role == "":
             raise PyPermissionError("Role name cannot be empty!")
@@ -390,7 +398,7 @@ class RoleService(metaclass=FrozenClass):
         Parameters
         ----------
         role : str
-            The target RoleID.
+            The target **RoleID**.
         include_descendant_subjects: bool
             Include all Subjects for descendant Roles.
         db : Session
@@ -404,7 +412,8 @@ class RoleService(metaclass=FrozenClass):
         Raises
         ------
         PyPermissionError
-            If the target Role does not exist.
+            If `role` is an empty string.
+            If the target **Role** does not exist.
         """
         if role == "":
             raise PyPermissionError("Role name cannot be empty!")
@@ -448,20 +457,21 @@ class RoleService(metaclass=FrozenClass):
         db: Session,
     ) -> None:
         """
-        Grant a Permission to a Role.
+        Grant a **Permission** to a Role.
 
         Parameters
         ----------
         role : str
-            The target RoleID.
+            The target **RoleID**.
         db : Session
             The SQLAlchemy session.
 
         Raises
         ------
         PyPermissionError
-            If the target Role does not exist.
-            If the Permission was granted before. TODO
+            If `role` is an empty string.
+            If the target **Role** does not exist.
+            If the permission is already granted to the role (duplicate policy).
         """
         if role == "":
             raise PyPermissionError("Role name cannot be empty!")
@@ -487,20 +497,21 @@ class RoleService(metaclass=FrozenClass):
         db: Session,
     ) -> None:
         """
-        Revoke a Permission from a Role.
+        Revoke a **Permission** from a Role.
 
         Parameters
         ----------
         role : str
-            The target Role ID.
+            The target **Role** ID.
         db : Session
             The SQLAlchemy session.
 
         Raises
         ------
         PyPermissionError
-            If the target Role does not exist.
-            If the Permission was not granted before. TODO
+            If `role` is an empty string.
+            If the target **Role** does not exist.
+            If the permission was not granted to the role (policy does not exist).
         """
         if role == "":
             raise PyPermissionError("Role name cannot be empty!")
@@ -534,26 +545,27 @@ class RoleService(metaclass=FrozenClass):
         db: Session,
     ) -> bool:
         """
-        Check if a Role has a Permission.
+        Check if a **Role** has a **Permission**.
 
         Parameters
         ----------
         role : str
-            The target RoleID.
+            The target **RoleID**.
         permission : Permission
-            The Permission to check for.
+            The **Permission** to check for.
         db : Session
             The SQLAlchemy session.
 
         Returns
         -------
         bool
-            True if the Permission is granted.
+            True if the **Permission** is granted.
 
         Raises
         ------
         PyPermissionError
-            If the target Role does not exist.
+            If `role` is an empty string.
+            If the target **Role** does not exist.
         """
         if role == "":
             raise PyPermissionError("Role name cannot be empty!")
@@ -595,23 +607,24 @@ class RoleService(metaclass=FrozenClass):
         db: Session,
     ) -> None:
         """
-        Check if a Role has a Permission.
+        Check if a **Role** has a **Permission**.
 
         Parameters
         ----------
         role : str
-            The target RoleID.
+            The target **RoleID**.
         permission : Permission
-            The Permission to check for.
+            The **Permission** to check for.
         db : Session
             The SQLAlchemy session.
 
         Raises
         ------
-        PyPermissionNotGrantedError
-            If the Permission is not granted.
+        PermissionNotGrantedError
+            If the **Permission** is not granted (including inherited permissions).
         PyPermissionError
-            If the target Role does not exist.
+            If `role` is an empty string.
+            If the target **Role** does not exist.
         """
         if role == "":
             raise PyPermissionError("Role name cannot be empty!")
@@ -629,14 +642,14 @@ class RoleService(metaclass=FrozenClass):
         db: Session,
     ) -> tuple[Permission, ...]:
         """
-        Get all granted Permissions for a Role.
+        Get all granted **Permissions** for a Role.
 
         Parameters
         ----------
         role : str
-            The target RoleID.
+            The target **RoleID**.
         inherited : bool
-            Includes all Permissions inherited by ancestor Roles.
+            Includes all **Permissions** inherited by ancestor Roles.
         db : Session
             The SQLAlchemy session.
 
@@ -648,7 +661,8 @@ class RoleService(metaclass=FrozenClass):
         Raises
         ------
         PyPermissionError
-            If the target Role does not exist.
+            If `role` is an empty string.
+            If the target **Role** does not exist.
         """
         if role == "":
             raise PyPermissionError("Role name cannot be empty!")
@@ -681,7 +695,7 @@ class RoleService(metaclass=FrozenClass):
         Parameters
         ----------
         role : str
-            The target RoleID.
+            The target **RoleID**.
         inherited : bool
             Includes all Policies inherited by ancestor Roles.
         db : Session
@@ -695,8 +709,8 @@ class RoleService(metaclass=FrozenClass):
         Raises
         ------
         PyPermissionError
-            If `role` is empty string.
-            If the target Role does not exist.
+            If `role` is an empty string.
+            If the target **Role** does not exist.
         """
         if role == "":
             raise PyPermissionError("Role name cannot be empty!")
@@ -753,8 +767,8 @@ class RoleService(metaclass=FrozenClass):
         Raises
         ------
         PyPermissionError
-            If `role` is empty string.
-            If `resource_type` is empty string.
+            If `role` is an empty string.
+            If the **ResourceType** is an empty string.
             If the target **Role** does not exist.
         """
         if role == "":

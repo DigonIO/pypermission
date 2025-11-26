@@ -1,15 +1,15 @@
 ---
-description: "PyPermission - The python RBAC library. Compare container vs. instance permissions and learn how to structure authorization the right way."
+description: "PyPermission - The python RBAC library. Compare container vs. instance **Permissions** and learn how to structure authorization the right way."
 ---
 
-# PyPermission - Permission Design Guide
+# PyPermission - **Permission** Design Guide
 
-This guide explores how to design permissions in Role-Based Access Control (RBAC) systems, focusing on two primary approaches: Container Permissions and Instance Permissions. Each approach defines how permissions are assigned to resources, and each has distinct trade-offs.
+This guide explores how to design **Permissions** in Role-Based Access Control (RBAC) systems, focusing on two primary approaches: Container **Permissions** and Instance Permissions. Each approach defines how **Permissions** are assigned to resources, and each has distinct trade-offs.
 
 The key distinction lies in how the Resource is scoped in the RBAC policy:
 
-+ **Container permissions** - Permissions are tied to a _container_ (e.g., a Group), and apply to all resources within that container (e.g., all Events in a Group).
-+ **Instance permissions** - Permissions are tied to _individual instances_ (e.g., Event ID 5), allowing fine-grained control over each resource.
++ **Container permissions** - **Permissions** are tied to a _container_ (e.g., a Group), and apply to all resources within that container (e.g., all Events in a Group).
++ **Instance permissions** - **Permissions** are tied to _individual instances_ (e.g., Event ID 5), allowing fine-grained control over each resource.
 
 In some cases, a hybrid approach combining both methods can offer the best of both worlds. This guide will help you evaluate these options and choose the most appropriate design for your use case.
 
@@ -23,11 +23,11 @@ We use the fictional platform _MeetDown_ to illustrate the two permission design
 
 ## Container permissions
 
-In this approach, permissions are defined at the **container level** (e.g., Group). When a new Group is created (e.g., ID 1), Roles like `group[1]_owner` and `group[1]_member` are automatically generated. Policies are then assigned to these Roles, with ResourceIDs referencing the container (e.g., `Group:1`), meaning the permissions apply to all resources _within_ that container.
+In this approach, **Permissions** are defined at the **container level** (e.g., Group). When a new Group is created (e.g., ID 1), Roles like `group[1]_owner` and `group[1]_member` are automatically generated. Policies are then assigned to these Roles, with ResourceIDs referencing the container (e.g., `Group:1`), meaning the **Permissions** apply to all resources _within_ that container.
 
 ### Example Policies for Group 1
 
-| Role              | ResourceType | ResourceID | Action   | Note                                                          |
+| **Role**              | **ResourceType** | **ResourceID** | Action   | Note                                                          |
 | ----------------- | ------------ | ---------- | -------- | ------------------------------------------------------------- |
 | `group[1]_owner`  | `Group`      | `1`        | `Edit`   | Owners of Group 1 can edit the Group.                         |
 | `group[1]_owner`  | `Group`      | `1`        | `Delete` | Owners of Group 1 can delete the Group.                       |
@@ -37,9 +37,9 @@ In this approach, permissions are defined at the **container level** (e.g., Grou
 | `group[1]_member` | `Event`      | `Group:1`  | `RSVP`   | Members of Group 1 can RSVP for Events of the Group.          |
 | `group[1]_member` | `Event`      | `Group:1`  | `Rate`   | Members of Group 1 can rate past Events of the Group.         |
 
-!!! note Role hierarchy
+!!! note **Role** hierarchy
 
-    The `group[1]_owner` Role inherits permissions from `group[1]_member`. This allows owners to perform all member actions automatically.
+    The `group[1]_owner` **Role** inherits **Permissions** from `group[1]_member`. This allows owners to perform all member actions automatically.
 
 ### ✅ Pros of Container Permissions
 
@@ -54,11 +54,11 @@ In this approach, permissions are defined at the **container level** (e.g., Grou
 
 ## Instance permissions
 
-In this approach, permissions are defined at the **instance level** (e.g., Event ID 5). When a Group is created (e.g., ID 2), Roles like `group[2]_owner` and `group[2]_member` are generated. However, policies for Events are only created **after** the Event instance exists, and each policy references the specific Event ID.
+In this approach, **Permissions** are defined at the **instance level** (e.g., Event ID 5). When a Group is created (e.g., ID 2), Roles like `group[2]_owner` and `group[2]_member` are generated. However, policies for Events are only created **after** the Event instance exists, and each policy references the specific Event ID.
 
 ### Example Policies for Group 2 (Before Event Creation)
 
-| Role             | ResourceType | ResourceID | Action   | Note                                              |
+| **Role**             | **ResourceType** | **ResourceID** | Action   | Note                                              |
 |------------------|--------------|------------|----------|---------------------------------------------------|
 | `group[2]_owner` | `Group`      | `2`        | `Edit`   | Owners can edit Group 2.                          |
 | `group[2]_owner` | `Group`      | `2`        | `Delete` | Owners can delete Group 2.                        |
@@ -70,7 +70,7 @@ In this approach, permissions are defined at the **instance level** (e.g., Event
 
 ### Example Policies After Creating Event 5
 
-| Role             | ResourceType | ResourceID | Action   | Note                                              |
+| **Role**             | **ResourceType** | **ResourceID** | Action   | Note                                              |
 |------------------|--------------|------------|----------|---------------------------------------------------|
 | `group[2]_owner` | `Event`      | `5`        | `Edit`   | Owners can edit Event 5.                          |
 | `group[2]_owner` | `Event`      | `5`        | `Delete` | Owners can delete Event 5.                        |
@@ -79,7 +79,7 @@ In this approach, permissions are defined at the **instance level** (e.g., Event
 
 ### ✅ Pros of Instance Permissions
 
-+ **Fine-grained control**: Permissions can be customized per Event (e.g., restrict RSVP for a specific Event).
++ **Fine-grained control**: **Permissions** can be customized per Event (e.g., restrict RSVP for a specific Event).
 + **Precise audits**: Access logs and checks are tied to specific resource instances.
 + **Direct access checks**: To verify access to Event 5, use EventID directly, no need to resolve GroupID.
 
@@ -91,7 +91,7 @@ In this approach, permissions are defined at the **instance level** (e.g., Event
 
 !!! tip
 
-    You can prevent inefficient permission checks on individual list items by querying all Permissions assigned to a Subject/Resource at once using the `pypermission.RBAC.subject.permissions(subject: str, db: Session)` and `pypermission.RBAC.role.permissions(subject: str, db: Session)` methods.
+    You can prevent inefficient permission checks on individual list items by querying all **Permissions** assigned to a Subject/Resource at once using the `pypermission.RBAC.subject.permissions(subject: str, db: Session)` and `pypermission.RBAC.role.permissions(subject: str, db: Session)` methods.
 
 ## When to Use Which Approach
 
@@ -99,4 +99,4 @@ In this approach, permissions are defined at the **instance level** (e.g., Event
 
 **Instance permissions** are better suited when you need fine-grained control over individual resources - such as for auditing, compliance, or when exceptions are common. They offer precision but come with higher maintenance and performance overhead.
 
-In many cases, a **hybrid approach** - using container permissions as the default and adding instance policies only where needed provides a good balance.
+In many cases, a **hybrid approach** - using container **Permissions** as the default and adding instance policies only where needed provides a good balance.

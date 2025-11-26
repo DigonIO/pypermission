@@ -188,7 +188,7 @@ In this `create()` function, the `match/case` block centralizes both the regular
 
 ### Creating a `User` object
 
-Creating a `User` object triggers the creation of a corresponding RBAC `Role` with the identifier `User[<UserID>]`. This dynamic role enables the user to manage their own account **Resources**, such as editing their profile or deactivating their account, by granting them instance-specific permissions like `User[<UserID>]:edit` and `User[<UserID>]:deactivate`.
+Creating a `User` object triggers the creation of a corresponding RBAC `Role` with the identifier `User[<UserID>]`. This dynamic role enables the user to manage their own account **Resources**, such as editing their profile or deactivating their account, by granting them instance-specific **Permissions** like `User[<UserID>]:edit` and `User[<UserID>]:deactivate`.
 
 ```python linenums="1" hl_lines="37-43"
 type ApplicationRole = Literal["Guest", "User", "Moderator"]

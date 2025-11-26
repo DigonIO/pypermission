@@ -53,7 +53,7 @@ The ANSI standard additionally defines a Static Separation of Duty (SSD) Relatio
 
 ### 5.2 Hierarchical RBAC
 
-#### 5.2.1 General Role Hierarchies
+#### 5.2.1 General **Role** Hierarchies
 
 | ANSI Entity set                        | PyPermission                       |
 | -------------------------------------- | ---------------------------------- |
@@ -66,7 +66,7 @@ The ANSI standard additionally defines a Static Separation of Duty (SSD) Relatio
 
 !!! note
 
-    The ANSI standard "leads the reader to believe that the permissions of a role include the permissions inherited by the role, but this is not the case"[^3]. Instead the standard suggests to check the permissions based on the roles active in a session and the hierarchy determines, which roles a Subject can activate. As our implementation does not have a session concept, the inherited permissions are included by default when requesting the permissions of a role. We provide a `inherited` parameter to the `permissions` method to allow for the explicit exclusion of inherited permissions.
+    The ANSI standard "leads the reader to believe that the **Permissions** of a role include the **Permissions** inherited by the role, but this is not the case"[^3]. Instead the standard suggests to check the **Permissions** based on the roles active in a session and the hierarchy determines, which roles a **Subject** can activate. As our implementation does not have a session concept, the inherited **Permissions** are included by default when requesting the **Permissions** of a role. We provide a `inherited` parameter to the `permissions` method to allow for the explicit exclusion of inherited permissions.
 
 ## 7 RBAC System and Administrative Functional Specification
 
@@ -118,32 +118,32 @@ The ANSI standard additionally defines a Static Separation of Duty (SSD) Relatio
 
 ### 7.2 Hierarchical RBAC
 
-#### 7.2.1 General Role Hierarchies
+#### 7.2.1 General **Role** Hierarchies
 
-##### 7.2.1.1 Administrative Commands for General Role Hierarchies
+##### 7.2.1.1 Administrative Commands for General **Role** Hierarchies
 
-| ANSI Methods                                 | NOTE                                      | PyPermission                              |
-| -------------------------------------------- | ----------------------------------------- | ----------------------------------------- |
-| `add_inheritance(asc: Role, desc: Role)`⚠️ |                                           | `pypermission.RBAC.role.add_hierarchy`    |
-| `delete_inheritance(asc: Role, desc: Role)`  |                                           | `pypermission.RBAC.role.remove_hierarchy` |
-| `add_ascendant(asc: Name, desc: Role)`       | creates asc Role and its relation to desc |                                           |
-| `add_descendant(asc: Role, desc: Name)`      | creates desc Role and its relation to asc |                                           |
+| ANSI Methods                                 | NOTE                                          | PyPermission                              |
+| -------------------------------------------- | --------------------------------------------- | ----------------------------------------- |
+| `add_inheritance(asc: Role, desc: Role)`⚠️ |                                               | `pypermission.RBAC.role.add_hierarchy`    |
+| `delete_inheritance(asc: Role, desc: Role)`  |                                               | `pypermission.RBAC.role.remove_hierarchy` |
+| `add_ascendant(asc: Name, desc: Role)`       | creates asc **Role** and its relation to desc |                                           |
+| `add_descendant(asc: Role, desc: Name)`      | creates desc **Role** and its relation to asc |                                           |
 
-##### 7.2.1.2 Supporting System Functions for General Role Hierarchies
+##### 7.2.1.2 Supporting System Functions for General **Role** Hierarchies
 
 | ANSI Methods                                    | PyPermission |
 | ----------------------------------------------- | ------------ |
 | `create_session(u: User, s: Name)`              | _N/A_        |
 | `add_active_role(u: User, s: Session, r: Role)` | _N/A_        |
 
-##### 7.2.1.3 Review Functions for General Role Hierarchies
+##### 7.2.1.3 Review Functions for General **Role** Hierarchies
 
 | ANSI Methods                             | PyPermission                      |
 | ---------------------------------------- | --------------------------------- |
 | `authorized_users(r: Role) -> set[User]` | `pypermission.RBAC.role.subjects` |
 | `authorized_roles(u: User) -> set[Role]` | `pypermission.RBAC.subject.roles` |
 
-##### 7.2.1.4 Advanced Review Functions for General Role Hierarchies
+##### 7.2.1.4 Advanced Review Functions for General **Role** Hierarchies
 
 | ANSI Methods                                                         | PyPermission                                    |
 | -------------------------------------------------------------------- | ----------------------------------------------- |
@@ -152,7 +152,7 @@ The ANSI standard additionally defines a Static Separation of Duty (SSD) Relatio
 | `role_operations_on_object(r: Role, o: Resource) -> set[Action]`⚠️ | `pypermission.RBAC.role.actions_on_resource`    |
 | `user_operations_on_object(u: User, o: Resource) -> set[Action]`⚠️ | `pypermission.RBAC.subject.actions_on_resource` |
 
-#### 7.2.2.1 Administrative Commands for Limited Role Hierarchies
+#### 7.2.2.1 Administrative Commands for Limited **Role** Hierarchies
 
 | ANSI Methods                                 | PyPermission                              |
 | -------------------------------------------- | ----------------------------------------- |

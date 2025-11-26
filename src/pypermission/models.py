@@ -22,7 +22,7 @@ class Permission:
     Attributes
     ----------
     resource_type : str
-        The ResourceType (e.g., "document", "user").
+        The **ResourceType** (e.g., "document", "user").
     resource_id : str
         The ResourceID. The star '*' acts as a wildcard matching all ResourceIDs of the same ResourceType. The empty string can be used for Actions on Resources that do not have an ResourceID.
     action : str
@@ -35,7 +35,7 @@ class Permission:
 
     def __init__(self, *, resource_type: str, resource_id: str, action: str) -> None:
         """
-        Initialize the Permission.
+        Initialize the **Permission**.
 
         Parameters
         ----------
@@ -76,14 +76,14 @@ class Permission:
 
 class Policy:
     """
-    Represents a Role paired with a Permission.
+    Represents a **Role** paired with a **Permission**.
 
     Attributes
     ----------
     role : str
-        The target RoleID.
+        The target **RoleID**.
     permission : Permission
-        The target Permission.
+        The target **Permission**.
     """
 
     role: str
@@ -96,9 +96,9 @@ class Policy:
         Parameters
         ----------
         role : str
-            The target RoleID.
+            The target **RoleID**.
         permission : Permission
-            The target Permission.
+            The target **Permission**.
         """
         if role == "":
             raise PyPermissionError("Role name cannot be empty!")

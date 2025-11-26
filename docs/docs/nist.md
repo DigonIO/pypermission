@@ -88,10 +88,10 @@ The NIST standard discusses several attributes that are not part of the core mod
 
 ### 7.4 Nature of Permissions
 
-The NIST standard leaves the definition of permissions open. **PyPermission** defines a **Permission** as a structured tuple of `resource_type`, `resource_id`, and `action`. We decided for splitting up the **Resource** in particular into its constituent `resource_type` and `resource_id`, because it makes container permissions (as described in the [Permission Design Guide](./permission_design_guide.md)) simple to implement. The `resource_id` further accepts `resource_id="*"` as a simple wildcard argument, matching all resources of the given `resource_type`. The Permission `event[*]:view` then represents access to all resources of type `event`.
+The NIST standard leaves the definition of **Permissions** open. **PyPermission** defines a **Permission** as a structured tuple of `resource_type`, `resource_id`, and `action`. We decided for splitting up the **Resource** in particular into its constituent `resource_type` and `resource_id`, because it makes container **Permissions** (as described in the [Permission Design Guide](./permission_design_guide.md)) simple to implement. The `resource_id` further accepts `resource_id="*"` as a simple wildcard argument, matching all resources of the given `resource_type`. The **Permission** `event[*]:view` then represents access to all resources of type `event`.
 
-### 7.9 Role Revocation
+### 7.9 **Role** Revocation
 
-The standard discusses the immediacy of revocation. In **PyPermission**, revocation via `pypermission.RBAC.role.revoke_permission` or `pypermission.RBAC.subject.deassign_role` is immediate. Since there are no long-lived sessions caching permissions in the library itself, the next `check_permission` call reflects the updated state immediately.
+The standard discusses the immediacy of revocation. In **PyPermission**, revocation via `pypermission.RBAC.role.revoke_permission` or `pypermission.RBAC.subject.deassign_role` is immediate. Since there are no long-lived sessions caching **Permissions** in the library itself, the next `check_permission` call reflects the updated state immediately.
 
 [^1]: The NIST model for role-based access control: towards a unified standard - <https://doi.org/10.1145/344287.344301>

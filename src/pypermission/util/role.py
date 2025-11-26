@@ -6,7 +6,7 @@ from pypermission.exc import PyPermissionError
 from pypermission.models import HierarchyORM, MemberORM, Permission, PolicyORM, RoleORM
 
 ################################################################################
-#### Role dag tools
+#### **Role** dag tools
 ################################################################################
 
 
@@ -30,7 +30,7 @@ def role_dag(
     include_subjects : bool
         Include assigned Subjects in the DAG.
     include_permissions : bool
-        Include granted Permissions in the DAG.
+        Include granted **Permissions** in the DAG.
 
     Returns
     -------

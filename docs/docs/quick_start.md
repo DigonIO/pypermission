@@ -59,7 +59,7 @@ with db_factory() as db:
     db.commit()
 ```
 
-We want the `admin` **Role** to inherit all permissions of the `user` **Role**, therefore we model the `admin` **Role** as a child of the `user` **Role** in our **Role** hierarchy:
+We want the `admin` **Role** to inherit all **Permissions** of the `user` **Role**, therefore we model the `admin` **Role** as a child of the `user` **Role** in our **Role** hierarchy:
 
 ```{.python continuation}
 with db_factory() as db:
@@ -84,7 +84,7 @@ with db_factory() as db:
     db.commit()
 ```
 
-## Basic Permission handling
+## Basic **Permission** handling
 
 When creating a **Permission**, using the wildcard string `"*"` for the `resource_id` specifies that all resources of the given `resource_type` and `action` can be granted via this **Permission**.
 

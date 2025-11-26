@@ -18,7 +18,7 @@ from pypermission.service.subject import SubjectService
 
 class RBAC(metaclass=FrozenClass):
     """
-    Namespace for the Role and Subject services.
+    Namespace for the **Role** and **Subject** services.
 
     Attributes
     ----------
