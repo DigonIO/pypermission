@@ -1,5 +1,5 @@
 ---
-description: "PyPermission - The python RBAC library. HowTo: Audit Subjects, Roles, Permissions and Policies in the RBAC system."
+description: "PyPermission - The python RBAC library. HowTo: Audit Subjects, Roles, **Permissions** and Policies in the RBAC system."
 ---
 
 # RBAC Auditing Guide
@@ -36,14 +36,15 @@ With the `util` extra installed, **PyPermission** can load the RBAC state direct
 
 The `role_dag` function builds an `nx.DiGraph` representation of the RBAC system directly from the database. It can optionally be scoped to a set of `root_roles`, in which case only those **Roles** and their ancestors are included. Setting `include_subjects` adds **Subject** nodes derived from **Members**, while `include_permissions` adds **Permission** nodes derived from **Policies**.
 
-```python hl_lines="5 11"
+```python hl_lines="5 11" fixture:URL_TO_DB
 import networkx as nx
 from sqlalchemy.engine.base import Engine
+from sqlalchemy.engine import create_engine
 from sqlalchemy.orm import sessionmaker
 
 from pypermission.util.role import role_dag
 
-engine = create_engine("<URL_to_DB>", future=True)
+engine = create_engine(URL_TO_DB, future=True)
 db_factory = sessionmaker(bind=engine, autoflush=False, autocommit=False)
 
 with db_factory.begin() as db:
@@ -54,19 +55,20 @@ with db_factory.begin() as db:
 
 The `plot_factory` function takes the `nx.DiGraph` produced by `role_dag`, renders the RBAC structure as an interactive Plotly graph and writes it to an HTML file. The `auto_open` flag controls whether the generated file is opened in the browser immediately, while `file_path` specifies where the visualization is stored.
 
-```python hl_lines="6 14"
+```python hl_lines="6 14" fixture:URL_TO_DB
 import networkx as nx
 from sqlalchemy.engine.base import Engine
+from sqlalchemy.engine import create_engine
 from sqlalchemy.orm import sessionmaker
 
 from pypermission.util.role import role_dag
 from pypermission.util.plot import plot_factory
 
-engine = create_engine("<URL_to_DB>", future=True)
+engine = create_engine(URL_TO_DB, future=True)
 db_factory = sessionmaker(bind=engine, autoflush=False, autocommit=False)
 
 with db_factory.begin() as db:
     dag: nx.DiGraph = role_dag(db=db)
 
-plot_factory(dag=dag, auto_open=True, file_path="dag.html")
+plot_factory(dag=dag, auto_open=False, file_path="dag.html")
 ```
