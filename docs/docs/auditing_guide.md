@@ -1,5 +1,5 @@
 ---
-description: "PyPermission - The python RBAC library. HowTo: Audit Subjects, Roles, **Permissions** and Policies in the RBAC system."
+description: "PyPermission - The python RBAC library. HowTo: Audit Subjects, Roles, Permissions and Policies in the RBAC system."
 ---
 
 # RBAC Auditing Guide

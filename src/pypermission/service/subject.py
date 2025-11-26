@@ -115,7 +115,7 @@ class SubjectService(metaclass=FrozenClass):
             If `role` is empty string.
             If the **Subject** does not exist.
             If the **Role** does not exist.
-            If the **Subject** was assigned to **Role** before. TODO
+            If the **Subject** is already assigned to the **Role**. TODO
         """
         if role == "":
             raise PyPermissionError("Role name cannot be empty!")
@@ -150,7 +150,7 @@ class SubjectService(metaclass=FrozenClass):
             If `role` is empty string.
             If the **Subject** does not exist.
             If the **Role** does not exist.
-            If the **Subject** is not assigned to the Role. TODO
+            If the **Subject** is not assigned to the **Role**. TODO
         """
         if role == "":
             raise PyPermissionError("Role name cannot be empty!")
@@ -309,7 +309,7 @@ class SubjectService(metaclass=FrozenClass):
 
         Raises
         ------
-        PyPermissionNotGrantedError
+        PermissionNotGrantedError
             If the **Permission** is not granted.
         PyPermissionError
             If `subject` is empty string.
@@ -359,7 +359,7 @@ class SubjectService(metaclass=FrozenClass):
     @classmethod
     def policies(cls, *, subject: str, db: Session) -> tuple[Policy, ...]:
         """
-        Get all Policies associated to a **Subject** via its **Role** hierarchy.
+        Get all **Policies** associated to a **Subject** via its **Role** hierarchy.
 
         Parameters
         ----------
@@ -370,8 +370,8 @@ class SubjectService(metaclass=FrozenClass):
 
         Returns
         -------
-        tuple[Policies, ...]
-            A tuple containing all granted Policies.
+        tuple[Policy, ...]
+            A tuple containing all granted **Policies**.
 
         Raises
         ------

@@ -26,7 +26,7 @@ class RoleService(metaclass=FrozenClass):
     @classmethod
     def create(cls, *, role: str, db: Session) -> None:
         """
-        Create a new Role.
+        Create a new **Role**.
 
         Parameters
         ----------
@@ -54,7 +54,7 @@ class RoleService(metaclass=FrozenClass):
     @classmethod
     def delete(cls, *, role: str, db: Session) -> None:
         """
-        Delete an existing Role.
+        Delete an existing **Role**.
 
         Parameters
         ----------
@@ -80,7 +80,7 @@ class RoleService(metaclass=FrozenClass):
     @classmethod
     def list(cls, *, db: Session) -> tuple[str, ...]:
         """
-        Get all Roles.
+        Get all **Roles**.
 
         Parameters
         ----------
@@ -90,7 +90,7 @@ class RoleService(metaclass=FrozenClass):
         Returns
         -------
         tuple[str, ...]
-            A tuple containing all RoleIDs.
+            A tuple containing all **RoleIDs**.
         """
         role_orms = db.scalars(select(RoleORM)).all()
         return tuple(role_orm.id for role_orm in role_orms)
@@ -98,7 +98,7 @@ class RoleService(metaclass=FrozenClass):
     @classmethod
     def add_hierarchy(cls, *, parent_role: str, child_role: str, db: Session) -> None:
         """
-        Add a parent-child hierarchy between two Roles.
+        Add a parent-child **Hierarchy** between two **Roles**.
 
         Parameters
         ----------
@@ -115,8 +115,8 @@ class RoleService(metaclass=FrozenClass):
             If the `parent_role` or `child_role` is an empty string.
             If `parent_role` and `child_role` are identical.
             If one or both **Roles** do not exist in the system.
-            If adding the hierarchy would create a cycle in the RBAC hierarchy.
-            If the hierarchy already exists.
+            If adding the **Hierarchy** would create a cycle in the RBAC **Hierarchy**.
+            If the **Hierarchy** already exists.
         """
         if parent_role == "":
             raise PyPermissionError(
@@ -177,7 +177,7 @@ class RoleService(metaclass=FrozenClass):
         cls, *, parent_role: str, child_role: str, db: Session
     ) -> None:
         """
-        Remove a parent-child hierarchy between two Roles.
+        Remove a parent-child **Hierarchy** between two **Roles**.
 
         Parameters
         ----------
@@ -194,7 +194,7 @@ class RoleService(metaclass=FrozenClass):
             If the `parent_role` or `child_role` is an empty string.
             If `parent_role` and `child_role` are identical.
             If one or both **Roles** do not exist in the system.
-            If the hierarchy does not exist.
+            If the **Hierarchy** does not exist.
         """
         if parent_role == "":
             raise PyPermissionError(
@@ -231,7 +231,7 @@ class RoleService(metaclass=FrozenClass):
     @classmethod
     def parents(cls, *, role: str, db: Session) -> tuple[str, ...]:
         """
-        Get all parent Roles.
+        Get all parent **Roles**.
 
         Parameters
         ----------
@@ -243,7 +243,7 @@ class RoleService(metaclass=FrozenClass):
         Returns
         -------
         tuple[str, ...]
-            A tuple containing all parent RoleIDs.
+            A tuple containing all parent **RoleIDs**.
 
         Raises
         ------
@@ -265,7 +265,7 @@ class RoleService(metaclass=FrozenClass):
     @classmethod
     def children(cls, *, role: str, db: Session) -> tuple[str, ...]:
         """
-        Get all child Roles.
+        Get all child **Roles**.
 
         Parameters
         ----------
@@ -277,7 +277,7 @@ class RoleService(metaclass=FrozenClass):
         Returns
         -------
         tuple[str, ...]
-            A tuple containing all child RoleIDs.
+            A tuple containing all child **RoleIDs**.
 
         Raises
         ------
@@ -299,7 +299,7 @@ class RoleService(metaclass=FrozenClass):
     @classmethod
     def ancestors(cls, *, role: str, db: Session) -> tuple[str, ...]:
         """
-        Get all ancestor Roles.
+        Get all ancestor **Roles**.
 
         Parameters
         ----------
@@ -311,7 +311,7 @@ class RoleService(metaclass=FrozenClass):
         Returns
         -------
         tuple[str, ...]
-            A tuple containing all ancestor RoleIDs.
+            A tuple containing all ancestor **RoleIDs**.
 
         Raises
         ------
@@ -345,7 +345,7 @@ class RoleService(metaclass=FrozenClass):
     @classmethod
     def descendants(cls, *, role: str, db: Session) -> tuple[str, ...]:
         """
-        Get all descending Roles.
+        Get all descending **Roles**.
 
         Parameters
         ----------
@@ -357,7 +357,7 @@ class RoleService(metaclass=FrozenClass):
         Returns
         -------
         tuple[str, ...]
-            A tuple containing all descending RoleIDs.
+            A tuple containing all descending **RoleIDs**.
 
         Raises
         ------
@@ -393,21 +393,21 @@ class RoleService(metaclass=FrozenClass):
         cls, *, role: str, include_descendant_subjects: bool = False, db: Session
     ) -> tuple[str, ...]:
         """
-        Get all Subjects assigned to a Role.
+        Get all **Subjects** assigned to a **Role**.
 
         Parameters
         ----------
         role : str
             The target **RoleID**.
         include_descendant_subjects: bool
-            Include all Subjects for descendant Roles.
+            Include all **Subjects** for descendant **Roles**.
         db : Session
             The SQLAlchemy session.
 
         Returns
         -------
         tuple[str, ...]
-            A tuple containing all assigned SubjectIDs.
+            A tuple containing all assigned **SubjectIDs**.
 
         Raises
         ------
@@ -457,7 +457,7 @@ class RoleService(metaclass=FrozenClass):
         db: Session,
     ) -> None:
         """
-        Grant a **Permission** to a Role.
+        Grant a **Permission** to a **Role**.
 
         Parameters
         ----------
@@ -471,7 +471,7 @@ class RoleService(metaclass=FrozenClass):
         PyPermissionError
             If `role` is an empty string.
             If the target **Role** does not exist.
-            If the permission is already granted to the role (duplicate policy).
+            If the **Permission** is already granted to the **Role** (duplicate policy).
         """
         if role == "":
             raise PyPermissionError("Role name cannot be empty!")
@@ -497,12 +497,12 @@ class RoleService(metaclass=FrozenClass):
         db: Session,
     ) -> None:
         """
-        Revoke a **Permission** from a Role.
+        Revoke a **Permission** from a **Role**.
 
         Parameters
         ----------
         role : str
-            The target **Role** ID.
+            The target **RoleID**.
         db : Session
             The SQLAlchemy session.
 
@@ -642,21 +642,21 @@ class RoleService(metaclass=FrozenClass):
         db: Session,
     ) -> tuple[Permission, ...]:
         """
-        Get all granted **Permissions** for a Role.
+        Get all granted **Permissions** for a **Role**.
 
         Parameters
         ----------
         role : str
             The target **RoleID**.
         inherited : bool
-            Includes all **Permissions** inherited by ancestor Roles.
+            Includes all **Permissions** inherited by ancestor **Roles**.
         db : Session
             The SQLAlchemy session.
 
         Returns
         -------
         tuple[Permission, ...]
-            A tuple containing all granted Permissions.
+            A tuple containing all granted **Permissions**.
 
         Raises
         ------
@@ -690,21 +690,21 @@ class RoleService(metaclass=FrozenClass):
         db: Session,
     ) -> tuple[Policy, ...]:
         """
-        Get all granted Policies for a Role.
+        Get all granted **Policies** for a **Role**.
 
         Parameters
         ----------
         role : str
             The target **RoleID**.
         inherited : bool
-            Includes all Policies inherited by ancestor Roles.
+            Includes all **Policies** inherited by ancestor **Roles**.
         db : Session
             The SQLAlchemy session.
 
         Returns
         -------
         tuple[Policies, ...]
-            A tuple containing all granted Policies.
+            A tuple containing all granted **Policies**.
 
         Raises
         ------
@@ -762,7 +762,7 @@ class RoleService(metaclass=FrozenClass):
         Returns
         -------
         tuple[str, ...]
-            A tuple containing all granted action IDs.
+            A tuple containing all granted **Actions**.
 
         Raises
         ------
