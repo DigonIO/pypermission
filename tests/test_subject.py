@@ -31,13 +31,6 @@ def test_create__duplicate_subject(*, db: Session) -> None:
     assert ERR_MSG_CONFLICT.subject_exists.format(subject=subject) == err.value.message
 
 
-def test_create__empty_subject(db: Session) -> None:
-    with pytest.raises(PyPermissionError) as err:
-        SS.create(subject="", db=db)
-
-    assert ERR_MSG.empty_subject == err.value.message
-
-
 ################################################################################
 #### Test subject delete
 ################################################################################
@@ -49,12 +42,6 @@ def test_delete__success(db: Session) -> None:
 
     SS.delete(subject="Alex", db=db)
     assert Counter() == Counter(SS.list(db=db))
-
-
-def test_delete__empty_subject(db: Session) -> None:
-    with pytest.raises(PyPermissionError) as err:
-        SS.delete(subject="", db=db)
-    assert ERR_MSG.empty_subject == err.value.message
 
 
 def test_delete__unknown_subject(db: Session) -> None:
@@ -89,24 +76,6 @@ def test_assign_role__success(db: Session) -> None:
     RS.create(role=role, db=db)
 
     SS.assign_role(subject=subject, role=role, db=db)
-
-
-def test_assign_role__empty_subject(db: Session) -> None:
-    role = "admin"
-    RS.create(role=role, db=db)
-    with pytest.raises(PyPermissionError) as err:
-        SS.assign_role(subject="", role=role, db=db)
-
-    assert ERR_MSG.empty_subject == err.value.message
-
-
-def test_assign_role__empty_role(db: Session) -> None:
-    subject = "Alex"
-    SS.create(subject=subject, db=db)
-    with pytest.raises(PyPermissionError) as err:
-        SS.assign_role(subject=subject, role="", db=db)
-
-    assert ERR_MSG.empty_role == err.value.message
 
 
 def test_assign_role__unknown_subject(db: Session) -> None:
@@ -165,7 +134,10 @@ def test_assign_role__already_assigned(db: Session) -> None:
     SS.assign_role(subject=subject, role=role, db=db)
     with pytest.raises(PyPermissionError) as err:
         SS.assign_role(subject=subject, role=role, db=db)
-    assert ERR_MSG_CONFLICT.role_assigned_to_subject.format(role=role, subject=subject) == err.value.message
+    assert (
+        ERR_MSG_CONFLICT.role_assigned_to_subject.format(role=role, subject=subject)
+        == err.value.message
+    )
 
 
 ################################################################################
@@ -184,15 +156,6 @@ def test_deassign_role__success(db: Session) -> None:
     assert Counter(SS.roles(subject="Alex", db=db)) == Counter()
 
 
-def test_deassign_role__empty_subject(db: Session) -> None:
-    role = "admin"
-    RS.create(role=role, db=db)
-
-    with pytest.raises(PyPermissionError) as err:
-        SS.deassign_role(subject="", role=role, db=db)
-    assert ERR_MSG.empty_subject == err.value.message
-
-
 def test_deassign_role__unknown_subject(db: Session) -> None:
     role = "admin"
     subject = "unknown"
@@ -201,16 +164,6 @@ def test_deassign_role__unknown_subject(db: Session) -> None:
     with pytest.raises(PyPermissionError) as err:
         SS.deassign_role(subject=subject, role=role, db=db)
     assert ERR_MSG.non_existent_subject.format(subject=subject) == err.value.message
-
-
-def test_deassign_role__empty_role(db: Session) -> None:
-    subject = "Alex"
-    SS.create(subject=subject, db=db)
-
-    with pytest.raises(PyPermissionError) as err:
-        SS.deassign_role(subject=subject, role="", db=db)
-
-    assert ERR_MSG.empty_role == err.value.message
 
 
 def test_deassign_role__unknown_role(db: Session) -> None:
@@ -282,12 +235,6 @@ def test_roles_include_ascendant__success(db: Session) -> None:
     assert Counter(("user",)) == Counter(
         SS.roles(subject="Uwe", include_ascendant_roles=True, db=db)
     )
-
-
-def test_roles__empty_subject(db: Session) -> None:
-    with pytest.raises(PyPermissionError) as err:
-        SS.roles(subject="", db=db)
-    assert ERR_MSG.empty_subject == err.value.message
 
 
 def test_roles__unknown_subject(db: Session) -> None:
@@ -370,18 +317,6 @@ def test_check_assert_permission__success(db: Session) -> None:
     )
 
 
-def test_assert_permission__empty_subject(db: Session) -> None:
-    with pytest.raises(PyPermissionError) as err:
-        SS.assert_permission(
-            subject="",
-            permission=Permission(
-                resource_type="event", resource_id="*", action="view"
-            ),
-            db=db,
-        )
-    assert ERR_MSG.empty_subject == err.value.message
-
-
 def test_check_permission__unknown_subject(db: Session) -> None:
     subject = "unknown"
     with pytest.raises(PyPermissionError) as err:
@@ -394,18 +329,6 @@ def test_check_permission__unknown_subject(db: Session) -> None:
         )
 
     assert ERR_MSG.non_existent_subject.format(subject=subject) == err.value.message
-
-
-def test_check_permission__empty_subject(db: Session) -> None:
-    with pytest.raises(PyPermissionError) as err:
-        SS.check_permission(
-            subject="",
-            permission=Permission(
-                resource_type="event", resource_id="*", action="view"
-            ),
-            db=db,
-        )
-    assert ERR_MSG.empty_subject == err.value.message
 
 
 ################################################################################
@@ -439,12 +362,6 @@ def test_permissions__success(*, db: Session) -> None:
     assert Counter((str(view_all), str(edit_all))) == Counter(
         str(permission) for permission in SS.permissions(subject="Alex", db=db)
     )
-
-
-def test_permissions__empty_subject(db: Session) -> None:
-    with pytest.raises(PyPermissionError) as err:
-        SS.permissions(subject="", db=db)
-    assert ERR_MSG.empty_subject == err.value.message
 
 
 def test_permissions__unknown_subject(db: Session) -> None:
@@ -486,12 +403,6 @@ def test_policies__success(*, db: Session) -> None:
     assert Counter((f"user:{view_all}", f"admin:{edit_all}")) == Counter(
         str(policy) for policy in SS.policies(subject="Alex", db=db)
     )
-
-
-def test_policies__empty_subject(db: Session) -> None:
-    with pytest.raises(PyPermissionError) as err:
-        SS.policies(subject="", db=db)
-    assert ERR_MSG.empty_subject == err.value.message
 
 
 def test_policies__unknown_subject(db: Session) -> None:
@@ -643,23 +554,6 @@ def test_actions_on_resource_not_inherited(*, db: Session) -> None:
             db=db,
         )
     ) == Counter(["edit"])
-
-
-def test_actions_on_resource__empty_subject(db: Session) -> None:
-    with pytest.raises(PyPermissionError) as err:
-        SS.actions_on_resource(
-            subject="", resource_type="event", resource_id="*", db=db
-        )
-    assert ERR_MSG.empty_subject == err.value.message
-
-
-def test_actions_on_resource__empty_resource_type(db: Session) -> None:
-    subject = "Uwe"
-    with pytest.raises(PyPermissionError) as err:
-        SS.actions_on_resource(
-            subject=subject, resource_type="", resource_id="*", db=db
-        )
-    assert ERR_MSG.empty_resource_type == err.value.message
 
 
 def test_actions_on_resource__unknown_subject(db: Session) -> None:

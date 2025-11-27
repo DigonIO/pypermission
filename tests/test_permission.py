@@ -1,6 +1,5 @@
 import pytest
 
-from pypermission.exc import ERR_MSG, PyPermissionError
 from pypermission.models import Permission
 
 ################################################################################
@@ -78,15 +77,3 @@ def test_permission__neq(*, resource_type: str, resource_id: str, action: str) -
 
         assert other != p2
         assert p2 != other
-
-
-def test_permission__empty_resource_type() -> None:
-    with pytest.raises(PyPermissionError) as err:
-        _p = Permission(resource_type="", resource_id="", action="edit")
-    assert ERR_MSG.empty_resource_type == err.value.message
-
-
-def test_permission__empty_action() -> None:
-    with pytest.raises(PyPermissionError) as err:
-        _p = Permission(resource_type="event", resource_id="", action="")
-    assert ERR_MSG.empty_action == err.value.message

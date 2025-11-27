@@ -6,16 +6,18 @@
 - `xxxx.` Normal
 - `xxxx!` Critical
 
-Next ID: `38`
+Next ID: `39`
 
 ## Open Tasks
 
+- `38.` Implement symmetric role review (see NIST, permission to role lookup + inherited flag)
 - `37?` Subclass Exceptions to allow the api consumer more fine grained control when handling the errors.
-- `35.` Prevent usage of `:` within the strings in `Subject`, `Roles`, `ResourceType`, `ResourceID` and `Action`
+- `35.` Prevent usage of `:` and `*` within the strings in `Subject`, `Roles`, `ResourceType`, `ResourceID` and `Action`
     - [ ] Doc/Tests: Replace `:` usage in Container **Permissions** and use brackets
     - [ ] Lock down user input to disallow the `:` character
+    - [ ] Lock down usage of `*` character in all but `ResourceID` (here single character only)
 - `34.` Allow the `*` wildcard for the action
-- `29?` Doc - Permission Design Guide -> As a subsection of RBAC system design (hierarchies vs flat, naming conventions (subjects/roles), ...)
+- `29?` Doc - Permission Design Guide -> As a subsection of RBAC system design (hierarchies vs flat, naming conventions (subjects/roles, prefixes & uuids), ...)
 - `28.` Doc - Design Rationale: Reasoning for certain design decisions
 - `26?` Doc - Ensure closer alignment to style guide
 - `19.` Provide json/yaml import/export utility function
@@ -56,7 +58,7 @@ Next ID: `38`
     - [x] Implement tests
     - [x] Implement validation logic
 - `23.` Doc - SEO and social description
-- `20.` Doc - Include mkdocs socical card
+- `20.` Doc - Include mkdocs social card
 - `9.` Doc - Finalize README
 - `8.` Doc - Add CHANGELOG
 - `3.` Decide for a seo optimal package name

@@ -49,8 +49,7 @@ class ERR_MSG_CONFLICT:
     )
 
 
-class ERR_MSG:
-    # empty string not allowed
+class ERR_STR_CHARS:
     empty_subject = "Subject name cannot be empty!"
     empty_role = "Role name cannot be empty!"
     empty_parent_role = "Role name cannot be empty, but `parent_role` is empty!"
@@ -58,6 +57,8 @@ class ERR_MSG:
     empty_resource_type = "Resource type cannot be empty!"
     empty_action = "Action cannot be empty!"
 
+
+class ERR_MSG:
     # non_existent
     non_existent_subject_role = "Subject '{subject}' or Role '{role}' does not exist!"
     non_existent_subject = "Subject '{subject}' does not exist!"

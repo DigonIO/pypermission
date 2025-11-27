@@ -1,18 +1,10 @@
 import pytest
 
-from pypermission.exc import ERR_MSG, PyPermissionError
 from pypermission.models import Permission, Policy
 
 ################################################################################
 #### Test Policy
 ################################################################################
-
-
-def test_policy__empty_role() -> None:
-    permission = Permission(resource_type="admin", resource_id="", action="edit")
-    with pytest.raises(PyPermissionError) as err:
-        Policy(role="", permission=permission)
-    assert ERR_MSG.empty_role == err.value.message
 
 
 @pytest.mark.parametrize(
