@@ -30,29 +30,24 @@ else:
 
 
 def process_subject_role_integrity_error(
-    *, err: IntegrityError, subject: str | None = None, role: str | None = None
+    *, err: IntegrityError, subject: str, role: str
 ) -> Never:
     match err:
         case IntegrityError(
-            orig=Sqlite3IntegrityError(sqlite_errorname="SQLITE_CONSTRAINT_PRIMARYKEY")
+            orig=Sqlite3IntegrityError(sqlite_errorname=str(msg))
+            | PsycopgUniqueViolation(diag=PsycopgDiagnostic(message_detail=str(msg)))
+        ) if msg == "SQLITE_CONSTRAINT_PRIMARYKEY" or (
+            f"Key (role_id, subject_id)=({role}, {subject}) already exists." in msg
         ):
             raise PyPermissionError(
                 f"Conflict: Role '{role}' already assigned to Subject '{subject}'!"
             )
         case IntegrityError(
             orig=Sqlite3IntegrityError(sqlite_errorname="SQLITE_CONSTRAINT_FOREIGNKEY")
-        ) if (subject is not None and role is not None):
+        ):
             raise PyPermissionError(
                 f"Subject '{subject}' or Role '{role}' does not exist!"
             )
-        case IntegrityError(
-            orig=Sqlite3IntegrityError(sqlite_errorname="SQLITE_CONSTRAINT_FOREIGNKEY")
-        ) if (subject is not None):
-            raise PyPermissionError(f"Subject '{subject}' does not exist!")
-        case IntegrityError(
-            orig=Sqlite3IntegrityError(sqlite_errorname="SQLITE_CONSTRAINT_FOREIGNKEY")
-        ) if (role is not None):
-            raise PyPermissionError(f"Role '{role}' does not exist!")
         case IntegrityError(
             orig=PsycopgForeignKeyViolation(
                 diag=PsycopgDiagnostic(message_detail=str(msg))
@@ -65,19 +60,6 @@ def process_subject_role_integrity_error(
             )
         ) if (f"Key (subject_id)=({subject}) is not present in table" in msg):
             raise PyPermissionError(f"Subject '{subject}' does not exist!")
-        case IntegrityError(
-            orig=PsycopgUniqueViolation(diag=PsycopgDiagnostic(message_detail=str(msg)))
-        ) if (
-            f"Key (role_id, subject_id)=({role}, {subject}) is not present in table"
-            in msg
-        ):
-            raise PyPermissionError(f"Conflict: FOO")
-        case IntegrityError(
-            orig=PsycopgUniqueViolation(diag=PsycopgDiagnostic(message_detail=str(msg)))
-        ) if (f"Key (role_id, subject_id)=({role}, {subject}) already exists." in msg):
-            raise PyPermissionError(
-                f"Conflict: Role '{role}' already assigned to Subject '{subject}'!"
-            )
         case _:
             ...
     raise PyPermissionError("Unexpected IntegrityError")
