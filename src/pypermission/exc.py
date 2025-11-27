@@ -37,15 +37,19 @@ class PermissionNotGrantedError(PyPermissionError):
 ################################################################################
 
 
-class ERR_MSG:
-    # conflict
-    conflict_role_exists = "Role '{role}' already exists!"
-    conflict_subject_exists = "Subject '{subject}' already exists!"
-    conflict_hierarchy_exists = "Hierarchy '{parent_role}' -> '{child_role}' exists!"
-    conflict_permission_exists = "Permission '{permission_str}' does already exist!"
-    conflict_cycle_detected = "Desired hierarchy would create a cycle!"
-    conflicting_role_ids = "RoleIDs must not be equal: '{role}'!"
+class ERR_MSG_CONFLICT:
+    role_exists = "Conflict: Role '{role}' already exists!"
+    subject_exists = "Conflict: Subject '{subject}' already exists!"
+    hierarchy_exists = "Conflict: Hierarchy '{parent_role}' -> '{child_role}' exists!"
+    policy_exists = "Conflict: Policy '{policy_str}' already exists!"
+    cycle_detected = "Conflict: Desired Hierarchy would create a cycle!"
+    role_ids = "Conflict: RoleIDs must not be equal: '{role}'!"
+    role_assigned_to_subject = (
+        "Conflict: Role '{role}' already assigned to Subject '{subject}'!"
+    )
 
+
+class ERR_MSG:
     # empty string not allowed
     empty_subject = "Subject name cannot be empty!"
     empty_role = "Role name cannot be empty!"
@@ -67,7 +71,7 @@ class ERR_MSG:
     non_existent_role_assignment = (
         "Role '{role}' is not assigned to Subject '{subject}'!"
     )
-    non_existent_permission = "Permission '{permission_str}' does not exist!"
+    non_existent_policy = "Policy '{policy_str}' does not exist!"
 
     # permission_not_granted
     permission_not_granted_for_role = (

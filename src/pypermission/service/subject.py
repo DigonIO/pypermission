@@ -49,7 +49,7 @@ class SubjectService(metaclass=FrozenClass):
             db.flush()
         except IntegrityError:
             db.rollback()
-            raise PyPermissionError(f"Subject '{subject}' already exists!")
+            raise PyPermissionError(f"Conflict: Subject '{subject}' already exists!")
 
     @classmethod
     def delete(cls, *, subject: str, db: Session) -> None:

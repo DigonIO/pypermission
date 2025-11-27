@@ -3,8 +3,13 @@ from collections import Counter
 import pytest
 from sqlalchemy.orm import Session
 
-from pypermission.exc import ERR_MSG, PermissionNotGrantedError, PyPermissionError
-from pypermission.models import Permission
+from pypermission.exc import (
+    ERR_MSG,
+    ERR_MSG_CONFLICT,
+    PermissionNotGrantedError,
+    PyPermissionError,
+)
+from pypermission.models import Permission, Policy
 from pypermission.service.role import RoleService as RS
 from pypermission.service.subject import SubjectService as SS
 
@@ -29,7 +34,7 @@ def test_create__duplicate_role(*, db: Session) -> None:
     with pytest.raises(PyPermissionError) as err:
         RS.create(role="user", db=db)
 
-    assert ERR_MSG.conflict_role_exists.format(role="user") == err.value.message
+    assert ERR_MSG_CONFLICT.role_exists.format(role="user") == err.value.message
 
 
 ################################################################################
@@ -123,7 +128,7 @@ def test_add_hierarchy__empty_child_role(*, db: Session) -> None:
 def test_add_hierarchy__conflict(*, db: Session) -> None:
     with pytest.raises(PyPermissionError) as err:
         RS.add_hierarchy(parent_role="user", child_role="user", db=db)
-    assert ERR_MSG.conflicting_role_ids.format(role="user") == err.value.message
+    assert ERR_MSG_CONFLICT.role_ids.format(role="user") == err.value.message
 
 
 def test_add_hierarchy__cycle(*, db: Session) -> None:
@@ -132,7 +137,7 @@ def test_add_hierarchy__cycle(*, db: Session) -> None:
     RS.add_hierarchy(parent_role="user", child_role="admin", db=db)
     with pytest.raises(PyPermissionError) as err:
         RS.add_hierarchy(parent_role="admin", child_role="user", db=db)
-    assert ERR_MSG.conflict_cycle_detected == err.value.message
+    assert ERR_MSG_CONFLICT.cycle_detected == err.value.message
 
 
 def test_add_hierarchy__exists(*, db: Session) -> None:
@@ -143,7 +148,7 @@ def test_add_hierarchy__exists(*, db: Session) -> None:
         RS.add_hierarchy(parent_role="user", child_role="admin", db=db)
 
     assert (
-        ERR_MSG.conflict_hierarchy_exists.format(parent_role="user", child_role="admin")
+        ERR_MSG_CONFLICT.hierarchy_exists.format(parent_role="user", child_role="admin")
         == err.value.message
     )
 
@@ -197,7 +202,7 @@ def test_remove_hierarchy__equal(*, db: Session) -> None:
     with pytest.raises(PyPermissionError) as err:
         RS.remove_hierarchy(parent_role="user", child_role="user", db=db)
 
-    assert ERR_MSG.conflicting_role_ids.format(role="user") == err.value.message
+    assert ERR_MSG_CONFLICT.role_ids.format(role="user") == err.value.message
 
 
 def test_remove_hierarchy__empty_parent_role(*, db: Session) -> None:
@@ -495,7 +500,9 @@ def test_grant_permission__duplication(*, db: Session) -> None:
         RS.grant_permission(role=role, permission=permission, db=db)
 
     assert (
-        ERR_MSG.conflict_permission_exists.format(permission_str=str(permission))
+        ERR_MSG_CONFLICT.policy_exists.format(
+            policy_str=str(Policy(role=role, permission=permission))
+        )
         == err.value.message
     )
 
@@ -534,14 +541,14 @@ def test_revoke_permission__success(*, db: Session) -> None:
 
 def test_revoke_permission__unknown_permission(*, db: Session) -> None:
     permission = Permission(resource_type="event", resource_id="*", action="edit")
+    policy = Policy(role="admin", permission=permission)
 
     RS.create(role="admin", db=db)
     with pytest.raises(PyPermissionError) as err:
         RS.revoke_permission(role="admin", permission=permission, db=db)
 
     assert (
-        ERR_MSG.non_existent_permission.format(permission_str=str(permission))
-        == err.value.message
+        ERR_MSG.non_existent_policy.format(policy_str=str(policy)) == err.value.message
     )
 
 

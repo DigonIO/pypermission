@@ -3,7 +3,12 @@ from collections import Counter
 import pytest
 from sqlalchemy.orm import Session
 
-from pypermission.exc import ERR_MSG, PermissionNotGrantedError, PyPermissionError
+from pypermission.exc import (
+    ERR_MSG,
+    ERR_MSG_CONFLICT,
+    PermissionNotGrantedError,
+    PyPermissionError,
+)
 from pypermission.models import Permission
 from pypermission.service.role import RoleService as RS
 from pypermission.service.subject import SubjectService as SS
@@ -23,7 +28,7 @@ def test_create__duplicate_subject(*, db: Session) -> None:
     with pytest.raises(PyPermissionError) as err:
         SS.create(subject=subject, db=db)
 
-    assert ERR_MSG.conflict_subject_exists.format(subject=subject) == err.value.message
+    assert ERR_MSG_CONFLICT.subject_exists.format(subject=subject) == err.value.message
 
 
 def test_create__empty_subject(db: Session) -> None:
@@ -149,6 +154,18 @@ def test_assign_role__unknown_role(db: Session) -> None:
             )
         case _:
             assert False
+
+
+def test_assign_role__already_assigned(db: Session) -> None:
+    subject = "Alex"
+    role = "admin"
+    SS.create(subject=subject, db=db)
+    RS.create(role=role, db=db)
+
+    SS.assign_role(subject=subject, role=role, db=db)
+    with pytest.raises(PyPermissionError) as err:
+        SS.assign_role(subject=subject, role=role, db=db)
+    assert ERR_MSG_CONFLICT.role_assigned_to_subject.format(role=role, subject=subject) == err.value.message
 
 
 ################################################################################

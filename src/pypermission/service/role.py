@@ -22,7 +22,7 @@ from pypermission.util.exception_handling import process_policy_integrity_error
 
 
 class RoleService(metaclass=FrozenClass):
-
+    # NOTE: we can use the Policy object when dealing with role + permission to let it handle empty role names for us.
     @classmethod
     def create(cls, *, role: str, db: Session) -> None:
         """
@@ -49,7 +49,7 @@ class RoleService(metaclass=FrozenClass):
             db.flush()
         except IntegrityError as err:
             db.rollback()
-            raise PyPermissionError(f"Role '{role}' already exists!") from err
+            raise PyPermissionError(f"Conflict: Role '{role}' already exists!") from err
 
     @classmethod
     def delete(cls, *, role: str, db: Session) -> None:
@@ -127,7 +127,9 @@ class RoleService(metaclass=FrozenClass):
                 "Role name cannot be empty, but `child_role` is empty!"
             )
         if parent_role == child_role:
-            raise PyPermissionError(f"RoleIDs must not be equal: '{parent_role}'!")
+            raise PyPermissionError(
+                f"Conflict: RoleIDs must not be equal: '{parent_role}'!"
+            )
 
         roles = db.scalars(
             select(RoleORM.id).where(RoleORM.id.in_([parent_role, child_role]))
@@ -158,7 +160,7 @@ class RoleService(metaclass=FrozenClass):
         ).all()
 
         if critical_leaf_relations:
-            raise PyPermissionError("Desired hierarchy would create a cycle!")
+            raise PyPermissionError("Conflict: Desired Hierarchy would create a cycle!")
 
         try:
             hierarchy_orm = HierarchyORM(
@@ -169,7 +171,7 @@ class RoleService(metaclass=FrozenClass):
         except IntegrityError as err:
             db.rollback()
             raise PyPermissionError(
-                f"Hierarchy '{parent_role}' -> '{child_role}' exists!"
+                f"Conflict: Hierarchy '{parent_role}' -> '{child_role}' exists!"
             ) from err
 
     @classmethod
@@ -206,7 +208,9 @@ class RoleService(metaclass=FrozenClass):
             )
 
         if parent_role == child_role:
-            raise PyPermissionError(f"RoleIDs must not be equal: '{parent_role}'!")
+            raise PyPermissionError(
+                f"Conflict: RoleIDs must not be equal: '{parent_role}'!"
+            )
 
         hierarchy_orm = db.get(HierarchyORM, (parent_role, child_role))
         if hierarchy_orm is None:
@@ -473,8 +477,7 @@ class RoleService(metaclass=FrozenClass):
             If the target **Role** does not exist.
             If the **Permission** is already granted to the **Role** (duplicate policy).
         """
-        if role == "":
-            raise PyPermissionError("Role name cannot be empty!")
+        policy = Policy(role=role, permission=permission)
         try:
             policy_orm = PolicyORM(
                 role_id=role,
@@ -486,7 +489,7 @@ class RoleService(metaclass=FrozenClass):
             db.flush()
         except IntegrityError as err:
             db.rollback()
-            process_policy_integrity_error(err=err, role=role, permission=permission)
+            process_policy_integrity_error(err=err, policy=policy)
 
     @classmethod
     def revoke_permission(
@@ -513,8 +516,7 @@ class RoleService(metaclass=FrozenClass):
             If the target **Role** does not exist.
             If the permission was not granted to the role (policy does not exist).
         """
-        if role == "":
-            raise PyPermissionError("Role name cannot be empty!")
+        policy = Policy(role=role, permission=permission)
         policy_tuple = (
             role,
             permission.resource_type,
@@ -528,9 +530,7 @@ class RoleService(metaclass=FrozenClass):
         if policy_orm is None:
             role_orm = db.get(RoleORM, role)
             if role_orm:
-                raise PyPermissionError(
-                    f"Permission '{str(permission)}' does not exist!"
-                )
+                raise PyPermissionError(f"Policy '{str(policy)}' does not exist!")
             raise PyPermissionError(f"Role '{role}' does not exist!")
 
         db.delete(policy_orm)
@@ -567,8 +567,7 @@ class RoleService(metaclass=FrozenClass):
             If `role` is an empty string.
             If the target **Role** does not exist.
         """
-        if role == "":
-            raise PyPermissionError("Role name cannot be empty!")
+        _ = Policy(role=role, permission=permission)  # raises if role empty
         root_cte = (
             select(RoleORM.id.label("role_id"))
             .where(RoleORM.id == role)
@@ -626,8 +625,7 @@ class RoleService(metaclass=FrozenClass):
             If `role` is an empty string.
             If the target **Role** does not exist.
         """
-        if role == "":
-            raise PyPermissionError("Role name cannot be empty!")
+        _ = Policy(role=role, permission=permission)  # raises if role empty
         if not cls.check_permission(role=role, permission=permission, db=db):
             raise PermissionNotGrantedError(
                 f"Permission '{permission}' is not granted for Role '{role}'!"

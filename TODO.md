@@ -6,10 +6,11 @@
 - `xxxx.` Normal
 - `xxxx!` Critical
 
-Next ID: `37`
+Next ID: `38`
 
 ## Open Tasks
 
+- `37?` Subclass Exceptions to allow the api consumer more fine grained control when handling the errors.
 - `36.` Doc - Update Links in Readme
 - `35.` Prevent usage of `:` within the strings in `Subject`, `Roles`, `ResourceType`, `ResourceID` and `Action`
     - [ ] Doc/Tests: Replace `:` usage in Container **Permissions** and use brackets
