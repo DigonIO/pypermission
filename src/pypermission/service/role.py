@@ -820,7 +820,6 @@ class RoleService(metaclass=FrozenClass):
 def _get_policy_orms_for_role(
     *, role: str, inherited: bool = True, db: Session
 ) -> Sequence[PolicyORM]:
-    # TODO raise IntegrityError if role is unknown and if possible via ORM
     if inherited:
         root_cte = (
             select(RoleORM.id.label("role_id"))
