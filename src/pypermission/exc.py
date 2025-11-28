@@ -38,24 +38,35 @@ class PermissionNotGrantedError(PyPermissionError):
 
 
 class ERR_MSG_CONFLICT:
-    role_exists = "Conflict: Role '{role}' already exists!"
-    subject_exists = "Conflict: Subject '{subject}' already exists!"
-    hierarchy_exists = "Conflict: Hierarchy '{parent_role}' -> '{child_role}' exists!"
-    policy_exists = "Conflict: Policy '{policy_str}' already exists!"
-    cycle_detected = "Conflict: Desired Hierarchy would create a cycle!"
-    role_ids = "Conflict: RoleIDs must not be equal: '{role}'!"
-    role_assigned_to_subject = (
-        "Conflict: Role '{role}' already assigned to Subject '{subject}'!"
+    role_exists = "Conflict: Role with ID '{role}' already exists!"
+    subject_exists = "Conflict: Subject with ID '{subject}' already exists!"
+    hierarchy_exists = (
+        "Conflict: Role Hierarchy '{parent_role}' -> '{child_role}' exists!"
     )
+    policy_exists = "Conflict: Policy '{policy_str}' already exists!"
+    cycle_detected = "Conflict: Desired Role Hierarchy would create a cycle!"
+    role_ids = (
+        "Conflict: A Role Hierarchy requires distinct RoleIDs, received '{role}' twice!"
+    )
+    role_assigned_to_subject = "Conflict: Role with ID '{role}' already assigned to Subject with ID '{subject}'!"
 
 
-class ERR_STR_CHARS:
-    empty_subject = "Subject name cannot be empty!"
-    empty_role = "Role name cannot be empty!"
-    empty_parent_role = "Role name cannot be empty, but `parent_role` is empty!"
-    empty_child_role = "Role name cannot be empty, but `child_role` is empty!"
-    empty_resource_type = "Resource type cannot be empty!"
-    empty_action = "Action cannot be empty!"
+class ERR_STR_EMPTY:
+    subject = "`subject` cannot be empty!"
+    role = "`role` cannot be empty!"
+    parent_role = "`parent_role` cannot be empty!"
+    child_role = "`child_role` cannot be empty!"
+    resource_type = "`resource_type` cannot be empty!"
+    action = "`action` cannot be empty!"
+
+
+class ERR_STR_WHITESPACE:
+    subject = "`subject` cannot have leading or trailing spaces!"
+    role = "`role` cannot have leading or trailing spaces!"
+    parent_role = "`parent_role` cannot have leading or trailing spaces!"
+    child_role = "`child_role` cannot have leading or trailing spaces!"
+    resource_type = "`resource_type` cannot have leading or trailing spaces!"
+    action = "`action` cannot have leading or trailing spaces!"
 
 
 class ERR_MSG:

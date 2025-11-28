@@ -17,16 +17,16 @@ class PyPermissionORM(DeclarativeBase): ...
 
 class Permission:
     """
-    Represents a Resource paired with an Action.
+    Represents a **Resource** paired with an **Action**.
 
     Attributes
     ----------
     resource_type : str
         The **ResourceType** (e.g., "document", "user").
     resource_id : str
-        The ResourceID. The star '*' acts as a wildcard matching all ResourceIDs of the same ResourceType. The empty string can be used for Actions on Resources that do not have an ResourceID.
+        The **ResourceID**. The star '*' acts as a wildcard matching all **ResourceIDs** of the same **ResourceType**. The empty string can be used for **Actions** on **Resources** that do not have an **ResourceID**.
     action : str
-        The Action allowed on the Resource (e.g., "read", "write", "delete").
+        The **Action** allowed on the **Resource** (e.g., "read", "write", "delete").
     """
 
     resource_type: str
@@ -47,7 +47,7 @@ class Permission:
             The action allowed on the resource (e.g., "read", "write", "delete").
         """
         if resource_type == "":
-            raise PyPermissionError("Resource type cannot be empty!")
+            raise PyPermissionError("ResourceType cannot be empty!")
         if action == "":
             raise PyPermissionError("Action cannot be empty!")
 

@@ -1,0 +1,118 @@
+import pytest
+from pypermission.exc import PyPermissionError
+from pypermission.util.input_validation import (
+    assert_subject,
+    assert_role,
+    assert_resource_type,
+    assert_resource_id,
+    assert_action,
+)
+
+ALWAYS_ALLOWED = [
+    ("admin", ""),
+    ("abc_123", ""),
+    ("List(Item)", ""),
+    ("List{Item}", ""),
+    ("A B C D", ""),
+    ("version_1.2.3", ""),
+    ("file-name-01", ""),
+    ("notes, draft version", ""),
+    ("hello!", ""),
+    ("email@example.com", ""),
+    ("price$", ""),
+    ("C#Code", ""),
+    ("100% sure", ""),
+    ("value+1", ""),
+    ("path/to/file", ""),
+    ('quote "text"', ""),
+    ("it's fine", ""),
+    ("new<T>", ""),
+    ("tabs\tnope", ""),
+    ("88ecfc8f-7f07-4e83-9b39-67cd2e0d9814", ""),
+]
+
+ALWAYS_FORBIDDEN = [
+    (":", ""),
+    ("value*multiplier", ""),
+    (" admin", ""),
+    ("admin ", ""),
+    (" ", ""),
+    ("Item[123", ""),
+    ("]Item", ""),
+    ("a:b", ""),
+    ("[]", ""),
+]
+
+
+CONTAINS_BRACKET = [
+    ("List[Item]", ""),
+    ("DATASET[2024].csv", ""),
+    ("User[Anna]_88ecfc8f-7f07-4e83-9b39-67cd2e0d9814", ""),
+]
+
+SINGLE_WILDCARD = [
+    ("*", ""),
+]
+
+# ============================ subject, role, action ===========================
+
+
+@pytest.mark.parametrize(
+    "value, note",
+    ALWAYS_ALLOWED + CONTAINS_BRACKET,
+)
+def test_values__passable(*, value: str, note: str) -> None:
+    assert_subject(subject=value)
+    assert_role(role=value)
+    assert_action(action=value)
+
+
+@pytest.mark.parametrize(
+    "value, note",
+    ALWAYS_FORBIDDEN + SINGLE_WILDCARD,
+)
+def test_raise_on_invalid_subject_role_action(*, value: str, note: str) -> None:
+    with pytest.raises(PyPermissionError) as err:
+        assert_subject(subject=value)
+        assert_role(role=value)
+        assert_action(action=value)
+
+
+# =============================== resource_type ================================
+
+
+@pytest.mark.parametrize(
+    "value, note",
+    ALWAYS_ALLOWED,
+)
+def test_resource_type__passable(*, value: str, note: str) -> None:
+    assert_resource_type(resource_type=value)
+
+
+@pytest.mark.parametrize(
+    "value, note",
+    ALWAYS_FORBIDDEN + CONTAINS_BRACKET + SINGLE_WILDCARD,
+)
+def test_raise_on_invalid_resource_type(*, value: str, note: str) -> None:
+    with pytest.raises(PyPermissionError) as err:
+        assert_resource_type(resource_type=value)
+
+
+# =============================== resource_id ================================
+
+
+@pytest.mark.parametrize(
+    "value, note",
+    ALWAYS_ALLOWED + CONTAINS_BRACKET + SINGLE_WILDCARD,
+)
+def test_resource_id__passable(*, value: str, note: str) -> None:
+    assert_resource_id(resource_id=value)
+
+
+@pytest.mark.parametrize(
+    "value, note",
+    ALWAYS_FORBIDDEN,
+)
+def test_raise_on_invalid_resource_id(*, value: str, note: str) -> None:
+    with pytest.raises(PyPermissionError) as err:
+        assert_resource_id(resource_id=value)

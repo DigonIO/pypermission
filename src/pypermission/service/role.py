@@ -15,6 +15,7 @@ from pypermission.models import (
     RoleORM,
 )
 from pypermission.util.exception_handling import process_policy_integrity_error
+from pypermission.util.input_validation import validate_rbac_parameters
 
 ################################################################################
 #### RoleService
@@ -732,6 +733,7 @@ class RoleService(metaclass=FrozenClass):
         )
 
     @classmethod
+    @validate_rbac_parameters
     def actions_on_resource(
         cls,
         *,
@@ -772,7 +774,7 @@ class RoleService(metaclass=FrozenClass):
         if role == "":
             raise PyPermissionError("Role name cannot be empty!")
         if resource_type == "":
-            raise PyPermissionError("Resource type cannot be empty!")
+            raise PyPermissionError("ResourceType cannot be empty!")
 
         if inherited:
             root_cte = (

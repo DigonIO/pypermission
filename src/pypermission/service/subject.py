@@ -435,7 +435,7 @@ class SubjectService(metaclass=FrozenClass):
         if subject == "":
             raise PyPermissionError("Subject name cannot be empty!")
         if resource_type == "":
-            raise PyPermissionError("Resource type cannot be empty!")
+            raise PyPermissionError("ResourceType cannot be empty!")
         if inherited:
             root_cte = (
                 select(MemberORM.role_id)

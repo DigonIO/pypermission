@@ -1,6 +1,6 @@
 import pytest
 from pypermission.models import Permission
-from pypermission.exc import ERR_STR_CHARS, PyPermissionError
+from pypermission.exc import ERR_STR_EMPTY, PyPermissionError
 
 ################################################################################
 #### Test Permission
@@ -10,4 +10,4 @@ from pypermission.exc import ERR_STR_CHARS, PyPermissionError
 def test_permission__empty_action() -> None:
     with pytest.raises(PyPermissionError) as err:
         _p = Permission(resource_type="event", resource_id="", action="")
-    assert ERR_STR_CHARS.empty_action == err.value.message
+    assert ERR_STR_EMPTY.action == err.value.message
