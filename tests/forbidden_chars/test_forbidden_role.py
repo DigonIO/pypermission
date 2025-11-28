@@ -1,10 +1,10 @@
 import pytest
-from pypermission.models import Permission, Policy
-from pypermission.exc import ERR_STR_EMPTY, PyPermissionError
-from pypermission.service.role import RoleService as RS
-from pypermission.service.subject import SubjectService as SS
 from sqlalchemy.orm import Session
 
+from pypermission.exc import ERR_STR_EMPTY, PyPermissionError
+from pypermission.models import Permission, Policy
+from pypermission.service.role import RoleService as RS
+from pypermission.service.subject import SubjectService as SS
 
 ################################################################################
 #### Test Policy

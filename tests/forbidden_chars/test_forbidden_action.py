@@ -1,6 +1,7 @@
 import pytest
-from pypermission.models import Permission
+
 from pypermission.exc import ERR_STR_EMPTY, PyPermissionError
+from pypermission.models import Permission
 
 ################################################################################
 #### Test Permission

@@ -1,13 +1,14 @@
 import pytest
+
 from pypermission.exc import PyPermissionError
 from pypermission.util.input_validation import (
-    assert_subject,
-    assert_role,
-    assert_parent_role,
-    assert_child_role,
-    assert_resource_type,
-    assert_resource_id,
     assert_action,
+    assert_child_role,
+    assert_parent_role,
+    assert_resource_id,
+    assert_resource_type,
+    assert_role,
+    assert_subject,
 )
 
 ALWAYS_ALLOWED = [

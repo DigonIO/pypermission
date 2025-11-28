@@ -3,9 +3,8 @@ from typing import Never
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 from sqlalchemy.sql.schema import ForeignKey
 from sqlalchemy.sql.sqltypes import String
-from pypermission.util.input_validation import validate_rbac_parameters
 
-from pypermission.exc import PyPermissionError
+from pypermission.util.input_validation import validate_rbac_parameters
 
 
 class PyPermissionORM(DeclarativeBase): ...

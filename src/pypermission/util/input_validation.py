@@ -1,9 +1,10 @@
-from collections.abc import Callable
-from functools import wraps
-from typing import Any, TypeIs, NewType, Literal
-from pypermission.exc import PyPermissionError
 import inspect
+from collections.abc import Callable
 from enum import StrEnum
+from functools import wraps
+from typing import Any, Literal, NewType, TypeIs
+
+from pypermission.exc import PyPermissionError
 
 Subject = NewType("Subject", str)
 Role = NewType("Role", str)
