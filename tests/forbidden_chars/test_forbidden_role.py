@@ -136,7 +136,6 @@ def test_actions_on_resource__empty_role(*, db: Session) -> None:
 
 
 def test_add_hierarchy__empty_parent_role(*, db: Session) -> None:
-    RS.create(role="admin", db=db)
     with pytest.raises(PyPermissionError) as err:
         RS.add_hierarchy(parent_role="", child_role="admin", db=db)
 
@@ -144,7 +143,6 @@ def test_add_hierarchy__empty_parent_role(*, db: Session) -> None:
 
 
 def test_remove_hierarchy__empty_parent_role(*, db: Session) -> None:
-    RS.create(role="admin", db=db)
     with pytest.raises(PyPermissionError) as err:
         RS.remove_hierarchy(parent_role="", child_role="admin", db=db)
 
@@ -155,7 +153,6 @@ def test_remove_hierarchy__empty_parent_role(*, db: Session) -> None:
 
 
 def test_add_hierarchy__empty_child_role(*, db: Session) -> None:
-    RS.create(role="user", db=db)
     with pytest.raises(PyPermissionError) as err:
         RS.add_hierarchy(parent_role="user", child_role="", db=db)
 
@@ -163,7 +160,6 @@ def test_add_hierarchy__empty_child_role(*, db: Session) -> None:
 
 
 def test_remove_hierarchy__empty_child_role(*, db: Session) -> None:
-    RS.create(role="user", db=db)
     with pytest.raises(PyPermissionError) as err:
         RS.remove_hierarchy(parent_role="user", child_role="", db=db)
 
@@ -178,19 +174,14 @@ def test_remove_hierarchy__empty_child_role(*, db: Session) -> None:
 
 
 def test_assign_role__empty_role(db: Session) -> None:
-    subject = "Alex"
-    SS.create(subject=subject, db=db)
     with pytest.raises(PyPermissionError) as err:
-        SS.assign_role(subject=subject, role="", db=db)
+        SS.assign_role(subject="Alex", role="", db=db)
 
     assert ERR_STR_EMPTY.role == err.value.message
 
 
 def test_deassign_role__empty_role(db: Session) -> None:
-    subject = "Alex"
-    SS.create(subject=subject, db=db)
-
     with pytest.raises(PyPermissionError) as err:
-        SS.deassign_role(subject=subject, role="", db=db)
+        SS.deassign_role(subject="Alex", role="", db=db)
 
     assert ERR_STR_EMPTY.role == err.value.message

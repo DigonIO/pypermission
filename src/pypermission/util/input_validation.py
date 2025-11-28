@@ -1,7 +1,5 @@
 from collections.abc import Callable
 from functools import wraps
-import re
-from re import Pattern
 from typing import Any, TypeIs, NewType, Literal
 from pypermission.exc import PyPermissionError
 import inspect
@@ -12,16 +10,6 @@ Role = NewType("Role", str)
 ResourceType = NewType("ResourceType", str)
 ResourceID = NewType("ResourceID", str)
 Action = NewType("Action", str)
-
-
-_RE_ALLOWED = r"^\*|^[a-zA-Z0-9_\[\] \.\,\-]+$"
-_RE_FORBIDDEN = r"[^a-zA-Z0-9_\[\] \.\,\-\*]"
-# TODO: this needs work
-_SUBJECT_CHAR_RE = _RE_ALLOWED
-_ROLE_CHAR_RE = _RE_ALLOWED
-_RESOURCE_TYPE_CHAR_RE = _RE_ALLOWED
-_RESOURCE_ID_CHAR_RE = _RE_ALLOWED
-_ACTION_CHAR_RE = _RE_ALLOWED
 
 type DefinitionalT = Literal["Subject", "Role", "ResourceType", "ResourceID", "Action"]
 
@@ -36,109 +24,130 @@ class DefID(StrEnum):
     ACTION = "action"
 
 
-_DEFINITIONAL_T_MAP: dict[DefID, DefinitionalT] = {
-    DefID.SUBJECT: "Subject",
-    DefID.ROLE: "Role",
-    DefID.CHILD_ROLE: "Role",
-    DefID.PARENT_ROLE: "Role",
-    DefID.RESOURCE_TYPE: "ResourceType",
-    DefID.RESOURCE_ID: "ResourceID",
-    DefID.ACTION: "Action",
-}
-
-_RE_MAP: dict[DefID, str] = {
-    DefID.SUBJECT: _SUBJECT_CHAR_RE,
-    DefID.ROLE: _ROLE_CHAR_RE,
-    DefID.CHILD_ROLE: _ROLE_CHAR_RE,
-    DefID.PARENT_ROLE: _ROLE_CHAR_RE,
-    DefID.RESOURCE_TYPE: _RESOURCE_TYPE_CHAR_RE,
-    DefID.RESOURCE_ID: _RESOURCE_ID_CHAR_RE,
-    DefID.ACTION: _ACTION_CHAR_RE,
-}
-
-_RE_PAT: dict[DefID, Pattern[str]] = {k: re.compile(v) for k, v in _RE_MAP.items()}
-
-
 def _raise_on_isinstance_str_fail(*, val: Any, def_id: DefID) -> None:
     if not isinstance(val, str):
-        breakpoint()
         raise PyPermissionError(
-            f"{def_id} must be a string, got {type(val).__name__}. "
-            f"Note: All {def_id} identifiers must be subclass of string."
+            f"All `{def_id}` identifiers must be subclass of string. "
+            f"Got {type(val).__name__}."
         )
 
 
-def _raise_on_empty_and_lr_whitespaces(*, val: str, def_id: DefID) -> None:
+def _raise_on_colon(*, val: Any, def_id: DefID) -> None:
+    if ":" in val:
+        raise PyPermissionError(f"Invalid character `:` found in `{def_id}`!")
+
+
+def _raise_on_bracket(*, val: str, def_id: DefID) -> None:
+    if "[" in val:
+        raise PyPermissionError(f"Invalid character `[` found in `{def_id}`!")
+    if "]" in val:
+        raise PyPermissionError(f"Invalid character `]` found in `{def_id}`!")
+
+
+def _raise_on_empty(*, val: str, def_id: DefID) -> None:
     if val == "":
-        raise PyPermissionError(f"`{def_id}` cannot be empty!")
+        raise PyPermissionError(f"Argument `{def_id}` cannot be empty!")
+
+
+def _raise_on_wildcard(*, val: str, def_id: DefID) -> None:
+    if val == "*":
+        raise PyPermissionError(f"Argument `{def_id}` cannot be the character `*`!")
+
+
+def _raise_on_lr_whitespaces(*, val: str, def_id: DefID) -> None:
     if val != val.strip():
-        raise PyPermissionError(f"`{def_id}` cannot have leading or trailing spaces!")
-
-
-def _raise_on_regex_violation(*, val: str, def_id: DefID) -> None:
-    disallowed_chars = re.search(_RE_FORBIDDEN, val)
-    if disallowed_chars:
-        pos = disallowed_chars.start()
-        char = disallowed_chars.group(0)
         raise PyPermissionError(
-            f"{def_id} name contains invalid characters. "
-            f"Disallowed character '{char}' found at position {pos}."
+            f"Argument `{def_id}` cannot have leading or trailing spaces!"
         )
-    if not _RE_PAT[def_id].match(val):
-        raise PyPermissionError(f"Invalid {def_id}: {val!r}")
 
 
 def _raise_on_bracket_imbalance(*, value: str, def_id: DefID) -> None:
     depth = 0
+    last = ""
     for ch in value:
         if ch == "[":
             depth += 1
         elif ch == "]":
+            if last == "[":
+                raise PyPermissionError(
+                    f"Invalid `{def_id}`: closing ']' used prematurely."
+                )
             depth -= 1
             if depth < 0:
                 raise PyPermissionError(
-                    f"Invalid {def_id}: unmatched closing ']' in {value}."
+                    f"Invalid `{def_id}`: unmatched closing ']' in {value}."
                 )
+        last = ch
     if depth != 0:
-        raise PyPermissionError(f"Invalid {def_id}: unmatched opening '[' in {value}.")
+        raise PyPermissionError(
+            f"Invalid `{def_id}`: unmatched opening '[' in {value}."
+        )
 
 
 def assert_subject(subject: Any) -> TypeIs[Subject]:
     _raise_on_isinstance_str_fail(val=subject, def_id=DefID.SUBJECT)
-    _raise_on_empty_and_lr_whitespaces(val=subject, def_id=DefID.SUBJECT)
-    _raise_on_regex_violation(val=subject, def_id=DefID.SUBJECT)
+    _raise_on_empty(val=subject, def_id=DefID.SUBJECT)
+    _raise_on_lr_whitespaces(val=subject, def_id=DefID.SUBJECT)
+    _raise_on_colon(val=subject, def_id=DefID.SUBJECT)
+    _raise_on_wildcard(val=subject, def_id=DefID.SUBJECT)
     _raise_on_bracket_imbalance(value=subject, def_id=DefID.SUBJECT)
     return True
 
 
 def assert_role(role: Any) -> TypeIs[Role]:
     _raise_on_isinstance_str_fail(val=role, def_id=DefID.ROLE)
-    _raise_on_empty_and_lr_whitespaces(val=role, def_id=DefID.ROLE)
-    _raise_on_regex_violation(val=role, def_id=DefID.ROLE)
+    _raise_on_empty(val=role, def_id=DefID.ROLE)
+    _raise_on_lr_whitespaces(val=role, def_id=DefID.ROLE)
+    _raise_on_colon(val=role, def_id=DefID.ROLE)
+    _raise_on_wildcard(val=role, def_id=DefID.ROLE)
     _raise_on_bracket_imbalance(value=role, def_id=DefID.ROLE)
+    return True
+
+
+def assert_parent_role(parent_role: Any) -> TypeIs[Role]:
+    _raise_on_isinstance_str_fail(val=parent_role, def_id=DefID.PARENT_ROLE)
+    _raise_on_empty(val=parent_role, def_id=DefID.PARENT_ROLE)
+    _raise_on_lr_whitespaces(val=parent_role, def_id=DefID.PARENT_ROLE)
+    _raise_on_colon(val=parent_role, def_id=DefID.PARENT_ROLE)
+    _raise_on_wildcard(val=parent_role, def_id=DefID.PARENT_ROLE)
+    _raise_on_bracket_imbalance(value=parent_role, def_id=DefID.PARENT_ROLE)
+    return True
+
+
+def assert_child_role(child_role: Any) -> TypeIs[Role]:
+    _raise_on_isinstance_str_fail(val=child_role, def_id=DefID.CHILD_ROLE)
+    _raise_on_empty(val=child_role, def_id=DefID.CHILD_ROLE)
+    _raise_on_lr_whitespaces(val=child_role, def_id=DefID.CHILD_ROLE)
+    _raise_on_colon(val=child_role, def_id=DefID.CHILD_ROLE)
+    _raise_on_wildcard(val=child_role, def_id=DefID.CHILD_ROLE)
+    _raise_on_bracket_imbalance(value=child_role, def_id=DefID.CHILD_ROLE)
     return True
 
 
 def assert_resource_type(resource_type: Any) -> TypeIs[ResourceType]:
     _raise_on_isinstance_str_fail(val=resource_type, def_id=DefID.RESOURCE_TYPE)
-    _raise_on_empty_and_lr_whitespaces(val=resource_type, def_id=DefID.RESOURCE_TYPE)
-    _raise_on_regex_violation(val=resource_type, def_id=DefID.RESOURCE_TYPE)
-    _raise_on_bracket_imbalance(value=resource_type, def_id=DefID.RESOURCE_TYPE)
+    _raise_on_empty(val=resource_type, def_id=DefID.RESOURCE_TYPE)
+    _raise_on_lr_whitespaces(val=resource_type, def_id=DefID.RESOURCE_TYPE)
+    _raise_on_colon(val=resource_type, def_id=DefID.RESOURCE_TYPE)
+    _raise_on_wildcard(val=resource_type, def_id=DefID.RESOURCE_TYPE)
+    _raise_on_bracket(val=resource_type, def_id=DefID.SUBJECT)
     return True
 
 
 def assert_resource_id(resource_id: Any) -> TypeIs[ResourceID]:
     _raise_on_isinstance_str_fail(val=resource_id, def_id=DefID.RESOURCE_ID)
-    _raise_on_empty_and_lr_whitespaces(val=resource_id, def_id=DefID.RESOURCE_ID)
-    _raise_on_regex_violation(val=resource_id, def_id=DefID.RESOURCE_ID)
+    _raise_on_lr_whitespaces(val=resource_id, def_id=DefID.RESOURCE_ID)
+    _raise_on_colon(val=resource_id, def_id=DefID.RESOURCE_ID)
     _raise_on_bracket_imbalance(value=resource_id, def_id=DefID.RESOURCE_ID)
     return True
 
 
 def assert_action(action: Any) -> TypeIs[Action]:
     _raise_on_isinstance_str_fail(val=action, def_id=DefID.ACTION)
-    _raise_on_empty_and_lr_whitespaces(val=action, def_id=DefID.ACTION)
-    _raise_on_regex_violation(val=action, def_id=DefID.ACTION)
+    _raise_on_empty(val=action, def_id=DefID.ACTION)
+    _raise_on_lr_whitespaces(val=action, def_id=DefID.ACTION)
+    _raise_on_colon(val=action, def_id=DefID.ACTION)
+    _raise_on_wildcard(val=action, def_id=DefID.ACTION)
     _raise_on_bracket_imbalance(value=action, def_id=DefID.ACTION)
     return True
 
@@ -151,15 +160,39 @@ VALIDATION_RULES: dict[
 ] = {
     DefID.SUBJECT: assert_subject,
     DefID.ROLE: assert_role,
+    DefID.CHILD_ROLE: assert_child_role,
+    DefID.PARENT_ROLE: assert_parent_role,
     DefID.RESOURCE_TYPE: assert_resource_type,
     DefID.RESOURCE_ID: assert_resource_id,
     DefID.ACTION: assert_action,
 }
 
-SKIP_IDENTIFIERS = {"child_role", "parent_role", "db", "ancestors", "inherited", "cls"}
+SKIP_IDENTIFIERS = {
+    "child_role",
+    "parent_role",
+    "db",
+    "ancestors",
+    "inherited",
+    "cls",
+    "self",
+    "permission",
+    "include_descendant_subjects",
+    "include_ascendant_roles",
+}
 
 
 def validate_rbac_parameters[**P, T](func: Callable[P, T]) -> Callable[P, T]:
+    """
+    Apply input validation to a method of the RBAC API.
+
+    Provides the following guardrails:
+
+    * The characters `[` and `]` are not allowed anywhere inside ResourceType
+    * Strings `"*"` and `""` are only allowed in ResourceID
+    * `:` can never be used within any string
+    * Leading & trailing spaces are never allowed
+    * Decorator will fail to apply, if trying to wrap a function with unexpected signature
+    """
     sig = inspect.signature(func)
 
     param_names = set(sig.parameters)

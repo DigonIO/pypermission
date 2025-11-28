@@ -12,10 +12,6 @@ Next ID: `39`
 
 - `38.` Implement symmetric role review (see NIST, permission to role lookup + inherited flag)
 - `37?` Subclass Exceptions to allow the api consumer more fine grained control when handling the errors.
-- `35.` Prevent usage of `:` and `*` within the strings in `Subject`, `Roles`, `ResourceType`, `ResourceID` and `Action`
-    - [ ] Doc/Tests: Replace `:` usage in Container **Permissions** and use brackets
-    - [ ] Lock down user input to disallow the `:` character
-    - [ ] Lock down usage of `*` character in all but `ResourceID` (here single character only)
 - `34.` Allow the `*` wildcard for the action
 - `29?` Doc - Permission Design Guide -> As a subsection of RBAC system design (hierarchies vs flat, naming conventions (subjects/roles, prefixes & uuids), ...)
 - `28.` Doc - Design Rationale: Reasoning for certain design decisions
@@ -25,6 +21,10 @@ Next ID: `39`
 
 ## Done Tasks
 
+- `35.` Prevent usage of `:` and `*` within the strings in `Subject`, `Roles`, `ResourceType`, `ResourceID` and `Action`
+    - [x] Doc/Tests: Replace `:` usage in Container **Permissions** and use brackets
+    - [x] Lock down user input to disallow the `:` character
+    - [x] Lock down usage of `*` character in all but `ResourceID` (here single character only)
 - `36.` Doc - Update Links in Readme
 - `32.` Doc - Some docstrings do not list all possible reasons for raising an exception
 - `27.` Doc - Add Auditing Guide

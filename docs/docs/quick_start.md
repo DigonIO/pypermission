@@ -120,7 +120,7 @@ with db_factory() as db:
 
     * The asterisk `*` is a wildcard and matches all **ResourceID**s for the corresponding **ResourceType**.
     * The same rule also applies when checking whether a subject has a given **Permission**
-    * Depending on your requirements it can be helpful to indicate a scope within the **ResourceID** (e.g. "group:123"). For more details, see the [Permission Design Guide](permission_design_guide.md).
+    * Depending on your requirements it can be helpful to indicate a scope within the **ResourceID** (e.g. "group[123]"). For more details, see the [Permission Design Guide](permission_design_guide.md).
 
 Being granted the `user` **Role**, `Ursula` can `view` `event` with ID `19` and all `event`s of the `group` with ID `123`.
 
@@ -134,7 +134,7 @@ with db_factory() as db:
     # or alternatively (recommended over python's assert):
     RBAC.subject.assert_permission(
         subject="Ursula",
-        permission=Permission(resource_type="event", resource_id="group:123", action="view"),
+        permission=Permission(resource_type="event", resource_id="group[123]", action="view"),
         db=db,
     )
 ```
@@ -161,7 +161,7 @@ with db_factory() as db:
     )
 ```
 
-## Subject‑specific roles
+## Subject-specific roles
 
 Create a dedicated **Role** for each **Subject** and assign it alongside the shared **Role**:
 

@@ -3,6 +3,8 @@ from pypermission.exc import PyPermissionError
 from pypermission.util.input_validation import (
     assert_subject,
     assert_role,
+    assert_parent_role,
+    assert_child_role,
     assert_resource_type,
     assert_resource_id,
     assert_action,
@@ -25,15 +27,24 @@ ALWAYS_ALLOWED = [
     ("value+1", ""),
     ("path/to/file", ""),
     ('quote "text"', ""),
-    ("it's fine", ""),
+    ("88ecfc8f-7f07-4e83-9b39-67cd2e0d9814", ""),
     ("new<T>", ""),
     ("tabs\tnope", ""),
-    ("88ecfc8f-7f07-4e83-9b39-67cd2e0d9814", ""),
+    ("it's fine", ""),
+    ("German - ÄäÖöÜüß", ""),
+    ("French - bêcédéè", ""),
+    ("Greek - ἀγκών εγγραφή εγγεγραμμένος", ""),
+    ("Many Languages - ⴰⵎⴰⵣⵉⵖ中文ÆØÅæㄏㄢøå字漢", ""),
+    ("ℹ️ W🤩W R🔒🫷ES 🤟🏼 ✔️", ""),
+    ("📈 To the moon 🚀", ""),
+    ("ax* cs", ""),
+    ("value*multiplier", ""),
 ]
 
 ALWAYS_FORBIDDEN = [
     (":", ""),
-    ("value*multiplier", ""),
+    ("xx :s", ""),
+    ("xx: cs", ""),
     (" admin", ""),
     ("admin ", ""),
     (" ", ""),
@@ -64,6 +75,8 @@ SINGLE_WILDCARD = [
 def test_values__passable(*, value: str, note: str) -> None:
     assert_subject(subject=value)
     assert_role(role=value)
+    assert_child_role(child_role=value)
+    assert_parent_role(parent_role=value)
     assert_action(action=value)
 
 
@@ -75,6 +88,8 @@ def test_raise_on_invalid_subject_role_action(*, value: str, note: str) -> None:
     with pytest.raises(PyPermissionError) as err:
         assert_subject(subject=value)
         assert_role(role=value)
+        assert_child_role(child_role=value)
+        assert_parent_role(parent_role=value)
         assert_action(action=value)
 
 

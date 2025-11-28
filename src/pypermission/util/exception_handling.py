@@ -40,7 +40,7 @@ def process_subject_role_integrity_error(
             f"Key (role_id, subject_id)=({role}, {subject}) already exists." in msg
         ):
             raise PyPermissionError(
-                f"Conflict: Role '{role}' already assigned to Subject '{subject}'!"
+                f"Conflict: Role with ID '{role}' already assigned to Subject with ID '{subject}'!"
             )
         case IntegrityError(
             orig=Sqlite3IntegrityError(sqlite_errorname="SQLITE_CONSTRAINT_FOREIGNKEY")
@@ -60,9 +60,9 @@ def process_subject_role_integrity_error(
             )
         ) if (f"Key (subject_id)=({subject}) is not present in table" in msg):
             raise PyPermissionError(f"Subject '{subject}' does not exist!")
-        case _:
+        case _:  # pragma: no cover
             ...
-    raise PyPermissionError("Unexpected IntegrityError")
+    raise PyPermissionError("Unexpected IntegrityError")  # pragma: no cover
 
 
 def process_policy_integrity_error(
@@ -83,6 +83,6 @@ def process_policy_integrity_error(
             | PsycopgForeignKeyViolation(diag=PsycopgDiagnostic(message_detail=str()))
         ):
             raise PyPermissionError(f"Role '{policy.role}' does not exist!") from err
-        case _:
+        case _:  # pragma: no cover
             ...
-    raise PyPermissionError("Unexpected IntegrityError")
+    raise PyPermissionError("Unexpected IntegrityError")  # pragma: no cover

@@ -27,7 +27,6 @@ def test_create__duplicate_subject(*, db: Session) -> None:
     SS.create(subject=subject, db=db)
     with pytest.raises(PyPermissionError) as err:
         SS.create(subject=subject, db=db)
-
     assert ERR_MSG_CONFLICT.subject_exists.format(subject=subject) == err.value.message
 
 

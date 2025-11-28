@@ -51,13 +51,14 @@ class ERR_MSG_CONFLICT:
     role_assigned_to_subject = "Conflict: Role with ID '{role}' already assigned to Subject with ID '{subject}'!"
 
 
+# Do not template this for now, makes tests more read and searchable
 class ERR_STR_EMPTY:
-    subject = "`subject` cannot be empty!"
-    role = "`role` cannot be empty!"
-    parent_role = "`parent_role` cannot be empty!"
-    child_role = "`child_role` cannot be empty!"
-    resource_type = "`resource_type` cannot be empty!"
-    action = "`action` cannot be empty!"
+    subject = "Argument `subject` cannot be empty!"
+    role = "Argument `role` cannot be empty!"
+    parent_role = "Argument `parent_role` cannot be empty!"
+    child_role = "Argument `child_role` cannot be empty!"
+    resource_type = "Argument `resource_type` cannot be empty!"
+    action = "Argument `action` cannot be empty!"
 
 
 class ERR_STR_WHITESPACE:

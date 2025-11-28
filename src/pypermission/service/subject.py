@@ -16,6 +16,7 @@ from pypermission.models import (
     SubjectORM,
 )
 from pypermission.util.exception_handling import process_subject_role_integrity_error
+from pypermission.util.input_validation import validate_rbac_parameters
 
 ################################################################################
 #### SubjectService
@@ -25,6 +26,7 @@ from pypermission.util.exception_handling import process_subject_role_integrity_
 class SubjectService(metaclass=FrozenClass):
 
     @classmethod
+    @validate_rbac_parameters
     def create(cls, *, subject: str, db: Session) -> None:
         """
         Create a new Subject.
@@ -41,17 +43,18 @@ class SubjectService(metaclass=FrozenClass):
         PyPermissionError
             If a **Subject** with the given SubjectID already exists or `subject` is empty string.
         """
-        if subject == "":
-            raise PyPermissionError("Subject name cannot be empty!")
         try:
             subject_orm = SubjectORM(id=subject)
             db.add(subject_orm)
             db.flush()
         except IntegrityError:
             db.rollback()
-            raise PyPermissionError(f"Conflict: Subject '{subject}' already exists!")
+            raise PyPermissionError(
+                f"Conflict: Subject with ID '{subject}' already exists!"
+            )
 
     @classmethod
+    @validate_rbac_parameters
     def delete(cls, *, subject: str, db: Session) -> None:
         """
         Delete an existing Subject.
@@ -68,8 +71,6 @@ class SubjectService(metaclass=FrozenClass):
         PyPermissionError
             If a **Subject** with the given SubjectID does not exist  or `subject` is empty string.
         """
-        if subject == "":
-            raise PyPermissionError("Subject name cannot be empty!")
         subject_orm = db.get(SubjectORM, subject)
         if subject_orm is None:
             raise PyPermissionError(f"Subject '{subject}' does not exist!")
@@ -77,6 +78,7 @@ class SubjectService(metaclass=FrozenClass):
         db.flush()
 
     @classmethod
+    @validate_rbac_parameters
     def list(cls, *, db: Session) -> tuple[str, ...]:
         """
         Get all Subjects.
@@ -95,6 +97,7 @@ class SubjectService(metaclass=FrozenClass):
         return tuple(subjects)
 
     @classmethod
+    @validate_rbac_parameters
     def assign_role(cls, *, subject: str, role: str, db: Session) -> None:
         """
         Assign a **Subject** to a Role.
@@ -117,10 +120,6 @@ class SubjectService(metaclass=FrozenClass):
             If the **Role** does not exist.
             If the **Role** is already assigned to the **Subject**.
         """
-        if role == "":
-            raise PyPermissionError("Role name cannot be empty!")
-        if subject == "":
-            raise PyPermissionError("Subject name cannot be empty!")
         try:
             member_orm = MemberORM(role_id=role, subject_id=subject)
             db.add(member_orm)
@@ -130,6 +129,7 @@ class SubjectService(metaclass=FrozenClass):
             process_subject_role_integrity_error(err=err, subject=subject, role=role)
 
     @classmethod
+    @validate_rbac_parameters
     def deassign_role(cls, *, subject: str, role: str, db: Session) -> None:
         """
         Deassign a **Subject** from a Role.
@@ -152,11 +152,6 @@ class SubjectService(metaclass=FrozenClass):
             If the **Role** does not exist.
             If the **Subject** is not assigned to the **Role**.
         """
-        if role == "":
-            raise PyPermissionError("Role name cannot be empty!")
-        if subject == "":
-            raise PyPermissionError("Subject name cannot be empty!")
-
         member_orm = db.get(MemberORM, (role, subject))
         if member_orm is None:
             subject_orm = db.get(SubjectORM, subject)
@@ -172,6 +167,7 @@ class SubjectService(metaclass=FrozenClass):
         db.flush()
 
     @classmethod
+    @validate_rbac_parameters
     def roles(
         cls, *, subject: str, include_ascendant_roles: bool = False, db: Session
     ) -> tuple[str, ...]:
@@ -198,8 +194,6 @@ class SubjectService(metaclass=FrozenClass):
             If `subject` is empty string.
             If the target **Subject** does not exist.
         """
-        if subject == "":
-            raise PyPermissionError("Subject name cannot be empty!")
         if include_ascendant_roles:
             root_cte = (
                 select(MemberORM.role_id)
@@ -225,6 +219,7 @@ class SubjectService(metaclass=FrozenClass):
         return tuple(roles)
 
     @classmethod
+    @validate_rbac_parameters
     def check_permission(
         cls,
         *,
@@ -255,8 +250,6 @@ class SubjectService(metaclass=FrozenClass):
             If `subject` is empty string.
             If the target **Subject** does not exist.
         """
-        if subject == "":
-            raise PyPermissionError("Subject name cannot be empty!")
         root_cte = (
             select(MemberORM.role_id)
             .where(MemberORM.subject_id == subject)
@@ -286,7 +279,7 @@ class SubjectService(metaclass=FrozenClass):
             raise PyPermissionError(f"Subject '{subject}' does not exist!")
         return False
 
-    @classmethod
+    @classmethod  # validated by check_permission
     def assert_permission(
         cls,
         *,
@@ -320,6 +313,7 @@ class SubjectService(metaclass=FrozenClass):
             )
 
     @classmethod
+    @validate_rbac_parameters
     def permissions(cls, *, subject: str, db: Session) -> tuple[Permission, ...]:
         """
         Get all **Permissions** a **Subject** has access to via its **Role** hierarchy.
@@ -342,8 +336,6 @@ class SubjectService(metaclass=FrozenClass):
             If `subject` is empty string.
             If the target **Subject** does not exist.
         """
-        if subject == "":
-            raise PyPermissionError("Subject name cannot be empty!")
         policy_orms = _get_policy_orms_for_subject(subject=subject, db=db)
 
         return tuple(
@@ -356,6 +348,7 @@ class SubjectService(metaclass=FrozenClass):
         )
 
     @classmethod
+    @validate_rbac_parameters
     def policies(cls, *, subject: str, db: Session) -> tuple[Policy, ...]:
         """
         Get all **Policies** associated to a **Subject** via its **Role** hierarchy.
@@ -378,8 +371,6 @@ class SubjectService(metaclass=FrozenClass):
             If `subject` is empty string.
             If the target **Subject** does not exist.
         """
-        if subject == "":
-            raise PyPermissionError("Subject name cannot be empty!")
         policy_orms = _get_policy_orms_for_subject(subject=subject, db=db)
 
         return tuple(
@@ -395,6 +386,7 @@ class SubjectService(metaclass=FrozenClass):
         )
 
     @classmethod
+    @validate_rbac_parameters
     def actions_on_resource(
         cls,
         *,
@@ -432,10 +424,6 @@ class SubjectService(metaclass=FrozenClass):
             If `resource_type` is empty string.
             If the target **Subject** does not exist.
         """
-        if subject == "":
-            raise PyPermissionError("Subject name cannot be empty!")
-        if resource_type == "":
-            raise PyPermissionError("ResourceType cannot be empty!")
         if inherited:
             root_cte = (
                 select(MemberORM.role_id)

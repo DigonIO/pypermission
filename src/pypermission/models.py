@@ -3,6 +3,7 @@ from typing import Never
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 from sqlalchemy.sql.schema import ForeignKey
 from sqlalchemy.sql.sqltypes import String
+from pypermission.util.input_validation import validate_rbac_parameters
 
 from pypermission.exc import PyPermissionError
 
@@ -33,6 +34,7 @@ class Permission:
     resource_id: str
     action: str
 
+    @validate_rbac_parameters
     def __init__(self, *, resource_type: str, resource_id: str, action: str) -> None:
         """
         Initialize the **Permission**.
@@ -46,10 +48,6 @@ class Permission:
         action : str
             The action allowed on the resource (e.g., "read", "write", "delete").
         """
-        if resource_type == "":
-            raise PyPermissionError("ResourceType cannot be empty!")
-        if action == "":
-            raise PyPermissionError("Action cannot be empty!")
 
         self.resource_type = resource_type
         self.resource_id = resource_id
@@ -89,6 +87,7 @@ class Policy:
     role: str
     permission: Permission
 
+    @validate_rbac_parameters
     def __init__(self, *, role: str, permission: Permission) -> None:
         """
         Initialize the Policy.
@@ -100,8 +99,6 @@ class Policy:
         permission : Permission
             The target **Permission**.
         """
-        if role == "":
-            raise PyPermissionError("Role name cannot be empty!")
         self.role = role
         self.permission = permission
 

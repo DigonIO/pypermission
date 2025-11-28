@@ -26,7 +26,6 @@ def test_create__duplicate_role(*, db: Session) -> None:
     RS.create(role="user", db=db)
     with pytest.raises(PyPermissionError) as err:
         RS.create(role="user", db=db)
-
     assert ERR_MSG_CONFLICT.role_exists.format(role="user") == err.value.message
 
 

@@ -57,8 +57,8 @@ A visual comparison between the **NIST RBAC** model and our database tables show
 ![NIST Hierarchical RBAC model](./assets/NIST_hierarchical_RBAC.png)
 _NIST Hierarchical RBAC model[^1]_
 
-![PyPermission database model](./assets/RBAC_python.png)
-_PyPermission database model_
+![PyPermission database model for RBAC in Python](./assets/RBAC_python.png)
+_PyPermission database model for RBAC in Python_
 
 ## 5 Constrained RBAC (Level 3)
 

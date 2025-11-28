@@ -26,26 +26,23 @@ def test_delete__empty_subject(db: Session) -> None:
 
 
 def test_assign_role__empty_subject(db: Session) -> None:
-    role = "admin"
-    RS.create(role=role, db=db)
     with pytest.raises(PyPermissionError) as err:
-        SS.assign_role(subject="", role=role, db=db)
+        SS.assign_role(subject="", role="admin", db=db)
 
     assert ERR_STR_EMPTY.subject == err.value.message
 
 
 def test_deassign_role__empty_subject(db: Session) -> None:
-    role = "admin"
-    RS.create(role=role, db=db)
-
     with pytest.raises(PyPermissionError) as err:
-        SS.deassign_role(subject="", role=role, db=db)
+        SS.deassign_role(subject="", role="admin", db=db)
+
     assert ERR_STR_EMPTY.subject == err.value.message
 
 
 def test_roles__empty_subject(db: Session) -> None:
     with pytest.raises(PyPermissionError) as err:
         SS.roles(subject="", db=db)
+
     assert ERR_STR_EMPTY.subject == err.value.message
 
 
@@ -76,12 +73,14 @@ def test_check_permission__empty_subject(db: Session) -> None:
 def test_permissions__empty_subject(db: Session) -> None:
     with pytest.raises(PyPermissionError) as err:
         SS.permissions(subject="", db=db)
+
     assert ERR_STR_EMPTY.subject == err.value.message
 
 
 def test_policies__empty_subject(db: Session) -> None:
     with pytest.raises(PyPermissionError) as err:
         SS.policies(subject="", db=db)
+
     assert ERR_STR_EMPTY.subject == err.value.message
 
 

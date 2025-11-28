@@ -26,7 +26,6 @@ def test_role_actions_on_resource__empty_resource_type(*, db: Session) -> None:
         RS.actions_on_resource(
             role="unknown", resource_type="", resource_id="123", db=db
         )
-
     assert ERR_STR_EMPTY.resource_type == err.value.message
 
 
