@@ -16,6 +16,7 @@ from pypermission.models import (
     SubjectORM,
 )
 from pypermission.util.exception_handling import process_subject_role_integrity_error
+from pypermission.util.input_validation import validate_rbac_parameters
 
 ################################################################################
 #### SubjectService
@@ -25,6 +26,7 @@ from pypermission.util.exception_handling import process_subject_role_integrity_
 class SubjectService(metaclass=FrozenClass):
 
     @classmethod
+    @validate_rbac_parameters
     def create(cls, *, subject: str, db: Session) -> None:
         """
         Create a new Subject.
@@ -32,26 +34,27 @@ class SubjectService(metaclass=FrozenClass):
         Parameters
         ----------
         subject : str
-            The SubjectID of the Subject to create.
+            The SubjectID of the **Subject** to create.
         db : Session
             The SQLAlchemy session.
 
         Raises
         ------
         PyPermissionError
-            If a Subject with the given SubjectID already exists or `subject` is empty string.
+            If a **Subject** with the given SubjectID already exists or `subject` is empty string.
         """
-        if subject == "":
-            raise PyPermissionError("Subject name cannot be empty!")
         try:
             subject_orm = SubjectORM(id=subject)
             db.add(subject_orm)
             db.flush()
         except IntegrityError:
             db.rollback()
-            raise PyPermissionError(f"Subject '{subject}' already exists!")
+            raise PyPermissionError(
+                f"Conflict: Subject with ID '{subject}' already exists!"
+            )
 
     @classmethod
+    @validate_rbac_parameters
     def delete(cls, *, subject: str, db: Session) -> None:
         """
         Delete an existing Subject.
@@ -66,10 +69,8 @@ class SubjectService(metaclass=FrozenClass):
         Raises
         ------
         PyPermissionError
-            If a Subject with the given SubjectID does not exist  or `subject` is empty string.
+            If a **Subject** with the given SubjectID does not exist  or `subject` is empty string.
         """
-        if subject == "":
-            raise PyPermissionError("Subject name cannot be empty!")
         subject_orm = db.get(SubjectORM, subject)
         if subject_orm is None:
             raise PyPermissionError(f"Subject '{subject}' does not exist!")
@@ -77,6 +78,7 @@ class SubjectService(metaclass=FrozenClass):
         db.flush()
 
     @classmethod
+    @validate_rbac_parameters
     def list(cls, *, db: Session) -> tuple[str, ...]:
         """
         Get all Subjects.
@@ -95,16 +97,17 @@ class SubjectService(metaclass=FrozenClass):
         return tuple(subjects)
 
     @classmethod
+    @validate_rbac_parameters
     def assign_role(cls, *, subject: str, role: str, db: Session) -> None:
         """
-        Assign a Subject to a Role.
+        Assign a **Subject** to a Role.
 
         Parameters
         ----------
         subject : str
             The target SubjectID.
         role : str
-            The target RoleID.
+            The target **RoleID**.
         db : Session
             The SQLAlchemy session.
 
@@ -113,14 +116,10 @@ class SubjectService(metaclass=FrozenClass):
         PyPermissionError
             If `subject` is empty string.
             If `role` is empty string.
-            If the Subject does not exist.
-            If the Role does not exist.
-            If the Subject was assigned to Role before. TODO
+            If the **Subject** does not exist.
+            If the **Role** does not exist.
+            If the **Role** is already assigned to the **Subject**.
         """
-        if role == "":
-            raise PyPermissionError("Role name cannot be empty!")
-        if subject == "":
-            raise PyPermissionError("Subject name cannot be empty!")
         try:
             member_orm = MemberORM(role_id=role, subject_id=subject)
             db.add(member_orm)
@@ -130,16 +129,17 @@ class SubjectService(metaclass=FrozenClass):
             process_subject_role_integrity_error(err=err, subject=subject, role=role)
 
     @classmethod
+    @validate_rbac_parameters
     def deassign_role(cls, *, subject: str, role: str, db: Session) -> None:
         """
-        Deassign a Subject from a Role.
+        Deassign a **Subject** from a Role.
 
         Parameters
         ----------
         subject : str
             The target SubjectID.
         role : str
-            The target RoleID.
+            The target **RoleID**.
         db : Session
             The SQLAlchemy session.
 
@@ -148,15 +148,10 @@ class SubjectService(metaclass=FrozenClass):
         PyPermissionError
             If `subject` is empty string.
             If `role` is empty string.
-            If the Subject does not exist.
-            If the Role does not exist.
-            If the Subject is not assigned to the Role. TODO
+            If the **Subject** does not exist.
+            If the **Role** does not exist.
+            If the **Subject** is not assigned to the **Role**.
         """
-        if role == "":
-            raise PyPermissionError("Role name cannot be empty!")
-        if subject == "":
-            raise PyPermissionError("Subject name cannot be empty!")
-        # TODO raise IntegrityError if subject or role is unknown and if possible via ORM
         member_orm = db.get(MemberORM, (role, subject))
         if member_orm is None:
             subject_orm = db.get(SubjectORM, subject)
@@ -172,6 +167,7 @@ class SubjectService(metaclass=FrozenClass):
         db.flush()
 
     @classmethod
+    @validate_rbac_parameters
     def roles(
         cls, *, subject: str, include_ascendant_roles: bool = False, db: Session
     ) -> tuple[str, ...]:
@@ -196,10 +192,8 @@ class SubjectService(metaclass=FrozenClass):
         ------
         PyPermissionError
             If `subject` is empty string.
-            If the target Subject does not exist.
+            If the target **Subject** does not exist.
         """
-        if subject == "":
-            raise PyPermissionError("Subject name cannot be empty!")
         if include_ascendant_roles:
             root_cte = (
                 select(MemberORM.role_id)
@@ -225,6 +219,7 @@ class SubjectService(metaclass=FrozenClass):
         return tuple(roles)
 
     @classmethod
+    @validate_rbac_parameters
     def check_permission(
         cls,
         *,
@@ -233,31 +228,28 @@ class SubjectService(metaclass=FrozenClass):
         db: Session,
     ) -> bool:
         """
-        Check if a Subject has access to a specific Permission via its Role hierarchy.
+        Check if a **Subject** has access to a specific **Permission** via its **Role** hierarchy.
 
         Parameters
         ----------
         subject : str
             The target SubjectID.
         permission : Permission
-            The Permission to check for.
+            The **Permission** to check for.
         db : Session
             The SQLAlchemy session.
 
         Returns
         -------
         bool
-            True if the Permission is granted.
+            True if the **Permission** is granted.
 
         Raises
         ------
         PyPermissionError
             If `subject` is empty string.
-            If the target Subject does not exist. TODO
+            If the target **Subject** does not exist.
         """
-        # TODO raise IntegrityError if subject is unknown and if possible via ORM
-        if subject == "":
-            raise PyPermissionError("Subject name cannot be empty!")
         root_cte = (
             select(MemberORM.role_id)
             .where(MemberORM.subject_id == subject)
@@ -287,7 +279,7 @@ class SubjectService(metaclass=FrozenClass):
             raise PyPermissionError(f"Subject '{subject}' does not exist!")
         return False
 
-    @classmethod
+    @classmethod  # validated by check_permission
     def assert_permission(
         cls,
         *,
@@ -296,24 +288,24 @@ class SubjectService(metaclass=FrozenClass):
         db: Session,
     ) -> None:
         """
-        Asserts that a Subject has access to a specific Permission via its Role hierarchy.
+        Asserts that a **Subject** has access to a specific **Permission** via its **Role** hierarchy.
 
         Parameters
         ----------
         subject : str
             The target SubjectID.
         permission : Permission
-            The Permission to check for.
+            The **Permission** to check for.
         db : Session
             The SQLAlchemy session.
 
         Raises
         ------
-        PyPermissionNotGrantedError
-            If the Permission is not granted.
+        PermissionNotGrantedError
+            If the **Permission** is not granted.
         PyPermissionError
             If `subject` is empty string.
-            If the target Subject does not exist.
+            If the target **Subject** does not exist.
         """
         if not cls.check_permission(subject=subject, permission=permission, db=db):
             raise PermissionNotGrantedError(
@@ -321,9 +313,10 @@ class SubjectService(metaclass=FrozenClass):
             )
 
     @classmethod
+    @validate_rbac_parameters
     def permissions(cls, *, subject: str, db: Session) -> tuple[Permission, ...]:
         """
-        Get all Permissions a Subject has access to via its Role hierarchy.
+        Get all **Permissions** a **Subject** has access to via its **Role** hierarchy.
 
         Parameters
         ----------
@@ -341,10 +334,8 @@ class SubjectService(metaclass=FrozenClass):
         ------
         PyPermissionError
             If `subject` is empty string.
-            If the target Subject does not exist.
+            If the target **Subject** does not exist.
         """
-        if subject == "":
-            raise PyPermissionError("Subject name cannot be empty!")
         policy_orms = _get_policy_orms_for_subject(subject=subject, db=db)
 
         return tuple(
@@ -357,9 +348,10 @@ class SubjectService(metaclass=FrozenClass):
         )
 
     @classmethod
+    @validate_rbac_parameters
     def policies(cls, *, subject: str, db: Session) -> tuple[Policy, ...]:
         """
-        Get all Policies associated to a Subject via its Role hierarchy.
+        Get all **Policies** associated to a **Subject** via its **Role** hierarchy.
 
         Parameters
         ----------
@@ -370,17 +362,15 @@ class SubjectService(metaclass=FrozenClass):
 
         Returns
         -------
-        tuple[Policies, ...]
-            A tuple containing all granted Policies.
+        tuple[Policy, ...]
+            A tuple containing all granted **Policies**.
 
         Raises
         ------
         PyPermissionError
             If `subject` is empty string.
-            If the target Subject does not exist.
+            If the target **Subject** does not exist.
         """
-        if subject == "":
-            raise PyPermissionError("Subject name cannot be empty!")
         policy_orms = _get_policy_orms_for_subject(subject=subject, db=db)
 
         return tuple(
@@ -396,6 +386,7 @@ class SubjectService(metaclass=FrozenClass):
         )
 
     @classmethod
+    @validate_rbac_parameters
     def actions_on_resource(
         cls,
         *,
@@ -433,10 +424,6 @@ class SubjectService(metaclass=FrozenClass):
             If `resource_type` is empty string.
             If the target **Subject** does not exist.
         """
-        if subject == "":
-            raise PyPermissionError("Subject name cannot be empty!")
-        if resource_type == "":
-            raise PyPermissionError("Resource type cannot be empty!")
         if inherited:
             root_cte = (
                 select(MemberORM.role_id)
@@ -486,7 +473,7 @@ class SubjectService(metaclass=FrozenClass):
 
 def _get_policy_orms_for_subject(*, subject: str, db: Session) -> Sequence[PolicyORM]:
     """
-    Get all PolicyORM objects associated to a Subject via its Role hierarchy.
+    Get all PolicyORM objects associated to a **Subject** via its **Role** hierarchy.
 
     Parameters
     ----------
@@ -503,7 +490,7 @@ def _get_policy_orms_for_subject(*, subject: str, db: Session) -> Sequence[Polic
     Raises
     ------
     PyPermissionError
-        If the target Subject does not exist.
+        If the target **Subject** does not exist.
     """
     subject_orm = db.get(SubjectORM, subject)
     if not subject_orm:

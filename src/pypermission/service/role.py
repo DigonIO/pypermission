@@ -15,6 +15,7 @@ from pypermission.models import (
     RoleORM,
 )
 from pypermission.util.exception_handling import process_policy_integrity_error
+from pypermission.util.input_validation import validate_rbac_parameters
 
 ################################################################################
 #### RoleService
@@ -22,53 +23,55 @@ from pypermission.util.exception_handling import process_policy_integrity_error
 
 
 class RoleService(metaclass=FrozenClass):
-
+    # NOTE: we can use the Policy object when dealing with role + permission to let it handle empty role names for us.
     @classmethod
+    @validate_rbac_parameters
     def create(cls, *, role: str, db: Session) -> None:
         """
-        Create a new Role.
+        Create a new **Role**.
 
         Parameters
         ----------
         role : str
-            The RoleID of the Role to create.
+            The **RoleID** of the **Role** to create.
         db : Session
             The SQLAlchemy session.
 
         Raises
         ------
         PyPermissionError
-            If a Role with the given RoleID already exists.
+            If `role` is an empty string.
+            If a **Role** with the given **RoleID** already exists.
         """
-        if role == "":
-            raise PyPermissionError("Role name cannot be empty!")
         try:
             role_orm = RoleORM(id=role)
             db.add(role_orm)
             db.flush()
         except IntegrityError as err:
             db.rollback()
-            raise PyPermissionError(f"Role '{role}' already exists!") from err
+            raise PyPermissionError(
+                f"Conflict: Role with ID '{role}' already exists!"
+            ) from err
 
     @classmethod
+    @validate_rbac_parameters
     def delete(cls, *, role: str, db: Session) -> None:
         """
-        Delete an existing Role.
+        Delete an existing **Role**.
 
         Parameters
         ----------
         role : str
-            The RoleID to delete.
+            The **RoleID** to delete.
         db : Session
             The SQLAlchemy session.
 
         Raises
         ------
         PyPermissionError
-            If a Role with the given RoleID does not exist.
+            If `role` is an empty string.
+            If a **Role** with the given **RoleID** does not exist.
         """
-        if role == "":
-            raise PyPermissionError("Role name cannot be empty!")
         role_orm = db.get(RoleORM, role)
         if role_orm is None:
             raise PyPermissionError(f"Role '{role}' does not exist!")
@@ -78,7 +81,7 @@ class RoleService(metaclass=FrozenClass):
     @classmethod
     def list(cls, *, db: Session) -> tuple[str, ...]:
         """
-        Get all Roles.
+        Get all **Roles**.
 
         Parameters
         ----------
@@ -88,43 +91,39 @@ class RoleService(metaclass=FrozenClass):
         Returns
         -------
         tuple[str, ...]
-            A tuple containing all RoleIDs.
+            A tuple containing all **RoleIDs**.
         """
         role_orms = db.scalars(select(RoleORM)).all()
         return tuple(role_orm.id for role_orm in role_orms)
 
     @classmethod
+    @validate_rbac_parameters
     def add_hierarchy(cls, *, parent_role: str, child_role: str, db: Session) -> None:
         """
-        Add a parent-child hierarchy between two Roles.
+        Add a parent-child **Hierarchy** between two **Roles**.
 
         Parameters
         ----------
         parent_role : str
-            The parent RoleID.
+            The parent **RoleID**.
         child_role : str
-            The child RoleID.
+            The child **RoleID**.
         db : Session
             The SQLAlchemy session.
 
         Raises
         ------
         PyPermissionError
-            If arguments `parent_role` and `child_role` are equal.
-            If one or both Roles do not exist.
-            If adding the hierarchy would create a cycle.
-            If the hierarchy already exists.
+            If the `parent_role` or `child_role` is an empty string.
+            If `parent_role` and `child_role` are identical.
+            If one or both **Roles** do not exist in the system.
+            If adding the **Hierarchy** would create a cycle in the RBAC **Hierarchy**.
+            If the **Hierarchy** already exists.
         """
-        if parent_role == "":
-            raise PyPermissionError(
-                "Role name cannot be empty, but `parent_role` is empty!"
-            )
-        if child_role == "":
-            raise PyPermissionError(
-                "Role name cannot be empty, but `child_role` is empty!"
-            )
         if parent_role == child_role:
-            raise PyPermissionError(f"RoleIDs must not be equal: '{parent_role}'!")
+            raise PyPermissionError(
+                f"Conflict: A Role Hierarchy requires distinct RoleIDs, received '{parent_role}' twice!"
+            )
 
         roles = db.scalars(
             select(RoleORM.id).where(RoleORM.id.in_([parent_role, child_role]))
@@ -155,7 +154,9 @@ class RoleService(metaclass=FrozenClass):
         ).all()
 
         if critical_leaf_relations:
-            raise PyPermissionError("Desired hierarchy would create a cycle!")
+            raise PyPermissionError(
+                "Conflict: Desired Role Hierarchy would create a cycle!"
+            )
 
         try:
             hierarchy_orm = HierarchyORM(
@@ -166,43 +167,39 @@ class RoleService(metaclass=FrozenClass):
         except IntegrityError as err:
             db.rollback()
             raise PyPermissionError(
-                f"Hierarchy '{parent_role}' -> '{child_role}' exists!"
+                f"Conflict: Role Hierarchy '{parent_role}' -> '{child_role}' exists!"
             ) from err
 
     @classmethod
+    @validate_rbac_parameters
     def remove_hierarchy(
         cls, *, parent_role: str, child_role: str, db: Session
     ) -> None:
         """
-        Remove a parent-child hierarchy between two Roles.
+        Remove a parent-child **Hierarchy** between two **Roles**.
 
         Parameters
         ----------
         parent_role : str
-            The parent RoleID.
+            The parent **RoleID**.
         child_role : str
-            The child RoleID.
+            The child **RoleID**.
         db : Session
             The SQLAlchemy session.
 
         Raises
         ------
         PyPermissionError
-            If arguments `parent_role` and `child_role` are equal.
-            If one or both Roles do not exist.
-            If the hierarchy does not exist.
+            If the `parent_role` or `child_role` is an empty string.
+            If `parent_role` and `child_role` are identical.
+            If one or both **Roles** do not exist in the system.
+            If the **Hierarchy** does not exist.
         """
-        if parent_role == "":
-            raise PyPermissionError(
-                "Role name cannot be empty, but `parent_role` is empty!"
-            )
-        if child_role == "":
-            raise PyPermissionError(
-                "Role name cannot be empty, but `child_role` is empty!"
-            )
 
         if parent_role == child_role:
-            raise PyPermissionError(f"RoleIDs must not be equal: '{parent_role}'!")
+            raise PyPermissionError(
+                f"Conflict: A Role Hierarchy requires distinct RoleIDs, received '{parent_role}' twice!"
+            )
 
         hierarchy_orm = db.get(HierarchyORM, (parent_role, child_role))
         if hierarchy_orm is None:
@@ -225,29 +222,29 @@ class RoleService(metaclass=FrozenClass):
         db.flush()
 
     @classmethod
+    @validate_rbac_parameters
     def parents(cls, *, role: str, db: Session) -> tuple[str, ...]:
         """
-        Get all parent Roles.
+        Get all parent **Roles**.
 
         Parameters
         ----------
         role : str
-            The target RoleID.
+            The target **RoleID**.
         db : Session
             The SQLAlchemy session.
 
         Returns
         -------
         tuple[str, ...]
-            A tuple containing all parent RoleIDs.
+            A tuple containing all parent **RoleIDs**.
 
         Raises
         ------
         PyPermissionError
-            If the target Role does not exist.
+            If `role` is an empty string.
+            If the target **Role** does not exist.
         """
-        if role == "":
-            raise PyPermissionError("Role name cannot be empty!")
         parents = db.scalars(
             select(HierarchyORM.parent_role_id).where(
                 HierarchyORM.child_role_id == role
@@ -258,29 +255,29 @@ class RoleService(metaclass=FrozenClass):
         return tuple(parents)
 
     @classmethod
+    @validate_rbac_parameters
     def children(cls, *, role: str, db: Session) -> tuple[str, ...]:
         """
-        Get all child Roles.
+        Get all child **Roles**.
 
         Parameters
         ----------
         role : str
-            The target RoleID.
+            The target **RoleID**.
         db : Session
             The SQLAlchemy session.
 
         Returns
         -------
         tuple[str, ...]
-            A tuple containing all child RoleIDs.
+            A tuple containing all child **RoleIDs**.
 
         Raises
         ------
         PyPermissionError
-            If the target Role does not exist.
+            If `role` is an empty string.
+            If the target **Role** does not exist.
         """
-        if role == "":
-            raise PyPermissionError("Role name cannot be empty!")
         children = db.scalars(
             select(HierarchyORM.child_role_id).where(
                 HierarchyORM.parent_role_id == role
@@ -291,29 +288,29 @@ class RoleService(metaclass=FrozenClass):
         return tuple(children)
 
     @classmethod
-    def ancestors(cls, *, role: str, db: Session) -> tuple[str, ...]:
+    @validate_rbac_parameters
+    def ascendants(cls, *, role: str, db: Session) -> tuple[str, ...]:
         """
-        Get all ancestor Roles.
+        Get all ascendants **Roles**.
 
         Parameters
         ----------
         role : str
-            The target RoleID.
+            The target **RoleID**.
         db : Session
             The SQLAlchemy session.
 
         Returns
         -------
         tuple[str, ...]
-            A tuple containing all ancestor RoleIDs.
+            A tuple containing all ascendant **RoleIDs**.
 
         Raises
         ------
         PyPermissionError
-            If the target Role does not exist.
+            If `role` is an empty string.
+            If the target **Role** does not exist.
         """
-        if role == "":
-            raise PyPermissionError("Role name cannot be empty!")
         root_cte = (
             select(HierarchyORM)
             .where(HierarchyORM.child_role_id == role)
@@ -327,38 +324,38 @@ class RoleService(metaclass=FrozenClass):
             )
         )
 
-        ancestor_relations = (
+        ascendant_relations = (
             db.scalars(select(relations_cte.c.parent_role_id)).unique().all()
         )
 
-        if len(ancestor_relations) == 0 and db.get(RoleORM, role) is None:
+        if len(ascendant_relations) == 0 and db.get(RoleORM, role) is None:
             raise PyPermissionError(f"Role '{role}' does not exist!")
-        return tuple(ancestor_relations)
+        return tuple(ascendant_relations)
 
     @classmethod
+    @validate_rbac_parameters
     def descendants(cls, *, role: str, db: Session) -> tuple[str, ...]:
         """
-        Get all descending Roles.
+        Get all descending **Roles**.
 
         Parameters
         ----------
         role : str
-            The target RoleID.
+            The target **RoleID**.
         db : Session
             The SQLAlchemy session.
 
         Returns
         -------
         tuple[str, ...]
-            A tuple containing all descending RoleIDs.
+            A tuple containing all descending **RoleIDs**.
 
         Raises
         ------
         PyPermissionError
-            If the target Role does not exist.
+            If `role` is an empty string.
+            If the target **Role** does not exist.
         """
-        if role == "":
-            raise PyPermissionError("Role name cannot be empty!")
         root_cte = (
             select(HierarchyORM)
             .where(HierarchyORM.parent_role_id == role)
@@ -381,33 +378,33 @@ class RoleService(metaclass=FrozenClass):
         return tuple(descendant_relations)
 
     @classmethod
+    @validate_rbac_parameters
     def subjects(
         cls, *, role: str, include_descendant_subjects: bool = False, db: Session
     ) -> tuple[str, ...]:
         """
-        Get all Subjects assigned to a Role.
+        Get all **Subjects** assigned to a **Role**.
 
         Parameters
         ----------
         role : str
-            The target RoleID.
+            The target **RoleID**.
         include_descendant_subjects: bool
-            Include all Subjects for descendant Roles.
+            Include all **Subjects** for descendant **Roles**.
         db : Session
             The SQLAlchemy session.
 
         Returns
         -------
         tuple[str, ...]
-            A tuple containing all assigned SubjectIDs.
+            A tuple containing all assigned **SubjectIDs**.
 
         Raises
         ------
         PyPermissionError
-            If the target Role does not exist.
+            If `role` is an empty string.
+            If the target **Role** does not exist.
         """
-        if role == "":
-            raise PyPermissionError("Role name cannot be empty!")
         if include_descendant_subjects:
             root_cte = (
                 select(RoleORM.id.label("role_id"))
@@ -448,23 +445,23 @@ class RoleService(metaclass=FrozenClass):
         db: Session,
     ) -> None:
         """
-        Grant a Permission to a Role.
+        Grant a **Permission** to a **Role**.
 
         Parameters
         ----------
         role : str
-            The target RoleID.
+            The target **RoleID**.
         db : Session
             The SQLAlchemy session.
 
         Raises
         ------
         PyPermissionError
-            If the target Role does not exist.
-            If the Permission was granted before. TODO
+            If `role` is an empty string.
+            If the target **Role** does not exist.
+            If the **Permission** is already granted to the **Role** (duplicate policy).
         """
-        if role == "":
-            raise PyPermissionError("Role name cannot be empty!")
+        policy = Policy(role=role, permission=permission)  # does the validation for us
         try:
             policy_orm = PolicyORM(
                 role_id=role,
@@ -476,7 +473,7 @@ class RoleService(metaclass=FrozenClass):
             db.flush()
         except IntegrityError as err:
             db.rollback()
-            process_policy_integrity_error(err=err, role=role, permission=permission)
+            process_policy_integrity_error(err=err, policy=policy)
 
     @classmethod
     def revoke_permission(
@@ -487,23 +484,23 @@ class RoleService(metaclass=FrozenClass):
         db: Session,
     ) -> None:
         """
-        Revoke a Permission from a Role.
+        Revoke a **Permission** from a **Role**.
 
         Parameters
         ----------
         role : str
-            The target Role ID.
+            The target **RoleID**.
         db : Session
             The SQLAlchemy session.
 
         Raises
         ------
         PyPermissionError
-            If the target Role does not exist.
-            If the Permission was not granted before. TODO
+            If `role` is an empty string.
+            If the target **Role** does not exist.
+            If the permission was not granted to the role (policy does not exist).
         """
-        if role == "":
-            raise PyPermissionError("Role name cannot be empty!")
+        policy = Policy(role=role, permission=permission)
         policy_tuple = (
             role,
             permission.resource_type,
@@ -517,15 +514,13 @@ class RoleService(metaclass=FrozenClass):
         if policy_orm is None:
             role_orm = db.get(RoleORM, role)
             if role_orm:
-                raise PyPermissionError(
-                    f"Permission '{str(permission)}' does not exist!"
-                )
+                raise PyPermissionError(f"Policy '{str(policy)}' does not exist!")
             raise PyPermissionError(f"Role '{role}' does not exist!")
 
         db.delete(policy_orm)
         db.flush()
 
-    @classmethod
+    @classmethod  # validated by policy
     def check_permission(
         cls,
         *,
@@ -534,29 +529,29 @@ class RoleService(metaclass=FrozenClass):
         db: Session,
     ) -> bool:
         """
-        Check if a Role has a Permission.
+        Check if a **Role** has a **Permission**.
 
         Parameters
         ----------
         role : str
-            The target RoleID.
+            The target **RoleID**.
         permission : Permission
-            The Permission to check for.
+            The **Permission** to check for.
         db : Session
             The SQLAlchemy session.
 
         Returns
         -------
         bool
-            True if the Permission is granted.
+            True if the **Permission** is granted.
 
         Raises
         ------
         PyPermissionError
-            If the target Role does not exist.
+            If `role` is an empty string.
+            If the target **Role** does not exist.
         """
-        if role == "":
-            raise PyPermissionError("Role name cannot be empty!")
+        _ = Policy(role=role, permission=permission)  # raises if role empty
         root_cte = (
             select(RoleORM.id.label("role_id"))
             .where(RoleORM.id == role)
@@ -586,7 +581,7 @@ class RoleService(metaclass=FrozenClass):
             return False
         return True
 
-    @classmethod
+    @classmethod  # validated by check_permission
     def assert_permission(
         cls,
         *,
@@ -595,32 +590,32 @@ class RoleService(metaclass=FrozenClass):
         db: Session,
     ) -> None:
         """
-        Check if a Role has a Permission.
+        Check if a **Role** has a **Permission**.
 
         Parameters
         ----------
         role : str
-            The target RoleID.
+            The target **RoleID**.
         permission : Permission
-            The Permission to check for.
+            The **Permission** to check for.
         db : Session
             The SQLAlchemy session.
 
         Raises
         ------
-        PyPermissionNotGrantedError
-            If the Permission is not granted.
+        PermissionNotGrantedError
+            If the **Permission** is not granted (including inherited permissions).
         PyPermissionError
-            If the target Role does not exist.
+            If `role` is an empty string.
+            If the target **Role** does not exist.
         """
-        if role == "":
-            raise PyPermissionError("Role name cannot be empty!")
         if not cls.check_permission(role=role, permission=permission, db=db):
             raise PermissionNotGrantedError(
                 f"Permission '{permission}' is not granted for Role '{role}'!"
             )
 
     @classmethod
+    @validate_rbac_parameters
     def permissions(
         cls,
         *,
@@ -629,29 +624,28 @@ class RoleService(metaclass=FrozenClass):
         db: Session,
     ) -> tuple[Permission, ...]:
         """
-        Get all granted Permissions for a Role.
+        Get all granted **Permissions** for a **Role**.
 
         Parameters
         ----------
         role : str
-            The target RoleID.
+            The target **RoleID**.
         inherited : bool
-            Includes all Permissions inherited by ancestor Roles.
+            Includes all **Permissions** inherited by ascendant **Roles**.
         db : Session
             The SQLAlchemy session.
 
         Returns
         -------
         tuple[Permission, ...]
-            A tuple containing all granted Permissions.
+            A tuple containing all granted **Permissions**.
 
         Raises
         ------
         PyPermissionError
-            If the target Role does not exist.
+            If `role` is an empty string.
+            If the target **Role** does not exist.
         """
-        if role == "":
-            raise PyPermissionError("Role name cannot be empty!")
         policy_orms = _get_policy_orms_for_role(role=role, inherited=inherited, db=db)
         if len(policy_orms) == 0:
             role_orm = db.get(RoleORM, role)
@@ -668,6 +662,7 @@ class RoleService(metaclass=FrozenClass):
         )
 
     @classmethod
+    @validate_rbac_parameters
     def policies(
         cls,
         *,
@@ -676,30 +671,28 @@ class RoleService(metaclass=FrozenClass):
         db: Session,
     ) -> tuple[Policy, ...]:
         """
-        Get all granted Policies for a Role.
+        Get all granted **Policies** for a **Role**.
 
         Parameters
         ----------
         role : str
-            The target RoleID.
+            The target **RoleID**.
         inherited : bool
-            Includes all Policies inherited by ancestor Roles.
+            Includes all **Policies** inherited by ascendant **Roles**.
         db : Session
             The SQLAlchemy session.
 
         Returns
         -------
         tuple[Policies, ...]
-            A tuple containing all granted Policies.
+            A tuple containing all granted **Policies**.
 
         Raises
         ------
         PyPermissionError
-            If `role` is empty string.
-            If the target Role does not exist.
+            If `role` is an empty string.
+            If the target **Role** does not exist.
         """
-        if role == "":
-            raise PyPermissionError("Role name cannot be empty!")
         policy_orms = _get_policy_orms_for_role(role=role, inherited=inherited, db=db)
 
         if len(policy_orms) == 0:
@@ -720,6 +713,7 @@ class RoleService(metaclass=FrozenClass):
         )
 
     @classmethod
+    @validate_rbac_parameters
     def actions_on_resource(
         cls,
         *,
@@ -741,26 +735,22 @@ class RoleService(metaclass=FrozenClass):
         resource_id : str
             The **ResourceID** to check.
         inherited : bool
-            Includes all **Actions** inherited by ancestor **Roles**.
+            Includes all **Actions** inherited by ascendant **Roles**.
         db : Session
             The SQLAlchemy session.
 
         Returns
         -------
         tuple[str, ...]
-            A tuple containing all granted action IDs.
+            A tuple containing all granted **Actions**.
 
         Raises
         ------
         PyPermissionError
-            If `role` is empty string.
-            If `resource_type` is empty string.
+            If `role` is an empty string.
+            If the **ResourceType** is an empty string.
             If the target **Role** does not exist.
         """
-        if role == "":
-            raise PyPermissionError("Role name cannot be empty!")
-        if resource_type == "":
-            raise PyPermissionError("Resource type cannot be empty!")
 
         if inherited:
             root_cte = (
@@ -808,7 +798,6 @@ class RoleService(metaclass=FrozenClass):
 def _get_policy_orms_for_role(
     *, role: str, inherited: bool = True, db: Session
 ) -> Sequence[PolicyORM]:
-    # TODO raise IntegrityError if role is unknown and if possible via ORM
     if inherited:
         root_cte = (
             select(RoleORM.id.label("role_id"))

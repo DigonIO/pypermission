@@ -6,22 +6,30 @@
 - `xxxx.` Normal
 - `xxxx!` Critical
 
-Next ID: `34`
+Next ID: `39`
 
 ## Open Tasks
 
-- `32.` Doc - Some docstrings do not list all possible reasons for raising an exception
-- `29.` Doc Permission Design Guide -> As a subsection of RBAC system design
+- `38.` Implement symmetric role review (see NIST, permission to role lookup + inherited flag)
+- `37?` Subclass Exceptions to allow the api consumer more fine grained control when handling the errors.
+- `34.` Allow the `*` wildcard for the action
+- `29?` Doc - Permission Design Guide -> As a subsection of RBAC system design (hierarchies vs flat, naming conventions (subjects/roles, prefixes & uuids), ...)
 - `28.` Doc - Design Rationale: Reasoning for certain design decisions
-- `27.` Doc - Add Auditing Guide
 - `26?` Doc - Ensure closer alignment to style guide
-- `22.` Doc - write [integration guide](https://pypermission.digon.io/guide/)
 - `19.` Provide json/yaml import/export utility function
 - `18.` Provide FastAPI standalone service with RBAC functionality via REST API
-- `10.` Doc - Compare to NIST
 
 ## Done Tasks
 
+- `35.` Prevent usage of `:` and `*` within the strings in `Subject`, `Roles`, `ResourceType`, `ResourceID` and `Action`
+    - [x] Doc/Tests: Replace `:` usage in Container **Permissions** and use brackets
+    - [x] Lock down user input to disallow the `:` character
+    - [x] Lock down usage of `*` character in all but `ResourceID` (here single character only)
+- `36.` Doc - Update Links in Readme
+- `32.` Doc - Some docstrings do not list all possible reasons for raising an exception
+- `27.` Doc - Add Auditing Guide
+- `22.` Doc - write [integration guide](https://pypermission.digon.io/integration_guide/1_introduction/)
+- `10.` Doc - Compare to NIST
 - `21.` Doc - Include external dependencies in build instead of using CDN
 - `11.` Doc - Compare to ANSI (fix section 6/7 TODO)
 - `30!` README some SVGs are not available on PyPI, replace the relative path with URL to GitLab (main branch)
@@ -50,7 +58,7 @@ Next ID: `34`
     - [x] Implement tests
     - [x] Implement validation logic
 - `23.` Doc - SEO and social description
-- `20.` Doc - Include mkdocs socical card
+- `20.` Doc - Include mkdocs social card
 - `9.` Doc - Finalize README
 - `8.` Doc - Add CHANGELOG
 - `3.` Decide for a seo optimal package name

@@ -3,8 +3,13 @@ from collections import Counter
 import pytest
 from sqlalchemy.orm import Session
 
-from pypermission.exc import ERR_MSG, PermissionNotGrantedError, PyPermissionError
-from pypermission.models import Permission
+from pypermission.exc import (
+    ERR_MSG,
+    ERR_MSG_CONFLICT,
+    PermissionNotGrantedError,
+    PyPermissionError,
+)
+from pypermission.models import Permission, Policy
 from pypermission.service.role import RoleService as RS
 from pypermission.service.subject import SubjectService as SS
 
@@ -17,19 +22,11 @@ def test_create__success(db: Session) -> None:
     RS.create(role="user", db=db)
 
 
-def test_create__empty_role(*, db: Session) -> None:
-    with pytest.raises(PyPermissionError) as err:
-        RS.create(role="", db=db)
-
-    assert ERR_MSG.empty_role == err.value.message
-
-
 def test_create__duplicate_role(*, db: Session) -> None:
     RS.create(role="user", db=db)
     with pytest.raises(PyPermissionError) as err:
         RS.create(role="user", db=db)
-
-    assert ERR_MSG.conflict_role_exists.format(role="user") == err.value.message
+    assert ERR_MSG_CONFLICT.role_exists.format(role="user") == err.value.message
 
 
 ################################################################################
@@ -41,13 +38,6 @@ def test_delete__success(*, db: Session) -> None:
     role = "user"
     RS.create(role=role, db=db)
     RS.delete(role=role, db=db)
-
-
-def test_delete__empty_role(*, db: Session) -> None:
-    with pytest.raises(PyPermissionError) as err:
-        RS.delete(role="", db=db)
-
-    assert ERR_MSG.empty_role == err.value.message
 
 
 def test_delete__unknown_role(*, db: Session) -> None:
@@ -104,26 +94,10 @@ def test_add_hierarchy__success(*, db: Session) -> None:
     RS.add_hierarchy(parent_role="user", child_role="admin", db=db)
 
 
-def test_add_hierarchy__empty_parent_role(*, db: Session) -> None:
-    RS.create(role="admin", db=db)
-    with pytest.raises(PyPermissionError) as err:
-        RS.add_hierarchy(parent_role="", child_role="admin", db=db)
-
-    assert ERR_MSG.empty_parent_role == err.value.message
-
-
-def test_add_hierarchy__empty_child_role(*, db: Session) -> None:
-    RS.create(role="user", db=db)
-    with pytest.raises(PyPermissionError) as err:
-        RS.add_hierarchy(parent_role="user", child_role="", db=db)
-
-    assert ERR_MSG.empty_child_role == err.value.message
-
-
 def test_add_hierarchy__conflict(*, db: Session) -> None:
     with pytest.raises(PyPermissionError) as err:
         RS.add_hierarchy(parent_role="user", child_role="user", db=db)
-    assert ERR_MSG.conflicting_role_ids.format(role="user") == err.value.message
+    assert ERR_MSG_CONFLICT.role_ids.format(role="user") == err.value.message
 
 
 def test_add_hierarchy__cycle(*, db: Session) -> None:
@@ -132,7 +106,7 @@ def test_add_hierarchy__cycle(*, db: Session) -> None:
     RS.add_hierarchy(parent_role="user", child_role="admin", db=db)
     with pytest.raises(PyPermissionError) as err:
         RS.add_hierarchy(parent_role="admin", child_role="user", db=db)
-    assert ERR_MSG.conflict_cycle_detected == err.value.message
+    assert ERR_MSG_CONFLICT.cycle_detected == err.value.message
 
 
 def test_add_hierarchy__exists(*, db: Session) -> None:
@@ -143,7 +117,7 @@ def test_add_hierarchy__exists(*, db: Session) -> None:
         RS.add_hierarchy(parent_role="user", child_role="admin", db=db)
 
     assert (
-        ERR_MSG.conflict_hierarchy_exists.format(parent_role="user", child_role="admin")
+        ERR_MSG_CONFLICT.hierarchy_exists.format(parent_role="user", child_role="admin")
         == err.value.message
     )
 
@@ -197,23 +171,7 @@ def test_remove_hierarchy__equal(*, db: Session) -> None:
     with pytest.raises(PyPermissionError) as err:
         RS.remove_hierarchy(parent_role="user", child_role="user", db=db)
 
-    assert ERR_MSG.conflicting_role_ids.format(role="user") == err.value.message
-
-
-def test_remove_hierarchy__empty_parent_role(*, db: Session) -> None:
-    RS.create(role="admin", db=db)
-    with pytest.raises(PyPermissionError) as err:
-        RS.remove_hierarchy(parent_role="", child_role="admin", db=db)
-
-    assert ERR_MSG.empty_parent_role == err.value.message
-
-
-def test_remove_hierarchy__empty_child_role(*, db: Session) -> None:
-    RS.create(role="user", db=db)
-    with pytest.raises(PyPermissionError) as err:
-        RS.remove_hierarchy(parent_role="user", child_role="", db=db)
-
-    assert ERR_MSG.empty_child_role == err.value.message
+    assert ERR_MSG_CONFLICT.role_ids.format(role="user") == err.value.message
 
 
 def test_remove_hierarchy__unknown_hierarchy(*, db: Session) -> None:
@@ -281,13 +239,6 @@ def test_parents__success(*, db: Session) -> None:
     assert Counter(user=1, user_v2=1) == Counter(RS.parents(role="admin", db=db))
 
 
-def test_parents__empty_role(*, db: Session) -> None:
-    with pytest.raises(PyPermissionError) as err:
-        RS.parents(role="", db=db)
-
-    assert ERR_MSG.empty_role == err.value.message
-
-
 def test_parents__unknown_role(*, db: Session) -> None:
     with pytest.raises(PyPermissionError) as err:
         RS.parents(role="user", db=db)
@@ -310,13 +261,6 @@ def test_children__success(*, db: Session) -> None:
     assert Counter(("mod", "mod_v2")) == Counter((RS.children(role="user", db=db)))
 
 
-def test_children__empty_role(*, db: Session) -> None:
-    with pytest.raises(PyPermissionError) as err:
-        RS.children(role="", db=db)
-
-    assert ERR_MSG.empty_role == err.value.message
-
-
 def test_children__unknown_role(*, db: Session) -> None:
     with pytest.raises(PyPermissionError) as err:
         RS.children(role="user", db=db)
@@ -325,11 +269,11 @@ def test_children__unknown_role(*, db: Session) -> None:
 
 
 ################################################################################
-#### Test role ancestors
+#### Test role ascendants
 ################################################################################
 
 
-def test_ancestors__success(*, db: Session) -> None:
+def test_ascendants__success(*, db: Session) -> None:
     RS.create(role="guest", db=db)
     RS.create(role="user", db=db)
     RS.create(role="mod", db=db)
@@ -342,20 +286,13 @@ def test_ancestors__success(*, db: Session) -> None:
     RS.add_hierarchy(parent_role="mod_v2", child_role="admin", db=db)
 
     assert Counter(("guest", "user", "mod", "mod_v2")) == Counter(
-        RS.ancestors(role="admin", db=db)
+        RS.ascendants(role="admin", db=db)
     )
 
 
-def test_ancestors__empty_role(*, db: Session) -> None:
+def test_ascendants__unknown_role(*, db: Session) -> None:
     with pytest.raises(PyPermissionError) as err:
-        RS.ancestors(role="", db=db)
-
-    assert ERR_MSG.empty_role == err.value.message
-
-
-def test_ancestors__unknown_role(*, db: Session) -> None:
-    with pytest.raises(PyPermissionError) as err:
-        RS.ancestors(role="user", db=db)
+        RS.ascendants(role="user", db=db)
 
     assert ERR_MSG.non_existent_role.format(role="user") == err.value.message
 
@@ -380,13 +317,6 @@ def test_descendants__success(*, db: Session) -> None:
     assert Counter(("admin", "user", "mod", "mod_v2")) == Counter(
         RS.descendants(role="guest", db=db)
     )
-
-
-def test_descendants__empty_role(*, db: Session) -> None:
-    with pytest.raises(PyPermissionError) as err:
-        RS.descendants(role="", db=db)
-
-    assert ERR_MSG.empty_role == err.value.message
 
 
 def test_descendants__unknown_role(*, db: Session) -> None:
@@ -447,17 +377,6 @@ def test_subjects_include_descendants__success(*, db: Session) -> None:
     )
 
 
-def test_subjects_include_descendants__empty_role(*, db: Session) -> None:
-    with pytest.raises(PyPermissionError) as err:
-        RS.subjects(role="", include_descendant_subjects=True, db=db)
-    assert ERR_MSG.empty_role == err.value.message
-
-    with pytest.raises(PyPermissionError) as err:
-        RS.subjects(role="", include_descendant_subjects=False, db=db)
-
-    assert ERR_MSG.empty_role == err.value.message
-
-
 def test_subjects_include_descendants__unknown_role(*, db: Session) -> None:
     role = "unknown"
     with pytest.raises(PyPermissionError) as err:
@@ -495,18 +414,11 @@ def test_grant_permission__duplication(*, db: Session) -> None:
         RS.grant_permission(role=role, permission=permission, db=db)
 
     assert (
-        ERR_MSG.conflict_permission_exists.format(permission_str=str(permission))
+        ERR_MSG_CONFLICT.policy_exists.format(
+            policy_str=str(Policy(role=role, permission=permission))
+        )
         == err.value.message
     )
-
-
-def test_grant_permission__empty_role(*, db: Session) -> None:
-    permission = Permission(resource_type="event", resource_id="*", action="edit")
-
-    with pytest.raises(PyPermissionError) as err:
-        RS.grant_permission(role="", permission=permission, db=db)
-
-    assert ERR_MSG.empty_role == err.value.message
 
 
 def test_grant_permission__unknown_role(*, db: Session) -> None:
@@ -534,23 +446,15 @@ def test_revoke_permission__success(*, db: Session) -> None:
 
 def test_revoke_permission__unknown_permission(*, db: Session) -> None:
     permission = Permission(resource_type="event", resource_id="*", action="edit")
+    policy = Policy(role="admin", permission=permission)
 
     RS.create(role="admin", db=db)
     with pytest.raises(PyPermissionError) as err:
         RS.revoke_permission(role="admin", permission=permission, db=db)
 
     assert (
-        ERR_MSG.non_existent_permission.format(permission_str=str(permission))
-        == err.value.message
+        ERR_MSG.non_existent_policy.format(policy_str=str(policy)) == err.value.message
     )
-
-
-def test_revoke_permission__empty_role(*, db: Session) -> None:
-    permission = Permission(resource_type="event", resource_id="*", action="edit")
-    with pytest.raises(PyPermissionError) as err:
-        RS.revoke_permission(role="", permission=permission, db=db)
-
-    assert ERR_MSG.empty_role == err.value.message
 
 
 def test_revoke_permission__unknown_role(*, db: Session) -> None:
@@ -609,15 +513,6 @@ def test_check_permission__success(*, db: Session) -> None:
     assert RS.check_permission(role="user[124]", permission=p_edit_123, db=db) is False
 
 
-def test_check_permission__empty_role(db: Session) -> None:
-    p_view_all = Permission(resource_type="event", resource_id="*", action="view")
-
-    with pytest.raises(PyPermissionError) as err:
-        RS.check_permission(role="", permission=p_view_all, db=db)
-
-    assert ERR_MSG.empty_role == err.value.message
-
-
 def test_check_permission__unknown_role(db: Session) -> None:
     p_view_all = Permission(resource_type="event", resource_id="*", action="view")
 
@@ -665,13 +560,6 @@ def test_assert_permission__success(*, db: Session) -> None:
     )
 
 
-def test_assert_permission__empty_role(*, db: Session) -> None:
-    p_view_all = Permission(resource_type="event", resource_id="*", action="view")
-    with pytest.raises(PyPermissionError) as err:
-        RS.assert_permission(role="", permission=p_view_all, db=db)
-    assert ERR_MSG.empty_role == err.value.message
-
-
 def test_assert_permission__unknown_role(db: Session) -> None:
     view_all = Permission(resource_type="event", resource_id="*", action="view")
 
@@ -714,13 +602,6 @@ def test_permissions__success(*, db: Session) -> None:
     )
 
 
-def test_permissions__empty_role(db: Session) -> None:
-    with pytest.raises(PyPermissionError) as err:
-        RS.permissions(role="", db=db)
-
-    assert ERR_MSG.empty_role == err.value.message
-
-
 def test_permissions__unknown_role(db: Session) -> None:
     with pytest.raises(PyPermissionError) as err:
         RS.permissions(role="unknown", db=db)
@@ -758,13 +639,6 @@ def test_policies__success(*, db: Session) -> None:
     assert Counter((f"admin:{edit_all}",)) == Counter(
         str(policy) for policy in RS.policies(role="admin", inherited=False, db=db)
     )
-
-
-def test_policies__empty_role(db: Session) -> None:
-    with pytest.raises(PyPermissionError) as err:
-        RS.policies(role="", db=db)
-
-    assert ERR_MSG.empty_role == err.value.message
 
 
 def test_policies__unknown_role(db: Session) -> None:
@@ -895,22 +769,6 @@ def test_actions_on_resource_not_inherited__success(*, db: Session) -> None:
             db=db,
         )
     ) == Counter(["edit"])
-
-
-def test_actions_on_resource__empty_role(*, db: Session) -> None:
-    with pytest.raises(PyPermissionError) as err:
-        RS.actions_on_resource(role="", resource_type="group", resource_id="123", db=db)
-
-    assert ERR_MSG.empty_role == err.value.message
-
-
-def test_actions_on_resource__empty_resource_type(*, db: Session) -> None:
-    with pytest.raises(PyPermissionError) as err:
-        RS.actions_on_resource(
-            role="unknown", resource_type="", resource_id="123", db=db
-        )
-
-    assert ERR_MSG.empty_resource_type == err.value.message
 
 
 def test_actions_on_resource__unknown_role(*, db: Session) -> None:

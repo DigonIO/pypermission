@@ -4,7 +4,7 @@ from typing import TYPE_CHECKING, Never
 from sqlalchemy.exc import IntegrityError
 
 from pypermission.exc import PyPermissionError
-from pypermission.models import Permission
+from pypermission.models import Policy
 
 if TYPE_CHECKING:
     from psycopg.errors import Diagnostic as PsycopgDiagnostic
@@ -30,63 +30,59 @@ else:
 
 
 def process_subject_role_integrity_error(
-    *, err: IntegrityError, subject: str | None = None, role: str | None = None
+    *, err: IntegrityError, subject: str, role: str
 ) -> Never:
     match err:
-        case IntegrityError(orig=Sqlite3IntegrityError()):
-            if subject is not None and role is not None:
-                raise PyPermissionError(
-                    f"Subject '{subject}' or Role '{role}' does not exist!"
-                )
-            if subject is not None:
-                raise PyPermissionError(f"Subject '{subject}' does not exist!")
-            if role is not None:
-                raise PyPermissionError(f"Role '{role}' does not exist!")
+        case IntegrityError(
+            orig=Sqlite3IntegrityError(sqlite_errorname=str(msg))
+            | PsycopgUniqueViolation(diag=PsycopgDiagnostic(message_detail=str(msg)))
+        ) if msg == "SQLITE_CONSTRAINT_PRIMARYKEY" or (
+            f"Key (role_id, subject_id)=({role}, {subject}) already exists." in msg
+        ):
+            raise PyPermissionError(
+                f"Conflict: Role with ID '{role}' already assigned to Subject with ID '{subject}'!"
+            )
+        case IntegrityError(
+            orig=Sqlite3IntegrityError(sqlite_errorname="SQLITE_CONSTRAINT_FOREIGNKEY")
+        ):
+            raise PyPermissionError(
+                f"Subject '{subject}' or Role '{role}' does not exist!"
+            )
         case IntegrityError(
             orig=PsycopgForeignKeyViolation(
                 diag=PsycopgDiagnostic(message_detail=str(msg))
             )
-        ):
-            if f"Key (role_id)=({role}) is not present in table" in msg:
-                raise PyPermissionError(f"Role '{role}' does not exist!")
-            if f"Key (subject_id)=({subject}) is not present in table" in msg:
-                raise PyPermissionError(f"Subject '{subject}' does not exist!")
-        case _:
+        ) if (f"Key (role_id)=({role}) is not present in table" in msg):
+            raise PyPermissionError(f"Role '{role}' does not exist!")
+        case IntegrityError(
+            orig=PsycopgForeignKeyViolation(
+                diag=PsycopgDiagnostic(message_detail=str(msg))
+            )
+        ) if (f"Key (subject_id)=({subject}) is not present in table" in msg):
+            raise PyPermissionError(f"Subject '{subject}' does not exist!")
+        case _:  # pragma: no cover
             ...
-    raise PyPermissionError("Unexpected IntegrityError")
+    raise PyPermissionError("Unexpected IntegrityError")  # pragma: no cover
 
 
 def process_policy_integrity_error(
     *,
     err: IntegrityError,
-    role: str,
-    permission: Permission,
+    policy: Policy,
 ) -> Never:
     match err:
         case IntegrityError(
             orig=Sqlite3IntegrityError(sqlite_errorname="SQLITE_CONSTRAINT_PRIMARYKEY")
+            | PsycopgUniqueViolation(diag=PsycopgDiagnostic(message_detail=str()))
         ):
             raise PyPermissionError(
-                f"Permission '{str(permission)}' does already exist!"
+                f"Conflict: Policy '{str(policy)}' already exists!"
             ) from err
         case IntegrityError(
             orig=Sqlite3IntegrityError(sqlite_errorname="SQLITE_CONSTRAINT_FOREIGNKEY")
+            | PsycopgForeignKeyViolation(diag=PsycopgDiagnostic(message_detail=str()))
         ):
-            raise PyPermissionError(f"Role '{role}' does not exist!") from err
-        case IntegrityError(
-            orig=PsycopgUniqueViolation(
-                diag=PsycopgDiagnostic(message_detail=str(_msg))
-            )
-        ):
-            raise PyPermissionError(
-                f"Permission '{str(permission)}' does already exist!"
-            ) from err
-        case IntegrityError(
-            orig=PsycopgForeignKeyViolation(
-                diag=PsycopgDiagnostic(message_detail=str(_msg))
-            )
-        ):
-            raise PyPermissionError(f"Role '{role}' does not exist!") from err
-        case _:
+            raise PyPermissionError(f"Role '{policy.role}' does not exist!") from err
+        case _:  # pragma: no cover
             ...
-    raise PyPermissionError("Unexpected IntegrityError")
+    raise PyPermissionError("Unexpected IntegrityError")  # pragma: no cover

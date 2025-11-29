@@ -3,102 +3,94 @@ description: "PyPermission - The python RBAC library. Technical mapping of PyPer
 ---
 
 
-# Comparing PyPermission with NIST
+# Comparing PyPermission with the NIST RBAC model
 
-The original NIST RBAC model[^1] defines 4 feature levels and distinguishes level
-2, 3 and 4 further depending on the support for either a) arbitrary or b) limited
-hierarchies. Level L.2a is closest to our implementation.
+The **PyPermission** library implements a feature set that closely resembles the **General Hierarchical RBAC** model (Level 2a) described in the **NIST RBAC** model[^1]. Additionally, it implements specific review functions defined in **Symmetric RBAC** (Level 4).
+
+The following comparison maps the functionality of `pypermission` against the four levels of the NIST reference model. The section numberings used below map 1:1 to the NIST standard sections for simple cross-referencing.
+
+## 3 Flat RBAC (Level 1)
+
+Flat RBAC requires the fundamental ability to assign **Subjects** (Users) to **Roles**, and **Permissions** to **Roles** in a many-to-many relationship. It also mandates specific review capabilities.
+
+| NIST Requirement                             | PyPermission Implementation                                  |
+| :------------------------------------------- | :----------------------------------------------------------- |
+| **User - Role Assignment**                   | `pypermission.RBAC.subject.assign_role`                      |
+| **User - Role Revokation**                   | `pypermission.RBAC.subject.deassign_role`                    |
+| **Permission to Role Assignment**            | `pypermission.RBAC.role.grant_permission`                    |
+| **Permission Revokation**                    | `pypermission.RBAC.role.revoke_permission`                   |
+| **Simultaneous Role Activation**             | Supported (Session-less design implies all roles are active) |
+| **User-Role Review** (List roles for a user) | `pypermission.RBAC.subject.roles`                            |
+| **Role-User Review** (List users for a role) | `pypermission.RBAC.role.subjects`                            |
+
+In this context, **PyPermission** maps NIST entities as follows:
+
++ `User` $\rightarrow$ **Subject**
++ `Operation` $\rightarrow$ **Action**
++ `Object` $\rightarrow$ **Resource**
++ `Operation` + `Object` $\rightarrow$ **Permission**
++ `Role` + `Operation` + `Object` $\rightarrow$ **Policy**
+
+## 4 Hierarchical RBAC (Level 2)
+
+Level 2 introduces **Role** hierarchies, where senior **Roles** inherit **Permissions** from junior **Roles**. The standard distinguishes between **General** (arbitrary partial order, where diamonds are possible) and **Limited** (tree/inverted tree) hierarchies. **PyPermission** supports **General Hierarchical RBAC (Level 2a)**, allowing for arbitrary Directed Acyclic Graphs (DAGs).
+
+The standard further offers two interpretations of the role hierarchy, of which **PyPermission** subscribes to the _permission-inheritance_ interpretation, where the **Role** hierarchy is called an _inheritance hierarchy_. Here a senior **Role** automatically has all **Permissions** of its junior **Roles** available for use. The _activation interpretation_ is the alternative interpretation, requires a **Session** concept and is demanded by the ANSI RBAC standard. Here junior roles have to be explicitly activated for a **Session** in order to gain inherited **Permissions** during a **Session**. This behaviour can be emulated when using **PyPermission**, but we leave the burden of **Session** management to the user of this library.
 
 !!! warning
 
-    PyPermission is not compliant with the RBAC NIST standard, as we decided against implementing the session concept.
+    Hierarchical RBAC comes with a semantic for the inferred **Permissions** that is not inherently obvious when compared to everyday language. In NIST, a **Role** inherits **Permissions** of the **Roles** it is senior of, while in **PyPermission** a child **Role** has access to at least all the **Permissions** it inherits from its parent **Roles**. This is why we suggest designing **RBAC** systems using a **Roles** composition first approach. If you choose to utilize hierarchical **RBAC** make sure to check out the available auditing and review functions we support.
 
-The section numberings used below map 1:1 to the NIST standard sections for simple cross-referencing.
+In this context, **PyPermission** maps NIST entities as follows:
 
-!!! warning
++ `Senior` $\rightarrow$ **Child** (a direct descendant, more powerful **Role** than the corresponding **Parent**)
++ `Junior` $\rightarrow$ **Parent** (a direct ascendant)
 
-    This page is currently incomplete.
+| NIST Requirement                           | PyPermission Implementation                                           |
+| :----------------------------------------- | :-------------------------------------------------------------------- |
+| **Add Hierarchy** (Senior/Junior relation) | `pypermission.RBAC.role.add_hierarchy`                                |
+| **Delete Hierarchy**                       | `pypermission.RBAC.role.remove_hierarchy`                             |
+| **Inheritance Calculation**                | Handled automatically in `pypermission.RBAC.subject.check_permission` |
 
-The NIST standard additionally defines a Static Separation of Duty (SSD) Relationship as well as Dynamic Separation of Duties (DSD) Relations. These relationships are defined as a constraint to prevent certain roles from being assigned to the same Subject.
-
-## RBAC NIST Reference Model
-
-!!! note "Conventions in the NIST Standard"
-
-    * assign implies a matching revoke method
-    * The senior (more powerful) roles are placed on top in diagrams
-
-!!! note "Work in progress"
-
-    * Our Wildcard Feature is closely related to the customizable permissions in section 7.4
-    * TODO: check if `user-role` review in flat RBAC and Hierarchical RBAC are 2 functions each or 2 for flat and 4 for hierarchical (probably 4)
-
-### L.1 Flat RBAC
-
-* assign user to role - `user-role` (many-to-many relation)
-* assign permission to role - `permission-role` (many-to-many relation)
-* users can simultaneously exercise permissions of multiple roles
-* `user-role` review
-    * list roles a specific user can take
-    * list users that can take a specific role
-
-### L.2 Hierarchical RBAC
-
-* assign seniority relation between roles `role-role` (many-to-many relation)
-* senior roles acquire permissions of their juniors
-* extends `user-role` review with
-    * list roles a specific user inherits by his assigned roles
-    * list users a specific role
-* possible implementation as
-    * inheritance hierarchy - activation of a role implies activation of all junior roles
-    * activation hierarchy - roles need to be activated for permissions to take effect,
-    activation of several roles at the same time possible
-
-#### L.2a General Hierarchical RBAC
-
-General Hierarchical RBAC as defined in the NIST Standard permits role hierarchies, as long as the defining graph is directed and acyclic.
-
-A visual comparison between the NIST RBAC model and our database tables shows a close resemblance:
+A visual comparison between the **NIST RBAC** model and our database tables shows the close architectural resemblance:
 
 ![NIST Hierarchical RBAC model](./assets/NIST_hierarchical_RBAC.png)
+_NIST Hierarchical RBAC model[^1]_
 
-NIST Hierarchical RBAC model[^1]
+![PyPermission database model for RBAC in Python](./assets/RBAC_python.png)
+_PyPermission database model for RBAC in Python_
 
-![PyPermission database model](./assets/RBAC_python.png)
+## 5 Constrained RBAC (Level 3)
 
-PyPermission database model
+Level 3 requires the enforcement of Separation of Duties (SOD), either statically (SSD) or dynamically (DSD). These relationships are defined as a constraint to prevent conflicting **Roles** from being assigned to the same **Subject**.
 
-#### L.2b Restricted Hierarchical RBAC
+| NIST Requirement | PyPermission Implementation |
+| :--- | :--- |
+| **Static Separation of Duty** | _N/A_ |
+| **Dynamic Separation of Duty** | _N/A_ |
 
-* restricted to tree/inv. tree or similar
+!!! info
 
-### L.3 Constrained RBAC
+    **PyPermission** does not currently implement Separation of Duty constraints.
 
-* Separation of duties (SOD)
-* possible implementation as
-    * static SOD (based on user-role assignment)
-    * dynamic SOD (based on role activation)
+## 6 Symmetric RBAC (Level 4)
 
-#### Static SOD (SSD)
+Symmetric RBAC adds requirements for **Permission**-**Role** review, ensuring administrators can determine which **Permissions** belong to a specific **Role**.
 
-* `role-role` (constrained many-to-many relation)
-    * roles within a linear ordering cannot at the same time have a containment relationship
-* Constrain conflicting roles
-    * When trying to assign users to conflicting roles
-    * When trying to add a constrain, that would currently be violated by either existing
-    users or by an existing role ordering
-    * Dynamically adding containment relationships might make management difficult on an existing structure. Possible Mitigations:
-        * Warn when attempted assignment/addition introduces a conflict (ignore with `-f` flag),
-      therefore allowing a structure to have active conflicts (with constraints unenforced)
-        * If a structure with active conflicts is a valid state, conflict-review must be possible
+| NIST Requirement           | PyPermission Implementation                                           |
+| :------------------------- | :-------------------------------------------------------------------- |
+| **Permission-Role Review** | `pypermission.RBAC.role.permissions` (only role to permission lookup) |
 
-### L.4 Symmetric RBAC
+## 7 Other RBAC Attributes
 
-* `permission-role` review
-    * list permission assigned to specific role (selectable between direct and indirect relations)
-    * list roles assigned to specific permission  (selectable between direct and indirect relations)
-        * What NIST calls Users we call Subjects
+The NIST standard discusses several attributes that are not part of the core model but are relevant for implementation.
 
----
+### 7.4 Nature of Permissions
+
+The NIST standard leaves the definition of **Permissions** open. **PyPermission** defines a **Permission** as a structured tuple of `resource_type`, `resource_id`, and `action`. We decided for splitting up the **Resource** in particular into its constituent `resource_type` and `resource_id`, because it makes container **Permissions** (as described in the [Permission Design Guide](./permission_design_guide.md)) simple to implement. The `resource_id` further accepts `resource_id="*"` as a simple wildcard argument, matching all resources of the given `resource_type`. The **Permission** `event[*]:view` then represents access to all resources of type `event`.
+
+### 7.9 **Role** Revocation
+
+The standard discusses the immediacy of revocation. In **PyPermission**, revocation via `pypermission.RBAC.role.revoke_permission` or `pypermission.RBAC.subject.deassign_role` is immediate. Since there are no long-lived sessions caching **Permissions** in the library itself, the next `check_permission` call reflects the updated state immediately.
 
 [^1]: The NIST model for role-based access control: towards a unified standard - <https://doi.org/10.1145/344287.344301>

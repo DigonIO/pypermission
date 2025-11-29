@@ -37,23 +37,40 @@ class PermissionNotGrantedError(PyPermissionError):
 ################################################################################
 
 
+class ERR_MSG_CONFLICT:
+    role_exists = "Conflict: Role with ID '{role}' already exists!"
+    subject_exists = "Conflict: Subject with ID '{subject}' already exists!"
+    hierarchy_exists = (
+        "Conflict: Role Hierarchy '{parent_role}' -> '{child_role}' exists!"
+    )
+    policy_exists = "Conflict: Policy '{policy_str}' already exists!"
+    cycle_detected = "Conflict: Desired Role Hierarchy would create a cycle!"
+    role_ids = (
+        "Conflict: A Role Hierarchy requires distinct RoleIDs, received '{role}' twice!"
+    )
+    role_assigned_to_subject = "Conflict: Role with ID '{role}' already assigned to Subject with ID '{subject}'!"
+
+
+# Do not template this for now, makes tests more read and searchable
+class ERR_STR_EMPTY:
+    subject = "Argument `subject` cannot be empty!"
+    role = "Argument `role` cannot be empty!"
+    parent_role = "Argument `parent_role` cannot be empty!"
+    child_role = "Argument `child_role` cannot be empty!"
+    resource_type = "Argument `resource_type` cannot be empty!"
+    action = "Argument `action` cannot be empty!"
+
+
+class ERR_STR_WHITESPACE:
+    subject = "`subject` cannot have leading or trailing spaces!"
+    role = "`role` cannot have leading or trailing spaces!"
+    parent_role = "`parent_role` cannot have leading or trailing spaces!"
+    child_role = "`child_role` cannot have leading or trailing spaces!"
+    resource_type = "`resource_type` cannot have leading or trailing spaces!"
+    action = "`action` cannot have leading or trailing spaces!"
+
+
 class ERR_MSG:
-    # conflict
-    conflict_role_exists = "Role '{role}' already exists!"
-    conflict_subject_exists = "Subject '{subject}' already exists!"
-    conflict_hierarchy_exists = "Hierarchy '{parent_role}' -> '{child_role}' exists!"
-    conflict_permission_exists = "Permission '{permission_str}' does already exist!"
-    conflict_cycle_detected = "Desired hierarchy would create a cycle!"
-    conflicting_role_ids = "RoleIDs must not be equal: '{role}'!"
-
-    # empty string not allowed
-    empty_subject = "Subject name cannot be empty!"
-    empty_role = "Role name cannot be empty!"
-    empty_parent_role = "Role name cannot be empty, but `parent_role` is empty!"
-    empty_child_role = "Role name cannot be empty, but `child_role` is empty!"
-    empty_resource_type = "Resource type cannot be empty!"
-    empty_action = "Action cannot be empty!"
-
     # non_existent
     non_existent_subject_role = "Subject '{subject}' or Role '{role}' does not exist!"
     non_existent_subject = "Subject '{subject}' does not exist!"
@@ -67,7 +84,7 @@ class ERR_MSG:
     non_existent_role_assignment = (
         "Role '{role}' is not assigned to Subject '{subject}'!"
     )
-    non_existent_permission = "Permission '{permission_str}' does not exist!"
+    non_existent_policy = "Policy '{policy_str}' does not exist!"
 
     # permission_not_granted
     permission_not_granted_for_role = (

@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.4.0
+
+### API Changes
+
+- `pypermission.service.role.RoleService.ancestors` renamed to `pypermission.service.role.RoleService.ascendants`
+- Disallowed certain strings in definitional type
+    - Strings `"*"` and `""` are only allowed in ResourceID
+    - `:` can never be used
+    - The characters `[` and `]` are not allowed anywhere inside ResourceType
+    - Leading & trailing spaces are never allowed
+    - Brackets `[` and `]` must be balances.
+
 ## 0.3.0
 
 ### API Changes

@@ -4,7 +4,7 @@
 Author: Jendrik A. Potyka, Fabian A. Preiss
 """
 
-__version__ = "0.3.0"
+__version__ = "0.4.0"
 __author__ = "Jendrik A. Potyka, Fabian A. Preiss"
 
 from typing import Final
@@ -18,7 +18,7 @@ from pypermission.service.subject import SubjectService
 
 class RBAC(metaclass=FrozenClass):
     """
-    Namespace for the Role and Subject services.
+    Namespace for the **Role** and **Subject** services.
 
     Attributes
     ----------

@@ -4,10 +4,10 @@ from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 from sqlalchemy.sql.schema import ForeignKey
 from sqlalchemy.sql.sqltypes import String
 
-from pypermission.exc import PyPermissionError
+from pypermission.util.input_validation import validate_rbac_parameters
 
 
-class BaseORM(DeclarativeBase): ...
+class PyPermissionORM(DeclarativeBase): ...
 
 
 ################################################################################
@@ -17,25 +17,26 @@ class BaseORM(DeclarativeBase): ...
 
 class Permission:
     """
-    Represents a Resource paired with an Action.
+    Represents a **Resource** paired with an **Action**.
 
     Attributes
     ----------
     resource_type : str
-        The ResourceType (e.g., "document", "user").
+        The **ResourceType** (e.g., "document", "user").
     resource_id : str
-        The ResourceID. The star '*' acts as a wildcard matching all ResourceIDs of the same ResourceType. The empty string can be used for Actions on Resources that do not have an ResourceID.
+        The **ResourceID**. The star '*' acts as a wildcard matching all **ResourceIDs** of the same **ResourceType**. The empty string can be used for **Actions** on **Resources** that do not have an **ResourceID**.
     action : str
-        The Action allowed on the Resource (e.g., "read", "write", "delete").
+        The **Action** allowed on the **Resource** (e.g., "read", "write", "delete").
     """
 
     resource_type: str
     resource_id: str
     action: str
 
+    @validate_rbac_parameters
     def __init__(self, *, resource_type: str, resource_id: str, action: str) -> None:
         """
-        Initialize the Permission.
+        Initialize the **Permission**.
 
         Parameters
         ----------
@@ -46,10 +47,6 @@ class Permission:
         action : str
             The action allowed on the resource (e.g., "read", "write", "delete").
         """
-        if resource_type == "":
-            raise PyPermissionError("Resource type cannot be empty!")
-        if action == "":
-            raise PyPermissionError("Action cannot be empty!")
 
         self.resource_type = resource_type
         self.resource_id = resource_id
@@ -76,19 +73,20 @@ class Permission:
 
 class Policy:
     """
-    Represents a Role paired with a Permission.
+    Represents a **Role** paired with a **Permission**.
 
     Attributes
     ----------
     role : str
-        The target RoleID.
+        The target **RoleID**.
     permission : Permission
-        The target Permission.
+        The target **Permission**.
     """
 
     role: str
     permission: Permission
 
+    @validate_rbac_parameters
     def __init__(self, *, role: str, permission: Permission) -> None:
         """
         Initialize the Policy.
@@ -96,12 +94,10 @@ class Policy:
         Parameters
         ----------
         role : str
-            The target RoleID.
+            The target **RoleID**.
         permission : Permission
-            The target Permission.
+            The target **Permission**.
         """
-        if role == "":
-            raise PyPermissionError("Role name cannot be empty!")
         self.role = role
         self.permission = permission
 
@@ -130,7 +126,7 @@ class FrozenClass(type):
 ################################################################################
 
 
-class RoleORM(BaseORM):
+class RoleORM(PyPermissionORM):
     __tablename__ = "pp_role_table"
     id: Mapped[str] = mapped_column(String, primary_key=True)
 
@@ -140,7 +136,7 @@ class RoleORM(BaseORM):
 ################################################################################
 
 
-class HierarchyORM(BaseORM):
+class HierarchyORM(PyPermissionORM):
     __tablename__ = "pp_hierarchy_table"
     parent_role_id: Mapped[str] = mapped_column(
         String, ForeignKey("pp_role_table.id", ondelete="CASCADE"), primary_key=True
@@ -155,7 +151,7 @@ class HierarchyORM(BaseORM):
 ################################################################################
 
 
-class SubjectORM(BaseORM):
+class SubjectORM(PyPermissionORM):
     __tablename__ = "pp_subject_table"
     id: Mapped[str] = mapped_column(String, primary_key=True)
 
@@ -165,7 +161,7 @@ class SubjectORM(BaseORM):
 ################################################################################
 
 
-class MemberORM(BaseORM):
+class MemberORM(PyPermissionORM):
     __tablename__ = "pp_member_table"
     role_id: Mapped[str] = mapped_column(
         String, ForeignKey("pp_role_table.id", ondelete="CASCADE"), primary_key=True
@@ -180,7 +176,7 @@ class MemberORM(BaseORM):
 ################################################################################
 
 
-class PolicyORM(BaseORM):
+class PolicyORM(PyPermissionORM):
     __tablename__ = "pp_policy_table"
     role_id: Mapped[str] = mapped_column(
         String, ForeignKey("pp_role_table.id", ondelete="CASCADE"), primary_key=True

@@ -8,7 +8,7 @@ from sqlalchemy.event import listen
 from sqlalchemy.orm import Session, sessionmaker
 
 from pypermission.db import set_sqlite_pragma
-from pypermission.models import BaseORM
+from pypermission.models import PyPermissionORM
 
 
 @pytest.fixture(params=["sqlite", "psql"])
@@ -27,9 +27,9 @@ def engine(request: FixtureRequest) -> Generator[Engine, None, None]:
         case _:
             raise ValueError()
 
-    BaseORM.metadata.create_all(engine)
+    PyPermissionORM.metadata.create_all(engine)
     yield engine
-    BaseORM.metadata.drop_all(engine)
+    PyPermissionORM.metadata.drop_all(engine)
     engine.dispose()
 
 

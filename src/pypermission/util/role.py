@@ -6,7 +6,7 @@ from pypermission.exc import PyPermissionError
 from pypermission.models import HierarchyORM, MemberORM, Permission, PolicyORM, RoleORM
 
 ################################################################################
-#### Role dag tools
+#### **Role** dag tools
 ################################################################################
 
 
@@ -30,7 +30,7 @@ def role_dag(
     include_subjects : bool
         Include assigned Subjects in the DAG.
     include_permissions : bool
-        Include granted Permissions in the DAG.
+        Include granted **Permissions** in the DAG.
 
     Returns
     -------
@@ -97,12 +97,12 @@ def _get_roles_and_hierarchies(
         )
     )
 
-    ancestor_relations = db.execute(
+    ascendant_relations = db.execute(
         select(relations_cte.c.parent_role_id, relations_cte.c.child_role_id)
     ).all()
 
-    roles = root_roles | {role for pair in ancestor_relations for role in pair}
-    hierarchies = set(ancestor_relations)  # type: ignore
+    roles = root_roles | {role for pair in ascendant_relations for role in pair}
+    hierarchies = set(ascendant_relations)  # type: ignore
 
     return roles, hierarchies
 
