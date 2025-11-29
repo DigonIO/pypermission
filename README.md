@@ -23,7 +23,7 @@ If you find the **PyPermission** library beneficial, please consider supporting 
 
 [![GitHub Repo stars](https://img.shields.io/github/stars/digonio/pypermission)](https://github.com/DigonIO/pypermission)
 
-# PyPermission - RBAC for Python
+# **PyPermission** - RBAC for Python
 
 ## Features
 
@@ -40,7 +40,7 @@ If you find the **PyPermission** library beneficial, please consider supporting 
 - High test [Coverage](https://pypermission.digon.io/coverage/)
 - [Online documentation](https://pypermission.digon.io/)
 
-## Installing `PyPermission` with pip
+## Installing **PyPermission** with pip
 
 The **PyPermission** library can be installed directly from the PyPI repositories with:
 
@@ -54,7 +54,7 @@ If you want to use PostgreSQL, you need to install the `postgres` dependency gro
 pip install 'PyPermission[postgres]'
 ```
 
-## Example
+## Usage Example
 
 ```python title="my_project.main.py"
 from sqlalchemy.engine import create_engine
@@ -103,6 +103,51 @@ with db_factory() as db:
         db=db,
     )
 ```
+
+## Auditing
+
+**PyPermission** supports a variety of review functions for auditing of the RBAC system and even comes with some tooling for visualization out of the box.
+
+![Auditing graph for RBAC in Python](https://gitlab.com/DigonIO/pypermission/-/raw/dev/assets/rbac_auditing_graph_example.png "Auditing graph for RBAC in Python")
+
+## The Core API surface on a glance
+
+[`pypermission.service.role.RoleService`](https://pypermission.digon.io/api/role/#pypermission.service.role.RoleService)
+
+| Methods                                                                                                                           |
+| --------------------------------------------------------------------------------------------------------------------------------- |
+| `create(*, role: str, db: Session) -> None`                                                                                       |
+| `delete(*, role: str, db: Session) -> None`                                                                                       |
+| `list(*, db: Session) -> tuple[str, ...]`                                                                                         |
+| `add_hierarchy(*, parent_role: str, child_role: str, db: Session) -> None`                                                        |
+| `remove_hierarchy(*, parent_role: str, child_role: str, db: Session) -> None`                                                     |
+| `children(*, role: str, db: Session) -> tuple[str, ...]`                                                                          |
+| `ascendants(*, role: str, db: Session) -> tuple[str, ...]`                                                                        |
+| `descendants(*, role: str, db: Session) -> tuple[str, ...]`                                                                       |
+| `subjects(*, role: str, include_descendant_subjects: bool = False, db: Session) -> tuple[str, ...]`                               |
+| `grant_permission(*, role: str, permission: Permission, db: Session) -> None`                                                     |
+| `revoke_permission(*, role: str, permission: Permission, db: Session) -> None`                                                    |
+| `check_permission(*, role: str, permission: Permission, db: Session) -> bool`                                                     |
+| `assert_permission(*, role: str, permission: Permission, db: Session) -> None`                                                    |
+| `permissions(*, role: str, inherited: bool = True, db: Session) -> tuple[Permission, ...]`                                        |
+| `policies(*, role: str, inherited: bool = True, db: Session) -> tuple[Policy, ...]`                                               |
+| `actions_on_resource(*, role: str, resource_type: str, resource_id: str, inherited: bool = True, db: Session) -> tuple[str, ...]` |
+
+[`pypermission.service.role.SubjectService`](https://pypermission.digon.io/api/subject/#pypermission.service.subject.SubjectService)
+
+| Methods                                                                                                                              |
+| ------------------------------------------------------------------------------------------------------------------------------------ |
+| `create(*, subject: str, db: Session) -> None`                                                                                       |
+| `delete(*, subject: str, db: Session) -> None`                                                                                       |
+| `list(*, db: Session) -> tuple[str, ...]`                                                                                            |
+| `assign_role(*, subject: str, role: str, db: Session) -> None`                                                                       |
+| `deassign_role(*, subject: str, role: str, db: Session) -> None`                                                                     |
+| `roles(*, subject: str, include_ascendant_roles: bool = False, db: Session) -> tuple[str, ...]`                                      |
+| `check_permission(*, subject: str, permission: Permission, db: Session) -> bool`                                                     |
+| `assert_permission(*, subject: str, permission: Permission, db: Session) -> None`                                                    |
+| `permissions(*, subject: str, db: Session) -> tuple[Permission, ...]`                                                                |
+| `policies(*, subject: str, db: Session) -> tuple[Policy, ...]`                                                                       |
+| `actions_on_resource(*, subject: str, resource_type: str, resource_id: str, inherited: bool = True, db: Session) -> tuple[str, ...]` |
 
 ## Resources
 

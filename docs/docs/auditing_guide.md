@@ -36,7 +36,7 @@ With the `util` extra installed, **PyPermission** can load the RBAC state direct
 
 The `role_dag` function builds an `nx.DiGraph` representation of the RBAC system directly from the database. It can optionally be scoped to a set of `root_roles`, in which case only those **Roles** and their ascendants are included. Setting `include_subjects` adds **Subject** nodes derived from **Members**, while `include_permissions` adds **Permission** nodes derived from **Policies**.
 
-```python hl_lines="5 11" fixture:URL_TO_DB
+```{.python hl_lines="6 12" fixture:URL_TO_DB}
 import networkx as nx
 from sqlalchemy.engine.base import Engine
 from sqlalchemy.engine import create_engine
@@ -55,7 +55,7 @@ with db_factory.begin() as db:
 
 The `plot_factory` function takes the `nx.DiGraph` produced by `role_dag`, renders the RBAC structure as an interactive Plotly graph and writes it to an HTML file. The `auto_open` flag controls whether the generated file is opened in the browser immediately, while `file_path` specifies where the visualization is stored.
 
-```python hl_lines="6 14" fixture:URL_TO_DB
+```{.python hl_lines="7 15" fixture:URL_TO_DB}
 import networkx as nx
 from sqlalchemy.engine.base import Engine
 from sqlalchemy.engine import create_engine
@@ -72,3 +72,6 @@ with db_factory.begin() as db:
 
 plot_factory(dag=dag, auto_open=False, file_path="dag.html")
 ```
+
+![Auditing graph for RBAC in Python](./assets/rbac_auditing_graph_example.png)
+_Auditing graph for RBAC in Python_
