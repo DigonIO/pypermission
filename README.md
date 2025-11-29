@@ -108,7 +108,7 @@ with db_factory() as db:
 
 **PyPermission** supports a variety of review functions for auditing of the RBAC system and even comes with some tooling for visualization out of the box.
 
-![Auditing graph for RBAC in Python](https://gitlab.com/DigonIO/pypermission/-/raw/dev/assets/rbac_auditing_graph_example.png "Auditing graph for RBAC in Python")
+![Auditing graph for RBAC in Python](https://gitlab.com/DigonIO/pypermission/-/raw/main/assets/rbac_auditing_graph_example.png "Auditing graph for RBAC in Python")
 
 ## The Core API surface on a glance
 
