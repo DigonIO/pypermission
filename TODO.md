@@ -6,10 +6,13 @@
 - `xxxx.` Normal
 - `xxxx!` Critical
 
-Next ID: `39`
+Next ID: `40`
 
 ## Open Tasks
 
+- `39.` Input Validation:
+    - [ ] Test individual error messages for every forbidden input (implementing `37` might be useful here)
+    - [ ] Simplify/Generalize the `assert_XXX` functions in `input_validation.py`
 - `38.` Implement symmetric role review (see NIST, permission to role lookup + inherited flag)
 - `37?` Subclass Exceptions to allow the api consumer more fine grained control when handling the errors.
 - `34.` Allow the `*` wildcard for the action

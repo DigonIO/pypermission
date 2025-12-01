@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.4.1
+
+### Bugfixes
+
+- FIX: resource_type validator giving misleading error message on bracket imbalance
+
 ## 0.4.0
 
 ### API Changes
@@ -10,7 +16,7 @@
     - `:` can never be used
     - The characters `[` and `]` are not allowed anywhere inside ResourceType
     - Leading & trailing spaces are never allowed
-    - Brackets `[` and `]` must be balances.
+    - Brackets `[` and `]` must be balanced.
 
 ## 0.3.0
 

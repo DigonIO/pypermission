@@ -37,7 +37,7 @@ In this approach, **Permissions** are defined at the **container level** (e.g., 
 | `Group[1]_Member` | `Event`          | `Group[1]`     | `RSVP`   | Members of Group 1 can RSVP for Events of the Group.          |
 | `Group[1]_Member` | `Event`          | `Group[1]`     | `rate`   | Members of Group 1 can rate past Events of the Group.         |
 
-!!! note **Role** hierarchy
+!!! note "Note - **Role** hierarchy"
     The `Group[1]_Owner` **Role** inherits **Permissions** from `Group[1]_Member`. This allows owners to perform all member **Actions** automatically.
 
 ### ✅ Pros of Container **Permissions**
