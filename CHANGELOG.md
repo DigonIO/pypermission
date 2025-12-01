@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.4.1
+
+### Bugfixes
+
+- FIX: resource_type validator giving misleading error message on bracket imbalance
+
 ## 0.4.0
 
 ### API Changes

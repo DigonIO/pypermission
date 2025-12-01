@@ -131,7 +131,7 @@ def assert_resource_type(resource_type: Any) -> TypeIs[ResourceType]:
     _raise_on_lr_whitespaces(val=resource_type, def_id=DefID.RESOURCE_TYPE)
     _raise_on_colon(val=resource_type, def_id=DefID.RESOURCE_TYPE)
     _raise_on_wildcard(val=resource_type, def_id=DefID.RESOURCE_TYPE)
-    _raise_on_bracket(val=resource_type, def_id=DefID.SUBJECT)
+    _raise_on_bracket(val=resource_type, def_id=DefID.RESOURCE_TYPE)
     return True
 
 
@@ -169,14 +169,11 @@ VALIDATION_RULES: dict[
 }
 
 SKIP_IDENTIFIERS = {
-    "child_role",
-    "parent_role",
     "db",
-    "ancestors",
     "inherited",
     "cls",
     "self",
-    "permission",
+    "permission",  # no check needed, as `Permission.__init__` already validates parameters
     "include_descendant_subjects",
     "include_ascendant_roles",
 }
